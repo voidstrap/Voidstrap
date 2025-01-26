@@ -29,7 +29,7 @@ Found any bugs? Submit an [issue](https://github.com/midaskira/Hellstrap/issues)
   - Player logs - Players leaving/joining server
   - Message logs
 - Fast Flags
-   - Flag profiles
+   - Flag backups
    - Removed editor warnings & flag validation
    - Roblox menu customization
    - More presets
