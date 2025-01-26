@@ -1,8 +1,9 @@
+
+
+
 <p align="center">
-    <a href="https://github.com/midaskira/Hellstrap">
-        <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-dark.png#gh-dark-mode-only" width="420" alt="Hellstrap Logo (Dark Mode)">
-        <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-light.png#gh-light-mode-only" width="420" alt="Hellstrap Logo (Light Mode)">
-    </a>
+    <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-dark.png#gh-dark-mode-only" width="420">
+    <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-light.png#gh-light-mode-only" width="420">
 </p>
 
 <div align="center">
