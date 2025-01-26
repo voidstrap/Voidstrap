@@ -18,7 +18,7 @@
 
 ----
 
-Fishstrap is a Bloxstrap fork aiming to enhance some of the features.
+Hellstrap is a Bloxstrap fork aiming to enhance some of the features.
 
 Found any bugs? Submit an [issue](https://github.com/returnrqt/bloxstrap/issues) or create bug report in our [discord server](https://discord.gg/xSsamjAU84).
 
@@ -56,11 +56,11 @@ Found any bugs? Submit an [issue](https://github.com/returnrqt/bloxstrap/issues)
 ----
 ### Considering a switch? [Download it here](https://github.com/returnrqt/bloxstrap/releases).
 
-[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/fishstrap?style=flat-square
-[shield-repo-releases]: https://img.shields.io/github/downloads/returnrqt/fishstrap/latest/total?color=981bfe&style=flat-square
-[shield-repo-stars]: https://img.shields.io/github/stars/returnrqt/fishstrap?color=dd9900&style=flat-square
-[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/fishstrap?style=flat-square
-[shield-repo-latest]:   https://img.shields.io/github/v/release/returnrqt/fishstrap?color=7a39fb&style=flat-square
+[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/Hellstrap?style=flat-square
+[shield-repo-releases]: https://img.shields.io/github/downloads/returnrqt/Hellstrap/latest/total?color=981bfe&style=flat-square
+[shield-repo-stars]: https://img.shields.io/github/stars/returnrqt/Hellstrap?color=dd9900&style=flat-square
+[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/Hellstrap?style=flat-square
+[shield-repo-latest]:   https://img.shields.io/github/v/release/returnrqt/Hellstrap?color=7a39fb&style=flat-square
 
 [shield-discord-server]: https://img.shields.io/discord/1299397064165429360?logo=discord&logoColor=white&label=discord&color=4d3dff&style=flat-square
 

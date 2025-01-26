@@ -5,8 +5,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: Fishstrap Version
-      description: "What version of Fishstrap are you using?"
+      label: Hellstrap Version
+      description: "What version of Hellstrap are you using?"
       placeholder: "v2.8.1.3"
     validations:
       required: true
@@ -21,6 +21,6 @@ body:
     id: log
     attributes:
       label: Bloxstrap Log
-      description: If you're getting a Fishstrap Exception error, upload your log file here. Otherwise, just leave it empty.
+      description: If you're getting a Hellstrap Exception error, upload your log file here. Otherwise, just leave it empty.
       value: "N/A"
       render: text
