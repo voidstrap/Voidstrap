@@ -2,8 +2,8 @@
 
 
 <p align="center">
-    <img src="https://github.com/returnrqt/bloxstrap/raw/main/Images/Bloxstrap-full-dark.png#gh-dark-mode-only" width="420">
-    <img src="https://github.com/returnrqt/bloxstrap/raw/main/Images/Bloxstrap-full-light.png#gh-light-mode-only" width="420">
+    <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-dark.png#gh-dark-mode-only" width="420">
+    <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-light.png#gh-light-mode-only" width="420">
 </p>
 
 <div align="center">
@@ -20,7 +20,7 @@
 
 Hellstrap is a Bloxstrap fork aiming to enhance some of the features.
 
-Found any bugs? Submit an [issue](https://github.com/returnrqt/bloxstrap/issues) or create bug report in our [discord server](https://discord.gg/xSsamjAU84).
+Found any bugs? Submit an [issue](https://github.com/midaskira/Hellstrap/issues) or create bug report in our [discord server](https://discord.gg/mxGrmWg3HX).
 
 ## Differences from Bloxstrap
 - Integrations
@@ -48,25 +48,25 @@ Found any bugs? Submit an [issue](https://github.com/returnrqt/bloxstrap/issues)
  
 ## Screenshots
 <p align="center">
-    <img src="https://i.imgur.com/nUnjTTg.png"/>
-    <img src="https://i.imgur.com/s7nechI.png"/>
-    <img src="https://i.imgur.com/ZZdsQmJ.png"/>
+    <img src="https://i.imgur.com/AnLNDBQ.png"/>
+    <img src="https://i.imgur.com/w9zev6X.png"/>
+    <img src="https://i.imgur.com/lAiK7O8.png"/>
 <p>
 
 ----
-### Considering a switch? [Download it here](https://github.com/returnrqt/bloxstrap/releases).
+### Considering a switch? [Download it here](https://github.com/midaskira/Hellstrap/releases).
 
-[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/Hellstrap?style=flat-square
-[shield-repo-releases]: https://img.shields.io/github/downloads/returnrqt/Hellstrap/latest/total?color=981bfe&style=flat-square
-[shield-repo-stars]: https://img.shields.io/github/stars/returnrqt/Hellstrap?color=dd9900&style=flat-square
-[shield-repo-license]:  https://img.shields.io/github/license/returnrqt/Hellstrap?style=flat-square
-[shield-repo-latest]:   https://img.shields.io/github/v/release/returnrqt/Hellstrap?color=7a39fb&style=flat-square
+[shield-repo-license]:  https://img.shields.io/github/license/midaskira/Hellstrap?style=flat-square
+[shield-repo-releases]: https://img.shields.io/github/downloads/midaskira/Hellstrap/latest/total?color=981bfe&style=flat-square
+[shield-repo-stars]: https://img.shields.io/github/stars/midaskira/Hellstrap?color=dd9900&style=flat-square
+[shield-repo-license]:  https://img.shields.io/github/license/midaskira/Hellstrap?style=flat-square
+[shield-repo-latest]:   https://img.shields.io/github/v/release/midaskira/Hellstrap?color=7a39fb&style=flat-square
 
-[shield-discord-server]: https://img.shields.io/discord/1299397064165429360?logo=discord&logoColor=white&label=discord&color=4d3dff&style=flat-square
+[shield-discord-server]: https://img.shields.io/discord/1327967202015580223?logo=discord&logoColor=white&label=discord&color=4d3dff&style=flat-square
 
-[repo-license]:  https://github.com/returnrqt/bloxstrap/blob/main/LICENSE
-[repo-actions]:  https://github.com/returnrqt/bloxstrap/actions
-[repo-releases]: https://github.com/returnrqt/bloxstrap/releases
-[repo-latest]:   https://github.com/returnrqt/bloxstrap/releases/latest
+[repo-license]:  https://github.com/midaskira/Hellstrap/blob/main/LICENSE
+[repo-actions]:  https://github.com/midaskira/Hellstrap/actions
+[repo-releases]: https://github.com/midaskira/Hellstrap/releases
+[repo-latest]:   https://github.com/midaskira/Hellstrap/releases/latest
 
-[discord-invite]:  https://discord.gg/xSsamjAU84
+[discord-invite]:  https://discord.gg/mxGrmWg3HX
