@@ -1,0 +1,3 @@
+dotnet publish --configuration Release /p:PublishProfile=Publish-x64
+ run in cmd in the folder
+just type in cmd in the search box by BRATIC BTW
