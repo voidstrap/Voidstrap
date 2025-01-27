@@ -88,4 +88,4 @@ Hellstrap is an advanced fork of Bloxstrap, aiming to enhance and expand feature
 [repo-license]:  https://github.com/midaskira/Hellstrap/blob/main/LICENSE
 [repo-releases]: https://github.com/midaskira/Hellstrap/releases
 [repo-latest]:   https://github.com/midaskira/Hellstrap/releases/latest
-[discord-invite]: [https://discord.gg/mxGrmWg3HX](https://discord.gg/RmX2SvQhed)
+[discord-invite]: https://discord.gg/RmX2SvQhed
