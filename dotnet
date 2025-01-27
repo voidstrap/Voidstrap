@@ -1,2 +1,0 @@
-dotnet publish --configuration Release /p:PublishProfile=Publish-x64
-by BRATIC
