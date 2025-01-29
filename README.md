@@ -21,7 +21,7 @@ Hellstrap is an advanced fork of Bloxstrap, aiming to enhance and expand feature
 
 ### Found a Bug?
 - Submit an [issue](https://github.com/midaskira/Hellstrap/issues) on GitHub.
-- Join our [Discord server](https://discord.gg/mxGrmWg3HX) to report bugs or request support.
+- Join our [Discord server](https://discord.gg/UuxcfqPNnA) to report bugs or request support.
 
 ---
 
