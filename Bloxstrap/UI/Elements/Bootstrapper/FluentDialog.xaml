@@ -15,7 +15,7 @@
     Closing="UiWindow_Closing"
     ExtendsContentIntoTitleBar="True"
     ResizeMode="NoResize"
-    WindowBackdropType="{Binding Path=WindowBackdropType, Mode=OneTime}"
+    WindowBackdropType="{Binding WindowBackdropType, Mode=OneTime}"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     mc:Ignorable="d"
@@ -24,25 +24,23 @@
     <!-- Taskbar Progress Information -->
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo 
-            ProgressState="{Binding Path=TaskbarProgressState}" 
-            ProgressValue="{Binding Path=TaskbarProgressValue}" />
+            ProgressState="{Binding TaskbarProgressState}" 
+            ProgressValue="{Binding TaskbarProgressValue}" />
     </Window.TaskbarItemInfo>
 
     <!-- Main Layout Grid -->
-    <Grid Background="{Binding Path=BackgroundColourBrush, Mode=OneTime}">
+    <Grid Background="{Binding BackgroundColourBrush, Mode=OneTime}">
 
         <!-- Top Information Text -->
         <TextBlock 
-    x:Name="VersionBind"
-    Margin="5"
-    VerticalAlignment="Top" 
-    HorizontalAlignment="Center"
-    FontSize="10" 
-    FontFamily="{StaticResource Rubik}"
-    Text="{Binding VersionText}" 
-    Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-
-
+            x:Name="VersionBind"
+            Margin="5"
+            VerticalAlignment="Top" 
+            HorizontalAlignment="Center"
+            FontSize="10" 
+            FontFamily="{StaticResource Rubik}"
+            Text="{Binding VersionText}" 
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
         <!-- Custom Title Bar -->
         <ui:TitleBar
@@ -64,13 +62,13 @@
             <!-- Icon Image -->
             <Image
                 Grid.Row="0"
-                Width="80"
-                Height="80"
+                Width="95"
+                Height="95"
                 Margin="0,30,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 RenderOptions.BitmapScalingMode="HighQuality"
-                Source="{Binding Icon, Mode=OneWay}" />
+                Source="{Binding Icon}" />
 
             <!-- Message Text -->
             <TextBlock
@@ -80,27 +78,27 @@
                 TextAlignment="Center"
                 FontSize="18"
                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                Text="{Binding Message, Mode=OneWay}"
+                Text="{Binding Message}"
                 TextWrapping="Wrap" />
 
             <!-- Progress Bar -->
             <ProgressBar
                 Grid.Row="2"
                 Margin="0,0,0,16"
-                IsIndeterminate="{Binding ProgressIndeterminate, Mode=OneWay}"
-                Maximum="{Binding ProgressMaximum, Mode=OneWay}"
-                Value="{Binding ProgressValue, Mode=OneWay}" />
+                IsIndeterminate="{Binding ProgressIndeterminate}"
+                Maximum="{Binding ProgressMaximum}"
+                Value="{Binding ProgressValue}" />
 
             <!-- Cancel Button -->
             <Button
                 Grid.Row="3"
-                Width="155"
+                Width="168"
                 Padding="4"
                 HorizontalAlignment="Center"
                 Command="{Binding CancelInstallCommand}"
                 Content="{x:Static resources:Strings.Common_Cancel}"
                 FontSize="14"
-                IsEnabled="{Binding CancelEnabled, Mode=OneWay}" />
+                IsEnabled="{Binding CancelEnabled}" />
         </Grid>
 
     </Grid>

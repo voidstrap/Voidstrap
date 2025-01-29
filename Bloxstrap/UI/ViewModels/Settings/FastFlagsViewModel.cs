@@ -120,7 +120,6 @@ namespace Hellstrap.UI.ViewModels.Settings
             set
             {
                 App.FastFlags.SetPreset("Rendering.MSAA", MSAALevels[value]);
-                App.FastFlags.SetPreset("Rendering.MSA2", MSAALevels[value]);
             }
         }
 
@@ -251,8 +250,6 @@ namespace Hellstrap.UI.ViewModels.Settings
                 App.FastFlags.SetPreset("Rendering.ShadowIntensity", value ? "0" : null);
             }
         }
-
-
         public int? FontSize
         {
             get => int.TryParse(App.FastFlags.GetPreset("UI.FontSize"), out int x) ? x : 1;

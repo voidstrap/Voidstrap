@@ -1,46 +1,53 @@
-﻿<!--
+﻿<!-- 
     This Source Code Form is subject to the terms of the MIT License.
     If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
     Copyright (C) Leszek Pomianowski and WPF UI Contributors.
     All Rights Reserved.
 -->
 
-<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" 
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
-    <Color x:Key="TextFillColorLightPrimary">#FFFFFF</Color>
+    <!-- Light Theme Colors -->
+    <Color x:Key="TextFillColorLightPrimary">#FFFFFFFF</Color>
     <Color x:Key="TextFillColorLightSecondary">#C5FFFFFF</Color>
     <Color x:Key="TextFillColorLightTertiary">#87FFFFFF</Color>
     <Color x:Key="TextFillColorLightDisabled">#5DFFFFFF</Color>
     <Color x:Key="TextFillColorLightInverse">#E4000000</Color>
 
-    <SolidColorBrush x:Key="TextFillColorLightPrimaryBrush" Color="{StaticResource TextFillColorLightPrimary}" />
-    <SolidColorBrush x:Key="TextFillColorLightSecondaryBrush" Color="{StaticResource TextFillColorLightSecondary}" />
-    <SolidColorBrush x:Key="TextFillColorLightTertiaryBrush" Color="{StaticResource TextFillColorLightTertiary}" />
-    <SolidColorBrush x:Key="TextFillColorLightDisabledBrush" Color="{StaticResource TextFillColorLightDisabled}" />
-    <SolidColorBrush x:Key="TextFillColorLightInverseBrush" Color="{StaticResource TextFillColorLightInverse}" />
+    <!-- Light Theme Brushes -->
+    <SolidColorBrush x:Key="TextFillColorLightPrimaryBrush" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="TextFillColorLightSecondaryBrush" Color="#C5FFFFFF" />
+    <SolidColorBrush x:Key="TextFillColorLightTertiaryBrush" Color="#87FFFFFF" />
+    <SolidColorBrush x:Key="TextFillColorLightDisabledBrush" Color="#5DFFFFFF" />
+    <SolidColorBrush x:Key="TextFillColorLightInverseBrush" Color="#E4000000" />
 
+    <!-- Dark Theme Colors -->
     <Color x:Key="TextFillColorDarkPrimary">#E4000000</Color>
     <Color x:Key="TextFillColorDarkSecondary">#BE000000</Color>
     <Color x:Key="TextFillColorDarkTertiary">#A2000000</Color>
     <Color x:Key="TextFillColorDarkDisabled">#5C000000</Color>
-    <Color x:Key="TextFillColorDarkInverse">#FFFFFF</Color>
+    <Color x:Key="TextFillColorDarkInverse">#FFFFFFFF</Color>
 
-    <SolidColorBrush x:Key="TextFillColorDarkPrimaryBrush" Color="{StaticResource TextFillColorDarkPrimary}" />
-    <SolidColorBrush x:Key="TextFillColorDarkSecondaryBrush" Color="{StaticResource TextFillColorDarkSecondary}" />
-    <SolidColorBrush x:Key="TextFillColorDarkTertiaryBrush" Color="{StaticResource TextFillColorDarkTertiary}" />
-    <SolidColorBrush x:Key="TextFillColorDarkDisabledBrush" Color="{StaticResource TextFillColorDarkDisabled}" />
-    <SolidColorBrush x:Key="TextFillColorDarkInverseBrush" Color="{StaticResource TextFillColorDarkInverse}" />
+    <!-- Dark Theme Brushes -->
+    <SolidColorBrush x:Key="TextFillColorDarkPrimaryBrush" Color="#E4000000" />
+    <SolidColorBrush x:Key="TextFillColorDarkSecondaryBrush" Color="#BE000000" />
+    <SolidColorBrush x:Key="TextFillColorDarkTertiaryBrush" Color="#A2000000" />
+    <SolidColorBrush x:Key="TextFillColorDarkDisabledBrush" Color="#5C000000" />
+    <SolidColorBrush x:Key="TextFillColorDarkInverseBrush" Color="#FFFFFFFF" />
 
-    <Color x:Key="ApplicationBackgroundColorLight">#FFFAFAFA</Color>
-    <SolidColorBrush x:Key="ApplicationBackgroundColorLightBrush" Color="{StaticResource ApplicationBackgroundColorLight}" />
+    <!-- Application Background -->
+    <Color x:Key="ApplicationBackgroundColorLight">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="ApplicationBackgroundColorLightBrush" Color="#FFFFFFFF" />
 
     <Color x:Key="ApplicationBackgroundColorDark">#FF202020</Color>
-    <SolidColorBrush x:Key="ApplicationBackgroundColorDarkBrush" Color="{StaticResource ApplicationBackgroundColorDark}" />
+    <SolidColorBrush x:Key="ApplicationBackgroundColorDarkBrush" Color="#FF202020" />
 
-    <Color x:Key="ControlStrongFillColorLight">#B3FFFFFF</Color>
-    <SolidColorBrush x:Key="ControlStrongFillColorLightBrush" Color="{StaticResource ControlStrongFillColorLight}" />
+    <!-- Control Fill Colors -->
+    <Color x:Key="ControlStrongFillColorLight">#FFFFFFFF</Color>
+    <SolidColorBrush x:Key="ControlStrongFillColorLightBrush" Color="#FFFFFFFF" />
 
     <Color x:Key="ControlStrongFillColorDark">#72000000</Color>
-    <SolidColorBrush x:Key="ControlStrongFillColorDarkBrush" Color="{StaticResource ControlStrongFillColorDark}" />
+    <SolidColorBrush x:Key="ControlStrongFillColorDarkBrush" Color="#72000000" />
 
 </ResourceDictionary>

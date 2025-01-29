@@ -65,6 +65,7 @@ namespace Hellstrap.UI.ViewModels.Settings
         public bool ActivityTrackingEnabled
         {
             get => App.Settings.Prop.EnableActivityTracking;
+
             set
             {
                 App.Settings.Prop.EnableActivityTracking = value;

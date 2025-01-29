@@ -1371,6 +1371,15 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to CleanCursor.
+        /// </summary>
+        public static string Enums_CursorType_CleanCursor {
+            get {
+                return ResourceManager.GetString("Enums.CursorType.CleanCursor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to FPSCursor.
         /// </summary>
         public static string Enums_CursorType_FPSCursor {
@@ -2880,6 +2889,15 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Disable grass motion.
+        /// </summary>
+        public static string Menu_FastFlags_Presets_DisableGrass_Title {
+            get {
+                return ResourceManager.GetString("Menu.FastFlags.Presets.DisableGrass.Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Disable player shadows.
         /// </summary>
         public static string Menu_FastFlags_Presets_DisablePlayerShadows_Title {
@@ -3589,7 +3607,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Query server location.
+        ///   Looks up a localized string similar to Server location.
         /// </summary>
         public static string Menu_Integrations_QueryServerLocation_Title {
             get {

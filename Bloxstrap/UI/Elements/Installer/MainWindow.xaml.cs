@@ -35,6 +35,7 @@ namespace Hellstrap.UI.Elements.Installer
 
     public partial class MainWindow : WpfUiWindow, INavigationWindow
     {
+        
         internal readonly MainWindowViewModel _viewModel = new();
 
         private Type _currentPage = typeof(WelcomePage);
@@ -50,7 +51,9 @@ namespace Hellstrap.UI.Elements.Installer
         public bool Finished => _currentPage == _pages.Last();
 
         public MainWindow()
+
         {
+            SetButtonEnabled("next", true);
             _viewModel.CloseWindowRequest += (_, _) => CloseWindow();
 
             _viewModel.PageRequest += (_, type) =>

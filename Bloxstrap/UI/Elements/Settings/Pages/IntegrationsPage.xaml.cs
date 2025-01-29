@@ -21,5 +21,10 @@ namespace Hellstrap.UI.Elements.Settings.Pages
             viewModel.SelectedCustomIntegration = (CustomIntegration)((ListBox)sender).SelectedItem;
             viewModel.OnPropertyChanged(nameof(viewModel.SelectedCustomIntegration));
         }
+
+        private void ToggleSwitch_Checked(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

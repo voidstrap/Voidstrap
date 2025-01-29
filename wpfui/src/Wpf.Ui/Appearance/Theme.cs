@@ -1,5 +1,5 @@
 ﻿// This Source Code Form is subject to the terms of the MIT License.
-// If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
+// If a copy of the MIT was not distributed with this file, you can obtain one at https://opensource.org/licenses/MIT.
 // Copyright (C) Leszek Pomianowski and WPF UI Contributors.
 // All Rights Reserved.
 
@@ -7,290 +7,170 @@ using System;
 using System.Windows;
 using Wpf.Ui.Interop;
 
-namespace Wpf.Ui.Appearance;
-
-/// <summary>
-/// Allows to manage available color themes from the library.
-/// </summary>
-public static class Theme
+namespace Wpf.Ui.Appearance
 {
     /// <summary>
-    /// Event triggered when the application's theme is changed.
+    /// Allows managing available color themes from the library.
     /// </summary>
-    public static event ThemeChangedEvent Changed;
-
-    /// <summary>
-    /// Gets a value that indicates whether the application is currently using the high contrast theme.
-    /// </summary>
-    /// <returns><see langword="true"/> if application uses high contrast theme.</returns>
-    public static bool IsHighContrast() => AppearanceData.ApplicationTheme == ThemeType.HighContrast;
-
-    /// <summary>
-    /// Gets a value that indicates whether the Windows is currently using the high contrast theme.
-    /// </summary>
-    /// <returns><see langword="true"/> if system uses high contrast theme.</returns>
-    public static bool IsSystemHighContrast() => SystemTheme.HighContrast;
-
-    /// <summary>
-    /// Changes the current application theme.
-    /// </summary>
-    /// <param name="themeType">Theme to set.</param>
-    /// <param name="backgroundEffect">Whether the custom background effect should be applied.</param>
-    /// <param name="updateAccent">Whether the color accents should be changed.</param>
-    /// <param name="forceBackground">If <see langword="true"/>, bypasses the app's theme compatibility check and tries to force the change of a background effect.</param>
-    public static void Apply(ThemeType themeType, BackgroundType backgroundEffect = BackgroundType.Mica,
-        bool updateAccent = true, bool forceBackground = false)
+    public static class Theme
     {
-        if (updateAccent)
-            Accent.Apply(
-                Accent.GetColorizationColor(),
-                themeType,
-                false
-            );
+        /// <summary>
+        /// Event triggered when the application's theme is changed.
+        /// </summary>
+        public static event ThemeChangedEvent Changed;
 
-        if (themeType == ThemeType.Unknown || themeType == AppearanceData.ApplicationTheme)
-            return;
+        /// <summary>
+        /// Gets a value that indicates whether the application is currently using the high contrast theme.
+        /// </summary>
+        public static bool IsHighContrast() => AppearanceData.ApplicationTheme == ThemeType.HighContrast;
 
-        var appDictionaries = new ResourceDictionaryManager(AppearanceData.LibraryNamespace);
+        /// <summary>
+        /// Gets a value that indicates whether Windows is currently using the high contrast theme.
+        /// </summary>
+        public static bool IsSystemHighContrast() => SystemTheme.HighContrast;
 
-        var themeDictionaryName = "Light";
-
-        switch (themeType)
+        /// <summary>
+        /// Changes the current application theme.
+        /// </summary>
+        public static void Apply(ThemeType themeType, BackgroundType backgroundEffect = BackgroundType.Mica,
+            bool updateAccent = true, bool forceBackground = false)
         {
-            case ThemeType.Dark:
-                themeDictionaryName = "Dark";
-                break;
-        }
+            if (themeType == ThemeType.Unknown || themeType == AppearanceData.ApplicationTheme)
+                return;
 
-        var isUpdated = appDictionaries.UpdateDictionary(
-            "theme",
-            new Uri(
-                AppearanceData.LibraryThemeDictionariesUri + themeDictionaryName + ".xaml",
-                UriKind.Absolute
-            )
-        );
+            // Apply accent if requested
+            if (updateAccent)
+                Accent.Apply(Accent.GetColorizationColor(), themeType, false);
 
-        //var wpfUiDictionary = appDictionaries.GetDictionary("wpf.ui");
-
-        // Force reloading ALL dictionaries
-        // Works but is terrible
-        //var isCoreUpdated = appDictionaries.UpdateDictionary(
-        //    "wpf.ui",
-        //    new Uri(
-        //        AppearanceData.LibraryDictionariesUri + "Wpf.Ui.xaml",
-        //        UriKind.Absolute
-        //    )
-        //);
-
-        //var isBrushesUpdated = appDictionaries.UpdateDictionary(
-        //        "assets/brushes",
-        //        new Uri(
-        //            AppearanceData.LibraryDictionariesUri + "Assets/Brushes.xaml",
-        //            UriKind.Absolute
-        //        )
-        //    );
+            // Update theme dictionary
+            var themeDictionaryName = themeType == ThemeType.Dark ? "Dark" : "Light";
+            var appDictionaries = new ResourceDictionaryManager(AppearanceData.LibraryNamespace);
+            var isUpdated = appDictionaries.UpdateDictionary("theme", new Uri(AppearanceData.LibraryThemeDictionariesUri + themeDictionaryName + ".xaml", UriKind.Absolute));
 
 #if DEBUG
-        System.Diagnostics.Debug.WriteLine(
-            $"INFO | {typeof(Theme)} tries to update theme to {themeDictionaryName} ({themeType}): {isUpdated}",
-            "Wpf.Ui.Theme");
+            System.Diagnostics.Debug.WriteLine($"INFO | {typeof(Theme)} tries to update theme to {themeDictionaryName} ({themeType}): {isUpdated}", "Wpf.Ui.Theme");
 #endif
-        if (!isUpdated)
-            return;
 
-        AppearanceData.ApplicationTheme = themeType;
+            if (!isUpdated)
+                return;
 
-        Changed?.Invoke(themeType, Accent.SystemAccent);
+            AppearanceData.ApplicationTheme = themeType;
+            Changed?.Invoke(themeType, Accent.SystemAccent);
 
-        UpdateBackground(themeType, backgroundEffect, forceBackground);
-    }
+            // Update background after theme change
+            UpdateBackground(themeType, backgroundEffect, forceBackground);
+        }
 
-    /// <summary>
-    /// Gets currently set application theme.
-    /// </summary>
-    /// <returns><see cref="ThemeType.Unknown"/> if something goes wrong.</returns>
-    public static ThemeType GetAppTheme()
-    {
-        if (AppearanceData.ApplicationTheme == ThemeType.Unknown)
-            FetchApplicationTheme();
-
-        return AppearanceData.ApplicationTheme;
-    }
-
-    /// <summary>
-    /// Gets currently set system theme.
-    /// </summary>
-    /// <returns><see cref="SystemThemeType.Unknown"/> if something goes wrong.</returns>
-    public static SystemThemeType GetSystemTheme()
-    {
-        if (AppearanceData.SystemTheme == SystemThemeType.Unknown)
-            FetchSystemTheme();
-
-        return AppearanceData.SystemTheme;
-    }
-
-    /// <summary>
-    /// Gets a value that indicates whether the application is matching the system theme.
-    /// </summary>
-    /// <returns><see langword="true"/> if the application has the same theme as the system.</returns>
-    public static bool IsAppMatchesSystem()
-    {
-        var appTheme = GetAppTheme();
-        var sysTheme = GetSystemTheme();
-
-        return appTheme switch
+        /// <summary>
+        /// Gets the currently set application theme.
+        /// </summary>
+        public static ThemeType GetAppTheme()
         {
-            ThemeType.Dark => sysTheme is SystemThemeType.Dark or SystemThemeType.CapturedMotion
-                or SystemThemeType.Glow,
-            ThemeType.Light => sysTheme is SystemThemeType.Light or SystemThemeType.Flow or SystemThemeType.Sunrise,
-            _ => appTheme == ThemeType.HighContrast && SystemTheme.HighContrast
-        };
-    }
+            if (AppearanceData.ApplicationTheme == ThemeType.Unknown)
+                FetchApplicationTheme();
 
-    /// <summary>
-    /// Checks if the application and the operating system are currently working in a dark theme.
-    /// </summary>
-    public static bool IsMatchedDark()
-    {
-        var appTheme = GetAppTheme();
-        var sysTheme = GetSystemTheme();
+            return AppearanceData.ApplicationTheme;
+        }
 
-        if (appTheme != ThemeType.Dark)
-            return false;
+        /// <summary>
+        /// Gets the currently set system theme.
+        /// </summary>
+        public static SystemThemeType GetSystemTheme()
+        {
+            if (AppearanceData.SystemTheme == SystemThemeType.Unknown)
+                FetchSystemTheme();
 
-        return sysTheme is SystemThemeType.Dark or SystemThemeType.CapturedMotion or SystemThemeType.Glow;
-    }
+            return AppearanceData.SystemTheme;
+        }
 
-    /// <summary>
-    /// Checks if the application and the operating system are currently working in a light theme.
-    /// </summary>
-    public static bool IsMatchedLight()
-    {
-        var appTheme = GetAppTheme();
-        var sysTheme = GetSystemTheme();
+        /// <summary>
+        /// Gets a value that indicates whether the application matches the system theme.
+        /// </summary>
+        public static bool IsAppMatchesSystem()
+        {
+            var appTheme = GetAppTheme();
+            var sysTheme = GetSystemTheme();
 
-        if (appTheme != ThemeType.Light)
-            return false;
+            // Convert SystemThemeType to ThemeType or compare equivalent values
+            switch (sysTheme)
+            {
+                case SystemThemeType.Dark:
+                case SystemThemeType.CapturedMotion:
+                case SystemThemeType.Glow:
+                    return appTheme == ThemeType.Dark;
 
-        return sysTheme is SystemThemeType.Light or SystemThemeType.Flow or SystemThemeType.Sunrise;
-    }
+                case SystemThemeType.Light:
+                case SystemThemeType.Flow:
+                case SystemThemeType.Sunrise:
+                    return appTheme == ThemeType.Light;
 
-    /// <summary>
-    /// Tries to apply dark theme to <see cref="Window"/>.
-    /// </summary>
-    public static bool ApplyDarkThemeToWindow(Window window)
-    {
-        if (window == null)
-            return false;
-
-        if (window.IsLoaded)
-            return UnsafeNativeMethods.ApplyWindowDarkMode(window);
-
-        window.Loaded += (sender, _) => UnsafeNativeMethods.ApplyWindowDarkMode(sender as Window);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to remove dark theme from <see cref="Window"/>.
-    /// </summary>
-    public static bool RemoveDarkThemeFromWindow(Window window)
-    {
-        if (window == null)
-            return false;
-
-        if (window.IsLoaded)
-            return UnsafeNativeMethods.RemoveWindowDarkMode(window);
-
-        window.Loaded += (sender, _) => UnsafeNativeMethods.RemoveWindowDarkMode(sender as Window);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to guess the currently set application theme.
-    /// </summary>
-    private static void FetchApplicationTheme()
-    {
-        var appDictionaries = new ResourceDictionaryManager(AppearanceData.LibraryNamespace);
-        var themeDictionary = appDictionaries.GetDictionary("theme");
-
-        if (themeDictionary == null)
-            return;
-
-        var themeUri = themeDictionary.Source.ToString().Trim().ToLower();
-
-        if (themeUri.Contains("light"))
-            AppearanceData.ApplicationTheme = ThemeType.Light;
-        else if (themeUri.Contains("dark"))
-            AppearanceData.ApplicationTheme = ThemeType.Dark;
-        else if (themeUri.Contains("highcontrast"))
-            AppearanceData.ApplicationTheme = ThemeType.HighContrast;
-    }
-
-    /// <summary>
-    /// Tries to guess the currently set system theme.
-    /// </summary>
-    private static void FetchSystemTheme()
-    {
-        AppearanceData.SystemTheme = SystemTheme.GetTheme();
-    }
-
-    /// <summary>
-    /// Forces change to application background. Required if custom background effect was previously applied.
-    /// </summary>
-    private static void UpdateBackground(ThemeType themeType,
-        BackgroundType backgroundEffect = BackgroundType.Unknown, bool forceBackground = false)
-    {
-        // TODO: All windows
-        Background.UpdateAll(themeType, backgroundEffect);
-
-        if (!AppearanceData.HasHandle(Application.Current.MainWindow))
-            Background.Apply(Application.Current.MainWindow, backgroundEffect, forceBackground);
-
-        // Do we really neeed this?
-        //if (!Win32.Utilities.IsOSWindows11OrNewer)
-        //{
-        //    var mainWindow = Application.Current.MainWindow;
-
-        //    if (mainWindow == null)
-        //        return;
-
-        //    var backgroundColor = Application.Current.Resources["ApplicationBackgroundColor"];
-        //    if (backgroundColor is Color color)
-        //        mainWindow.Background = new SolidColorBrush(color);
-        //}
+                default:
+                    return appTheme == ThemeType.HighContrast && SystemTheme.HighContrast;
+            }
+        }
 
 
-        //        var mainWindow = Application.Current.MainWindow;
+        /// <summary>
+        /// Tries to remove dark theme from <see cref="Window"/>.
+        /// </summary>
+        public static bool RemoveDarkThemeFromWindow(Window window)
+        {
+            if (window == null)
+                return false;
 
-        //        if (mainWindow == null)
-        //            return;
+            if (window.IsLoaded)
+                return UnsafeNativeMethods.RemoveWindowDarkMode(window);
 
-        //        // TODO: Do not refresh window presenter background if already applied
-        //        var backgroundColor = Application.Current.Resources["ApplicationBackgroundColor"];
-        //        if (backgroundColor is Color color)
-        //            mainWindow.Background = new SolidColorBrush(color);
+            window.Loaded += (sender, _) => UnsafeNativeMethods.RemoveWindowDarkMode(sender as Window);
 
-        //#if DEBUG
-        //        System.Diagnostics.Debug.WriteLine($"INFO | Current background color: {backgroundColor}", "Wpf.Ui.Theme");
-        //#endif
+            return true;
+        }
 
-        //        var windowHandle = new WindowInteropHelper(mainWindow).Handle;
+        /// <summary>
+        /// Tries to guess the currently set application theme.
+        /// </summary>
+        private static void FetchApplicationTheme()
+        {
+            var appDictionaries = new ResourceDictionaryManager(AppearanceData.LibraryNamespace);
+            var themeDictionary = appDictionaries.GetDictionary("theme");
 
-        //        if (windowHandle == IntPtr.Zero)
-        //            return;
+            if (themeDictionary == null)
+                return;
 
-        //        Background.Remove(windowHandle);
+            var themeUri = themeDictionary.Source.ToString().Trim().ToLower();
 
-        //        //if (!IsAppMatchesSystem() || backgroundEffect == BackgroundType.Unknown)
-        //        //    return;
+            if (themeUri.Contains("light"))
+                AppearanceData.ApplicationTheme = ThemeType.Light;
+            else if (themeUri.Contains("dark"))
+                AppearanceData.ApplicationTheme = ThemeType.Dark;
+            else if (themeUri.Contains("highcontrast"))
+                AppearanceData.ApplicationTheme = ThemeType.HighContrast;
+        }
 
-        //        if (backgroundEffect == BackgroundType.Unknown)
-        //            return;
+        /// <summary>
+        /// Tries to guess the currently set system theme.
+        /// </summary>
+        private static void FetchSystemTheme() => AppearanceData.SystemTheme = SystemTheme.GetTheme();
 
-        //        // TODO: Improve
-        //        if (Background.Apply(windowHandle, backgroundEffect, forceBackground))
-        //            mainWindow.Background = Brushes.Transparent;
+        /// <summary>
+        /// Forces change to application background if a custom background effect was applied.
+        /// </summary>
+        private static void UpdateBackground(ThemeType themeType, BackgroundType backgroundEffect = BackgroundType.Unknown, bool forceBackground = false)
+        {
+            Background.UpdateAll(themeType, backgroundEffect);
+
+            var mainWindow = Application.Current.MainWindow;
+
+            if (mainWindow == null || !AppearanceData.HasHandle(mainWindow))
+                return;
+
+            Background.Apply(mainWindow, backgroundEffect, forceBackground);
+        }
+
+        private static bool IsSystemDarkTheme() =>
+            GetSystemTheme() is SystemThemeType.Dark or SystemThemeType.CapturedMotion or SystemThemeType.Glow;
+
+        private static bool IsSystemLightTheme() =>
+            GetSystemTheme() is SystemThemeType.Light or SystemThemeType.Flow or SystemThemeType.Sunrise;
     }
 }

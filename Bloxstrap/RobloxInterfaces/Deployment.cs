@@ -117,6 +117,8 @@ namespace Hellstrap.RobloxInterfaces
             return null;
         }
 
+
+
         public static string GetLocation(string resource)
         {
             string location = BaseUrl;

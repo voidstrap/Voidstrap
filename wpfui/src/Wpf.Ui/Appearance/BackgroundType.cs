@@ -43,10 +43,5 @@ public enum BackgroundType
     /// <summary>
     /// Windows 11 wallpaper blur effect.
     /// </summary>
-    Tabbed,
-
-    /// <summary>
-    /// Disables all the Background processing code.
-    /// </summary>
-    Disable
+    Tabbed
 }

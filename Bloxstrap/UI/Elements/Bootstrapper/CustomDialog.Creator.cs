@@ -179,8 +179,7 @@ namespace Hellstrap.UI.Elements.Bootstrapper
                 case "Unknown":
                     return BackgroundType.Unknown;
 
-                case "Disable":
-                    return BackgroundType.Disable;
+
 
                 case "Auto":
                     return BackgroundType.Auto;

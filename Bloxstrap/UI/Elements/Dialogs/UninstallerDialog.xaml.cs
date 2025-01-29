@@ -11,8 +11,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-using Hellstrap.UI.ViewModels.Dialogs;
 using Hellstrap.UI.ViewModels.Installer;
+using Hellstrap.UI.ViewModels.Dialogs;
 using Wpf.Ui.Mvvm.Interfaces;
 
 namespace Hellstrap.UI.Elements.Dialogs

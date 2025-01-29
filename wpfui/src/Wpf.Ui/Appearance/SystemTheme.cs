@@ -1,5 +1,5 @@
 ﻿// This Source Code Form is subject to the terms of the MIT License.
-// If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
+// If a copy of the MIT was not distributed with this file, you can obtain one at https://opensource.org/licenses/MIT.
 // Copyright (C) Leszek Pomianowski and WPF UI Contributors.
 // All Rights Reserved.
 
@@ -15,31 +15,28 @@ internal static class SystemTheme
     /// <summary>
     /// Gets the current main color of the system.
     /// </summary>
-    /// <returns></returns>
     public static Color GlassColor => SystemParameters.WindowGlassColor;
 
     /// <summary>
-    /// Determines whether the system is currently set to hight contrast mode.
+    /// Determines whether the system is currently set to high contrast mode.
     /// </summary>
-    /// <returns><see langword="true"/> if <see cref="SystemParameters.HighContrast"/>.</returns>
     public static bool HighContrast => SystemParameters.HighContrast;
 
     /// <summary>
-    /// Gets currently set system theme based on <see cref="Registry"/> value.
+    /// Gets the currently set system theme based on <see cref="Registry"/> value.
     /// </summary>
     public static SystemThemeType GetTheme()
     {
         var currentTheme =
             Registry.GetValue("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes",
-                "CurrentTheme", "aero.theme") as string ?? String.Empty;
+                "CurrentTheme", "aero.theme") as string ?? string.Empty;
 
-        if (String.IsNullOrEmpty(currentTheme))
+        if (string.IsNullOrEmpty(currentTheme))
             return SystemThemeType.Unknown;
 
         currentTheme = currentTheme.ToLower().Trim();
 
-        // This may be changed in the next versions, check the Insider previews
-
+        // Check for known theme types
         if (currentTheme.Contains("basic.theme"))
             return SystemThemeType.Light;
 
@@ -61,20 +58,22 @@ internal static class SystemTheme
         if (currentTheme.Contains("themed.theme"))
             return SystemThemeType.Flow;
 
-        //if (currentTheme.Contains("custom.theme"))
-        //    return ; custom can be light or dark
-
+        // Check for light/dark theme preference based on registry
         var rawAppsUseLightTheme = Registry.GetValue(
-        "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-        "AppsUseLightTheme", 1) ?? 1;
+            "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
+            "AppsUseLightTheme", 1);
 
-        if (rawAppsUseLightTheme is int and 0)
+        // If the value is explicitly set to 0, return dark theme
+        if (rawAppsUseLightTheme is int appsUseLightTheme && appsUseLightTheme == 0)
             return SystemThemeType.Dark;
 
         var rawSystemUsesLightTheme = Registry.GetValue(
             "HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize",
-            "SystemUsesLightTheme", 1) ?? 1;
+            "SystemUsesLightTheme", 1);
 
-        return rawSystemUsesLightTheme is int and 0 ? SystemThemeType.Dark : SystemThemeType.Light;
+        // If the value is explicitly set to 0, return dark theme
+        return rawSystemUsesLightTheme is int systemUsesLightTheme && systemUsesLightTheme == 0
+            ? SystemThemeType.Dark
+            : SystemThemeType.Light;
     }
 }

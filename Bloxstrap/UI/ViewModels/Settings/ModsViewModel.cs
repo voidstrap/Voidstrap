@@ -87,6 +87,13 @@ namespace Hellstrap.UI.ViewModels.Settings
         public EnumModPresetTask<Enums.CursorType> CursorTypeTask { get; } = new EnumModPresetTask<Enums.CursorType>("CursorType", new()
 {
     {
+        Enums.CursorType.CleanCursor, new Dictionary<string, string>()
+        {
+            { @"content\textures\Cursors\KeyboardMouse\ArrowCursor.png",    "Cursor.CleanCursor.ArrowCursor.png" },
+            { @"content\textures\Cursors\KeyboardMouse\ArrowFarCursor.png", "Cursor.CleanCursor.ArrowFarCursor.png" }
+        }
+    },
+    {
         Enums.CursorType.FPSCursor, new Dictionary<string, string>()
         {
             { @"content\textures\Cursors\KeyboardMouse\ArrowCursor.png",    "Cursor.FPSCursor.ArrowCursor.png" },

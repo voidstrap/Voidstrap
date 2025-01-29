@@ -31,6 +31,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
             DataContext = _viewModel;
         }
 
+
         private void OpenFlagEditor(object? sender, EventArgs e)
         {
             if (Window.GetWindow(this) is INavigationWindow window)

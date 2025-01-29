@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using Hellstrap.Integrations;
 using CommunityToolkit.Mvvm.Input;
+using System.Threading.Tasks;
 
 namespace Hellstrap.UI.ViewModels.ContextMenu
 {
@@ -9,70 +10,75 @@ namespace Hellstrap.UI.ViewModels.ContextMenu
         private readonly ActivityWatcher _activityWatcher;
 
         public List<ActivityData>? GameHistory { get; private set; }
-
         public GenericTriState LoadState { get; private set; } = GenericTriState.Unknown;
-
-        public string Error { get; private set; } = String.Empty;
-
+        public string Error { get; private set; } = string.Empty;
         public ICommand CloseWindowCommand => new RelayCommand(RequestClose);
-        
+
         public EventHandler? RequestCloseEvent;
 
+        // Constructor with activity watcher injected
         public ServerHistoryViewModel(ActivityWatcher activityWatcher)
         {
             _activityWatcher = activityWatcher;
+            _activityWatcher.OnGameLeave += (_, _) => LoadDataAsync(); // Calls LoadData asynchronously
 
-            _activityWatcher.OnGameLeave += (_, _) => LoadData();
-
-            LoadData();
+            // Initially load data
+            LoadDataAsync();
         }
 
-        private async void LoadData()
+        // Async method to load data
+        private async void LoadDataAsync()
         {
             LoadState = GenericTriState.Unknown;
             OnPropertyChanged(nameof(LoadState));
 
-            var entries = _activityWatcher.History.Where(x => x.UniverseDetails is null);
+            var entries = _activityWatcher.History.Where(x => x.UniverseDetails == null).ToList(); // Avoid multiple enumeration
 
             if (entries.Any())
             {
-                string universeIds = String.Join(',', entries.Select(x => x.UniverseId).Distinct());
+                string universeIds = string.Join(',', entries.Select(x => x.UniverseId).Distinct());
 
                 try
                 {
+                    // Fetch details for all the unique universe IDs
                     await UniverseDetails.FetchBulk(universeIds);
                 }
                 catch (Exception ex)
                 {
                     App.Logger.WriteException("ServerHistoryViewModel::LoadData", ex);
-                    
+
                     Error = ex.Message;
                     OnPropertyChanged(nameof(Error));
 
                     LoadState = GenericTriState.Failed;
                     OnPropertyChanged(nameof(LoadState));
-
                     return;
                 }
 
+                // Populate UniverseDetails from the cache
                 foreach (var entry in entries)
+                {
                     entry.UniverseDetails = UniverseDetails.LoadFromCache(entry.UniverseId);
+                }
             }
 
-            GameHistory = new(_activityWatcher.History);
+            // Initialize the GameHistory with the current state
+            GameHistory = new List<ActivityData>(_activityWatcher.History);
 
             var consolidatedJobIds = new List<ActivityData>();
 
-            // consolidate activity entries from in-universe teleports
-            // the time left of the latest activity gets moved to the root activity
-            // the job id of the latest public server activity gets moved to the root activity
+            // Consolidate activity entries from in-universe teleports
             foreach (var entry in _activityWatcher.History)
             {
-                if (entry.RootActivity is not null)
+                if (entry.RootActivity != null)
                 {
+                    // Update TimeLeft for root activities if necessary
                     if (entry.RootActivity.TimeLeft < entry.TimeLeft)
+                    {
                         entry.RootActivity.TimeLeft = entry.TimeLeft;
+                    }
 
+                    // Consolidate the JobId for public servers
                     if (entry.ServerType == ServerType.Public && !consolidatedJobIds.Contains(entry))
                     {
                         entry.RootActivity.JobId = entry.JobId;
@@ -89,6 +95,13 @@ namespace Hellstrap.UI.ViewModels.ContextMenu
             OnPropertyChanged(nameof(LoadState));
         }
 
+        // Close window handler
         private void RequestClose() => RequestCloseEvent?.Invoke(this, EventArgs.Empty);
+
+        // Optional: Ensure we unsubscribe from events to prevent memory leaks
+        public void Dispose()
+        {
+            _activityWatcher.OnGameLeave -= (_, _) => LoadDataAsync();
+        }
     }
 }

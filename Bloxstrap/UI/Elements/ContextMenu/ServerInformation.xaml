@@ -59,7 +59,7 @@
                 Grid.Column="0" 
                 Margin="0,0,16,12" 
                 VerticalAlignment="Center" 
-                Text="{x:Static resources:Strings.ContextMenu_ServerInformation_Type}" />
+                Text="Type:" />
             <TextBlock 
                 Grid.Row="0" 
                 Grid.Column="1" 
@@ -72,7 +72,7 @@
                 Grid.Column="0" 
                 Margin="0,0,16,12" 
                 VerticalAlignment="Center" 
-                Text="{x:Static resources:Strings.ContextMenu_ServerInformation_InstanceId}" />
+                Text="Instance ID:" />
             <TextBlock 
                 Grid.Row="1" 
                 Grid.Column="1" 
@@ -85,7 +85,7 @@
                 Grid.Column="0" 
                 Margin="0,0,16,12" 
                 VerticalAlignment="Center" 
-                Text="{x:Static resources:Strings.ContextMenu_ServerInformation_Location}" 
+                Text="Server Location:" 
                 Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
             <TextBlock 
                 Grid.Row="2" 

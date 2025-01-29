@@ -32,8 +32,7 @@ namespace Hellstrap
             { "Rendering.ManualFullscreen", "FFlagHandleAltEnterFullscreenManually" },
             { "Rendering.DisableScaling", "DFFlagDisableDPIScale" },
             { "Rendering.DisableScaling2", "DFFlagDebugOverrideDPIScale" },
-            { "Rendering.MSAA", "FIntDebugFRMOptionalMSAALevelOverride" },
-            { "Rendering.MSAA2", "FIntDebugForceMSAASamples" },
+            { "Rendering.MSAA", "FIntDebugForceMSAASamples" },
             { "Rendering.DisablePostFX", "FFlagDisablePostFx" },
             { "Rendering.ShadowIntensity", "FIntRenderShadowIntensity" },
 
@@ -53,8 +52,6 @@ namespace Hellstrap
             { "Rendering.Lighting.Unified", "FFlagRenderUnifiedLighting12"},
 
             // Texture quality
-            { "Rendering.TextureQuality2", "FStringTerrainMaterialTablePre2022" },
-            { "Rendering.TextureQuality", "FStringTerrainMaterialTable2022" },
             { "Rendering.TerrainTextureQuality", "FIntTerrainArraySliceSize" },
             { "Rendering.TextureQuality.Level", "DFIntTextureQualityOverride" },
             { "Rendering.TextureQuality.OverrideEnabled", "DFFlagTextureQualityOverrideEnabled" },
@@ -97,6 +94,7 @@ namespace Hellstrap
 
             // DarkMode
             { "DarkMode.BlueMode", "FFlagLuaAppEnableFoundationColors7"},
+
 
             // Preload
             { "Preload.Preload2", "DFFlagEnableMeshPreloading2"},
@@ -156,7 +154,6 @@ namespace Hellstrap
         public static IReadOnlyDictionary<MSAAMode, string?> MSAAModes => new Dictionary<MSAAMode, string?>
         {
             { MSAAMode.Default, null },
-            { MSAAMode.x0, "0" },
             { MSAAMode.x1, "1" },
             { MSAAMode.x2, "2" },
             { MSAAMode.x3, "3" },
@@ -348,8 +345,8 @@ namespace Hellstrap
             if (GetPreset("Network.Log") != "7")
                 SetPreset("Network.Log", "7");
 
-            if (GetPreset("Rendering.ManualFullscreen") != "False")
-                SetPreset("Rendering.ManualFullscreen", "False");
+            if (GetPreset("Rendering.ManualFullscreen") != "True") //dx alt enter fix
+                SetPreset("Rendering.ManualFullscreen", "True");
 
             if (GetPreset("Rendering.FixHighlights") != "True")
                 SetPreset("Rendering.FixHighlights", "True");

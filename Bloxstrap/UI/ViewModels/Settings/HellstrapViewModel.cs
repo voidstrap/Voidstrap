@@ -2,13 +2,16 @@
 using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Hellstrap.UI.ViewModels.Settings
 {
     public class HellstrapViewModel : NotifyPropertyChangedViewModel
     {
         public bool ShouldExportConfig { get; set; } = true;
-
         public bool ShouldExportLogs { get; set; } = true;
 
         public ICommand ExportDataCommand => new RelayCommand(ExportData);
@@ -16,11 +19,10 @@ namespace Hellstrap.UI.ViewModels.Settings
         private void ExportData()
         {
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'");
-
-            var dialog = new SaveFileDialog 
-            { 
+            var dialog = new SaveFileDialog
+            {
                 FileName = $"Hellstrap-export-{timestamp}.zip",
-                Filter = $"{Strings.FileTypes_ZipArchive}|*.zip" 
+                Filter = $"{Strings.FileTypes_ZipArchive}|*.zip"
             };
 
             if (dialog.ShowDialog() != true)
@@ -31,49 +33,49 @@ namespace Hellstrap.UI.ViewModels.Settings
 
             if (ShouldExportConfig)
             {
-                var files = new List<string>()
+                var configFiles = new List<string>
                 {
                     App.Settings.FileLocation,
                     App.State.FileLocation,
                     App.FastFlags.FileLocation
                 };
-
-                AddFilesToZipStream(zipStream, files, "Config/");
+                AddFilesToZipStream(zipStream, configFiles, "Config/");
             }
 
             if (ShouldExportLogs && Directory.Exists(Paths.Logs))
             {
-                var files = Directory.GetFiles(Paths.Logs)
-                    .Where(x => !x.Equals(App.Logger.FileLocation, StringComparison.OrdinalIgnoreCase));
-
-                AddFilesToZipStream(zipStream, files, "Logs/");
+                var logFiles = Directory.GetFiles(Paths.Logs)
+                    .Where(file => !file.Equals(App.Logger.FileLocation, StringComparison.OrdinalIgnoreCase));
+                AddFilesToZipStream(zipStream, logFiles, "Logs/");
             }
 
-            zipStream.CloseEntry();
             zipStream.Finish();
             memStream.Position = 0;
 
-            using var outputStream = File.OpenWrite(dialog.FileName);
-            memStream.CopyTo(outputStream);
-
-            Process.Start("explorer.exe", $"/select,\"{dialog.FileName}\"");
+            SaveZipToFile(memStream, dialog.FileName);
         }
 
         private void AddFilesToZipStream(ZipOutputStream zipStream, IEnumerable<string> files, string directory)
         {
-            foreach (string file in files)
+            foreach (var file in files.Where(File.Exists))
             {
-                if (!File.Exists(file))
-                    continue;
-
-                var entry = new ZipEntry(directory + Path.GetFileName(file));
-                entry.DateTime = DateTime.Now;
+                var entry = new ZipEntry(directory + Path.GetFileName(file))
+                {
+                    DateTime = DateTime.Now
+                };
 
                 zipStream.PutNextEntry(entry);
 
                 using var fileStream = File.OpenRead(file);
                 fileStream.CopyTo(zipStream);
             }
+        }
+
+        private void SaveZipToFile(MemoryStream zipMemoryStream, string filePath)
+        {
+            using var outputStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            zipMemoryStream.CopyTo(outputStream);
+            Process.Start("explorer.exe", $"/select,\"{filePath}\"");
         }
     }
 }

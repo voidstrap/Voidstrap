@@ -335,6 +335,9 @@ If not, then please report this exception through a [GitHub issue]({1}) along wi
 	<data name="Enums.CursorType.FPSCursor" xml:space="preserve">
     <value>FPSCursor</value>
   </data>
+	<data name="Enums.CursorType.CleanCursor" xml:space="preserve">
+    <value>CleanCursor</value>
+  </data>
   <data name="Enums.EmojiType.Catmoji" xml:space="preserve">
     <value>Catmoji</value>
   </data>
@@ -741,7 +744,7 @@ Selecting 'No' will ignore this warning and continue installation.</value>
     <value>When in-game, you'll be able to see where your server is located via [ipinfo.io]({0}).</value>
   </data>
   <data name="Menu.Integrations.QueryServerLocation.Title" xml:space="preserve">
-    <value>Query server location</value>
+    <value>Server location</value>
   </data>
   <data name="Menu.Integrations.Title" xml:space="preserve">
     <value>Integrations</value>
@@ -894,6 +897,9 @@ Some text might not be translated to preferred language.</value>
   </data>
   <data name="Menu.FastFlags.Presets.DisableTerrainTextures.Title" xml:space="preserve">
     <value>Disable terrain textures</value>
+  </data>
+	<data name="Menu.FastFlags.Presets.DisableGrass.Title" xml:space="preserve">
+    <value>Disable grass motion</value>
   </data>
   <data name="Dialog.Connectivity.UnableToDownload" xml:space="preserve">
     <value>Hellstrap is unable to download Roblox</value>
