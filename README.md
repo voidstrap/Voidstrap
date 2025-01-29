@@ -25,6 +25,16 @@ Hellstrap is an advanced fork of Bloxstrap, aiming to enhance and expand feature
 
 ---
 
+### Ready to Switch?
+[**Download Hellstrap here**](https://github.com/midaskira/Hellstrap/releases)
+
+---
+
+## Additional Resources
+- Join [Stoof's Discord server](https://discord.gg/fekwAbMCfx) for fast flags and additional support.
+
+---
+
 ## Differences from Bloxstrap
 
 ### **Integrations**
@@ -64,17 +74,7 @@ Hellstrap is an advanced fork of Bloxstrap, aiming to enhance and expand feature
     <img src="https://i.imgur.com/lAiK7O8.png" alt="Screenshot 3">
 </p>
 
----
 
-### Ready to Switch?
-[**Download Hellstrap here**](https://github.com/midaskira/Hellstrap/releases)
-
----
-
-## Additional Resources
-- Join [Stoof's Discord server](https://discord.gg/fekwAbMCfx) for fast flags and additional support.
-
----
 
 [shield-repo-license]:  https://img.shields.io/github/license/midaskira/Hellstrap?style=flat-square
 [shield-repo-releases]: https://img.shields.io/github/downloads/midaskira/Hellstrap/latest/total?color=981bfe&style=flat-square
