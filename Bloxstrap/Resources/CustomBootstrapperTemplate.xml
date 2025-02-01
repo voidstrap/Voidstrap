@@ -1,0 +1,4 @@
+﻿<HellstrapCustomBootstrapper Version="0" Height="320" Width="500">
+	<!-- Put UI elements here -->
+	<!-- Examples of custom bootstrappers can be found at https://github.com/Bloxstraplabs/custom-bootstrapper-examples -->
+</HellstrapCustomBootstrapper>
