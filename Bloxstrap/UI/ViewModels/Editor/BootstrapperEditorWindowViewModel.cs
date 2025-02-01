@@ -1,10 +1,7 @@
 ﻿using Hellstrap.UI.Elements.Bootstrapper;
 using CommunityToolkit.Mvvm.Input;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
 using System.Windows;
 using System.Windows.Input;
 
@@ -14,55 +11,75 @@ namespace Hellstrap.UI.ViewModels.Editor
     {
         private CustomDialog? _dialog = null;
 
-        public ICommand PreviewCommand => new RelayCommand(Preview);
-        public ICommand SaveCommand => new RelayCommand(Save);
+        // Commands
+        public ICommand PreviewCommand { get; }
+        public ICommand SaveCommand { get; }
 
-        public string Name { get; set; } = "";
+        // Properties
+        public string Name { get; set; } = string.Empty;
         public string Title { get; set; } = "Editing \"Custom Theme\"";
-        public string Code { get; set; } = "";
+        public string Code { get; set; } = string.Empty;
 
+        public BootstrapperEditorWindowViewModel()
+        {
+            // Initialize commands
+            PreviewCommand = new RelayCommand(Preview);
+            SaveCommand = new RelayCommand(Save);
+        }
+
+        // Preview the custom theme
         private void Preview()
         {
-            const string LOG_IDENT = "BootstrapperEditorWindowViewModel::Preview";
+            const string LogIdentifier = "BootstrapperEditorWindowViewModel::Preview";
 
             try
             {
-                CustomDialog dialog = new CustomDialog();
-
+                var dialog = new CustomDialog();
                 dialog.ApplyCustomTheme(Name, Code);
 
-                if (_dialog != null)
-                    _dialog.CloseBootstrapper();
+                // Close previous dialog if it exists
+                _dialog?.CloseBootstrapper();
                 _dialog = dialog;
 
+                // Set message and show the preview dialog
                 dialog.Message = Strings.Bootstrapper_StylePreview_TextCancel;
                 dialog.CancelEnabled = true;
                 dialog.ShowBootstrapper();
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Failed to preview custom theme");
-                App.Logger.WriteException(LOG_IDENT, ex);
+                // Log error
+                App.Logger.WriteLine(LogIdentifier, "Failed to preview custom theme");
+                App.Logger.WriteException(LogIdentifier, ex);
 
-                Frontend.ShowMessageBox($"Failed to preview theme: {ex.Message}", MessageBoxImage.Error, MessageBoxButton.OK);
             }
         }
 
+        // Save the custom theme to a file
         private void Save()
         {
-            const string LOG_IDENT = "BootstrapperEditorWindowViewModel::Save";
-
-            string path = Path.Combine(Paths.CustomThemes, Name, "Theme.xml");
+            const string LogIdentifier = "BootstrapperEditorWindowViewModel::Save";
+            string themeDirectory = Path.Combine(Paths.CustomThemes, Name);
+            string themeFilePath = Path.Combine(themeDirectory, "Theme.xml");
 
             try
             {
-                File.WriteAllText(path, Code);
+                // Ensure the directory exists
+                if (!Directory.Exists(themeDirectory))
+                {
+                    Directory.CreateDirectory(themeDirectory);
+                }
+
+                // Save the code to the file
+                File.WriteAllText(themeFilePath, Code);
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Failed to save custom theme");
-                App.Logger.WriteException(LOG_IDENT, ex);
+                // Log error
+                App.Logger.WriteLine(LogIdentifier, "Failed to save custom theme");
+                App.Logger.WriteException(LogIdentifier, ex);
 
+                // Show error message to the user
                 Frontend.ShowMessageBox($"Failed to save theme: {ex.Message}", MessageBoxImage.Error, MessageBoxButton.OK);
             }
         }

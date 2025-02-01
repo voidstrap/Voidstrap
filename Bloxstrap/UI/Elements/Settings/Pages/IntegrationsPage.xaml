@@ -21,7 +21,7 @@
         <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_Integrations_EnableActivityTracking_Title}" 
             Description="{x:Static resources:Strings.Menu_Integrations_EnableActivityTracking_Description}" 
-            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/What-is-activity-tracking%3F"
+            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F"
             x:Name="ActivityTrackingOption">
             <ui:ToggleSwitch IsChecked="{Binding ActivityTrackingEnabled, Mode=TwoWay}" Checked="ToggleSwitch_Checked" />
         </controls:OptionControl>

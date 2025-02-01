@@ -12,7 +12,7 @@ namespace Hellstrap
 
         public virtual string ClassName => typeof(T).Name;
         
-        public virtual string ProfilesLocation => Path.Combine(Paths.Base, $"Profiles.json");
+        public virtual string ProfilesLocation => Path.Combine(Paths.Base, $"Backup.json");
 
         public virtual string FileLocation => Path.Combine(Paths.Base, $"{ClassName}.json");
 
@@ -110,7 +110,7 @@ namespace Hellstrap
                 if (!Directory.Exists(BaseDir))
                     Directory.CreateDirectory(BaseDir);
 
-                App.Logger.WriteLine(LOGGER_STRING, $"Writing flag profile {name}");
+                App.Logger.WriteLine(LOGGER_STRING, $"Writing flag backup {name}");
 
                 if (!File.Exists(FileDirectory))
                     File.Create(FileDirectory).Dispose();

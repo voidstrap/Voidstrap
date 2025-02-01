@@ -41,6 +41,7 @@ namespace Hellstrap.Models.Persistable
         public bool ShowAccountOnRichPresence { get; set; } = false;
         public bool ShowServerDetails { get; set; } = true;
 
+
         // Custom Integrations
         public ObservableCollection<CustomIntegration> CustomIntegrations { get; set; } = new();
 

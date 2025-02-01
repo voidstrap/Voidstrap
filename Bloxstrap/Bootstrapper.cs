@@ -66,6 +66,8 @@ namespace Hellstrap
 
         private int _appPid = 0;
 
+        private int totalPackageSize = 0;
+
         public IBootstrapperDialog? Dialog = null;
 
         public bool IsStudioLaunch => _launchMode != LaunchMode.Player;
@@ -186,8 +188,8 @@ namespace Hellstrap
 
             try
             {
-                Mutex.OpenExisting("Bloxstrap-Bootstrapper").Close();
-                App.Logger.WriteLine(LOG_IDENT, "Bloxstrap-Bootstrapper mutex exists, waiting...");
+                Mutex.OpenExisting("Hellstrap-Bootstrapper").Close();
+                App.Logger.WriteLine(LOG_IDENT, "Hellstrap-Bootstrapper mutex exists, waiting...");
                 SetStatus(Strings.Bootstrapper_Status_WaitingOtherInstances);
                 mutexExists = true;
             }
@@ -197,7 +199,7 @@ namespace Hellstrap
             }
 
             // wait for mutex to be released if it's not yet
-            await using var mutex = new AsyncMutex(false, "Bloxstrap-Bootstrapper");
+            await using var mutex = new AsyncMutex(false, "Hellstrap-Bootstrapper");
             await mutex.AcquireAsync(_cancelTokenSource.Token);
 
             _mutex = mutex;
@@ -549,7 +551,7 @@ namespace Hellstrap
             // i don't like this, but there isn't much better way of doing it /shrug
             if (Process.GetProcessesByName(App.ProjectName).Length > 1)
             {
-                App.Logger.WriteLine(LOG_IDENT, $"More than one Bloxstrap instance running, aborting update check");
+                App.Logger.WriteLine(LOG_IDENT, $"More than one Hellstrap instance running, aborting update check");
                 return false;
             }
 
@@ -583,7 +585,7 @@ namespace Hellstrap
             try
             {
 #if DEBUG_UPDATER
-                string downloadLocation = Path.Combine(Paths.TempUpdates, "Bloxstrap.exe");
+                string downloadLocation = Path.Combine(Paths.TempUpdates, "Hellstrap.exe");
 
                 Directory.CreateDirectory(Paths.TempUpdates);
 
@@ -1098,6 +1100,34 @@ namespace Hellstrap
             App.State.Prop.ModManifest = modFolderFiles;
             App.State.Save();
 
+            App.Logger.WriteLine(LOG_IDENT, "Checking for eurotrucks2.exe toggle");
+
+            try
+            {
+                bool isEuroTrucks = File.Exists(Path.Combine(_latestVersionDirectory, "eurotrucks2.exe")) ? true : false;
+
+                if (App.Settings.Prop.RenameClientToEuroTrucks2)
+                {
+                    if (!isEuroTrucks)
+                        File.Move(
+                            Path.Combine(_latestVersionDirectory, "RobloxPlayerBeta.exe"),
+                            Path.Combine(_latestVersionDirectory, "eurotrucks2.exe")
+                        );
+                }
+                else
+                {
+                    if (isEuroTrucks)
+                        File.Move(
+                            Path.Combine(_latestVersionDirectory, "eurotrucks2.exe"),
+                            Path.Combine(_latestVersionDirectory, "RobloxPlayerBeta.exe")
+                        );
+                }
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, "Failed to update client! " + ex.Message);
+            }
+
             App.Logger.WriteLine(LOG_IDENT, $"Finished checking file mods");
         }
 
@@ -1189,6 +1219,12 @@ namespace Hellstrap
                         await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cancelTokenSource.Token);
 
                         _totalDownloadedBytes += bytesRead;
+                        SetStatus(
+                            String.Format(App.Settings.Prop.DownloadingStringFormat,
+                            package.Name,
+                            _totalDownloadedBytes / 1048576,
+                            totalPackageSize / 1048576
+                            ));
                         UpdateProgressBar();
                     }
 
@@ -1207,8 +1243,6 @@ namespace Hellstrap
 
                     if (ex.GetType() == typeof(ChecksumFailedException))
                     {
-                        App.SendStat("packageDownloadState", "httpFail");
-
                         Frontend.ShowConnectivityDialog(
                             Strings.Dialog_Connectivity_UnableToDownload,
                             String.Format(Strings.Dialog_Connectivity_UnableToDownloadReason, "[https://github.com/bloxstraplabs/bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox](https://github.com/bloxstraplabs/bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox)"),

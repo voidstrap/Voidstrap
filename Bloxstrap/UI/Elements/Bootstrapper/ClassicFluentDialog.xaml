@@ -23,8 +23,6 @@
         <TaskbarItemInfo ProgressState="{Binding Path=TaskbarProgressState}" ProgressValue="{Binding Path=TaskbarProgressValue}" />
     </Window.TaskbarItemInfo>
 
-
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -32,35 +30,31 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <ui:TitleBar Grid.Row="0" x:Name="RootTitleBar" Padding="8" Title="{Binding Title, Mode=OneTime}" ShowMinimize="False" ShowMaximize="False" CanMaximize="False" ShowClose="False" />
+        <!-- Title Bar -->
+        <ui:TitleBar Grid.Row="0" x:Name="RootTitleBar" Padding="8" Title="{Binding Title, Mode=OneTime}"
+                     ShowMinimize="False" ShowMaximize="False" CanMaximize="False" ShowClose="False" />
 
-        <ui:TitleBar
-            Grid.Row="0"
-            VerticalAlignment="Top"
-            CanMaximize="False"
-            ShowClose="False"
-            ShowMaximize="False"
-            ShowMinimize="False" />
-
-
-
+        <!-- Main Content -->
         <Grid Grid.Row="1" Margin="16,0,16,0" VerticalAlignment="Center">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image Grid.Column="0" Margin="0,12,0,0" Width="48" Height="48" VerticalAlignment="Top" Source="{Binding Icon, Mode=OneWay}" RenderOptions.BitmapScalingMode="HighQuality" />
-            <StackPanel Grid.Column="1">
-                <TextBlock Margin="16,8,0,0" FontSize="20" Text="{Binding Message, Mode=OneWay}" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                <ProgressBar Margin="16,16,0,16" IsIndeterminate="{Binding ProgressIndeterminate, Mode=OneWay}" Maximum="{Binding ProgressMaximum, Mode=OneWay}" Value="{Binding ProgressValue, Mode=OneWay}" />
+            <Image Grid.Column="0" Margin="0,12,0,0" Width="48" Height="48" VerticalAlignment="Top" 
+                   Source="{Binding Icon, Mode=OneWay}" RenderOptions.BitmapScalingMode="HighQuality" />
+            <StackPanel Grid.Column="1" Margin="0,12,0,-12">
+                <TextBlock Margin="16,8,0,0" FontSize="20" Text="{Binding Message, Mode=OneWay}" TextWrapping="Wrap" 
+                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                <ProgressBar Margin="16,16,0,16" IsIndeterminate="{Binding ProgressIndeterminate, Mode=OneWay}" 
+                             Maximum="{Binding ProgressMaximum, Mode=OneWay}" Value="{Binding ProgressValue, Mode=OneWay}" Height="7" />
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" Padding="15">
-            <Border.Background>
-                <SolidColorBrush Color="{ui:ThemeResource SolidBackgroundFillColorSecondary}" Opacity="{Binding FooterOpacity, Mode=OneTime}" />
-            </Border.Background>
-            <Button Margin="209,0,0,0" Content="{x:Static resources:Strings.Common_Cancel}" Width="181" IsEnabled="{Binding CancelEnabled, Mode=OneWay}" Command="{Binding CancelInstallCommand}" />
-        </Border>
+        <!-- Cancel Button -->
+        <Button Grid.Row="2" Width="190" Padding="6" Command="{Binding CancelInstallCommand}" 
+                Content="{x:Static resources:Strings.Common_Cancel}" FontSize="14" 
+                Background="{ui:ThemeResource ApplicationBackgroundBrush}" 
+                Foreground="{DynamicResource TextFillColorPrimaryBrush}" 
+                IsEnabled="{Binding CancelEnabled}" Margin="210,16,16,16" HorizontalAlignment="Center" />
     </Grid>
 </base:WpfUiWindow>

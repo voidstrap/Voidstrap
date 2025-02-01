@@ -52,49 +52,68 @@
 
             <!-- Navigation Menu -->
             <ui:NavigationFluent x:Name="RootNavigation" Grid.Row="1" Grid.Column="0" Margin="0,0,12,0"
-    Frame="{Binding ElementName=RootFrame}" SelectedPageIndex="0">
+                     Frame="{Binding ElementName=RootFrame}" SelectedPageIndex="0">
+
+                <!-- Menu Items -->
                 <ui:NavigationFluent.Items>
+
                     <!-- Integrations Menu Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
-            PageType="{x:Type pages:IntegrationsPage}" Icon="AddCircle28" Tag="integrations" ToolTip="Manage Integrations" />
+                           PageType="{x:Type pages:IntegrationsPage}" Icon="AddCircle28"
+                           Tag="integrations" ToolTip="Manage Integrations" />
 
                     <!-- Behaviour Menu Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Behaviour_Title}"
-            PageType="{x:Type pages:BehaviourPage}" Icon="PlaySettings20" Tag="bootstrapper" ToolTip="Behavior Settings" />
+                           PageType="{x:Type pages:BehaviourPage}" Icon="PlaySettings20"
+                           Tag="bootstrapper" ToolTip="Behavior Settings" />
 
                     <!-- Mods Menu Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
-            PageType="{x:Type pages:ModsPage}" Icon="WrenchScrewdriver20" Tag="mods" ToolTip="Manage Mods" />
+                           PageType="{x:Type pages:ModsPage}" Icon="WrenchScrewdriver20"
+                           Tag="mods" ToolTip="Manage Mods" />
 
-                    <!-- Fast Flag Editor Menu Item, visibility bound -->
+                    <!-- Fast Flag Editor Menu Item (Visibility bound) -->
                     <ui:NavigationItem Content="FastFlag Editor"
-            PageType="{x:Type pages:FastFlagEditorPage}" Icon="EditSettings24" Tag="fastflageditor" Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" ToolTip="FastFlag Editor" />
+                           PageType="{x:Type pages:FastFlagEditorPage}" Icon="EditSettings24"
+                           Tag="fastflageditor" Visibility="{Binding IsFastFlagEditorVisible, 
+                           Converter={StaticResource BooleanToVisibilityConverter}}"
+                           ToolTip="FastFlag Editor" />
 
                     <!-- Flag Settings Menu Item -->
-                    <ui:NavigationItem Content="Engine Settings" PageType="{x:Type pages:FastFlagsPage}"
-            Icon="Flag48" Tag="fastflags" ToolTip="Configure Flag Settings" />
+                    <ui:NavigationItem Content="Engine Settings"
+                           PageType="{x:Type pages:FastFlagsPage}" Icon="Flag48"
+                           Tag="fastflags" ToolTip="Configure Engine Settings" />
 
                     <!-- Appearance Menu Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Appearance_Title}"
-            PageType="{x:Type pages:AppearancePage}" Icon="PaintBrush24" Tag="appearance" ToolTip="Change Appearance" />
+                           PageType="{x:Type pages:AppearancePage}" Icon="PaintBrush24"
+                           Tag="appearance" ToolTip="Change Appearance" />
 
                     <!-- Shortcuts Menu Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
-            PageType="{x:Type pages:ShortcutsPage}" Icon="Apps32" Tag="shortcuts" Click="NavigationItem_Click_1" ToolTip="View Shortcuts" />
-
+                           PageType="{x:Type pages:ShortcutsPage}" Icon="Apps32"
+                           Tag="shortcuts" Click="NavigationItem_Click_1"
+                           ToolTip="View Shortcuts" />
                 </ui:NavigationFluent.Items>
 
+                <!-- Footer Items -->
                 <ui:NavigationFluent.Footer>
+
                     <!-- Hellstrap Footer Item -->
-                    <ui:NavigationItem Content="Hellstrap" PageType="{x:Type pages:ChannelPage}"
-            Icon="Settings48" Tag="channel" Click="NavigationItem_Click" ToolTip="Hellstrap Settings" />
+                    <ui:NavigationItem Content="Hellstrap"
+                           PageType="{x:Type pages:ChannelPage}" Icon="Settings48"
+                           Tag="channel" Click="NavigationItem_Click"
+                           ToolTip="Hellstrap Settings" />
 
                     <!-- About Footer Item -->
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
-            Icon="QuestionCircle48" Margin="0,0,0,12"
-            Command="{Binding OpenAboutCommand, Mode=OneTime}" ToolTip="About Us" />
+                           Icon="QuestionCircle48" Margin="0,0,0,12"
+                           Command="{Binding OpenAboutCommand, Mode=OneTime}"
+                           ToolTip="About Us" />
                 </ui:NavigationFluent.Footer>
+
             </ui:NavigationFluent>
+
 
 
             <!-- Content Area -->

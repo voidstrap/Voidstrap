@@ -32,7 +32,7 @@
 
             <Image x:Name="Image1" Grid.Column="0" Width="72" Height="72" VerticalAlignment="Center" Source="pack://application:,,,/Hellstrap.ico" RenderOptions.BitmapScalingMode="HighQuality" />
             <Image x:Name="Image2" Grid.Column="0" Width="72" Height="72" VerticalAlignment="Center" Source="pack://application:,,,/Resources/BootstrapperStyles/ByfronDialog/Matt.png" RenderOptions.BitmapScalingMode="HighQuality" Opacity="0" />
-            
+
             <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -40,10 +40,10 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
                     <TextBlock Grid.Column="0" Text="Hellstrap" Margin="0,0,4,0" FontSize="24" FontWeight="Medium" />
-                    
+
                 </Grid>
                 <TextBlock Text="A Bloxstrap fork." Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                
+
             </StackPanel>
         </Grid>
 
@@ -68,8 +68,8 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4,16,4" FontSize="14" FontWeight="Medium" Text="Timestamp" />
-                <TextBlock Grid.Row="0" Grid.Column="1" Margin="0,0,0,4" VerticalAlignment="Bottom" Text="{Binding BuildTimestamp, Mode=OneTime}" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,4,16,4" FontSize="14" FontWeight="Medium" Text="Updated:" />
+                <TextBlock Grid.Row="0" Margin="74,7,0,0" VerticalAlignment="Top" Text="{Binding BuildTimestamp, Mode=OneTime}" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Grid.ColumnSpan="2" />
 
                 <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,4,16,4" FontSize="14" FontWeight="Medium" Text="Commit Hash" Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
                 <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,4" VerticalAlignment="Bottom" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Visibility="{Binding BuildCommitVisibility, Mode=OneTime}">
@@ -160,7 +160,6 @@
                     <controls:MarkdownTextBlock MarkdownText="[NetSoftworks](https://github.com/netsoftwork)" />
                     <controls:MarkdownTextBlock MarkdownText="[BlueOutside](https://github.com/BlueOutside)" />
                     <controls:MarkdownTextBlock MarkdownText="[Stoof](https://guns.lol/stoof)" />
-                    <controls:MarkdownTextBlock MarkdownText="[return](https://github.com/returnrqt)" />
                 </StackPanel>
             </controls:Expander>
         </Grid>

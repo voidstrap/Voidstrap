@@ -823,7 +823,7 @@ Selecting 'No' will ignore this warning and continue installation.</value>
     <value>Changes will take effect the next time you launch Roblox.</value>
   </data>
   <data name="Menu.SettingsSaved.Title" xml:space="preserve">
-    <value>Settings saved!</value>
+    <value>Hellstrap Settings Saved!</value>
   </data>
   <data name="Menu.Title" xml:space="preserve">
     <value>Hellstrap Settings</value>
@@ -1273,11 +1273,11 @@ Would you like to enable test mode?</value>
     <value>Cancelling Roblox upgrade.</value>
   </data>
   <data name="Menu.Behaviour.RenameToEurotrucks.Title" xml:space="preserve">
-    <value>Ansel support</value>
+    <value>Bloxshade support</value>
   </data>
   <data name="Menu.Behaviour.RenameToEurotrucks.Description" xml:space="preserve">
-    <value>Renames Roblox to Euro Trucks 2. Requires a supported graphics card for optimal performance.
-	This feature is required for shaders.</value>
+    <value>For optimal performance, a supported graphics card is required.
+This feature is essential for shaders to function properly.</value>
   </data>
   <data name="Menu.Behaviour.Channel.Title" xml:space="preserve">
     <value>Channel</value>
@@ -1514,13 +1514,13 @@ Please close any applications that may be using Roblox's files, and relaunch.</v
 		Only works with [text chat service](https://devforum.roblox.com/t/new-in-experience-text-chat-system-public-release/1848837).</value>
   </data>
   <data name="Menu.Behaviour.AnselBanner" xml:space="preserve">
-    <value>Ansel support is required for shaders.</value>
+    <value>Bloxshade support is required for shaders.</value>
   </data>
   <data name="Dialog.Bloxshade.ThankYou" xml:space="preserve">
     <value>Thank you for using Bloxshade with Hellstrap</value>
   </data>
   <data name="Dialog.Bloxshade.Setting" xml:space="preserve">
-    <value>Ansel support has been enabled</value>
+    <value>Bloxshade support has been enabled</value>
   </data>
   <data name="Common.Profiles" xml:space="preserve">
     <value>Profiles</value>

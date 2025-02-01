@@ -1,11 +1,8 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.IO;
 using System.Windows;
+using System.Windows.Controls;
 using Hellstrap.Resources;
-using Hellstrap.Enums.FlagPresets;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
 
 namespace Hellstrap.UI.Elements.Dialogs
 {
@@ -26,20 +23,27 @@ namespace Hellstrap.UI.Elements.Dialogs
         {
             LoadProfile.Items.Clear();
 
-            string profilesDirectory = Path.Combine(Paths.Base, Paths.SavedFlagProfiles);
+            var profilesDirectory = Path.Combine(Paths.Base, Paths.SavedFlagProfiles);
 
-            if (!Directory.Exists(profilesDirectory))
+            try
             {
-                Directory.CreateDirectory(profilesDirectory);
-            }
-
-            foreach (var profilePath in Directory.GetFiles(profilesDirectory))
-            {
-                string profileName = Path.GetFileName(profilePath);
-                if (!string.IsNullOrEmpty(profileName))
+                if (!Directory.Exists(profilesDirectory))
                 {
-                    LoadProfile.Items.Add(profileName);
+                    Directory.CreateDirectory(profilesDirectory);
                 }
+
+                foreach (var profilePath in Directory.GetFiles(profilesDirectory))
+                {
+                    var profileName = Path.GetFileName(profilePath);
+                    if (!string.IsNullOrWhiteSpace(profileName))
+                    {
+                        LoadProfile.Items.Add(profileName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading profiles: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 

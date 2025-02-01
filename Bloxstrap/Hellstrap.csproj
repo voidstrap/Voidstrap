@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Hellstrap.ico</ApplicationIcon>
-		<Version>1.0.0.8</Version>
-		<FileVersion>1.0.0.8</FileVersion>
+		<Version>1.0.0.9</Version>
+		<FileVersion>1.0.0.9</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>

@@ -20,7 +20,6 @@
     AllowsTransparency="False"
     WindowStyle="None"
     WindowCornerPreference="Default"
-    WindowBackdropType="Disable"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
@@ -60,7 +59,7 @@
                 CanMaximize="False"
                 ShowClose="False"
                 ShowMaximize="False"
-                ShowMinimize="False" />
+                ShowMinimize="True" />
 
             <!-- Main Content Grid -->
             <Grid x:Name="ElementGrid" Grid.Row="1" />

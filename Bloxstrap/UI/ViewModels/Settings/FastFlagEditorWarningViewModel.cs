@@ -17,7 +17,7 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public string ContinueButtonText { get; set; } = "";
 
-        public bool CanContinue { get; set; } = false;
+        public bool CanContinue { get; set; } = true;
 
         public ICommand GoBackCommand => new RelayCommand(GoBack);
 

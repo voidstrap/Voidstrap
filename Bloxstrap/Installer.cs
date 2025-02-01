@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using Hellstrap;
 using Microsoft.Win32;
 
 namespace Hellstrap
@@ -149,7 +150,7 @@ namespace Hellstrap
             }
             else
             {
-                if (!IsImplicitInstall 
+                if (!IsImplicitInstall
                     && !InstallLocation.EndsWith(App.ProjectName, StringComparison.InvariantCultureIgnoreCase)
                     && Directory.Exists(InstallLocation)
                     && Directory.EnumerateFileSystemEntries(InstallLocation).Any())
@@ -196,7 +197,7 @@ namespace Hellstrap
             const string LOG_IDENT = "Installer::DoUninstall";
 
             var processes = new List<Process>();
-            
+
             if (!String.IsNullOrEmpty(App.State.Prop.Player.VersionGuid))
                 processes.AddRange(Process.GetProcessesByName(App.RobloxPlayerAppName));
 

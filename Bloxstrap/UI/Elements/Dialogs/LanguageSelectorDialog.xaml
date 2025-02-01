@@ -12,7 +12,7 @@
     Title="{x:Static resources:Strings.Installer_Title}"
     MinWidth="0"
     MinHeight="0"
-    Width="380"
+    Width="390"
     SizeToContent="Height"
     ResizeMode="NoResize"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"

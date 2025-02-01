@@ -21,26 +21,15 @@
     mc:Ignorable="d"
     d:DataContext="{d:DesignInstance vms:FluentDialogViewModel, IsDesignTimeCreatable=True}">
 
-    <!-- Taskbar Progress Information -->
+    <!-- Taskbar Progress Indicator -->
     <Window.TaskbarItemInfo>
         <TaskbarItemInfo 
             ProgressState="{Binding TaskbarProgressState}" 
             ProgressValue="{Binding TaskbarProgressValue}" />
     </Window.TaskbarItemInfo>
 
-    <!-- Main Layout Grid -->
+    <!-- Main UI Layout -->
     <Grid Background="{Binding BackgroundColourBrush, Mode=OneTime}">
-
-        <!-- Top Information Text -->
-        <TextBlock 
-            x:Name="VersionBind"
-            Margin="5"
-            VerticalAlignment="Top" 
-            HorizontalAlignment="Center"
-            FontSize="10" 
-            FontFamily="{StaticResource Rubik}"
-            Text="{Binding VersionText}" 
-            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
         <!-- Custom Title Bar -->
         <ui:TitleBar
@@ -50,7 +39,18 @@
             ShowMaximize="False"
             ShowMinimize="False" />
 
-        <!-- Content Section -->
+        <!-- Version Information -->
+        <TextBlock 
+            x:Name="VersionTextBlock"
+            Margin="5"
+            VerticalAlignment="Top" 
+            HorizontalAlignment="Center"
+            FontSize="10" 
+            FontFamily="{StaticResource Rubik}"
+            Text="{Binding VersionText}" 
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+        <!-- Content Grid -->
         <Grid Margin="32,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -59,7 +59,7 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Icon Image -->
+            <!-- App Icon -->
             <Image
                 Grid.Row="0"
                 Width="95"
@@ -70,13 +70,14 @@
                 RenderOptions.BitmapScalingMode="HighQuality"
                 Source="{Binding Icon}" />
 
-            <!-- Message Text -->
+            <!-- Status Message -->
             <TextBlock
                 Grid.Row="1"
-                Margin="0,0,0,8"
+                Margin="0,10,0,8"
                 HorizontalAlignment="Center"
                 TextAlignment="Center"
                 FontSize="18"
+                FontWeight="SemiBold"
                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                 Text="{Binding Message}"
                 TextWrapping="Wrap" />
@@ -84,7 +85,8 @@
             <!-- Progress Bar -->
             <ProgressBar
                 Grid.Row="2"
-                Margin="0,0,0,16"
+                Margin="10,0,10,16"
+                Height="5"
                 IsIndeterminate="{Binding ProgressIndeterminate}"
                 Maximum="{Binding ProgressMaximum}"
                 Value="{Binding ProgressValue}" />
@@ -93,12 +95,13 @@
             <Button
                 Grid.Row="3"
                 Width="231"
-                Padding="4"
+                Padding="6"
                 HorizontalAlignment="Center"
                 Command="{Binding CancelInstallCommand}"
                 Content="{x:Static resources:Strings.Common_Cancel}"
                 FontSize="14"
                 Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+                Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                 IsEnabled="{Binding CancelEnabled}" />
         </Grid>
 

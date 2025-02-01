@@ -19,32 +19,15 @@ namespace Hellstrap
         {
             { DefaultLocale, Strings.Common_SystemDefault },
             { "en-US", "English (Recommended)" },
-#if QA_BUILD
-            { "sq", "Albanian" }, 
-#endif
             { "ar", "العربية" }, // Arabic
             { "bg", "Български" }, // Bulgarian
-#if QA_BUILD
-            { "bn", "বাংলা" }, // Bengali
-            { "bs", "Bosanski" }, // Bosnian
-#endif
             { "cs", "Čeština" }, // Czech
             { "de", "Deutsch" }, // German
-#if QA_BUILD
-            { "da", "Dansk" }, // Danish
-#endif
             { "es-ES", "Español" }, // Spanish
-#if QA_BUILD
-            { "el", "Ελληνικά" }, // Greek
-#endif
             { "fa", "فارسی" }, // Persian
             { "fi", "Suomi" }, // Finnish
             { "fil", "Filipino" }, // Filipino
             { "fr", "Français" }, // French
-#if QA_BUILD
-            { "he", "עברית‎" }, // Hebrew
-            { "hi", "Hindi (Latin)" }, // Hindi
-#endif
             { "hr", "Hrvatski" }, // Croatian
             { "hu", "Magyar" }, // Hungarian
             { "id", "Bahasa Indonesia" }, // Indonesian
@@ -54,11 +37,8 @@ namespace Hellstrap
             { "lt", "Lietuvių" }, // Lithuanian
             { "ms", "Malay" }, // Malay
             { "nl", "Nederlands" }, // Dutch
-#if QA_BUILD
-            { "no", "Bokmål" }, // Norwegian
-#endif
             { "pl", "Polski" }, // Polish
-            { "pt-BR", "Português (Brasil)" }, // Portuguese, Brazilian
+            { "pt-BR", "Português (Brasil)" }, // Portuguese (Brazilian)
             { "ro", "Română" }, // Romanian
             { "ru", "Русский" }, // Russian
             { "sv-SE", "Svenska" }, // Swedish
@@ -67,9 +47,6 @@ namespace Hellstrap
             { "uk", "Українська" }, // Ukrainian
             { "vi", "Tiếng Việt" }, // Vietnamese
             { "zh-CN", "中文 (简体)" }, // Chinese Simplified
-#if QA_BUILD
-            { "zh-HK", "中文 (廣東話)" }, // Chinese Traditional, Hong Kong
-#endif
             { "zh-TW", "中文 (繁體)" } // Chinese Traditional
         };
 
@@ -96,13 +73,29 @@ namespace Hellstrap
             }
             else
             {
-                CurrentCulture = new CultureInfo(identifier);
+                try
+                {
+                    CurrentCulture = new CultureInfo(identifier);
+                }
+                catch (CultureNotFoundException)
+                {
+                    // Handle unsupported culture identifier (could log or fall back to default)
+                    CurrentCulture = CultureInfo.InvariantCulture;
+                }
 
+                // Update culture settings for the current thread
                 CultureInfo.DefaultThreadCurrentUICulture = CurrentCulture;
                 Thread.CurrentThread.CurrentUICulture = CurrentCulture;
             }
 
-            RightToLeft = _rtlLocales.Contains(CurrentCulture.Name.Substring(0, 2));
+            RightToLeft = IsRightToLeft(CurrentCulture.Name);
+        }
+
+        private static bool IsRightToLeft(string cultureName)
+        {
+            // Extract the language code (first two characters) to check for RTL support
+            string languageCode = cultureName.Substring(0, 2);
+            return _rtlLocales.Contains(languageCode);
         }
 
         public static void Initialize()

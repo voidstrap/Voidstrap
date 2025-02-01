@@ -1011,7 +1011,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ansel support has been enabled.
+        ///   Looks up a localized string similar to Bloxshade support has been enabled.
         /// </summary>
         public static string Dialog_Bloxshade_Setting {
             get {
@@ -2293,7 +2293,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ansel support is required for shaders..
+        ///   Looks up a localized string similar to Bloxshade support is required for shaders..
         /// </summary>
         public static string Menu_Behaviour_AnselBanner {
             get {
@@ -2410,8 +2410,8 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Renames Roblox to Euro Trucks 2. Requires a supported graphics card for optimal performance.
-        ///	This feature is required for shaders..
+        ///   Looks up a localized string similar to For optimal performance, a supported graphics card is required.
+        ///This feature is essential for shaders to function properly..
         /// </summary>
         public static string Menu_Behaviour_RenameToEurotrucks_Description {
             get {
@@ -2420,7 +2420,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Ansel support.
+        ///   Looks up a localized string similar to Bloxshade support.
         /// </summary>
         public static string Menu_Behaviour_RenameToEurotrucks_Title {
             get {
@@ -3931,7 +3931,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Settings saved!.
+        ///   Looks up a localized string similar to Hellstrap Settings Saved!.
         /// </summary>
         public static string Menu_SettingsSaved_Title {
             get {

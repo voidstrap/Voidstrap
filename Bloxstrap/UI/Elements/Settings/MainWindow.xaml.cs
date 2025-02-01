@@ -19,26 +19,48 @@ namespace Hellstrap.UI.Elements.Settings
         public MainWindow(bool showAlreadyRunningWarning)
         {
             InitializeComponent();
-
-            var viewModel = new MainWindowViewModel();
-            DataContext = viewModel;
-
-            viewModel.RequestSaveNoticeEvent += (sender, e) => SettingsSavedSnackbar.Show();
-            viewModel.RequestCloseWindowEvent += (sender, e) => Close();
+            InitializeViewModel();
+            InitializeWindowState();
+            InitializeNavigation();
 
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
 
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbar();
+        }
 
-            LoadWindowState();
-            InitializeNavigation();
+        /// <summary>
+        /// Initializes the ViewModel and event handlers.
+        /// </summary>
+        private void InitializeViewModel()
+        {
+            var viewModel = new MainWindowViewModel();
+            DataContext = viewModel;
+
+            viewModel.RequestSaveNoticeEvent += OnRequestSaveNotice;
+            viewModel.RequestCloseWindowEvent += OnRequestCloseWindow;
+        }
+
+        /// <summary>
+        /// Handles save notice event.
+        /// </summary>
+        private void OnRequestSaveNotice(object sender, EventArgs e)
+        {
+            SettingsSavedSnackbar.Show();
+        }
+
+        /// <summary>
+        /// Handles close window event.
+        /// </summary>
+        private void OnRequestCloseWindow(object sender, EventArgs e)
+        {
+            Close();
         }
 
         /// <summary>
         /// Restores the window state based on saved settings.
         /// </summary>
-        private void LoadWindowState()
+        private void InitializeWindowState()
         {
             // Ensure the window is within screen bounds
             if (_state.Left > SystemParameters.VirtualScreenWidth) _state.Left = 0;
@@ -113,6 +135,14 @@ namespace Hellstrap.UI.Elements.Settings
             }
 
             // Save window state
+            SaveWindowState();
+        }
+
+        /// <summary>
+        /// Saves the window state to the application settings.
+        /// </summary>
+        private void SaveWindowState()
+        {
             _state.Width = Width;
             _state.Height = Height;
             _state.Top = Top;
