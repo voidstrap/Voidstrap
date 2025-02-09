@@ -1,0 +1,215 @@
+<base:WpfUiWindow x:Class="Hellstrap.UI.Elements.Settings.MainWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:pages="clr-namespace:Hellstrap.UI.Elements.Settings.Pages"
+                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                  xmlns:base="clr-namespace:Hellstrap.UI.Elements.Base"
+                  xmlns:resources="clr-namespace:Hellstrap.Resources"
+                  xmlns:dmodels="clr-namespace:Hellstrap.UI.ViewModels.Settings"
+                  mc:Ignorable="d"
+                  d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel, IsDesignTimeCreatable=True}"
+                  Title="{x:Static resources:Strings.Menu_Title}"
+                  MinWidth="1000" Width="1000" Height="580"
+                  Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+                  ExtendsContentIntoTitleBar="True"
+                  WindowStartupLocation="CenterScreen"
+                  Closing="WpfUiWindow_Closing"
+                  Closed="WpfUiWindow_Closed">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Snackbars -->
+        <ui:Snackbar x:Name="AlreadyRunningSnackbar" 
+                     Title="{x:Static resources:Strings.Menu_AlreadyRunning_Title}"
+                     Message="{x:Static resources:Strings.Menu_AlreadyRunning_Caption}" 
+                     Icon="Info20"
+                     Timeout="10000" 
+                     Margin="200,0,200,20" 
+                     Grid.RowSpan="10" 
+                     Panel.ZIndex="10" />
+
+        <ui:Snackbar x:Name="SettingsSavedSnackbar"
+                     Title="{x:Static resources:Strings.Menu_SettingsSaved_Title}"
+                     Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
+                     Appearance="Success"
+                     Icon="CheckboxChecked24"
+                     Timeout="3000"
+                     Margin="200, 0, 200, 20"
+                     Grid.RowSpan="10"
+                     Panel.ZIndex="9" />
+
+        <ui:Snackbar x:Name="SettingsSavedLaunchSnackbar"
+                     Title="Hellstrap Saved And Launched Roblox!"
+                     Message="Changes have been saved."
+                     Appearance="Success"
+                     Icon="CheckboxChecked24"
+                     Timeout="3500"
+                     Margin="150, 0, 150, 20"
+                     Grid.RowSpan="10"
+                     Panel.ZIndex="10" />
+
+        <!-- Title Bar -->
+        <ui:TitleBar Padding="8" 
+                     x:Name="RootTitleBar" 
+                     Grid.Row="0"
+                     ForceShutdown="False" 
+                     MinimizeToTray="False" 
+                     UseSnapLayout="True"
+                     Title="{x:Static resources:Strings.Menu_Title}" 
+                     Icon="pack://application:,,,/Hellstrap.ico" />
+
+        <!-- Main Content Grid -->
+        <Grid x:Name="RootGrid" Grid.Row="1" Margin="12,12,0,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Navigation Menu -->
+            <ui:NavigationFluent x:Name="RootNavigation" 
+                                 Grid.Row="1" 
+                                 Grid.Column="0" 
+                                 Margin="0,0,12,0" 
+                                 Frame="{Binding ElementName=RootFrame}" 
+                                 SelectedPageIndex="0">
+                <ui:NavigationFluent.Items>
+                    <!-- Menu Items -->
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
+                                       PageType="{x:Type pages:IntegrationsPage}" 
+                                       Icon="AddCircle28"
+                                       Tag="integrations" 
+                                       ToolTip="Manage Integrations" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Behaviour_Title}"
+                                       PageType="{x:Type pages:BehaviourPage}" 
+                                       Icon="PlaySettings20"
+                                       Tag="bootstrapper" 
+                                       ToolTip="Behavior Settings" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
+                                       PageType="{x:Type pages:ModsPage}" 
+                                       Icon="WrenchScrewdriver20"
+                                       Tag="mods" 
+                                       ToolTip="Manage Mods" />
+
+                    <!-- Fast Flag Editor Menu Item -->
+                    <ui:NavigationItem Content="FastFlag Editor"
+                                       PageType="{x:Type pages:FastFlagEditorPage}" 
+                                       Icon="EditSettings24"
+                                       Tag="fastflageditor" 
+                                       Visibility="{Binding IsFastFlagEditorVisible, 
+                                       Converter={StaticResource BooleanToVisibilityConverter}}"
+                                       ToolTip="FastFlag Editor" />
+
+                    <ui:NavigationItem Content="Engine Settings"
+                                       PageType="{x:Type pages:FastFlagsPage}" 
+                                       Icon="Flag48"
+                                       Tag="fastflags" 
+                                       ToolTip="Configure Engine Settings" />
+
+                    <ui:NavigationItem Content="Theme"
+                                       PageType="{x:Type pages:AppearancePage}" 
+                                       Icon="PaintBrush24"
+                                       Tag="appearance" 
+                                       ToolTip="Change Theme" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
+                                       PageType="{x:Type pages:ShortcutsPage}" 
+                                       Icon="Apps32"
+                                       Tag="shortcuts" 
+                                       Click="NavigationItem_Click_1"
+                                       ToolTip="View Shortcuts" />
+                </ui:NavigationFluent.Items>
+
+                <!-- Footer Items -->
+                <ui:NavigationFluent.Footer>
+                    <ui:NavigationItem Content="Hellstrap"
+                                       PageType="{x:Type pages:ChannelPage}" 
+                                       Icon="Settings48"
+                                       Tag="channel" 
+                                       Click="NavigationItem_Click"
+                                       ToolTip="Hellstrap Settings" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
+                                       Icon="QuestionCircle48" 
+                                       Margin="0,0,0,12"
+                                       Command="{Binding OpenAboutCommand, Mode=OneTime}"
+                                       ToolTip="About Us" />
+                </ui:NavigationFluent.Footer>
+            </ui:NavigationFluent>
+
+            <!-- Content Area -->
+            <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <ui:Breadcrumb Grid.Row="0" Margin="0,0,0,5" Navigation="{Binding ElementName=RootNavigation}" />
+                <Frame x:Name="RootFrame" Grid.Row="1" />
+            </Grid>
+        </Grid>
+
+        <!-- Status Bar -->
+        <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,10" BorderThickness="0,2,0,0">
+            <StatusBar.Background>
+                <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="45" />
+            </StatusBar.Background>
+            <StatusBar.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                    </Grid>
+                </ItemsPanelTemplate>
+            </StatusBar.ItemsPanel>
+            <StatusBarItem Grid.Column="0" Margin="0,0,-18,0">
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:ToggleSwitch IsChecked="{Binding TestModeEnabled, Mode=TwoWay}" />
+                    <TextBlock Padding="12,0,0,0" Text="{x:Static resources:Strings.Menu_TestMode}"
+                               VerticalAlignment="Center" FontSize="14" Width="92" />
+                </StackPanel>
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="2" Padding="0,0,4,0">
+                <ui:Button Content="Launch Roblox" 
+                           Appearance="Primary"
+                           Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}" 
+                           Click="Button_Click" 
+                           Width="140" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </StatusBarItem>
+
+            <StatusBarItem Grid.Column="3" Padding="0,0,4,0">
+                <ui:Button Content="{x:Static resources:Strings.Menu_Save}" 
+                           Appearance="Primary"
+                           Command="{Binding SaveSettingsCommand, Mode=OneWay}" 
+                           Width="59" 
+                           Click="Button_Click_1" />
+            </StatusBarItem>
+            <StatusBarItem Grid.Column="4">
+                <ui:Button Content="{x:Static resources:Strings.Common_Close}"
+                           Appearance="Secondary" 
+                           Command="{Binding CloseWindowCommand, Mode=OneTime}" 
+                           Width="59" 
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center" />
+            </StatusBarItem>
+        </StatusBar>
+    </Grid>
+</base:WpfUiWindow>

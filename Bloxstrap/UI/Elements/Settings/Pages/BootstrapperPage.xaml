@@ -1,0 +1,66 @@
+﻿<ui:UiPage x:Class="Hellstrap.UI.Elements.Settings.Pages.BehaviourPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:local="clr-namespace:Hellstrap.UI.Elements.Settings.Pages"
+      xmlns:controls="clr-namespace:Hellstrap.UI.Elements.Controls"
+      xmlns:models="clr-namespace:Hellstrap.UI.ViewModels.Settings"
+      xmlns:resources="clr-namespace:Hellstrap.Resources"
+      d:DataContext="{d:DesignInstance Type=models:BehaviourViewModel}"
+      mc:Ignorable="d" 
+      d:DesignHeight="600" d:DesignWidth="800"
+      Title="BehaviourPage"
+      Scrollable="True">
+
+    <!-- Main content container -->
+    <StackPanel Margin="0,0,14,14">
+        <!-- Description text -->
+        <TextBlock 
+            Margin="0,0,0,8" 
+            Text="{x:Static resources:Strings.Menu_Behaviour_Description}" 
+            FontSize="14" 
+            Foreground="{StaticResource TextFillColorSecondaryBrush}" />
+
+        <!-- Confirm Launches Option -->
+        <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Description}">
+            <ui:ToggleSwitch IsChecked="{Binding ConfirmLaunches, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!-- Force Roblox Language Option -->
+        <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
+            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
+            <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!-- Informational Banner -->
+        <ui:InfoBar 
+            x:Name="AnselBanner" 
+            Margin="0,5,0,-5" 
+            Padding="4" 
+            IsOpen="False" 
+            Message="{x:Static resources:Strings.Menu_Behaviour_AnselBanner}" 
+            Severity="Informational" 
+            IsClosable="True" />
+
+        <!-- Rename to Eurotrucks Option -->
+        <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_Behaviour_RenameToEurotrucks_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_RenameToEurotrucks_Description}">
+            <ui:ToggleSwitch IsChecked="{Binding RenameClientToEurotrucks2, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!-- Multi-Instances Option -->
+        <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}">
+            <ui:ToggleSwitch IsChecked="{Binding MultiInstances, Mode=TwoWay}" />
+        </controls:OptionControl>
+        
+    </StackPanel>
+</ui:UiPage>
