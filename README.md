@@ -3,7 +3,7 @@
 **Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
 
 <p align="center">
-   <img src="https://github.com/midaskira/Hellstrap/blob/main/Images/HellstrapNeon.png"
+   <img src="https://github.com/midaskira/Hellstrap/blob/main/Images/Hellstrap-full-light.png"
 </p>
 
 <p align="center">
