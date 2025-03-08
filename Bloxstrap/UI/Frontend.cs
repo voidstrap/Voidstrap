@@ -79,9 +79,9 @@ namespace Hellstrap.UI
                 App.Logger.WriteException(LOG_IDENT, ex);
 
                 if (!App.LaunchSettings.QuietFlag.Active)
-                    Frontend.ShowMessageBox($"Failed to setup custom bootstrapper: {ex.Message}.\nDefaulting to Fluent.", MessageBoxImage.Error);
+                    Frontend.ShowMessageBox($"Failed to setup custom bootstrapper: {ex.Message}.\nDefaulting Theme.", MessageBoxImage.Error);
 
-                return GetBootstrapperDialog(BootstrapperStyle.FluentDialog);
+                return GetBootstrapperDialog(BootstrapperStyle.FluentAeroDialog);
             }
         }
 

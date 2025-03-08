@@ -20,7 +20,7 @@
         Icon2022,
         [EnumName(FromTranslation = "Common.Custom")]
         IconCustom,
-        [EnumName(StaticName = "Bloxstrap (Classic)")]
+        [EnumName(StaticName = "Hellstrap (Classic)")]
         IconHellstrapClassic
     }
 }

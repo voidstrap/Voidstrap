@@ -4,9 +4,9 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 
 using Hellstrap.UI.Elements.Dialogs;
+using Hellstrap;
 
 namespace Hellstrap
-
 {
     public static class LaunchHandler
     {
@@ -63,6 +63,11 @@ namespace Hellstrap
             {
                 App.Logger.WriteLine(LOG_IDENT, $"Opening bootstrapper ({App.LaunchSettings.RobloxLaunchMode})");
                 LaunchRoblox(App.LaunchSettings.RobloxLaunchMode);
+            }
+            else if (App.LaunchSettings.BloxshadeFlag.Active)
+            {
+                App.Logger.WriteLine(LOG_IDENT, "Opening Bloxshade");
+                LaunchBloxshadeConfig();
             }
             else if (!App.LaunchSettings.QuietFlag.Active)
             {
@@ -205,6 +210,8 @@ namespace Hellstrap
         {
             const string LOG_IDENT = "LaunchHandler::LaunchRoblox";
 
+            const string MutexName = "ROBLOX_singletonMutex";
+
             if (launchMode == LaunchMode.None)
                 throw new InvalidOperationException("No Roblox launch mode set");
 
@@ -218,7 +225,7 @@ namespace Hellstrap
                 App.Terminate(ErrorCode.ERROR_FILE_NOT_FOUND);
             }
 
-            if (App.Settings.Prop.ConfirmLaunches && Mutex.TryOpenExisting("ROBLOX_singletonMutex", out var _))
+            if (App.Settings.Prop.ConfirmLaunches && Mutex.TryOpenExisting("ROBLOX_singletonMutex", out var _) && !App.Settings.Prop.MultiInstanceLaunching)
             {
                 // this currently doesn't work very well since it relies on checking the existence of the singleton mutex
                 // which often hangs around for a few seconds after the window closes
@@ -246,6 +253,29 @@ namespace Hellstrap
                 dialog.Bootstrapper = App.Bootstrapper;
             }
 
+            Mutex? singletonMutex = null;
+
+            if (App.Settings.Prop.MultiInstanceLaunching)
+            {
+                App.Logger.WriteLine(LOG_IDENT, "Attempting to create singleton mutex...");
+                try
+                {
+                    Mutex.OpenExisting("ROBLOX_singletonMutex");
+                    App.Logger.WriteLine(LOG_IDENT, "Singleton mutex already exists.");
+                }
+                catch
+                {
+                    // create the singleton mutex before the game client does
+                    singletonMutex = new Mutex(true, "ROBLOX_singletonMutex");
+                    App.Logger.WriteLine(LOG_IDENT, "Created singleton mutex.");
+                }
+            }
+
+            // only applying the fix after game join allows the user to open the desktop app before joining any game
+            if (!App.Settings.Prop.EnableActivityTracking)
+            {
+                Utilities.ApplyTeleportFix();
+            }
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {
                 App.Logger.WriteLine(LOG_IDENT, "Bootstrapper task has finished");
@@ -254,6 +284,24 @@ namespace Hellstrap
                 {
                     App.Logger.WriteLine(LOG_IDENT, "An exception occurred when running the bootstrapper");
 
+                    if (t.Exception is not null)
+                        App.FinalizeExceptionHandling(t.Exception);
+                }
+                else if (singletonMutex is not null)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "We have singleton mutex ownership! Running in background until all Roblox processes are closed");
+
+                    // we've got ownership of the roblox singleton mutex!
+                    // if we stop running, everything will screw up once any more roblox instances launched
+                    while (Process.GetProcessesByName("RobloxPlayerBeta").Any())
+                    {
+                        Thread.Sleep(920);
+                    };
+
+                    App.Logger.WriteLine(LOG_IDENT, "All Roblox processes closed!");
+
+                    if (File.Exists(App.RobloxCookiesFilePath))
+                        Utilities.RemoveTeleportFix();
                 }
 
                 App.Terminate();
@@ -287,10 +335,29 @@ namespace Hellstrap
                 {
                     App.Logger.WriteLine(LOG_IDENT, "An exception occurred when running the watcher");
 
+                    if (t.Exception is not null)
+                        App.FinalizeExceptionHandling(t.Exception);
                 }
 
                 App.Terminate();
             });
+        }
+
+        public static void LaunchBloxshadeConfig()
+        {
+            const string LOG_IDENT = "LaunchHandler::LaunchBloxshade";
+
+            // ansel setting
+            //App.Settings.Prop.RenameClientToEuroTrucks2 = true;
+            //App.Settings.Save();
+
+            //App.State.Prop.ShowBloxshadeWarning = true;
+            //App.State.Save();
+
+            App.Logger.WriteLine(LOG_IDENT, "Showing unsupported warning");
+
+            new BloxshadeDialog().ShowDialog();
+            App.SoftTerminate();
         }
     }
 }

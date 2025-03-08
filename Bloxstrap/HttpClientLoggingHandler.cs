@@ -1,4 +1,6 @@
-﻿namespace Hellstrap
+﻿using Hellstrap;
+
+namespace Hellstrap
 {
     internal class HttpClientLoggingHandler : MessageProcessingHandler
     {

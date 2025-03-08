@@ -65,6 +65,9 @@
             Header="{x:Static resources:Strings.Common_Shortcuts_StartMenu}">
                 <ui:ToggleSwitch IsChecked="{Binding CreateStartMenuShortcuts, Mode=TwoWay}" />
             </controls:OptionControl>
+
+
         </Grid>
+
     </StackPanel>
 </ui:UiPage>

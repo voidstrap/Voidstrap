@@ -1,94 +1,170 @@
-﻿using System;
+﻿// This Source Code Form is subject to the terms of the MIT License.
+// If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
+// Copyright (C) Leszek Pomianowski and WPF UI Contributors.
+// All Rights Reserved.
+
+using System;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using Wpf.Ui.Hardware;
 
-namespace Wpf.Ui.Animations
+namespace Wpf.Ui.Animations;
+
+/// <summary>
+/// Provides tools for <see cref="FrameworkElement"/> animation.
+/// </summary>
+public static class Transitions
 {
-    public static class Transitions
+    private const double DecelerationRatio = 0.7;
+
+    /// <summary>
+    /// Attempts to apply an animation effect while adding content to the frame.
+    /// </summary>
+    /// <param name="element">Currently rendered element.</param>
+    /// <param name="type">Selected transition type.</param>
+    /// <param name="duration">Transition duration.</param>
+    public static bool ApplyTransition(object element, TransitionType type, int duration)
     {
-        private const double SmoothEasing = 0.85;
+        if (type == TransitionType.None)
+            return false;
 
-        public static bool ApplyTransition(object element, TransitionType type, int duration)
+        // Disable transitions for non-accelerated devices.
+        if (!HardwareAcceleration.IsSupported(RenderingTier.PartialAcceleration))
+            return false;
+
+        if (element is not FrameworkElement frameworkElement)
+            return false;
+
+        if (duration < 10)
+            return false;
+
+        if (duration > 10000)
+            duration = 10000;
+
+        var timespanDuration = new Duration(TimeSpan.FromMilliseconds(duration));
+
+        switch (type)
         {
-            if (type == TransitionType.None || duration < 10)
-                return false;
+            case TransitionType.FadeIn:
+                FadeInTransition(frameworkElement, timespanDuration);
+                break;
 
-            // Limit duration for performance
-            duration = Math.Min(duration, 10000);
+            case TransitionType.FadeInWithSlide:
+                FadeInWithSlideTransition(frameworkElement, timespanDuration);
+                break;
 
-            // Check for hardware acceleration support
-            if (!HardwareAcceleration.IsSupported(RenderingTier.PartialAcceleration))
-                return false;
+            case TransitionType.SlideBottom:
+                SlideBottomTransition(frameworkElement, timespanDuration);
+                break;
 
-            // Ensure element is a valid FrameworkElement
-            if (element is not FrameworkElement frameworkElement)
-                return false;
+            case TransitionType.SlideRight:
+                SlideRightTransition(frameworkElement, timespanDuration);
+                break;
 
-            var timespanDuration = new Duration(TimeSpan.FromMilliseconds(duration));
-
-            // Apply transition based on the type
-            return type switch
-            {
-                TransitionType.FadeIn => ApplyFadeIn(frameworkElement, timespanDuration),
-                TransitionType.FadeInWithSlide => ApplyFadeInWithSlide(frameworkElement, timespanDuration),
-                TransitionType.SlideBottom => ApplySlide(frameworkElement, timespanDuration, 50, 0),
-                TransitionType.SlideRight => ApplySlide(frameworkElement, timespanDuration, 60, 0, true),
-                TransitionType.SlideLeft => ApplySlide(frameworkElement, timespanDuration, -60, 0, true),
-                _ => false,
-            };
+            case TransitionType.SlideLeft:
+                SlideLeftTransition(frameworkElement, timespanDuration);
+                break;
         }
 
-        private static bool ApplyFadeIn(FrameworkElement element, Duration duration)
-        {
-            return ApplyOpacityTransition(element, duration, 0.0, 1.0);
-        }
+        return true;
+    }
 
-        private static bool ApplyFadeInWithSlide(FrameworkElement element, Duration duration)
+    private static void FadeInTransition(FrameworkElement navigatedElement, Duration duration)
+    {
+        var opacityDoubleAnimation = new DoubleAnimation
         {
-            ApplySlideTransition(element, duration, 40, 0);
-            return ApplyOpacityTransition(element, duration, 0.0, 1.0);
-        }
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = 0.0,
+            To = 1.0,
+        };
 
-        private static bool ApplySlide(FrameworkElement element, Duration duration, double from, double to, bool isHorizontal = false)
+        navigatedElement.BeginAnimation(UIElement.OpacityProperty, opacityDoubleAnimation);
+    }
+
+    private static void FadeInWithSlideTransition(FrameworkElement navigatedElement, Duration duration)
+    {
+        var translateDoubleAnimation = new DoubleAnimation
         {
-            ApplySlideTransition(element, duration, from, to, isHorizontal);
-            return true;
-        }
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = 30,
+            To = 0,
+        };
 
-        private static void ApplySlideTransition(FrameworkElement element, Duration duration, double from, double to, bool isHorizontal = false)
+        if (navigatedElement.RenderTransform is not TranslateTransform)
+            navigatedElement!.RenderTransform = new TranslateTransform(0, 0);
+
+        if (!navigatedElement.RenderTransformOrigin.Equals(new Point(0.5, 0.5)))
+            navigatedElement!.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        navigatedElement.RenderTransform.BeginAnimation(TranslateTransform.YProperty, translateDoubleAnimation);
+
+        var opacityDoubleAnimation = new DoubleAnimation
         {
-            // Ensure RenderTransform is set correctly
-            if (element.RenderTransform is not TranslateTransform translateTransform)
-            {
-                translateTransform = new TranslateTransform();
-                element.RenderTransform = translateTransform;
-            }
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = 0.0,
+            To = 1.0,
+        };
+        navigatedElement.BeginAnimation(UIElement.OpacityProperty, opacityDoubleAnimation);
+    }
 
-            // Create and apply animation with cubic easing
-            var translateAnimation = CreateDoubleAnimation(duration, from, to);
-            var property = isHorizontal ? TranslateTransform.XProperty : TranslateTransform.YProperty;
-            translateTransform.BeginAnimation(property, translateAnimation);
-        }
-
-        private static bool ApplyOpacityTransition(FrameworkElement element, Duration duration, double from, double to)
+    private static void SlideBottomTransition(FrameworkElement navigatedElement, Duration duration)
+    {
+        var translateDoubleAnimation = new DoubleAnimation
         {
-            // Create and apply opacity animation with quadratic easing
-            var opacityAnimation = CreateDoubleAnimation(duration, from, to, new QuadraticEase { EasingMode = EasingMode.EaseOut });
-            element.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
-            return true;
-        }
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = 30,
+            To = 0,
+        };
 
-        private static DoubleAnimation CreateDoubleAnimation(Duration duration, double from, double to, IEasingFunction easingFunction = null)
+        if (navigatedElement.RenderTransform is not TranslateTransform)
+            navigatedElement!.RenderTransform = new TranslateTransform(0, 0);
+
+        if (!navigatedElement.RenderTransformOrigin.Equals(new Point(0.5, 0.5)))
+            navigatedElement!.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        navigatedElement.RenderTransform.BeginAnimation(TranslateTransform.YProperty, translateDoubleAnimation);
+    }
+
+    private static void SlideRightTransition(FrameworkElement navigatedElement, Duration duration)
+    {
+        var translateDoubleAnimation = new DoubleAnimation
         {
-            return new DoubleAnimation
-            {
-                Duration = duration,
-                From = from,
-                To = to,
-                EasingFunction = easingFunction ?? new CubicEase { EasingMode = EasingMode.EaseOut }
-            };
-        }
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = 50,
+            To = 0,
+        };
+
+        if (navigatedElement.RenderTransform is not TranslateTransform)
+            navigatedElement!.RenderTransform = new TranslateTransform(0, 0);
+
+        if (!navigatedElement.RenderTransformOrigin.Equals(new Point(0.5, 0.5)))
+            navigatedElement!.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        navigatedElement.RenderTransform.BeginAnimation(TranslateTransform.XProperty, translateDoubleAnimation);
+    }
+
+    private static void SlideLeftTransition(FrameworkElement navigatedElement, Duration duration)
+    {
+        var translateDoubleAnimation = new DoubleAnimation
+        {
+            Duration = duration,
+            DecelerationRatio = DecelerationRatio,
+            From = -50,
+            To = 0,
+        };
+
+        if (navigatedElement.RenderTransform is not TranslateTransform)
+            navigatedElement!.RenderTransform = new TranslateTransform(0, 0);
+
+        if (!navigatedElement.RenderTransformOrigin.Equals(new Point(0.5, 0.5)))
+            navigatedElement!.RenderTransformOrigin = new Point(0.5, 0.5);
+
+        navigatedElement.RenderTransform.BeginAnimation(TranslateTransform.XProperty, translateDoubleAnimation);
     }
 }

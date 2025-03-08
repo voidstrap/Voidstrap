@@ -46,28 +46,28 @@ namespace Hellstrap.UI.ViewModels.ContextMenu
                 _ = QueryServerLocationAsync();
         }
 
-        private async Task QueryServerLocationAsync()
+        private async Task QueryServerLocationAsync(CancellationToken cancellationToken = default)
         {
             try
             {
                 // Display "Loading..." initially
                 ServerLocation = Strings.Common_Loading;
 
-                // Fetch the server location
+                // Fetch the server location with cancellation support
                 string? location = await _activityWatcher.Data.QueryServerLocation();
 
                 // Update with the retrieved location or fallback to "Not Available"
-                ServerLocation = string.IsNullOrEmpty(location)
-                    ? Strings.Common_NotAvailable
-                    : location;
+                ServerLocation = location ?? Strings.Common_NotAvailable;
             }
-            catch (Exception ex)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                // Handle errors gracefully
+                // Handle errors gracefully, avoid logging cancellation exceptions
                 ServerLocation = Strings.Common_ErrorFetchingLocation;
                 Console.WriteLine($"Error querying server location: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);  // Optional: log stack trace for better diagnostics
             }
         }
+
 
         private void CopyInstanceId()
         {

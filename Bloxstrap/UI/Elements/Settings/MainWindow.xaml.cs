@@ -48,15 +48,32 @@ namespace Hellstrap.UI.Elements.Settings
         /// <summary>
         /// Handles save notice event.
         /// </summary>
-        private void OnRequestSaveNotice(object? sender, EventArgs e) // Added nullable reference type
+        private bool isSaveAndLaunchClicked = false; // Add a flag to track Save and Launch click
+
+        private void OnSaveAndLaunchButtonClick(object sender, EventArgs e)
         {
-            SettingsSavedSnackbar.Show();
+            // Set the flag to true when Save and Launch is clicked
+            isSaveAndLaunchClicked = true;
+
+            // Proceed with save and launch logic here
         }
 
-        private void OnRequestSaveLaunchNotice(object? sender, EventArgs e) // Added nullable reference type
+        private void OnRequestSaveNotice(object? sender, EventArgs e)
         {
-            SettingsSavedLaunchSnackbar.Show();
+            if (!isSaveAndLaunchClicked) // Check the flag before showing the snackbar
+            {
+                SettingsSavedSnackbar.Show();
+            }
         }
+
+        private void OnRequestSaveLaunchNotice(object? sender, EventArgs e)
+        {
+            if (!isSaveAndLaunchClicked) // Check the flag before showing the snackbar
+            {
+                SettingsSavedLaunchSnackbar.Show();
+            }
+        }
+
 
         /// <summary>
         /// Handles close window event.

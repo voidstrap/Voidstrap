@@ -119,10 +119,10 @@ namespace Hellstrap
                     window.FontFamily = new System.Windows.Media.FontFamily(new Uri("pack://application:,,,/Resources/Fonts/"), "./#Noto Sans Thai");
                 }
 
-#if QA_BUILD
+
                 window.BorderBrush = System.Windows.Media.Brushes.Red;
                 window.BorderThickness = new Thickness(4);
-#endif
+
             }));
         }
     }

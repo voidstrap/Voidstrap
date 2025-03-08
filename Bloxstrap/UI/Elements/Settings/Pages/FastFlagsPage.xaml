@@ -27,6 +27,12 @@
             </ComboBox>
         </controls:OptionControl>
 
+        <ui:CardAction Icon="BookQuestionMark24" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Help}" />
+                <TextBlock Margin="0,2,0,0" FontSize="12" Text="{x:Static resources:Strings.Menu_FastFlags_Help_Description}" Padding="0,0,16,0"  Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            </StackPanel>
+        </ui:CardAction>
 
         <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_FastFlags_ManagerEnabled_Title}"
@@ -48,8 +54,8 @@
         </controls:OptionControl>
 
         <controls:OptionControl 
-    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DarkMode_Title}"
-    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_DarkMode_Description}">
+    Header="GreenMode"
+    Description="Uses the old green Roblox colors">
             <ui:ToggleSwitch IsChecked="{Binding EnableDarkMode, Mode=TwoWay}" />
         </controls:OptionControl>
 
@@ -98,8 +104,8 @@
 
                 <controls:OptionControl 
            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_LightingTechnology_Title}" 
-           Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_LightingTechnology_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology'}"  Foreground="{StaticResource TextFillColorSecondaryBrush}"
-           HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology">
+           Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_LightingTechnology_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology'}"  Foreground="{StaticResource TextFillColorSecondaryBrush}"
+           HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology">
                     <ComboBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" ItemsSource="{Binding LightingModes.Keys, Mode=OneTime}" Text="{Binding SelectedLightingMode, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -114,7 +120,7 @@
                 <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FPSLimit_Title}" 
             Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FPSLimit_Description}" 
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#framerate-limit">
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#framerate-limit">
                     <ui:TextBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" Text="{Binding FramerateLimit, Mode=TwoWay}" PreviewTextInput="ValidateUInt32" />
                 </controls:OptionControl>
 
@@ -127,17 +133,18 @@
                 <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_FastFlags_Presets_Preload_Title}" 
             Description="Preloads Most Textures and Fonts (May Increase Loading Time)" 
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
                     <ui:ToggleSwitch IsChecked="{Binding Preload, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Title}" 
             Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Description}" 
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
                     <ui:ToggleSwitch IsChecked="{Binding FixDisplayScaling, Mode=TwoWay}" />
                 </controls:OptionControl>
 
+ 
 
 
                 <controls:OptionControl 
@@ -152,72 +159,29 @@
                 </controls:OptionControl>
 
                 <controls:OptionControl 
-            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_TextureQuality_Title}">
-                    <ComboBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}" Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
+   Header="{x:Static resources:Strings.Menu_FastFlags_Presets_TextureQuality_Title}"
+   Description="Higher values may blur icons or remove textures at levels 4-8.">
+
+                    <ComboBox 
+       Margin="5,0,0,0" 
+       Padding="10,5,10,5" 
+       Width="200" 
+       ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}" 
+       Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
+
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
+
                     </ComboBox>
                 </controls:OptionControl>
 
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Grid.Row="1" Margin="0,8,0,0" IsExpanded="False">
-            <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14.4" Text="{x:Static resources:Strings.Menu_FastFlags_Presets_Categories_UserInterface}" />
-                    </StackPanel>
-                </Grid>
-            </ui:CardExpander.Header>
 
-            <StackPanel>
-                <controls:OptionControl 
-            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Title}" 
-            Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Description}">
-                    <ui:ToggleSwitch IsChecked="{Binding FullscreenTitlebarDisabled, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_Chromeui_Title}" 
-    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_Chromeui_Description}"
-    HelpLink="https://devforum.roblox.com/t/updated-experience-controls-now-live/3215981">
-                    <ui:ToggleSwitch IsChecked="{Binding ChromeUI, Mode=TwoWay}" />
-                </controls:OptionControl>
-                
-                
-
-                <controls:OptionControl
-    Header="Red font"
-    Description="Uses roblox BuilderSans font to use red font (Dont Use Any Custom Font If Using This)">
-                    <ui:ToggleSwitch IsChecked="{Binding RainBowText, Mode=TwoWay}" />
-                </controls:OptionControl>
-                
-                
-
-
-                <controls:OptionControl 
-            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Title}" 
-            Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Hellstrap'}" 
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding">
-                    <ui:TextBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" Text="{Binding GuiHidingId, Mode=TwoWay}" PreviewTextInput="ValidateUInt32" />
-                </controls:OptionControl>
-
-                <controls:OptionControl 
-            x:Name="FontPaddingOption"
-            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Title}" 
-            Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Hellstrap'}">
-                    <ui:TextBox Width="200" Padding="10,5,10,5" Text="{Binding FontSize, Mode=TwoWay}" PreviewTextInput="ValidateInt32" />
-                </controls:OptionControl>
-            </StackPanel>
-        </ui:CardExpander>
 
         <ui:CardExpander Grid.Row="1" Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
@@ -267,7 +231,7 @@
 
                 <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_FastFlags_Presets_EscapeMenuVersion_Title}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#escape-menu-version">
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#escape-menu-version">
                     <ComboBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" ItemsSource="{Binding IGMenuVersions.Keys, Mode=OneTime}" Text="{Binding SelectedIGMenuVersion, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -275,6 +239,100 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                </controls:OptionControl>
+            </StackPanel>
+        </ui:CardExpander>
+
+        <ui:CardExpander Grid.Row="1" Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="Voice Chat" />
+                        <TextBlock Margin="0,2,0,0" FontSize="12" Text="Customize Roblox voice chat settings" Foreground="{StaticResource TextFillColorTertiaryBrush}"  />
+                    </StackPanel>
+                </Grid>
+            </ui:CardExpander.Header>
+            <StackPanel>
+
+                <controls:OptionControl 
+    Header="Voice Chat Party"
+    Description="Enables voice chat when you're in a party.">
+                    <ui:ToggleSwitch IsChecked="{Binding PartyToggle, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+    Header="Google In Roblox"
+    Description="Allows you to use Google in Roblox.">
+                    <ui:ToggleSwitch IsChecked="{Binding GoogleToggle, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+            Header="Voice Chat Volume" 
+            Description="1000 is the default.">
+                    <ui:TextBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" Text="{Binding VolChatLimit, Mode=TwoWay}" PreviewTextInput="ValidateUInt32" />
+                </controls:OptionControl>
+
+
+
+            </StackPanel>
+        </ui:CardExpander>
+
+
+
+        <ui:CardExpander Grid.Row="1" Margin="0,8,0,0">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14.4" Text="{x:Static resources:Strings.Menu_FastFlags_Presets_Categories_UserInterface}" />
+                    </StackPanel>
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <StackPanel>
+                <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Title}" 
+            Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Description}">
+                    <ui:ToggleSwitch IsChecked="{Binding FullscreenTitlebarDisabled, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_Chromeui_Title}" 
+    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_Chromeui_Description}"
+    HelpLink="https://devforum.roblox.com/t/updated-experience-controls-now-live/3215981">
+                    <ui:ToggleSwitch IsChecked="{Binding ChromeUI, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+
+                <controls:OptionControl
+    Header="Red font"
+    Description="Uses roblox BuilderSans font to use red font (Dont Use Any Custom Font If Using This)">
+                    <ui:ToggleSwitch IsChecked="{Binding RainBowText, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+
+
+                <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Title}" 
+            Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Hellstrap'}" 
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#gui-hiding">
+                    <ui:TextBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" Text="{Binding GuiHidingId, Mode=TwoWay}" PreviewTextInput="ValidateUInt32" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+            x:Name="FontPaddingOption"
+            Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Title}" 
+            Description="{Binding Source={x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Hellstraplabs/Hellstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Hellstrap'}">
+                    <ui:TextBox Width="200" Padding="10,5,10,5" Text="{Binding FontSize, Mode=TwoWay}" PreviewTextInput="ValidateInt32" />
                 </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>

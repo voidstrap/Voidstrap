@@ -7,6 +7,10 @@
             "commandName": "Project",
             "commandLineArgs": "-quiet"
         },
+        "Hellstrap (Install)": {
+            "commandName": "Project",
+            "commandLineArgs": "-install"
+        },
         "Hellstrap (Uninstall)": {
             "commandName": "Project",
             "commandLineArgs": "-uninstall"
@@ -21,7 +25,7 @@
         },
         "Hellstrap (Deeplink)": {
             "commandName": "Project",
-            "commandLineArgs": "-player \"roblox://experiences/start?placeId=13700835620\""
+            "commandLineArgs": "-player \"roblox://experiences/start?placeId=286090429\""
         },
         "Hellstrap (Studio Launch)": {
             "commandName": "Project",

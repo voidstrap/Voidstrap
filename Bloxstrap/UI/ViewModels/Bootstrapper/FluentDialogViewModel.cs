@@ -1,35 +1,65 @@
-﻿using System;
-using System.Windows.Media;
-using Hellstrap.UI.ViewModels.Bootstrapper;
-using Hellstrap;
+﻿using System.Windows.Media;
 using Wpf.Ui.Appearance;
 
 namespace Hellstrap.UI.ViewModels.Bootstrapper
 {
     public class FluentDialogViewModel : BootstrapperDialogViewModel
     {
-        public BackgroundType WindowBackdropType { get; set; } = BackgroundType.Mica;
+        // Defining background color brushes
+        private static readonly SolidColorBrush LightBackgroundBrush =
+            new SolidColorBrush(Color.FromArgb(128, 225, 225, 225));
 
-        public SolidColorBrush BackgroundColourBrush { get; set; } = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+        private static readonly SolidColorBrush DarkBackgroundBrush =
+            new SolidColorBrush(Color.FromArgb(128, 30, 30, 30));
 
-        public string VersionText { get; init; }
-        public string ChannelText { get; init; }
-        public FluentDialogViewModel(IBootstrapperDialog dialog, bool aero, string version, string channel) : base(dialog)
+        private static readonly SolidColorBrush TransparentBrush =
+            new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
+
+        // Properties
+        public BackgroundType WindowBackdropType { get; private set; } = BackgroundType.Mica;
+        public SolidColorBrush BackgroundColourBrush { get; private set; } = TransparentBrush;
+        public string VersionText { get; private set; }
+        public string ChannelText { get; private set; }
+
+        // Constructor
+        public FluentDialogViewModel(IBootstrapperDialog dialog, bool isAero, string version, string channel)
+            : base(dialog)
         {
-            const int alpha = 128;
+            SetBackdropType(isAero);
+            SetVersionText();
+            SetBackgroundColor(isAero);
+            ChannelText = channel;  // Assuming 'channel' is directly assigned
+        }
 
-            WindowBackdropType = aero ? BackgroundType.Aero : BackgroundType.Mica;
+        // Method to determine the backdrop type
+        private void SetBackdropType(bool isAero)
+        {
+            WindowBackdropType = isAero ? BackgroundType.Aero : BackgroundType.Mica;
+        }
 
-            string RealVersion = String.IsNullOrEmpty(Utilities.GetRobloxVersion(App.Bootstrapper?.IsStudioLaunch ?? false)) ? "None" : Utilities.GetRobloxVersion(App.Bootstrapper?.IsStudioLaunch ?? false);
+        // Method to set the version text
+        private void SetVersionText()
+        {
+            string realVersion = Utilities.GetRobloxVersion(App.Bootstrapper?.IsStudioLaunch ?? false);
 
-            VersionText = "Version: " + RealVersion;
-            ChannelText = "Bucket: " + channel;
-
-            if (aero)
+            // If no version is detected, leave VersionText empty
+            if (string.IsNullOrEmpty(realVersion))
             {
-                BackgroundColourBrush = App.Settings.Prop.Theme.GetFinal() == Enums.Theme.Light ?
-                    new SolidColorBrush(Color.FromArgb(alpha, 225, 225, 225)) :
-                    new SolidColorBrush(Color.FromArgb(alpha, 30, 30, 30));
+                VersionText = string.Empty;
+            }
+            else
+            {
+                VersionText = $"Version: {realVersion}";
+            }
+        }
+
+        // Method to set the background color based on the theme and 'aero' flag
+        private void SetBackgroundColor(bool isAero)
+        {
+            if (isAero)
+            {
+                var currentTheme = App.Settings.Prop.Theme.GetFinal();
+                BackgroundColourBrush = currentTheme == Enums.Theme.Light ? LightBackgroundBrush : DarkBackgroundBrush;
             }
         }
     }

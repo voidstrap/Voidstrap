@@ -1,6 +1,7 @@
 ﻿using System.Windows.Input;
 using Hellstrap.Integrations;
 using CommunityToolkit.Mvvm.Input;
+using Hellstrap.UI.ViewModels;
 
 namespace Hellstrap.UI.ViewModels.ContextMenu
 {

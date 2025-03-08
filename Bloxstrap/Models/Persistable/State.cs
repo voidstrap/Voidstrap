@@ -8,13 +8,13 @@ namespace Hellstrap.Models.Persistable
 
         public bool ShowBloxshadeWarning { get; set; } = false;
 
-        public bool IgnoreOutdatedChannel { get; set; } = true;
+        public bool IgnoreOutdatedChannel { get; set; } = false;
 
         public bool WatcherRunning { get; set; } = false;
 
         public bool PromptWebView2Install { get; set; } = true;
 
-        public int LastPage {  get; set; } = 0;
+        public int LastPage { get; set; } = 0;
 
         public AppState Player { get; set; } = new();
 

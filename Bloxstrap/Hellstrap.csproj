@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Hellstrap.ico</ApplicationIcon>
-		<Version>1.0.1.5</Version>
-		<FileVersion>1.0.1.5</FileVersion>
+		<Version>1.0.1.8</Version>
+		<FileVersion>1.0.1.8</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -61,16 +61,22 @@
     <EmbeddedResource Include="Resources\IconLate2015.ico" />
     <EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursor.png" />
     <EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursorDecalDrag.png" />
     <EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursor.png" />
     <EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursorDecalDrag.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursor.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursorDecalDrag.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursor.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursorDecalDrag.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursor.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursorDecalDrag.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursor.png" />
 	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowFarCursor.png" />
+	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursorDecalDrag.png" />
     <EmbeddedResource Include="Resources\Mods\Sounds\OldDeath.ogg" />
     <EmbeddedResource Include="Resources\Mods\Sounds\OldGetUp.mp3" />
     <EmbeddedResource Include="Resources\Mods\Sounds\OldJump.mp3" />

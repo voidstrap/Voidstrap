@@ -7,8 +7,6 @@ namespace Hellstrap.RobloxInterfaces
     {
         public const string DefaultChannel = "production";
 
-        private const string VersionStudioHash = "version-012732894899482c";
-
         public static string Channel = DefaultChannel;
 
         public static string BinaryType = "WindowsPlayer";
@@ -52,11 +50,9 @@ namespace Hellstrap.RobloxInterfaces
                 response.EnsureSuccessStatusCode();
 
                 // versionStudio is the version hash for the last MFC studio to be deployed.
-                // the response body should always be "version-012732894899482c".
                 string content = await response.Content.ReadAsStringAsync(token);
 
-                if (content != VersionStudioHash)
-                    throw new InvalidHTTPResponseException($"versionStudio response does not match (expected \"{VersionStudioHash}\", got \"{content}\")");
+
             }
             catch (TaskCanceledException)
             {
@@ -71,7 +67,6 @@ namespace Hellstrap.RobloxInterfaces
 
             return url;
         }
-
 
         /// <summary>
         /// This function serves double duty as the setup mirror enumerator, and as our connectivity check.
@@ -120,28 +115,26 @@ namespace Hellstrap.RobloxInterfaces
 
         public static string GetLocation(string resource)
         {
-            // Start with the base URL
-            var location = BaseUrl;
+            string location = BaseUrl;
 
-            // Check if the default channel should be used
-            if (IsDefaultChannel)
-                return location + resource;
+            if (!IsDefaultChannel)
+            {
+                string channelName;
 
-            // Determine the channel name based on the flag setting
-            var channelName = ApplicationSettings
-                .GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel)
-                .Get<bool>("FFlagReplaceChannelNameForDownload")
-                    ? "common"
-                    : Channel.ToLowerInvariant();
+                if (ApplicationSettings.GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel).Get<bool>("FFlagReplaceChannelNameForDownload"))
+                    channelName = "common";
+                else
+                    channelName = Channel.ToLowerInvariant();
 
-            // Append the channel and the resource to the URL
-            location += $"/channel/{channelName}{resource}";
+                location += $"/channel/{channelName}";
+            }
+
+            location += resource;
 
             return location;
         }
 
-
-        public static async Task<ClientVersion> GetInfo(bool? isUpgrade = false, string? channel = null)
+        public static async Task<ClientVersion> GetInfo(string? channel = null)
         {
             const string LOG_IDENT = "Deployment::GetInfo";
 
@@ -182,7 +175,24 @@ namespace Hellstrap.RobloxInterfaces
                     App.Logger.WriteLine(LOG_IDENT, "Failed to contact clientsettingscdn! Falling back to clientsettings...");
                     App.Logger.WriteException(LOG_IDENT, ex);
 
-                    clientVersion = await Http.GetJson<ClientVersion>("https://clientsettings.roblox.com" + path);
+                    try
+                    {
+                        clientVersion = await Http.GetJson<ClientVersion>("https://clientsettings.roblox.com" + path);
+                    }
+                    catch (HttpRequestException httpEx)
+                    when (!isDefaultChannel && BadChannelCodes.Contains(httpEx.StatusCode))
+                    {
+                        throw new InvalidChannelException(httpEx.StatusCode);
+                    }
+                }
+
+                // check if channel is behind LIVE
+                if (!isDefaultChannel)
+                {
+                    var defaultClientVersion = await GetInfo(DefaultChannel);
+
+                    if (Utilities.CompareVersions(clientVersion.Version, defaultClientVersion.Version) == VersionComparison.LessThan)
+                        clientVersion.IsBehindDefaultChannel = true;
                 }
 
                 ClientVersionCache[cacheKey] = clientVersion;

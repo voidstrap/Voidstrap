@@ -15,6 +15,13 @@
         <TextBlock Text="{x:Static resources:Strings.Menu_Appearance_Description}" FontSize="14" Foreground="{StaticResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
 
         <controls:OptionControl
+            Header="{x:Static resources:Strings.Menu_Appearance_Language_Title}"
+            Description="{x:Static resources:Strings.Menu_Appearance_Language_Description}">
+            <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding Languages, Mode=OneTime}" Text="{Binding SelectedLanguage, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+
+        <controls:OptionControl
             Header="{x:Static resources:Strings.Menu_Appearance_Global_Theme_Title}">
             <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding Themes, Mode=OneTime}" Text="{Binding Theme, Mode=TwoWay}" SelectionChanged="ComboBox_SelectionChanged">
                 <ComboBox.ItemTemplate>
@@ -25,11 +32,7 @@
             </ComboBox>
         </controls:OptionControl>
 
-        <controls:OptionControl
-            Header="{x:Static resources:Strings.Menu_Appearance_Language_Title}"
-            Description="{x:Static resources:Strings.Menu_Appearance_Language_Description}">
-            <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding Languages, Mode=OneTime}" Text="{Binding SelectedLanguage, Mode=TwoWay}" />
-        </controls:OptionControl>
+
 
         <Grid Margin="0,8,0,0">
             <Grid.ColumnDefinitions>

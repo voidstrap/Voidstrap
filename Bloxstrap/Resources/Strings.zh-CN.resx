@@ -760,19 +760,19 @@
     <value>查阅关于如何管理和创建模组的指南。</value>
     <comment>Title is Common.Help</comment>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Choose" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
     <value>选择字体文件...</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Description" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
     <value>字体大小可在 “FFlags” 选项卡中进行调整。</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Invalid" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
     <value>您当前选择的文件似乎不是有效的字体文件。</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Remove" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
     <value>移除已应用的字体</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Title" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
     <value>使用自定义字体</value>
   </data>
   <data name="Menu.Mods.OpenModsFolder.Description" xml:space="preserve">

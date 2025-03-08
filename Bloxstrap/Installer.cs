@@ -251,7 +251,7 @@ namespace Hellstrap
             }
             else
             {
-                string playerPath = Path.Combine((string)playerFolder, App.Settings.Prop.RenameClientToEuroTrucks2 ? "eurotrucks2.exe" : "RobloxPlayerBeta.exe");
+                string playerPath = Path.Combine((string)playerFolder, "RobloxPlayerBeta.exe");
 
                 WindowsRegistry.RegisterPlayer(playerPath, "%1");
             }

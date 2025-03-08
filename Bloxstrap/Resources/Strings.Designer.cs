@@ -1668,7 +1668,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Hellstrap has been upgraded to v{0}.
+        ///   Looks up a localized string similar to Hellstrap has been upgraded to a new version.
         /// </summary>
         public static string InstallChecker_Updated {
             get {
@@ -1996,7 +1996,7 @@ namespace Hellstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A Hellstrap fork..
+        ///   Looks up a localized string similar to A Bloxstrap fork..
         /// </summary>
         public static string Menu_About_Description {
             get {
@@ -3753,45 +3753,45 @@ namespace Hellstrap.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Choose font....
         /// </summary>
-        public static string Menu_Mods_Misc_CustomFont_Choose {
+        public static string Menu_Mods_Misc_CustomCursor_Choose {
             get {
-                return ResourceManager.GetString("Menu.Mods.Misc.CustomFont.Choose", resourceCulture);
+                return ResourceManager.GetString("Menu.Mods.Misc.CustomCursor.Choose", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Font size can be adjusted in the Engine Settings tab..
         /// </summary>
-        public static string Menu_Mods_Misc_CustomFont_Description {
+        public static string Menu_Mods_Misc_CustomCursor_Description {
             get {
-                return ResourceManager.GetString("Menu.Mods.Misc.CustomFont.Description", resourceCulture);
+                return ResourceManager.GetString("Menu.Mods.Misc.CustomCursor.Description", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to The file you have chosen does not appear to be a valid font file..
         /// </summary>
-        public static string Menu_Mods_Misc_CustomFont_Invalid {
+        public static string Menu_Mods_Misc_CustomCursor_Invalid {
             get {
-                return ResourceManager.GetString("Menu.Mods.Misc.CustomFont.Invalid", resourceCulture);
+                return ResourceManager.GetString("Menu.Mods.Misc.CustomCursor.Invalid", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Remove applied font.
         /// </summary>
-        public static string Menu_Mods_Misc_CustomFont_Remove {
+        public static string Menu_Mods_Misc_CustomCursor_Remove {
             get {
-                return ResourceManager.GetString("Menu.Mods.Misc.CustomFont.Remove", resourceCulture);
+                return ResourceManager.GetString("Menu.Mods.Misc.CustomCursor.Remove", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Use custom font.
         /// </summary>
-        public static string Menu_Mods_Misc_CustomFont_Title {
+        public static string Menu_Mods_Misc_CustomCursor_Title {
             get {
-                return ResourceManager.GetString("Menu.Mods.Misc.CustomFont.Title", resourceCulture);
+                return ResourceManager.GetString("Menu.Mods.Misc.CustomCursor.Title", resourceCulture);
             }
         }
         

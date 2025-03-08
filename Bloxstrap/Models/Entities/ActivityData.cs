@@ -6,15 +6,20 @@ using System.Windows.Input;
 using Hellstrap.AppData;
 using Hellstrap.Models.APIs;
 using CommunityToolkit.Mvvm.Input;
-using System.Net.Http;
+using Hellstrap;
 
 namespace Hellstrap.Models.Entities
 {
     public class ActivityData
     {
+
         private long _universeId = 0;
 
-        public ActivityData? RootActivity { get; set; }
+        /// <summary>
+        /// If the current activity stems from an in-universe teleport, then this will be
+        /// set to the activity that corresponds to the initial game join
+        /// </summary>
+        public ActivityData? RootActivity;
 
         public long UniverseId
         {
@@ -31,98 +36,126 @@ namespace Hellstrap.Models.Entities
             public string UserId { get; set; } = "Unknown";
             public string Username { get; set; } = "Unknown";
             public string Type { get; set; } = "Unknown";
-            public DateTime Time { get; set; } = DateTime.UtcNow;
+            public DateTime Time { get; set; } = DateTime.Now;
         }
 
         public class UserMessage
         {
             public string Message { get; set; } = "Unknown";
-            public DateTime Time { get; set; } = DateTime.UtcNow;
+            public DateTime Time { get; set; } = DateTime.Now;
         }
 
         public long PlaceId { get; set; } = 0;
+
         public string JobId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// This will be empty unless the server joined is a private server
+        /// </summary>
         public string AccessCode { get; set; } = string.Empty;
+
         public long UserId { get; set; } = 0;
+
         public string MachineAddress { get; set; } = string.Empty;
 
         public bool MachineAddressValid => !string.IsNullOrEmpty(MachineAddress) && !MachineAddress.StartsWith("10.");
+
         public bool IsTeleport { get; set; } = false;
+
         public ServerType ServerType { get; set; } = ServerType.Public;
-        public DateTime TimeJoined { get; set; } = DateTime.UtcNow;
+
+        public DateTime TimeJoined { get; set; }
+
         public DateTime? TimeLeft { get; set; }
 
+        // everything below here is optional strictly for Hellstraprpc, discord rich presence, or game history
+
+        /// <summary>
+        /// This is intended only for other people to use, i.e. context menu invite link, rich presence joining
+        /// </summary>
         public string RPCLaunchData { get; set; } = string.Empty;
+
         public UniverseDetails? UniverseDetails { get; set; }
 
         public string GameHistoryDescription
         {
             get
             {
-                var desc = $"{UniverseDetails?.Data.Creator.Name} • {TimeJoined:t} " +
-                           (Locale.CurrentCulture.Name.StartsWith("ja") ? '~' : '-') +
-                           $"{TimeLeft?.ToString("t") ?? "Ongoing"}";
+                string desc = string.Format(
+                    "{0} • {1} {2} {3}",
+                    UniverseDetails?.Data.Creator.Name,
+                    TimeJoined.ToString("t"),
+                    Locale.CurrentCulture.Name.StartsWith("ja") ? '~' : '-',
+                    TimeLeft?.ToString("t")
+                );
 
                 if (ServerType != ServerType.Public)
-                    desc += $" • {ServerType.ToTranslatedString()}";
+                    desc += " • " + ServerType.ToTranslatedString();
 
                 return desc;
             }
         }
 
-        public ICommand RejoinServerCommand { get; }
+        public ICommand RejoinServerCommand => new RelayCommand(RejoinServer);
 
         public Dictionary<int, UserLog> PlayerLogs { get; internal set; } = new();
+
         public Dictionary<int, UserMessage> MessageLogs { get; internal set; } = new();
 
         private SemaphoreSlim serverQuerySemaphore = new(1, 1);
 
-        public ActivityData()
-        {
-            RejoinServerCommand = new RelayCommand(RejoinServer);
-        }
-
         public string GetInviteDeeplink(bool launchData = true)
         {
-            var deeplink = $"https://www.roblox.com/games/start?placeId={PlaceId}";
-            deeplink += ServerType == ServerType.Private ? $"&accessCode={AccessCode}" : $"&gameInstanceId={JobId}";
+            string deeplink = $"https://www.roblox.com/games/start?placeId={PlaceId}";
+
+            if (ServerType == ServerType.Private) // thats not going to work
+                deeplink += "&accessCode=" + AccessCode;
+            else
+                deeplink += "&gameInstanceId=" + JobId;
 
             if (launchData && !string.IsNullOrEmpty(RPCLaunchData))
-                deeplink += $"&launchData={HttpUtility.UrlEncode(RPCLaunchData)}";
+                deeplink += "&launchData=" + HttpUtility.UrlEncode(RPCLaunchData);
 
             return deeplink;
         }
 
         public async Task<string?> QueryServerLocation()
         {
-            const string logIdent = "ActivityData::QueryServerLocation";
-            string location = null;
+            const string LOG_IDENT = "ActivityData::QueryServerLocation";
 
             if (!MachineAddressValid)
                 throw new InvalidOperationException($"Machine address is invalid ({MachineAddress})");
 
             await serverQuerySemaphore.WaitAsync();
 
+            if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out string? location))
+            {
+                serverQuerySemaphore.Release();
+                return location;
+            }
+
             try
             {
-                if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out location))
-                    return location;
-
                 var ipInfo = await Http.GetJson<IPInfoResponse>($"https://ipinfo.io/{MachineAddress}/json");
 
-                if (string.IsNullOrEmpty(ipInfo?.City))
+                if (string.IsNullOrEmpty(ipInfo.City))
                     throw new InvalidHTTPResponseException("Reported city was blank");
 
-                location = ipInfo.City == ipInfo.Region
-                    ? $"{ipInfo.Region}, {ipInfo.Country}"
-                    : $"{ipInfo.City}, {ipInfo.Region}, {ipInfo.Country}";
+                if (ipInfo.City == ipInfo.Region)
+                    location = $"{ipInfo.Region}, {ipInfo.Country}";
+                else
+                    location = $"{ipInfo.City}, {ipInfo.Region}, {ipInfo.Country}";
 
                 GlobalCache.ServerLocation[MachineAddress] = location;
+                serverQuerySemaphore.Release();
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(logIdent, $"Failed to get server location for {MachineAddress}");
-                App.Logger.WriteException(logIdent, ex);
+                App.Logger.WriteLine(LOG_IDENT, $"Failed to get server location for {MachineAddress}");
+                App.Logger.WriteException(LOG_IDENT, ex);
+
+                GlobalCache.ServerLocation[MachineAddress] = location;
+                serverQuerySemaphore.Release();
 
                 Frontend.ShowConnectivityDialog(
                     string.Format(Strings.Dialog_Connectivity_UnableToConnect, "ipinfo.io"),
@@ -130,10 +163,6 @@ namespace Hellstrap.Models.Entities
                     MessageBoxImage.Warning,
                     ex
                 );
-            }
-            finally
-            {
-                serverQuerySemaphore.Release();
             }
 
             return location;
@@ -143,7 +172,8 @@ namespace Hellstrap.Models.Entities
 
         private void RejoinServer()
         {
-            var playerPath = new RobloxPlayerData().ExecutablePath;
+            string playerPath = new RobloxPlayerData().ExecutablePath;
+
             Process.Start(playerPath, GetInviteDeeplink(false));
         }
     }

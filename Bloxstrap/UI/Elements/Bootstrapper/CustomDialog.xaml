@@ -20,17 +20,12 @@
     AllowsTransparency="False"
     WindowStyle="None"
     WindowCornerPreference="Default"
+    WindowBackdropType="Aero"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
-
-    <!-- Taskbar Item Info -->
     <Window.TaskbarItemInfo>
-        <TaskbarItemInfo 
-            ProgressState="{Binding Path=TaskbarProgressState}" 
-            ProgressValue="{Binding Path=TaskbarProgressValue}" />
+        <TaskbarItemInfo ProgressState="{Binding Path=TaskbarProgressState}" ProgressValue="{Binding Path=TaskbarProgressValue}" />
     </Window.TaskbarItemInfo>
-
-    <!-- Resources for Styling -->
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -40,16 +35,12 @@
     </Window.Resources>
 
     <Grid>
-        <!-- Main Layout with TitleBar and Element Grid -->
         <Grid>
             <Grid.RowDefinitions>
-                <!-- Row for TitleBar -->
                 <RowDefinition Height="Auto" />
-                <!-- Row for Main Content -->
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <!-- Custom TitleBar Configuration -->
             <ui:TitleBar
                 x:Name="RootTitleBar"
                 Title="Hellstrap"
@@ -59,9 +50,8 @@
                 CanMaximize="False"
                 ShowClose="False"
                 ShowMaximize="False"
-                ShowMinimize="True" />
+                ShowMinimize="False" />
 
-            <!-- Main Content Grid -->
             <Grid x:Name="ElementGrid" Grid.Row="1" />
         </Grid>
     </Grid>

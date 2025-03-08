@@ -399,7 +399,7 @@ If not, then please report this exception through a [GitHub issue]({1}) along wi
     <value>Light</value>
   </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
-    <value>Hellstrap has been upgraded to v{0}</value>
+    <value>Hellstrap has been upgraded to a new version</value>
   </data>
   <data name="InstallChecker.VersionDifferentThanInstalled" xml:space="preserve">
     <value>The version of Hellstrap you've launched is different to the version you currently have installed.
@@ -421,7 +421,7 @@ Would you like to upgrade your currently installed version?</value>
     <value>Special Thanks</value>
   </data>
   <data name="Menu.About.Description" xml:space="preserve">
-    <value>A Hellstrap fork.</value>
+    <value>A Bloxstrap fork.</value>
   </data>
   <data name="Menu.About.DiscordServer" xml:space="preserve">
     <value>Discord server</value>
@@ -759,19 +759,19 @@ Selecting 'No' will ignore this warning and continue installation.</value>
     <value>See info about managing and creating mods.</value>
     <comment>Title is Common.Help</comment>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Choose" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
     <value>Choose font...</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Description" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
     <value>Font size can be adjusted in the Engine Settings tab.</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Invalid" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
     <value>The file you have chosen does not appear to be a valid font file.</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Remove" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
     <value>Remove applied font</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Title" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
     <value>Use custom font</value>
   </data>
   <data name="Menu.Mods.OpenModsFolder.Description" xml:space="preserve">

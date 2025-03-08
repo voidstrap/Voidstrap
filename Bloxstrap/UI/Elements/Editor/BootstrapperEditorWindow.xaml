@@ -66,6 +66,7 @@
                 HorizontalAlignment="Center"
                 Command="{Binding Path=SaveCommand, Mode=OneTime}"
                 Content="Save" />
+            
         </Grid>
     </Grid>
 </base:WpfUiWindow>

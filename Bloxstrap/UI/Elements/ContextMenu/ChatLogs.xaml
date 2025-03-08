@@ -14,7 +14,7 @@
         Title="{x:Static resources:Strings.ContextMenu_MessageLogs_Title}"
         MinWidth="420"
         MinHeight="420"
-        Width="580"
+        Width="380"
         Height="420"
         Background="{ui:ThemeResource ApplicationBackgroundBrush}"
         ExtendsContentIntoTitleBar="True"
@@ -60,7 +60,7 @@
         </Border>
 
         <DataGrid Name="ChatLogsDataGrid" Grid.Row="2" HeadersVisibility="Column" GridLinesVisibility="Horizontal"
-          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False"
+          AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="True"
           SelectionMode="Single" SelectionUnit="Cell" IsReadOnly="True"
           ItemsSource="{Binding MessageLogsCollection}" Margin="4,8,4,8" SelectionChanged="ChatLogsDataGrid_SelectionChanged">
             <DataGrid.Style>

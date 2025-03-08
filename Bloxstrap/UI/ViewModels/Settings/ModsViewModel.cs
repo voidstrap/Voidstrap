@@ -25,6 +25,8 @@ namespace Hellstrap.UI.ViewModels.Settings
             { "ttc", new byte[] { 0x74, 0x74, 0x63, 0x66 } }
         };
 
+
+
         public ICommand OpenModsFolderCommand => new RelayCommand(() => Process.Start("explorer.exe", Paths.Mods));
         public ICommand ManageCustomFontCommand => new RelayCommand(ManageCustomFont);
         public ICommand OpenCompatSettingsCommand => new RelayCommand(OpenCompatSettings);
@@ -34,6 +36,7 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public Visibility DeleteCustomFontVisibility =>
             string.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Collapsed : Visibility.Visible;
+
 
         public ModPresetTask OldDeathSoundTask { get; } = new("OldDeathSound", "content\\sounds\\ouch.ogg", "Sounds.OldDeath.ogg");
         public ModPresetTask OldAvatarBackgroundTask { get; } = new("OldAvatarBackground", "ExtraContent\\places\\Mobile.rbxl", "OldAvatarBackground.rbxl");
@@ -55,27 +58,33 @@ namespace Hellstrap.UI.ViewModels.Settings
         {
             { Enums.CursorType.DotCursor, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.DotCursor.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.DotCursor.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.DotCursor.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.DotCursor.ArrowCursorDecalDrag.png" }
             }},
             { Enums.CursorType.StoofsCursor, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.StoofsCursor.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.StoofsCursor.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.StoofsCursor.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.StoofsCursor.ArrowCursorDecalDrag.png" }
             }},
             { Enums.CursorType.CleanCursor, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.CleanCursor.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.CleanCursor.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.CleanCursor.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.CleanCursor.ArrowCursorDecalDrag.png" }
             }},
             { Enums.CursorType.FPSCursor, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.FPSCursor.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.FPSCursor.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.FPSCursor.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.FPSCursor.ArrowCursorDecalDrag.png" }
             }},
             { Enums.CursorType.From2006, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.From2006.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.From2006.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.From2006.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.From2006.ArrowCursorDecalDrag.png" }
             }},
             { Enums.CursorType.From2013, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.From2013.ArrowCursor.png" },
-                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.From2013.ArrowFarCursor.png" }
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.From2013.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.From2013.ArrowCursorDecalDrag.png" }
             }}
         });
 
@@ -96,7 +105,7 @@ namespace Hellstrap.UI.ViewModels.Settings
 
                 if (!FontHeaders.TryGetValue(type, out var expectedHeader) || !expectedHeader.SequenceEqual(fileHeader))
                 {
-                    Frontend.ShowMessageBox(Strings.Menu_Mods_Misc_CustomFont_Invalid, MessageBoxImage.Error);
+                    Frontend.ShowMessageBox("Custom Font Invalid", MessageBoxImage.Error);
                     return;
                 }
 
@@ -106,6 +115,7 @@ namespace Hellstrap.UI.ViewModels.Settings
             OnPropertyChanged(nameof(ChooseCustomFontVisibility));
             OnPropertyChanged(nameof(DeleteCustomFontVisibility));
         }
+
 
         private void OpenCompatSettings()
         {

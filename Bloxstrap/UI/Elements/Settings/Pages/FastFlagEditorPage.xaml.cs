@@ -30,8 +30,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
     /// </summary>
     public partial class FastFlagEditorPage
     {
-        // believe me when i say there is absolutely zero point to using mvvm for this
-        // using a datagrid is a codebehind thing only and thats it theres literally no way around it
+
 
         private readonly ObservableCollection<FastFlag> _fastFlagList = new();
 
@@ -39,7 +38,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
         private string _searchFilter = string.Empty;
         private string _lastSearch = string.Empty;
         private DateTime _lastSearchTime = DateTime.MinValue;
-        private const int _debounceDelay = 75;
+        private const int _debounceDelay = 70;
 
 
 
@@ -120,7 +119,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
                 ImportJSON(dialog.JsonTextBox.Text);
         }
 
-        private void ShowProfilesDialog()
+        private void ShowBackupsDialog()
         {
             var dialog = new FlagProfilesDialog();
             dialog.ShowDialog();
@@ -129,15 +128,15 @@ namespace Hellstrap.UI.Elements.Settings.Pages
                 return;
 
             if (dialog.Tabs.SelectedIndex == 0)
-                App.FastFlags.SaveProfile(dialog.SaveProfile.Text);
+                App.FastFlags.SaveBackup(dialog.SaveBackup.Text);
             else if (dialog.Tabs.SelectedIndex == 1)
             {
-                if (dialog.LoadProfile.SelectedValue == null)
+                if (dialog.LoadBackup.SelectedValue == null)
                     return;
-                App.FastFlags.LoadProfile(dialog.LoadProfile.SelectedValue.ToString(), dialog.ClearFlags.IsChecked);
+                App.FastFlags.LoadBackup(dialog.LoadBackup.SelectedValue.ToString(), dialog.ClearFlags.IsChecked);
             }
 
-            Thread.Sleep(850);
+            Thread.Sleep(98);
             ReloadList();
         }
 
@@ -343,7 +342,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
 
         private void AddButton_Click(object sender, RoutedEventArgs e) => ShowAddDialog();
 
-        private void FlagProfiles_Click(object sender, RoutedEventArgs e) => ShowProfilesDialog();
+        private void FlagProfiles_Click(object sender, RoutedEventArgs e) => ShowBackupsDialog();
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -371,14 +370,66 @@ namespace Hellstrap.UI.Elements.Settings.Pages
         private void ExportJSONButton_Click(object sender, RoutedEventArgs e)
         {
             string json = JsonSerializer.Serialize(App.FastFlags.Prop, new JsonSerializerOptions { WriteIndented = true });
-            Clipboard.SetDataObject(json);
-            Frontend.ShowMessageBox(Strings.Menu_FastFlagEditor_JsonCopiedToClipboard, MessageBoxImage.Information);
+
+                SaveJSONToFile(json);
         }
 
-        // Fields (A-Z)
+        private void CopyJSONButton_Click(object sender, RoutedEventArgs e)
+        {
+            string json = JsonSerializer.Serialize(App.FastFlags.Prop, new JsonSerializerOptions { WriteIndented = true });
+
+                Clipboard.SetText(json);
+            }
+
+
+
+
+        private void SaveJSONToFile(string json)
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = "JSON files (*.json)|*.json|Text files (*.txt)|*.txt",
+                Title = "Save JSON or TXT File",
+                FileName = "HellstrapExport.json"
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+
+                    var filePath = saveFileDialog.FileName;
+                    if (string.IsNullOrEmpty(Path.GetExtension(filePath)))
+                    {
+                        filePath += ".json";
+                    }
+
+                    File.WriteAllText(filePath, json);
+                    Frontend.ShowMessageBox("JSON file saved successfully!", MessageBoxImage.Information);
+                }
+                catch (IOException ioEx)
+                {
+                    Frontend.ShowMessageBox($"Error saving file: {ioEx.Message}", MessageBoxImage.Error);
+                }
+                catch (UnauthorizedAccessException uaEx)
+                {
+                    Frontend.ShowMessageBox($"Permission error: {uaEx.Message}", MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    Frontend.ShowMessageBox($"Unexpected error: {ex.Message}", MessageBoxImage.Error);
+                }
+            }
+        }
+
+
+
+
+
+
         private CancellationTokenSource _searchCancellationTokenSource;
 
-        // Search TextBox TextChanged Event Handler
+
         private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is not TextBox textbox) return;
@@ -431,7 +482,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
             // Smarter search: Prioritize matches that start with the filter
             var bestMatch = App.FastFlags.Prop.Keys
                 .Where(flag => flag.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(flag => !flag.StartsWith(searchFilter, StringComparison.OrdinalIgnoreCase)) // Prioritize startsWith
+                .OrderBy(flag => !flag.StartsWith(searchFilter, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(flag => flag.IndexOf(searchFilter, StringComparison.OrdinalIgnoreCase))
                 .ThenBy(flag => flag.Length)
                 .FirstOrDefault();
@@ -439,22 +490,21 @@ namespace Hellstrap.UI.Elements.Settings.Pages
             if (!string.IsNullOrEmpty(bestMatch))
             {
                 SuggestionTextBlock.Text = $"Looking For ({bestMatch})?";
-                AnimateSuggestionVisibility(1);  // Fully visible
+                AnimateSuggestionVisibility(1);
             }
             else
             {
-                AnimateSuggestionVisibility(0);  // Fade out
+                AnimateSuggestionVisibility(0);
             }
         }
 
 
-        // Animate Suggestion Visibility with optimized logic
         private void AnimateSuggestionVisibility(double targetOpacity)
         {
             var opacityAnimation = new DoubleAnimation
             {
                 To = targetOpacity,
-                Duration = TimeSpan.FromMilliseconds(130), // Slightly smoother transition
+                Duration = TimeSpan.FromMilliseconds(95),
                 EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
             };
 
@@ -498,7 +548,6 @@ namespace Hellstrap.UI.Elements.Settings.Pages
             {
                 DeleteAllFlags();
                 ReloadUI();
-                ShowInfoMessage("All flags have been deleted successfully.");
             }
             catch (Exception ex)
             {
@@ -513,11 +562,11 @@ namespace Hellstrap.UI.Elements.Settings.Pages
 
         private void DeleteAllFlags()
         {
-            // Clear the local flag list
+
             _fastFlagList.Clear();
 
-            // Clear all flags from App.FastFlags
-            foreach (var key in App.FastFlags.Prop.Keys.ToList()) // Avoid modifying collection during iteration
+
+            foreach (var key in App.FastFlags.Prop.Keys.ToList())
             {
                 App.FastFlags.SetValue(key, null);
             }
@@ -525,7 +574,7 @@ namespace Hellstrap.UI.Elements.Settings.Pages
 
         private void ReloadUI()
         {
-            ReloadList(); // Refresh the UI list after clearing
+            ReloadList();
         }
 
         private void ShowInfoMessage(string message)

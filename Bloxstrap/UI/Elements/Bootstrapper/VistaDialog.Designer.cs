@@ -13,9 +13,13 @@
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
+            if (disposing)
             {
-                components.Dispose();
+                if (components != null)
+                {
+                    components.Dispose();
+                    components = null;
+                }
             }
             base.Dispose(disposing);
         }
@@ -29,6 +33,7 @@
         private void InitializeComponent()
         {
             this.SuspendLayout();
+
             // 
             // VistaDialog
             // 
@@ -41,10 +46,12 @@
             this.ShowInTaskbar = false;
             this.Text = "VistaDialog";
             this.WindowState = System.Windows.Forms.FormWindowState.Minimized;
-            this.Load += new System.EventHandler(this.VistaDialog_Load);
-            this.FormClosing += this.Dialog_FormClosing;
-            this.ResumeLayout(false);
 
+            // Event handlers
+            this.Load += new System.EventHandler(this.VistaDialog_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Dialog_FormClosing);
+
+            this.ResumeLayout(false);
         }
 
         #endregion

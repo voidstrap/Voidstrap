@@ -6,7 +6,7 @@ namespace Hellstrap.Models.Persistable
     /// <summary>
     /// Represents configuration settings for Hellstrap.
     /// </summary>
-    public class Settings
+    public class AppSettings
     {
         // General Configuration
         public BootstrapperStyle BootstrapperStyle { get; set; } = BootstrapperStyle.FluentAeroDialog;
@@ -24,8 +24,11 @@ namespace Hellstrap.Models.Persistable
         public bool EnableAnalytics { get; set; } = true;
 
         public bool ShouldExportConfig { get; set; } = true;
+
+        public bool ShouldExportLogs { get; set; } = true;
         public bool UseFastFlagManager { get; set; } = true;
         public bool WPFSoftwareRender { get; set; } = false;
+        public bool FixTeleports { get; set; } = false;
 
         // Launch Configuration
         public bool ConfirmLaunches { get; set; } = true;
@@ -43,7 +46,7 @@ namespace Hellstrap.Models.Persistable
         // Rich Presence (Discord Integration)
         public bool UseDiscordRichPresence { get; set; } = true;
         public bool HideRPCButtons { get; set; } = true;
-        public bool ShowAccountOnRichPresence { get; set; } = false;
+        public bool ShowAccountOnRichPresence { get; set; } = true;
         public bool ShowServerDetails { get; set; } = true;
 
 
@@ -54,7 +57,7 @@ namespace Hellstrap.Models.Persistable
         public bool UseDisableAppPatch { get; set; } = false;
 
         // Roblox Deployment Settings
-        public string Channel { get; set; } = Hellstrap.RobloxInterfaces.Deployment.DefaultChannel;
+        public string Channel { get; set; } = "production";
 
     }
 }

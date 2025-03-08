@@ -2,36 +2,65 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.IO;
-using System.Linq;
-using System.Text;
+
 using CommunityToolkit.Mvvm.Input;
+
 using Microsoft.Win32;
+
 using Hellstrap.UI.Elements.Settings;
 using Hellstrap.UI.Elements.Editor;
+using Hellstrap.UI.ViewModels;
+using Hellstrap;
 
 namespace Hellstrap.UI.ViewModels.Settings
 {
     public class AppearanceViewModel : NotifyPropertyChangedViewModel
     {
         private readonly Page _page;
-        private string _downloadingStatus = "";
-
-        public AppearanceViewModel(Page page)
-        {
-            _page = page;
-            Icons = new ObservableCollection<BootstrapperIconEntry>(BootstrapperIconEx.Selections.Select(entry => new BootstrapperIconEntry { IconType = entry }));
-            PopulateCustomThemes();
-        }
 
         public ICommand PreviewBootstrapperCommand => new RelayCommand(PreviewBootstrapper);
         public ICommand BrowseCustomIconLocationCommand => new RelayCommand(BrowseCustomIconLocation);
+
         public ICommand AddCustomThemeCommand => new RelayCommand(AddCustomTheme);
         public ICommand DeleteCustomThemeCommand => new RelayCommand(DeleteCustomTheme);
         public ICommand RenameCustomThemeCommand => new RelayCommand(RenameCustomTheme);
         public ICommand EditCustomThemeCommand => new RelayCommand(EditCustomTheme);
 
-        public IEnumerable<Theme> Themes => Enum.GetValues(typeof(Theme)).Cast<Theme>();
+        private void PreviewBootstrapper()
+        {
+            IBootstrapperDialog dialog = App.Settings.Prop.BootstrapperStyle.GetNew();
+
+            dialog.Message = String.Format("Theme Preview");
+
+            dialog.CancelEnabled = true;
+            dialog.ShowBootstrapper();
+        }
+
+        private void BrowseCustomIconLocation()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = $"{Strings.Menu_IconFiles}|*.ico"
+            };
+
+            if (dialog.ShowDialog() != true)
+                return;
+
+            CustomIconLocation = dialog.FileName;
+            OnPropertyChanged(nameof(CustomIconLocation));
+        }
+
+        public AppearanceViewModel(Page page)
+        {
+            _page = page;
+
+            foreach (var entry in BootstrapperIconEx.Selections)
+                Icons.Add(new BootstrapperIconEntry { IconType = entry });
+
+            PopulateCustomThemes();
+        }
+
+        public IEnumerable<Theme> Themes { get; } = Enum.GetValues(typeof(Theme)).Cast<Theme>();
 
         public Theme Theme
         {
@@ -39,7 +68,7 @@ namespace Hellstrap.UI.ViewModels.Settings
             set
             {
                 App.Settings.Prop.Theme = value;
-                ((MainWindow)Window.GetWindow(_page)!)?.ApplyTheme();
+                ((MainWindow)Window.GetWindow(_page)!).ApplyTheme();
             }
         }
 
@@ -53,11 +82,11 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public string DownloadingStatus
         {
-            get => string.Format(Strings.Bootstrapper_Status_Downloading + " {0} - {1}MB / {2}MB", _downloadingStatus);
-            set => _downloadingStatus = value;
+            get => App.DownloadStats.Prop.DownloadingStringFormat;
+            set => App.DownloadStats.Prop.DownloadingStringFormat = value;
         }
 
-        public IEnumerable<BootstrapperStyle> Dialogs => BootstrapperStyleEx.Selections;
+        public IEnumerable<BootstrapperStyle> Dialogs { get; } = BootstrapperStyleEx.Selections;
 
         public BootstrapperStyle Dialog
         {
@@ -65,7 +94,7 @@ namespace Hellstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.BootstrapperStyle = value;
         }
 
-        public ObservableCollection<BootstrapperIconEntry> Icons { get; }
+        public ObservableCollection<BootstrapperIconEntry> Icons { get; set; } = new();
 
         public BootstrapperIcon Icon
         {
@@ -84,25 +113,141 @@ namespace Hellstrap.UI.ViewModels.Settings
             get => App.Settings.Prop.BootstrapperIconCustomLocation;
             set
             {
-                App.Settings.Prop.BootstrapperIcon = string.IsNullOrEmpty(value) ? BootstrapperIcon.IconHellstrap : BootstrapperIcon.IconCustom;
+                if (String.IsNullOrEmpty(value))
+                {
+                    if (App.Settings.Prop.BootstrapperIcon == BootstrapperIcon.IconCustom)
+                        App.Settings.Prop.BootstrapperIcon = BootstrapperIcon.IconHellstrap;
+                }
+                else
+                {
+                    App.Settings.Prop.BootstrapperIcon = BootstrapperIcon.IconCustom;
+                }
+
                 App.Settings.Prop.BootstrapperIconCustomLocation = value;
+
                 OnPropertyChanged(nameof(Icon));
                 OnPropertyChanged(nameof(Icons));
             }
         }
 
-        public ObservableCollection<string> CustomThemes { get; } = new();
-        public bool IsCustomThemeSelected => SelectedCustomTheme is not null;
-
-        public string? SelectedCustomTheme
+        private string CreateCustomThemeName()
         {
-            get => App.Settings.Prop.SelectedCustomTheme;
-            set => App.Settings.Prop.SelectedCustomTheme = value;
+            int count = Directory.GetDirectories(Paths.CustomThemes).Count();
+
+            string name = $"Theme {count + 1}";
+            if (Directory.Exists(Path.Combine(Paths.CustomThemes, name)))
+                name += " " + Random.Shared.Next(1, 100000).ToString();
+
+            return name;
         }
 
-        public string SelectedCustomThemeName { get; set; } = "";
-        public int SelectedCustomThemeIndex { get; set; }
+        private void CreateCustomThemeStructure(string name)
+        {
+            string dir = Path.Combine(Paths.CustomThemes, name);
+            Directory.CreateDirectory(dir);
 
+            string themeFilePath = Path.Combine(dir, "Theme.xml");
+
+            string templateContent = Encoding.UTF8.GetString(Resource.Get("CustomBootstrapperTemplate.xml").Result);
+
+            File.WriteAllText(themeFilePath, templateContent);
+        }
+
+        private void DeleteCustomThemeStructure(string name)
+        {
+            string dir = Path.Combine(Paths.CustomThemes, name);
+            Directory.Delete(dir, true);
+        }
+
+        private void RenameCustomThemeStructure(string oldName, string newName)
+        {
+            string oldDir = Path.Combine(Paths.CustomThemes, oldName);
+            string newDir = Path.Combine(Paths.CustomThemes, newName);
+            Directory.Move(oldDir, newDir);
+        }
+
+        private void AddCustomTheme()
+        {
+            string name = CreateCustomThemeName();
+
+            try
+            {
+                CreateCustomThemeStructure(name);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("AppearanceViewModel::AddCustomTheme", ex);
+                Frontend.ShowMessageBox($"Failed to create custom theme: {ex.Message}", MessageBoxImage.Error);
+                return;
+            }
+
+            CustomThemes.Add(name);
+            SelectedCustomThemeIndex = CustomThemes.Count - 1;
+
+            OnPropertyChanged(nameof(SelectedCustomThemeIndex));
+            OnPropertyChanged(nameof(IsCustomThemeSelected));
+        }
+
+        private void DeleteCustomTheme()
+        {
+            if (SelectedCustomTheme is null)
+                return;
+
+            try
+            {
+                DeleteCustomThemeStructure(SelectedCustomTheme);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("AppearanceViewModel::DeleteCustomTheme", ex);
+                Frontend.ShowMessageBox($"Failed to delete custom theme {SelectedCustomTheme}: {ex.Message}", MessageBoxImage.Error);
+                return;
+            }
+
+            CustomThemes.Remove(SelectedCustomTheme);
+
+            if (CustomThemes.Any())
+            {
+                SelectedCustomThemeIndex = CustomThemes.Count - 1;
+                OnPropertyChanged(nameof(SelectedCustomThemeIndex));
+            }
+
+            OnPropertyChanged(nameof(IsCustomThemeSelected));
+        }
+
+        private void RenameCustomTheme()
+        {
+            if (SelectedCustomTheme is null)
+                return;
+
+            if (SelectedCustomTheme == SelectedCustomThemeName)
+                return;
+
+            try
+            {
+                RenameCustomThemeStructure(SelectedCustomTheme, SelectedCustomThemeName);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("AppearanceViewModel::RenameCustomTheme", ex);
+                Frontend.ShowMessageBox($"Failed to rename custom theme {SelectedCustomTheme}: {ex.Message}", MessageBoxImage.Error);
+                return;
+            }
+
+            int idx = CustomThemes.IndexOf(SelectedCustomTheme);
+            CustomThemes[idx] = SelectedCustomThemeName;
+
+            SelectedCustomThemeIndex = idx;
+            OnPropertyChanged(nameof(SelectedCustomThemeIndex));
+        }
+
+        private void EditCustomTheme()
+        {
+            if (SelectedCustomTheme is null)
+                return;
+
+            new BootstrapperEditorWindow(SelectedCustomTheme).ShowDialog();
+        }
 
         private void PopulateCustomThemes()
         {
@@ -135,101 +280,17 @@ namespace Hellstrap.UI.ViewModels.Settings
             }
         }
 
-        private void PreviewBootstrapper()
+        public string? SelectedCustomTheme
         {
-            IBootstrapperDialog dialog = App.Settings.Prop.BootstrapperStyle.GetNew();
-            dialog.CancelEnabled = true;
-            dialog.ShowBootstrapper();
+            get => App.Settings.Prop.SelectedCustomTheme;
+            set => App.Settings.Prop.SelectedCustomTheme = value;
         }
 
-        private void BrowseCustomIconLocation()
-        {
-            var dialog = new OpenFileDialog { Filter = $"{Strings.Menu_IconFiles}|*.ico" };
-            if (dialog.ShowDialog() == true)
-            {
-                CustomIconLocation = dialog.FileName;
-                OnPropertyChanged(nameof(CustomIconLocation));
-            }
-        }
+        public string SelectedCustomThemeName { get; set; } = "";
 
-        private string GenerateUniqueThemeName()
-        {
-            int count = Directory.GetDirectories(Paths.CustomThemes).Count();
-            string name = $"Theme {count + 1}";
+        public int SelectedCustomThemeIndex { get; set; }
 
-            while (Directory.Exists(Path.Combine(Paths.CustomThemes, name)))
-                name += $" {Random.Shared.Next(1, 100000)}";
-
-            return name;
-        }
-
-        private void CreateCustomThemeStructure(string name)
-        {
-            string dir = Path.Combine(Paths.CustomThemes, name);
-            Directory.CreateDirectory(dir);
-            File.WriteAllText(Path.Combine(dir, "Theme.xml"), Encoding.UTF8.GetString(Resource.Get("CustomBootstrapperTemplate.xml").Result));
-        }
-
-        private void AddCustomTheme()
-        {
-            string name = GenerateUniqueThemeName();
-            try
-            {
-                CreateCustomThemeStructure(name);
-                CustomThemes.Add(name);
-                SelectedCustomThemeIndex = CustomThemes.Count - 1;
-                OnPropertyChanged(nameof(SelectedCustomThemeIndex));
-                OnPropertyChanged(nameof(IsCustomThemeSelected));
-            }
-            catch (Exception ex)
-            {
-                HandleException("AddCustomTheme", ex);
-            }
-        }
-
-        private void DeleteCustomTheme()
-        {
-            if (SelectedCustomTheme is null) return;
-            try
-            {
-                Directory.Delete(Path.Combine(Paths.CustomThemes, SelectedCustomTheme), true);
-                CustomThemes.Remove(SelectedCustomTheme);
-                SelectedCustomThemeIndex = CustomThemes.Any() ? CustomThemes.Count - 1 : -1;
-                OnPropertyChanged(nameof(SelectedCustomThemeIndex));
-                OnPropertyChanged(nameof(IsCustomThemeSelected));
-            }
-            catch (Exception ex)
-            {
-                HandleException("DeleteCustomTheme", ex);
-            }
-        }
-
-        private void RenameCustomTheme()
-        {
-            if (SelectedCustomTheme is null || SelectedCustomTheme == SelectedCustomThemeName) return;
-            try
-            {
-                Directory.Move(Path.Combine(Paths.CustomThemes, SelectedCustomTheme), Path.Combine(Paths.CustomThemes, SelectedCustomThemeName));
-                CustomThemes[CustomThemes.IndexOf(SelectedCustomTheme)] = SelectedCustomThemeName;
-                SelectedCustomThemeIndex = CustomThemes.IndexOf(SelectedCustomThemeName);
-                OnPropertyChanged(nameof(SelectedCustomThemeIndex));
-            }
-            catch (Exception ex)
-            {
-                HandleException("RenameCustomTheme", ex);
-            }
-        }
-
-        private void EditCustomTheme()
-        {
-            if (SelectedCustomTheme is null) return;
-            new BootstrapperEditorWindow(SelectedCustomTheme).ShowDialog();
-        }
-
-        private void HandleException(string methodName, Exception ex)
-        {
-            App.Logger.WriteException($"AppearanceViewModel::{methodName}", ex);
-            Frontend.ShowMessageBox($"Error in {methodName}: {ex.Message}", MessageBoxImage.Error);
-        }
+        public ObservableCollection<string> CustomThemes { get; set; } = new();
+        public bool IsCustomThemeSelected => SelectedCustomTheme is not null;
     }
 }

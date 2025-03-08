@@ -1,6 +1,7 @@
 ﻿using Hellstrap.AppData;
 using Hellstrap.Integrations;
 using Hellstrap.Models;
+using Hellstrap;
 
 namespace Hellstrap
 {
@@ -9,7 +10,7 @@ namespace Hellstrap
         private readonly InterProcessLock _lock = new("Watcher");
 
         private readonly WatcherData? _watcherData;
-        
+
         private readonly NotifyIconWrapper? _notifyIcon;
 
         public readonly ActivityWatcher? ActivityWatcher;
@@ -110,7 +111,7 @@ namespace Hellstrap
             ActivityWatcher?.Start();
 
             while (Utilities.GetProcessesSafe().Any(x => x.Id == _watcherData.ProcessId))
-                await Task.Delay(750);
+                await Task.Delay(1000);
 
             if (_watcherData.AutoclosePids is not null)
             {

@@ -15,6 +15,12 @@ namespace Hellstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.CheckForUpdates = value;
         }
 
+        public bool HWAsselEnabled
+        {
+            get => App.Settings.Prop.WPFSoftwareRender;
+            set => App.Settings.Prop.WPFSoftwareRender = value;
+        }
+
         public bool AnalyticsEnabled
         {
             get => App.Settings.Prop.EnableAnalytics;
@@ -25,6 +31,12 @@ namespace Hellstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.ShouldExportConfig;
             set => App.Settings.Prop.ShouldExportConfig = value;
+        }
+
+        public bool ExportLogs
+        {
+            get => App.Settings.Prop.ShouldExportLogs;
+            set => App.Settings.Prop.ShouldExportLogs = value;
         }
 
         public bool ShouldExportConfig { get; set; } = true;

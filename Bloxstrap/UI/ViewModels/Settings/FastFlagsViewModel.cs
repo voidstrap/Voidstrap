@@ -37,9 +37,6 @@ namespace Hellstrap.UI.ViewModels.Settings
             { "Telemetry.EpCounter", value ? Enabled : Disabled },
             { "Telemetry.EpStats", value ? Enabled : Disabled },
             { "Telemetry.Event", value ? Enabled : Disabled },
-            { "Telemetry.V2Counter", value ? Enabled : Disabled },
-            { "Telemetry.V2Event", value ? Enabled : Disabled },
-            { "Telemetry.V2Stats", value ? Enabled : Disabled },
             { "Telemetry.Point", value ? Enabled : Disabled },
 
             { "Telemetry.GraphicsQualityUsage", value ? Disabled : Enabled },
@@ -75,15 +72,36 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public bool EnableDarkMode
         {
-            get => string.Equals(App.FastFlags.GetPreset("DarkMode.BlueMode"), "True", StringComparison.OrdinalIgnoreCase);
-
-            set => App.FastFlags.SetPreset("DarkMode.BlueMode", value ? "True" : "False");
+            get => !string.Equals(App.FastFlags.GetPreset("DarkMode.BlueMode"), "True", StringComparison.OrdinalIgnoreCase);
+            set => App.FastFlags.SetPreset("DarkMode.BlueMode", value ? "False" : "True");
         }
+
+        public bool GoogleToggle
+        {
+            get => string.Equals(App.FastFlags.GetPreset("VoiceChat.VoiceChat1"), "False", StringComparison.OrdinalIgnoreCase);
+            set
+            {
+                if (value)
+                {
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat1", "False");
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat2", "https://google.com");
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat3", "https://google.com");
+                }
+                else
+                {
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat1", "True");
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat2", null);
+                    App.FastFlags.SetPreset("VoiceChat.VoiceChat3", null);
+                }
+            }
+        }
+
+
 
 
         public bool Layered
         {
-            get => App.FastFlags.GetPreset("Layered.Clothing") == "-1"; // we use this fflag to determine if preset is enabled
+            get => App.FastFlags.GetPreset("Layered.Clothing") == "-1";
             set
             {
 
@@ -93,17 +111,14 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public bool FpsFix
         {
-            get => App.FastFlags.GetPreset("FpsFix.Log") == "False"; // we use this fflag to determine if preset is enabled
-            set
-            {
-
-                App.FastFlags.SetPreset("FpsFix.Log", value ? "False" : null);
-            }
+            get => App.FastFlags.GetPreset("FpsFix.Log")?.Equals("False") ?? false;
+            set => App.FastFlags.SetPreset("FpsFix.Log", value ? "False" : null);
         }
+
 
         public bool Preload
         {
-            get => App.FastFlags.GetPreset("Preload.Preload2") == "True"; // we use this fflag to determine if preset is enabled
+            get => App.FastFlags.GetPreset("Preload.Preload2") == "True";
             set
             {
 
@@ -135,6 +150,15 @@ namespace Hellstrap.UI.ViewModels.Settings
             get => int.TryParse(App.FastFlags.GetPreset("Rendering.Framerate"), out int x) ? x : 0;
             set => App.FastFlags.SetPreset("Rendering.Framerate", value == 0 ? null : value);
         }
+
+
+        public int VolChatLimit
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("VoiceChat.VoiceChat4"), out int x) ? x : 1000;
+            set => App.FastFlags.SetPreset("VoiceChat.VoiceChat4", value > 0 ? value.ToString() : null);
+        }
+
+
 
         public IReadOnlyDictionary<MSAAMode, string?> MSAALevels => FastFlagManager.MSAAModes;
 
@@ -245,19 +269,26 @@ namespace Hellstrap.UI.ViewModels.Settings
 
         public TextureQuality SelectedTextureQuality
         {
-            get => TextureQualities.Where(x => x.Value == App.FastFlags.GetPreset("Rendering.TextureQuality.Level")).FirstOrDefault().Key;
+            get
+            {
+                // Directly fetch the selected texture quality key from the dictionary if available
+                var preset = App.FastFlags.GetPreset("Rendering.TextureQuality.Level");
+                return TextureQualities.FirstOrDefault(x => x.Value == preset).Key;
+            }
             set
             {
+                // Set preset to null for Default or the specific quality level
                 if (value == TextureQuality.Default)
                 {
                     App.FastFlags.SetPreset("Rendering.TextureQuality", null);
                 }
-                else
+                else if (TextureQualities.TryGetValue(value, out var level))
                 {
-                    App.FastFlags.SetPreset("Rendering.TextureQuality.Level", TextureQualities[value]);
+                    App.FastFlags.SetPreset("Rendering.TextureQuality.Level", level);
                 }
             }
         }
+
 
 
         public bool DisablePostFX
@@ -306,51 +337,74 @@ namespace Hellstrap.UI.ViewModels.Settings
             }
         }
 
+        public bool PartyToggle
+        {
+            get => App.FastFlags.GetPreset("VoiceChat.VoiceChat4") == "False";
+            set
+            {
+                string presetValue = value ? "False" : "True";
+                App.FastFlags.SetPreset("VoiceChat.VoiceChat4", presetValue);
+                App.FastFlags.SetPreset("VoiceChat.VoiceChat5", presetValue);
+            }
+        }
 
 
 
+
+
+
+        public bool GetFlagAsBool(string flagKey, string falseValue = "False")
+        {
+            return App.FastFlags.GetPreset(flagKey) != falseValue;
+        }
+
+        public void SetFlagFromBool(string flagKey, bool value, string falseValue = "False")
+        {
+            App.FastFlags.SetPreset(flagKey, value ? null : falseValue);
+        }
 
         public bool ChromeUI
         {
-            get => App.FastFlags.GetPreset("UI.Menu.ChromeUI") != "False"; // its on by default so we have to do that
-            set => App.FastFlags.SetPreset("UI.Menu.ChromeUI", value);
+            get => GetFlagAsBool("UI.Menu.ChromeUI");
+            set => SetFlagFromBool("UI.Menu.ChromeUI", value);
         }
 
         public bool VRToggle
         {
-            get => App.FastFlags.GetPreset("Menu.VRToggles") != "False";
-            set => App.FastFlags.SetPreset("Menu.VRToggles", value);
+            get => GetFlagAsBool("Menu.VRToggles");
+            set => SetFlagFromBool("Menu.VRToggles", value);
         }
 
         public bool SoothsayerCheck
         {
-            get => App.FastFlags.GetPreset("Menu.Feedback") != "False";
-            set => App.FastFlags.SetPreset("Menu.Feedback", value);
+            get => GetFlagAsBool("Menu.Feedback");
+            set => SetFlagFromBool("Menu.Feedback", value);
         }
 
         public bool LanguageSelector
         {
             get => App.FastFlags.GetPreset("Menu.LanguageSelector") != "0";
-            set => App.FastFlags.SetPreset("Menu.LanguageSelector", value ? null : "0");
+            set => SetFlagFromBool("Menu.LanguageSelector", value, "0");
         }
 
         public bool Haptics
         {
-            get => App.FastFlags.GetPreset("Menu.Haptics") != "False";
-            set => App.FastFlags.SetPreset("Menu.Haptics", value);
+            get => GetFlagAsBool("Menu.Haptics");
+            set => SetFlagFromBool("Menu.Haptics", value);
         }
 
         public bool Framerate
         {
-            get => App.FastFlags.GetPreset("Menu.Framerate") != "False";
-            set => App.FastFlags.SetPreset("Menu.Framerate", value);
+            get => GetFlagAsBool("Menu.Framerate");
+            set => SetFlagFromBool("Menu.Framerate", value);
         }
 
         public bool ChatTranslation
         {
-            get => App.FastFlags.GetPreset("Menu.ChatTranslation") != "False";
-            set => App.FastFlags.SetPreset("Menu.ChatTranslation", value);
+            get => GetFlagAsBool("Menu.ChatTranslation");
+            set => SetFlagFromBool("Menu.ChatTranslation", value);
         }
+
         public bool ResetConfiguration
         {
             get => _preResetFlags is not null;

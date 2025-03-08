@@ -76,7 +76,8 @@
                     Navigation="{Binding ElementName=RootNavigation}" />
 
                 <!-- Page Content Frame -->
-                <Frame x:Name="RootFrame" Grid.Row="1" />
+                <Frame x:Name="RootFrame" Grid.Row="1" Content="This installation process will be quick and simple, 
+                       and you will be able to configure any of Hellstrap's settings after installation."/>
             </Grid>
         </Grid>
 
@@ -114,7 +115,7 @@
                     Name="NextButton" 
                     Content="{Binding NextButtonText, Mode=OneWay}" 
                     Width="100" 
-                    Command="{Binding NextPageCommand, Mode=OneWay}" 
+                    Command="{Binding NextPageCommand, Mode=OneWay}"
                     IsEnabled="{Binding NextButtonEnabled, Mode=OneWay}" />
             </StatusBarItem>
 

@@ -2,7 +2,6 @@
 {
     static class Paths
     {
-        // Directories that are not dependent on the base directory
         public static string Temp => Path.Combine(Path.GetTempPath(), App.ProjectName);
         public static string UserProfile => Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         public static string LocalAppData => Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
@@ -13,8 +12,6 @@
 
         public static string TempUpdates => Path.Combine(Temp, "Updates");
         public static string TempLogs => Path.Combine(Temp, "Logs");
-
-        // Base directory-dependent paths
         public static string Base { get; private set; } = string.Empty;
         public static string Downloads { get; private set; } = string.Empty;
         public static string SavedBackups { get; private set; } = string.Empty;
@@ -27,7 +24,6 @@
         public static string Application { get; private set; } = string.Empty;
 
         public static string CustomFont => Path.Combine(Mods, "content", "fonts", "CustomFont.ttf");
-
         public static bool Initialized => !string.IsNullOrWhiteSpace(Base);
 
         public static void Initialize(string baseDirectory)
@@ -42,10 +38,33 @@
             Integrations = Path.Combine(Base, "Integrations");
             Versions = Path.Combine(Base, "RblxVersions");
             Mods = Path.Combine(Base, "Mods");
-            Roblox = Path.Combine(Base, "Roblox");
             CustomThemes = Path.Combine(Base, "CustomThemes");
 
             Application = Path.Combine(Base, $"{App.ProjectName}.exe");
+
+            EnsureDirectoryExists(Downloads);
+            EnsureDirectoryExists(SavedBackups);
+            EnsureDirectoryExists(Logs);
+            EnsureDirectoryExists(Integrations);
+            EnsureDirectoryExists(Versions);
+            EnsureDirectoryExists(Mods);
+            EnsureDirectoryExists(CustomThemes);
+        }
+
+        private static void EnsureDirectoryExists(string directoryPath)
+        {
+            if (!Directory.Exists(directoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(directoryPath);
+                    Console.WriteLine($"Created missing directory: {directoryPath}");
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Failed to create directory {directoryPath}: {ex.Message}");
+                }
+            }
         }
     }
 }

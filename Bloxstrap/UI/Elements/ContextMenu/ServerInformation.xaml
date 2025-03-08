@@ -47,6 +47,7 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
@@ -55,45 +56,48 @@
 
             <!-- Server Type -->
             <TextBlock 
-                Grid.Row="0" 
-                Grid.Column="0" 
-                Margin="0,0,16,12" 
-                VerticalAlignment="Center" 
-                Text="Type:" />
+        Grid.Row="0" 
+        Grid.Column="0" 
+        Margin="0,0,16,12" 
+        VerticalAlignment="Center" 
+        Text="Type:" />
             <TextBlock 
-                Grid.Row="0" 
-                Grid.Column="1" 
-                Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-                Text="{Binding ServerType, Mode=OneWay}" />
-
-            <!-- Instance ID -->
-            <TextBlock 
-                Grid.Row="1" 
-                Grid.Column="0" 
-                Margin="0,0,16,12" 
-                VerticalAlignment="Center" 
-                Text="Instance ID:" />
-            <TextBlock 
-                Grid.Row="1" 
-                Grid.Column="1" 
-                Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-                Text="{Binding InstanceId, Mode=OneWay}" />
+        Grid.Row="0" 
+        Grid.Column="1" 
+        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+        Text="{Binding ServerType, Mode=OneWay}" />
 
             <!-- Server Location -->
             <TextBlock 
-                Grid.Row="2" 
-                Grid.Column="0" 
-                Margin="0,0,16,12" 
-                VerticalAlignment="Center" 
-                Text="Server Location:" 
-                Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
+        Grid.Row="1" 
+        Grid.Column="0" 
+        Margin="0,0,16,12" 
+        VerticalAlignment="Center" 
+        Text="Server Location:" 
+        Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
             <TextBlock 
-                Grid.Row="2" 
-                Grid.Column="1" 
-                Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-                Text="{Binding ServerLocation, Mode=OneWay}" 
-                Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
+        Grid.Row="1" 
+        Grid.Column="1" 
+        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+        Text="{Binding ServerLocation, Mode=OneWay}" 
+        Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
+
+            <!-- Instance ID -->
+            <TextBlock 
+        Grid.Row="2" 
+        Grid.Column="0" 
+        Margin="0,0,16,12" 
+        VerticalAlignment="Center" 
+        Text="Instance ID:" />
+            <TextBlock 
+        Grid.Row="2" 
+        Grid.Column="1" 
+        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+        Text="{Binding InstanceId, Mode=OneWay}" />
         </Grid>
+
+
+
 
         <!-- Footer Buttons -->
         <Border 

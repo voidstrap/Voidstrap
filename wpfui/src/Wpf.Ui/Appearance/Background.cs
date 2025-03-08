@@ -32,6 +32,7 @@ public static class Background
             BackgroundType.Aero => Win32.Utilities.IsOSWindows7OrNewer,
             BackgroundType.Unknown => true,
             BackgroundType.None => true,
+            BackgroundType.Disable => false, // dont run the apply code
             _ => false
         };
     }

@@ -40,7 +40,7 @@
                      Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
                      Appearance="Success"
                      Icon="CheckboxChecked24"
-                     Timeout="3000"
+                     Timeout="2000"
                      Margin="200, 0, 200, 20"
                      Grid.RowSpan="10"
                      Panel.ZIndex="9" />
@@ -50,7 +50,7 @@
                      Message="Changes have been saved."
                      Appearance="Success"
                      Icon="CheckboxChecked24"
-                     Timeout="3500"
+                     Timeout="2000"
                      Margin="150, 0, 150, 20"
                      Grid.RowSpan="10"
                      Panel.ZIndex="10" />
@@ -88,20 +88,17 @@
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
                                        PageType="{x:Type pages:IntegrationsPage}" 
                                        Icon="AddCircle28"
-                                       Tag="integrations" 
-                                       ToolTip="Manage Integrations" />
+                                       Tag="integrations"  />
 
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Behaviour_Title}"
                                        PageType="{x:Type pages:BehaviourPage}" 
                                        Icon="PlaySettings20"
-                                       Tag="bootstrapper" 
-                                       ToolTip="Behavior Settings" />
+                                       Tag="bootstrapper" />
 
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
                                        PageType="{x:Type pages:ModsPage}" 
                                        Icon="WrenchScrewdriver20"
-                                       Tag="mods" 
-                                       ToolTip="Manage Mods" />
+                                       Tag="mods" />
 
                     <!-- Fast Flag Editor Menu Item -->
                     <ui:NavigationItem Content="FastFlag Editor"
@@ -109,27 +106,23 @@
                                        Icon="EditSettings24"
                                        Tag="fastflageditor" 
                                        Visibility="{Binding IsFastFlagEditorVisible, 
-                                       Converter={StaticResource BooleanToVisibilityConverter}}"
-                                       ToolTip="FastFlag Editor" />
+                                       Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                     <ui:NavigationItem Content="Engine Settings"
                                        PageType="{x:Type pages:FastFlagsPage}" 
                                        Icon="Flag48"
-                                       Tag="fastflags" 
-                                       ToolTip="Configure Engine Settings" />
+                                       Tag="fastflags"  />
 
                     <ui:NavigationItem Content="Theme"
                                        PageType="{x:Type pages:AppearancePage}" 
                                        Icon="PaintBrush24"
-                                       Tag="appearance" 
-                                       ToolTip="Change Theme" />
+                                       Tag="appearance"  />
 
                     <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
                                        PageType="{x:Type pages:ShortcutsPage}" 
                                        Icon="Apps32"
                                        Tag="shortcuts" 
-                                       Click="NavigationItem_Click_1"
-                                       ToolTip="View Shortcuts" />
+                                       Click="NavigationItem_Click_1"/>
                 </ui:NavigationFluent.Items>
 
                 <!-- Footer Items -->
@@ -138,14 +131,12 @@
                                        PageType="{x:Type pages:ChannelPage}" 
                                        Icon="Settings48"
                                        Tag="channel" 
-                                       Click="NavigationItem_Click"
-                                       ToolTip="Hellstrap Settings" />
+                                       Click="NavigationItem_Click" />
 
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48" 
                                        Margin="0,0,0,12"
-                                       Command="{Binding OpenAboutCommand, Mode=OneTime}"
-                                       ToolTip="About Us" />
+                                       Command="{Binding OpenAboutCommand, Mode=OneTime}" />
                 </ui:NavigationFluent.Footer>
             </ui:NavigationFluent>
 
@@ -161,10 +152,11 @@
         </Grid>
 
         <!-- Status Bar -->
-        <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,10" BorderThickness="0,2,0,0">
+        <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,8" BorderThickness="0,1.4,0,0"  Height="55">
             <StatusBar.Background>
-                <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="45" />
+                <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="0.45" />
             </StatusBar.Background>
+
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -178,37 +170,44 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
-            <StatusBarItem Grid.Column="0" Margin="0,0,-18,0">
+
+            <!-- Test Mode Toggle -->
+            <StatusBarItem Grid.Column="0" Margin="0,0,4,0">
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <ui:ToggleSwitch IsChecked="{Binding TestModeEnabled, Mode=TwoWay}" />
-                    <TextBlock Padding="12,0,0,0" Text="{x:Static resources:Strings.Menu_TestMode}"
-                               VerticalAlignment="Center" FontSize="14" Width="92" />
+                    <TextBlock Padding="10,0,0,0" Text="{x:Static resources:Strings.Menu_TestMode}"
+                       VerticalAlignment="Center" FontSize="14" />
                 </StackPanel>
             </StatusBarItem>
-            <StatusBarItem Grid.Column="2" Padding="0,0,4,0">
+
+            <!-- Launch Roblox Button -->
+            <StatusBarItem Grid.Column="2" Padding="0,0,8,0">
                 <ui:Button Content="Launch Roblox" 
-                           Appearance="Primary"
-                           Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}" 
-                           Click="Button_Click" 
-                           Width="140" 
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center"/>
+                   Appearance="Primary"
+                   Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}" 
+                   Click="Button_Click" 
+                   Width="140" 
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"/>
             </StatusBarItem>
 
-            <StatusBarItem Grid.Column="3" Padding="0,0,4,0">
+            <!-- Save Button -->
+            <StatusBarItem Grid.Column="3" Padding="0,0,9,0">
                 <ui:Button Content="{x:Static resources:Strings.Menu_Save}" 
-                           Appearance="Primary"
-                           Command="{Binding SaveSettingsCommand, Mode=OneWay}" 
-                           Width="59" 
-                           Click="Button_Click_1" />
+                   Appearance="Primary"
+                   Command="{Binding SaveSettingsCommand, Mode=OneWay}" 
+                   Width="80" 
+                   Click="Button_Click_1" />
             </StatusBarItem>
-            <StatusBarItem Grid.Column="4">
+
+            <!-- Close Button -->
+            <StatusBarItem Grid.Column="4" Padding="0,0,8,0">
                 <ui:Button Content="{x:Static resources:Strings.Common_Close}"
-                           Appearance="Secondary" 
-                           Command="{Binding CloseWindowCommand, Mode=OneTime}" 
-                           Width="59" 
-                           HorizontalAlignment="Center"
-                           VerticalAlignment="Center" />
+                   Appearance="Secondary" 
+                   Command="{Binding CloseWindowCommand, Mode=OneTime}" 
+                   Width="80"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center" />
             </StatusBarItem>
         </StatusBar>
     </Grid>

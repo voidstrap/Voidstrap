@@ -59,16 +59,17 @@
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- App Icon -->
             <Image
-                Grid.Row="0"
-                Width="95"
-                Height="95"
-                Margin="0,30,0,0"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                RenderOptions.BitmapScalingMode="HighQuality"
-                Source="{Binding Icon}" />
+    Grid.Row="0"
+    Width="95"
+    Height="95"
+    Margin="0,30,0,0"
+    HorizontalAlignment="Center"
+    VerticalAlignment="Top"
+    Source="{Binding Icon}"
+    RenderOptions.BitmapScalingMode="HighQuality"
+    SnapsToDevicePixels="True" />
+
 
             <!-- Status Message -->
             <TextBlock
@@ -94,7 +95,7 @@
             <!-- Cancel Button -->
             <Button
                 Grid.Row="3"
-                Width="231"
+                Width="235"
                 Padding="6"
                 HorizontalAlignment="Center"
                 Command="{Binding CancelInstallCommand}"
@@ -104,7 +105,6 @@
                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                 IsEnabled="{Binding CancelEnabled}" />
         </Grid>
-
     </Grid>
 
 </base:WpfUiWindow>

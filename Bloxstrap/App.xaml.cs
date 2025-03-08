@@ -1,17 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Shell;
 using System.Windows.Threading;
+
 using Microsoft.Win32;
 
 namespace Hellstrap
@@ -27,29 +19,47 @@ namespace Hellstrap
         public const string ProjectName = "Hellstrap";
 #endif
         public const string ProjectOwner = "Hellstrap";
-        public const string ProjectRepository = "https://api.github.com/repos/midaskira/Hellstrap";
+        public const string ProjectRepository = "midaskira/Hellstrap";
         public const string ProjectDownloadLink = "https://github.com/midaskira/Hellstrap/releases";
-        public const string ProjectHelpLink = "https://github.com/bloxstraplabs/bloxstrap/wiki";
-        public const string ProjectSupportLink = "https://github.com/bloxstraplabs/bloxstrap/issues/new";
+        public const string ProjectHelpLink = "https://github.com/Hellstraplabs/Hellstrap/wiki";
+        public const string ProjectSupportLink = "https://github.com/Hellstraplabs/Hellstrap/issues/new";
 
         public const string RobloxPlayerAppName = "RobloxPlayerBeta";
         public const string RobloxStudioAppName = "RobloxStudioBeta";
 
+        // simple shorthand for extremely frequently used and long string - this goes under HKCU
         public const string UninstallKey = $@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{ProjectName}";
+
         public const string ApisKey = $"Software\\{ProjectName}";
 
         public static LaunchSettings LaunchSettings { get; private set; } = null!;
-        public static BuildMetadataAttribute BuildMetadata { get; } = Assembly.GetExecutingAssembly().GetCustomAttribute<BuildMetadataAttribute>()!;
-        public static string Version { get; } = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
-        public static Bootstrapper? Bootstrapper { get; set; }
-        public static bool IsActionBuild => !string.IsNullOrEmpty(BuildMetadata.CommitRef);
+
+        public static readonly string RobloxCookiesFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), @"Roblox\LocalStorage\RobloxCookies.dat");
+
+        public static BuildMetadataAttribute BuildMetadata = Assembly.GetExecutingAssembly().GetCustomAttribute<BuildMetadataAttribute>()!;
+
+        public static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
+
+        public static Bootstrapper? Bootstrapper { get; set; } = null!;
+
+        public static bool IsActionBuild => !String.IsNullOrEmpty(BuildMetadata.CommitRef);
+
         public static bool IsProductionBuild => IsActionBuild && BuildMetadata.CommitRef.StartsWith("tag", StringComparison.Ordinal);
-        public static bool IsStudioVisible => !string.IsNullOrEmpty(State.Prop.Studio.VersionGuid);
+
+        public static bool IsStudioVisible => !String.IsNullOrEmpty(App.State.Prop.Studio.VersionGuid);
+
         public static readonly MD5 MD5Provider = MD5.Create();
+
         public static readonly Logger Logger = new();
+
         public static readonly Dictionary<string, BaseTask> PendingSettingTasks = new();
-        public static readonly JsonManager<Settings> Settings = new();
+
+        public static readonly JsonManager<Models.Persistable.AppSettings> Settings = new();
+
+        public static readonly JsonManager<DownloadStats> DownloadStats = new();
+
         public static readonly JsonManager<State> State = new();
+
         public static readonly FastFlagManager FastFlags = new();
 
         public static readonly HttpClient HttpClient = new(
@@ -58,120 +68,204 @@ namespace Hellstrap
             )
         );
 
-        private static bool _showingExceptionDialog;
+        private static bool _showingExceptionDialog = false;
 
         public static void Terminate(ErrorCode exitCode = ErrorCode.ERROR_SUCCESS)
         {
             int exitCodeNum = (int)exitCode;
+
             Logger.WriteLine("App::Terminate", $"Terminating with exit code {exitCodeNum} ({exitCode})");
+
             Environment.Exit(exitCodeNum);
         }
 
         public static void SoftTerminate(ErrorCode exitCode = ErrorCode.ERROR_SUCCESS)
         {
-            Logger.WriteLine("App::SoftTerminate", $"Terminating with exit code {(int)exitCode} ({exitCode})");
-            Current.Dispatcher.Invoke(() => Current.Shutdown((int)exitCode));
+            int exitCodeNum = (int)exitCode;
+
+            Logger.WriteLine("App::SoftTerminate", $"Terminating with exit code {exitCodeNum} ({exitCode})");
+
+            Current.Dispatcher.Invoke(() => Current.Shutdown(exitCodeNum));
         }
 
-        private void GlobalExceptionHandler(object sender, DispatcherUnhandledExceptionEventArgs e)
+        void GlobalExceptionHandler(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
+
             Logger.WriteLine("App::GlobalExceptionHandler", "An exception occurred");
-            HandleException(e.Exception);
+
+            FinalizeExceptionHandling(e.Exception);
         }
 
-        public static void HandleException(Exception ex)
+        public static void FinalizeExceptionHandling(AggregateException ex)
         {
-            if (_showingExceptionDialog) return;
+            foreach (var innerEx in ex.InnerExceptions)
+                Logger.WriteException("App::FinalizeExceptionHandling", innerEx);
+
+            FinalizeExceptionHandling(ex.GetBaseException(), false);
+        }
+
+        public static void FinalizeExceptionHandling(Exception ex, bool log = true)
+        {
+            if (log)
+                Logger.WriteException("App::FinalizeExceptionHandling", ex);
+
+            if (_showingExceptionDialog)
+                return;
 
             _showingExceptionDialog = true;
-            Logger.WriteException("App::HandleException", ex);
+
             SendLog();
 
             if (Bootstrapper?.Dialog != null)
             {
-                Bootstrapper.Dialog.TaskbarProgressValue = Math.Max(Bootstrapper.Dialog.TaskbarProgressValue, 1);
+                if (Bootstrapper.Dialog.TaskbarProgressValue == 0)
+                    Bootstrapper.Dialog.TaskbarProgressValue = 1; // make sure it's visible
+
                 Bootstrapper.Dialog.TaskbarProgressState = TaskbarItemProgressState.Error;
             }
 
             Frontend.ShowExceptionDialog(ex);
+
             Terminate(ErrorCode.ERROR_INSTALL_FAILURE);
         }
 
         public static async Task<GithubRelease?> GetLatestRelease()
         {
+            const string LOG_IDENT = "App::GetLatestRelease";
+
             try
             {
-                var releaseInfo = await Http.GetJson<GithubRelease>($"{ProjectRepository}/releases/latest");
-                return releaseInfo?.Assets != null ? releaseInfo : null;
+                var releaseInfo = await Http.GetJson<GithubRelease>($""); //Glitchy so removed for now Adding back soon sowy
+
+                if (releaseInfo is null || releaseInfo.Assets is null)
+                {
+                    Logger.WriteLine(LOG_IDENT, "Encountered invalid data");
+                    return null;
+                }
+
+                return releaseInfo;
             }
             catch (Exception ex)
             {
-                Logger.WriteException("App::GetLatestRelease", ex);
-                return null;
+                Logger.WriteException(LOG_IDENT, ex);
             }
+
+            return null;
+        }
+        public static void SendStat(string key, string value)
+        {
+
         }
 
-        public static void SendStat(string key, string value) { }
-        public static void SendLog() { }
+        public static void SendLog()
+        {
 
+        }
         protected override void OnStartup(StartupEventArgs e)
         {
             const string LOG_IDENT = "App::OnStartup";
+
             Locale.Initialize();
+
             base.OnStartup(e);
+
             Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
 
-            string userAgent = $"{ProjectName}/{Version}" + (IsActionBuild
-                ? $" (Compiled {BuildMetadata.Timestamp.ToFriendlyString()} from commit {BuildMetadata.CommitHash} ({BuildMetadata.CommitRef}))"
-                : $" (Build {Convert.ToBase64String(Encoding.UTF8.GetBytes(BuildMetadata.Machine))})");
+            string userAgent = $"{ProjectName}/{Version}";
+
+            if (IsActionBuild)
+            {
+                Logger.WriteLine(LOG_IDENT, $"Compiled {BuildMetadata.Timestamp.ToFriendlyString()} from commit {BuildMetadata.CommitHash} ({BuildMetadata.CommitRef})");
+
+                if (IsProductionBuild)
+                    userAgent += $" (Production)";
+                else
+                    userAgent += $" (Artifact {BuildMetadata.CommitHash}, {BuildMetadata.CommitRef})";
+            }
+            else
+            {
+                Logger.WriteLine(LOG_IDENT, $"Compiled {BuildMetadata.Timestamp.ToFriendlyString()} from {BuildMetadata.Machine}");
+
+#if QA_BUILD
+                userAgent += " (QA)";
+#else
+                userAgent += $" (Build {Convert.ToBase64String(Encoding.UTF8.GetBytes(BuildMetadata.Machine))})";
+#endif
+            }
 
             Logger.WriteLine(LOG_IDENT, $"Loaded from {Paths.Process}");
-            Logger.WriteLine(LOG_IDENT, $"Temp path: {Paths.Temp}");
-            Logger.WriteLine(LOG_IDENT, $"Windows Start Menu path: {Paths.WindowsStartMenu}");
+            Logger.WriteLine(LOG_IDENT, $"Temp path is {Paths.Temp}");
+            Logger.WriteLine(LOG_IDENT, $"WindowsStartMenu path is {Paths.WindowsStartMenu}");
 
-            ApplicationConfiguration.Initialize();
+            // To customize application configuration such as set high DPI settings or default font,
+            // see https://aka.ms/applicationconfiguration.
+
+
             HttpClient.Timeout = TimeSpan.FromSeconds(30);
             HttpClient.DefaultRequestHeaders.Add("User-Agent", userAgent);
 
             LaunchSettings = new LaunchSettings(e.Args);
 
+            // installation check begins here
             using var uninstallKey = Registry.CurrentUser.OpenSubKey(UninstallKey);
-            string? installLocation = uninstallKey?.GetValue("InstallLocation") as string;
+            string? installLocation = null;
             bool fixInstallLocation = false;
 
-            if (!string.IsNullOrEmpty(installLocation) && !Directory.Exists(installLocation))
+            if (uninstallKey?.GetValue("InstallLocation") is string value)
             {
-                var match = Regex.Match(installLocation, @"^[a-zA-Z]:\\Users\\([^\\]+)", RegexOptions.IgnoreCase);
-                string newLocation = match.Success ? installLocation.Replace(match.Value, Paths.UserProfile, StringComparison.InvariantCultureIgnoreCase) : "";
-
-                if (!string.IsNullOrEmpty(newLocation) && Directory.Exists(newLocation))
+                if (Directory.Exists(value))
                 {
-                    installLocation = newLocation;
-                    fixInstallLocation = true;
+                    installLocation = value;
+                }
+                else
+                {
+                    var match = Regex.Match(value, @"^[a-zA-Z]:\\Users\\([^\\]+)", RegexOptions.IgnoreCase);
+
+                    if (match.Success)
+                    {
+                        string newLocation = value.Replace(match.Value, Paths.UserProfile, StringComparison.InvariantCultureIgnoreCase);
+
+                        if (Directory.Exists(newLocation))
+                        {
+                            installLocation = newLocation;
+                            fixInstallLocation = true;
+                        }
+                    }
                 }
             }
 
+            // silently change install location if we detect a portable run
             if (installLocation is null && Directory.GetParent(Paths.Process)?.FullName is string processDir)
             {
-                var files = Directory.GetFiles(processDir).Select(Path.GetFileName).ToArray();
-                if (files.Length <= 3 && files.Contains("Settings.json") && files.Contains("State.json"))
+                var files = Directory.GetFiles(processDir).Select(x => Path.GetFileName(x)).ToArray();
+
+                // check if settings.json and state.json are the only files in the folder
+                if (files.Length <= 3 && files.Contains("Settings.json") && files.Contains("State.json") && files.Contains("DownloadStats.json")) 
                 {
                     installLocation = processDir;
                     fixInstallLocation = true;
                 }
             }
 
-            if (fixInstallLocation && installLocation != null)
+            if (fixInstallLocation && installLocation is not null)
             {
-                var installer = new Installer { InstallLocation = installLocation, IsImplicitInstall = true };
+                var installer = new Installer
+                {
+                    InstallLocation = installLocation,
+                    IsImplicitInstall = true
+                };
 
                 if (installer.CheckInstallLocation())
                 {
                     Logger.WriteLine(LOG_IDENT, $"Changing install location to '{installLocation}'");
                     installer.DoInstall();
                 }
-                else installLocation = null;
+                else
+                {
+                    // force reinstall
+                    installLocation = null;
+                }
             }
 
             if (installLocation is null)
@@ -182,6 +276,8 @@ namespace Hellstrap
             else
             {
                 Paths.Initialize(installLocation);
+
+                // ensure executable is in the install directory
                 if (Paths.Process != Paths.Application && !File.Exists(Paths.Application))
                     File.Copy(Paths.Process, Paths.Application);
 
@@ -193,14 +289,29 @@ namespace Hellstrap
                     Terminate();
                 }
 
+                DownloadStats.Load();
                 Settings.Load();
                 State.Load();
                 FastFlags.Load();
+
+                if (!Locale.SupportedLocales.ContainsKey(Settings.Prop.Locale))
+                {
+                    Settings.Prop.Locale = "nil";
+                    Settings.Save();
+                }
+
                 Locale.Set(Settings.Prop.Locale);
-                if (!LaunchSettings.BypassUpdateCheck) Installer.HandleUpgrade();
-                WindowsRegistry.RegisterApis();
+
+                if (!LaunchSettings.BypassUpdateCheck)
+                    Installer.HandleUpgrade();
+
+                WindowsRegistry.RegisterApis(); // we want to register those early on
+                                                // so we wont have any issues with bloxshade
+
                 LaunchHandler.ProcessLaunchArgs();
             }
+
+            // you must *explicitly* call terminate when everything is done, it won't be called implicitly
         }
     }
 }

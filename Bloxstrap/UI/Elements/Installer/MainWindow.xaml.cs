@@ -53,6 +53,8 @@ namespace Hellstrap.UI.Elements.Installer
         public MainWindow()
 
         {
+
+
             SetButtonEnabled("next", true);
             _viewModel.CloseWindowRequest += (_, _) => CloseWindow();
 
@@ -77,6 +79,7 @@ namespace Hellstrap.UI.Elements.Installer
 
             Closing += new CancelEventHandler(MainWindow_Closing);
         }
+
 
         void NextPage()
         {

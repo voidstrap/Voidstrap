@@ -1,29 +1,32 @@
 # **Hellstrap - The Ultimate Bloxstrap Fork for Roblox Optimization**
 
-Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.
+**Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
 
 <p align="center">
-   <img src="https://github.com/midaskira/Hellstrap/raw/main/Images/Hellstrap-full-light.png" width="420" alt="Hellstrap Light Mode">
+   <img src="https://github.com/midaskira/Hellstrap/blob/main/Images/HellstrapNeon.png"
 </p>
 
 <p align="center">
-⭐ If you find Hellstrap useful, please consider giving us a star! It helps a lot! ⭐
+
+**⭐ If you find Hellstrap useful, please consider giving us a star! It helps a lot! ⭐**
+
 </p>
+
 
 > [!CAUTION]
-> The only official places to download Hellstrap are this GitHub repository and [Our Discord](https://discord.gg/UuxcfqPNnA). Any other websites offering downloads or claiming to be us are not controlled by us.
+> **The only official places to download Hellstrap are this GitHub repository and [Our Discord](https://discord.gg/UuxcfqPNnA). Any other websites offering downloads or claiming to be us are not controlled by us.**
 
 <p align="center">
   <a href="https://github.com/midaskira/Hellstrap/blob/main/LICENSE.md">
     <img src="https://img.shields.io/github/license/midaskira/Hellstrap?&color=FFC000&border_radius=3" alt="License" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
   <a href="https://github.com/midaskira/Hellstrap/releases">
-    <img src="https://img.shields.io/github/downloads/midaskira/Hellstrap/latest/total?color=981bfe&label=Latest Downloads&border_radius=3" alt="Latest Downloads" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+    <img src="https://img.shields.io/github/downloads/midaskira/Hellstrap/total?color=981bfe&label=Downloads&border_radius=3" alt="Downloads" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
-  <a href="https://github.com/midaskira/Hellstrap/releases/latest">
+  <a href="https://github.com/midaskira/Hellstrap/releases">
     <img src="https://img.shields.io/github/v/release/midaskira/Hellstrap?color=7a39fb&label=Latest&border_radius=3" alt="GitHub Stars" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
-  <a href="https://github.com/midaskira/Hellstrap/stargazers">
+  <a href="https://github.com/midaskira/">
     <img src="https://img.shields.io/github/stars/midaskira/Hellstrap?color=FFD700&label=Stars&border_radius=3" alt="GitHub Stars">
   </a>
 </p>
@@ -45,6 +48,10 @@ Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/
 - ✅ **Multi-instance support** for launching multiple Roblox clients  
 - ✅ **Advanced logging & tracking** for smoother experience  
 - ✅ **Bug fixes & stability improvements**  
+- ✅ **Cross-Game Teleport** – Added an option to enable cross-game teleport (fixes Error 773)  
+- ✅ **Channels Manager** – Switch between Production, Live, and ZLive channels  
+- ✅ **Hardware Acceleration Toggle** – Disable hardware acceleration for better performance  
+- ✅ **UI Improvements** – Enhanced readability, theme previews, and redesigned shortcuts  
 
 ---
 
@@ -66,24 +73,32 @@ Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/
 - Eliminates **editor warnings & flag validation**  
 - **Customizable** Roblox menus for personal preferences  
 - Additional **presets & shortcuts** for quick use  
+- **Removed outdated flags** that were no longer relevant  
 
 ### 🔹 **Channels**
-- Quick **version selection & channel switching**  
 - Option to **cancel forced Roblox updates**  
+- **New Channels Manager** – Switch between Production, Live, and ZLive  
 
 ### 🔹 **Bootstrapper Enhancements**
 - **Bloxshade support** for improved visual aesthetics  
 - **Multi-instance launching** for Roblox  
+- **Fixed launch errors & improved Windows detection**  
+- **Uninstall settings now save when checkbox is checked**  
 
 ### 🔹 **Appearance & Customization**
 - Tailored **themes** for a personalized launcher  
 - Customizable **download status bar**  
+- **Improved UI layout & icons for better readability**  
+- **Theme Preview Mode** – See changes before applying  
+- **Draggable cursor image & fixed cursor issues**  
 
 ### 🔹 **Extras**
 - Save **last opened settings page** for convenience  
 - Apply **custom bootstrapper themes** for unique looks  
 - Various **bug fixes & updates** for smoother experience  
 - **Disable Roblox updates** to maintain desired version  
+- **Rewritten code for better performance and stability**  
+- **Added beta warning to Roblox Updates to inform users of potential bugs**  
 
 💡 *Expect more features soon!* 🚀
 
@@ -105,25 +120,7 @@ Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/
 ## 🎨 Credits
 - **Logo**: [midaskira](https://github.com/midaskira)  
 - **Hellstrap Code**: [midaskira (Co-Owner)](https://github.com/midaskira) & [KloBraticc (Owner)](https://github.com/KloBraticc)  
+- **Contributors**: [stoof](https://github.com/stoofis), [Flemish](https://github.com/LeventGameing), [5070], [DynamicFF](https://github.com/DynamicFastFlag), [TnoobixRT](https://github.com/TnoobixRT)
 - **Inspiration**: [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)  
 
 ---
-
-## 📸 Hellstrap V1.0.0.9 Screenshots
-
-<div class="screenshot-container">
-   
-<p align="center">
-    <img class="screenshot" src="https://i.imgur.com/5lMtLOW.png" alt="Hellstrap interface screenshot 1">
-    <img class="screenshot" src="https://i.imgur.com/cFBmtfO.png" alt="Hellstrap interface screenshot 2">
-    <img class="screenshot" src="https://i.imgur.com/xYTZU7x.png" alt="Hellstrap interface screenshot 3">
-   </p>
-</div>
-
-<p align="center">
-✅ We aim to make things easier and better for you!
-</p>
-
-<!--
-Keywords: Roblox Launcher, Bloxstrap Alternative, Roblox Multi-Instance, Roblox Optimization, Disable Roblox Updates, Fast Flags, Bloxstrap Fork
--->

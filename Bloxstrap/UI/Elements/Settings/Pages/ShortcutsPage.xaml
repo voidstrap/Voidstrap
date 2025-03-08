@@ -30,9 +30,9 @@
             Header="{x:Static resources:Strings.Menu_Shortcuts_ExtractIcons_Title}"
             Description="{Binding Source={x:Static resources:Strings.Menu_Shortcuts_ExtractIcons_Description}, 
                                  Converter={StaticResource StringFormatConverter}, 
-                                 ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/Using-Roblox-icons-for-your-shortcuts'}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Using-Roblox-icons-for-your-shortcuts"
-            Margin="0,0,0,16">
+                                 ConverterParameter='https://github.com/Hellstraplabs/Hellstrap/wiki/Using-Roblox-icons-for-your-shortcuts'}"
+            HelpLink="https://github.com/Hellstraplabs/Hellstrap/wiki/Using-Roblox-icons-for-your-shortcuts"
+            Margin="0,0,0,8">
             <ui:ToggleSwitch IsChecked="{Binding ExtractIconsTask.NewState, Mode=TwoWay}" />
         </controls:OptionControl>
 
@@ -46,7 +46,7 @@
             Text="{x:Static resources:Strings.Menu_Shortcuts_General_Description}" 
             Foreground="{StaticResource TextFillColorSecondaryBrush}" />
 
-        <Grid Margin="0,16,0,0">
+        <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -77,7 +77,7 @@
             Text="{x:Static resources:Strings.Menu_Shortcuts_Function_Description}" 
             Foreground="{StaticResource TextFillColorSecondaryBrush}" />
 
-        <Grid Margin="0,16,0,0">
+        <Grid Margin="0,4,0,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -96,7 +96,7 @@
                 Grid.Column="1" 
                 Margin="4,0,4,0"
                 Header="{x:Static resources:Strings.LaunchMenu_LaunchRobloxStudio}"
-                Visibility="{Binding IsStudioOptionVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+>
                 <ui:ToggleSwitch IsChecked="{Binding StudioIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
 
@@ -106,7 +106,11 @@
                 Header="{x:Static resources:Strings.Menu_Title}">
                 <ui:ToggleSwitch IsChecked="{Binding SettingsIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
+
+
         </Grid>
+
+
 
     </StackPanel>
 </ui:UiPage>

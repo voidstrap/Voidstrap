@@ -1,4 +1,5 @@
-﻿using Hellstrap.AppData;
+﻿using System.Windows;
+using Hellstrap.AppData;
 using Hellstrap.RobloxInterfaces;
 
 namespace Hellstrap.UI.ViewModels.Settings
@@ -11,10 +12,31 @@ namespace Hellstrap.UI.ViewModels.Settings
             
         }
 
-        public bool MultiInstances
+
+        public bool MultiInstanceLaunchingEnabled
         {
             get => App.Settings.Prop.MultiInstanceLaunching;
-            set => App.Settings.Prop.MultiInstanceLaunching = value;
+            set
+            {
+                App.Settings.Prop.MultiInstanceLaunching = value;
+
+                if (!value)
+                {
+                    FixTeleportsEnabled = value;
+                    OnPropertyChanged(nameof(FixTeleportsEnabled));
+                }
+            }
+        }
+
+        public bool FixTeleportsEnabled
+        {
+            get => App.Settings.Prop.FixTeleports;
+            set
+            {
+
+
+                App.Settings.Prop.FixTeleports = value;
+            }
         }
 
         public bool ConfirmLaunches

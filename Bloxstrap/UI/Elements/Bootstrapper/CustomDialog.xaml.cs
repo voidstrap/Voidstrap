@@ -1,8 +1,11 @@
 ﻿using Hellstrap.UI.Elements.Bootstrapper.Base;
 using Hellstrap.UI.ViewModels.Bootstrapper;
+using Hellstrap;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Shell;
+using System.Windows.Threading;
 
 namespace Hellstrap.UI.Elements.Bootstrapper
 {

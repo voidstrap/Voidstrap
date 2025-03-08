@@ -12,7 +12,7 @@ namespace Hellstrap
 
         public virtual string ClassName => typeof(T).Name;
         
-        public virtual string ProfilesLocation => Path.Combine(Paths.Base, $"Backup.json");
+        public virtual string BackupsLocation => Path.Combine(Paths.Base, $"Backup.json");
 
         public virtual string FileLocation => Path.Combine(Paths.Base, $"{ClassName}.json");
 
@@ -45,9 +45,9 @@ namespace Hellstrap
                 {
                     string message = "";
 
-                    if (ClassName == nameof(Settings))
+                    if (ClassName == nameof(Models.Persistable.AppSettings))
                         message = Strings.JsonManager_SettingsLoadFailed;
-                    else if (ClassName == nameof(FastFlagManager))
+                    else if (ClassName == nameof(Hellstrap.FastFlagManager))
                         message = Strings.JsonManager_FastFlagsLoadFailed;
 
                     if (!String.IsNullOrEmpty(message))
@@ -95,9 +95,9 @@ namespace Hellstrap
             App.Logger.WriteLine(LOG_IDENT, "Save complete!");
         }
 
-        public void SaveProfile(string name)
+        public void SaveBackup(string name)
         {
-            string LOGGER_STRING = "SaveProfile::Profiles";
+            string LOGGER_STRING = "SaveBackup::Backups";
 
             string BaseDir = Paths.SavedBackups;
             try
@@ -125,9 +125,9 @@ namespace Hellstrap
             }
         }
 
-        public void LoadProfile(string? name, bool? clearFlags)
+        public void LoadBackup(string? name, bool? clearFlags)
         {
-            string LOGGER_STRING = "LoadProfile::Profiles";
+            string LOGGER_STRING = "LoadBackup::Backups";
 
             string BaseDir = Paths.SavedBackups;
 

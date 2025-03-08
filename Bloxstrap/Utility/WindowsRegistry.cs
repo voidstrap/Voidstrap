@@ -1,4 +1,5 @@
-﻿using Microsoft.Win32;
+﻿using Hellstrap;
+using Microsoft.Win32;
 using System.CodeDom;
 
 namespace Hellstrap.Utility
@@ -6,7 +7,7 @@ namespace Hellstrap.Utility
     static class WindowsRegistry
     {
         private const string RobloxPlaceKey = "Roblox.Place";
-        
+
         public static readonly List<RegistryKey> Roots = new() { Registry.CurrentUser, Registry.LocalMachine };
 
         public static void RegisterProtocol(string key, string name, string handler, string handlerParam = "%1")
@@ -118,7 +119,7 @@ namespace Hellstrap.Utility
                 apisKey.SetValueSafe("InstallationPath", Paths.Base);
             };
 
-            var currentApis = Registry.CurrentUser.OpenSubKey(App.ApisKey,false);
+            var currentApis = Registry.CurrentUser.OpenSubKey(App.ApisKey, false);
 
             if (currentApis == null)
             {

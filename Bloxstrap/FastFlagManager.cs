@@ -10,7 +10,7 @@ namespace Hellstrap
 
         public override string LOG_IDENT_CLASS => ClassName;
 
-        public override string ProfilesLocation => Path.Combine(Paths.Base, "SavedBackups");
+        public override string BackupsLocation => Path.Combine(Paths.Base, "SavedBackups");
 
         public override string FileLocation => Path.Combine(Paths.Mods, "ClientSettings\\ClientAppSettings.json");
 
@@ -19,10 +19,7 @@ namespace Hellstrap
         public static IReadOnlyDictionary<string, string> PresetFlags = new Dictionary<string, string>
         {
             // Activity watcher
-            { "Decomposition.Log", "FFlagSimEnableDCD16" },
-            { "InertialScrolling.Log", "FFlagUserBetterInertialScrolling" },
             { "FpsFix.Log", "FFlagTaskSchedulerLimitTargetFpsTo2402" },
-            { "Perf.Log", "DFFlagDebugPerfMode" },
             { "Players.LogLevel", "FStringDebugLuaLogLevel" },
             { "Players.LogPattern", "FStringDebugLuaLogPattern" },
 
@@ -32,7 +29,6 @@ namespace Hellstrap
 
             // Presets and stuff
             { "Rendering.Framerate", "DFIntTaskSchedulerTargetFps" },
-            { "Rendering.ManualFullscreen", "FFlagHandleAltEnterFullscreenManually" },
             { "Rendering.DisableScaling", "DFFlagDisableDPIScale" },
             { "Rendering.DisableScaling2", "DFFlagDebugOverrideDPIScale" },
             { "Rendering.MSAA", "FIntDebugForceMSAASamples" },
@@ -47,7 +43,6 @@ namespace Hellstrap
             { "Rendering.Mode.Vulkan", "FFlagDebugGraphicsPreferVulkan" },
             { "Rendering.Mode.OpenGL", "FFlagDebugGraphicsPreferOpenGL" },
             { "Rendering.Mode.D3D10", "FFlagDebugGraphicsPreferD3D11FL10" },
-            { "Rendering.FixHighlights", "FFlagHighlightOutlinesOnMobile"},
 
             // Lighting technology
             { "Rendering.Lighting.Voxel", "DFFlagDebugRenderForceTechnologyVoxel" },
@@ -58,6 +53,16 @@ namespace Hellstrap
             // Texture quality
             { "Rendering.TerrainTextureQuality", "FIntTerrainArraySliceSize" },
             { "Rendering.TextureQuality.Level", "FIntDebugTextureManagerSkipMips" },
+
+            // VoiceChat Google
+            { "VoiceChat.VoiceChat1", "FFlagTopBarUseNewBadge" },
+            { "VoiceChat.VoiceChat2", "FStringTopBarBadgeLearnMoreLink" },
+            { "VoiceChat.VoiceChat3", "FStringVoiceBetaBadgeLearnMoreLink" },
+
+            // VoiceChat Other
+            { "VoiceChat.VoiceChat4", "DFIntVoiceChatVolumeThousandths" },
+            { "VoiceChat.VoiceChat5", "FFlagEnablePartyVoiceOnlyForUnfilteredThreads" },
+            { "VoiceChat.VoiceChat6", "FFlagEnablePartyVoiceOnlyForEligibleUsers" },
 
 
             // Guis
@@ -89,9 +94,6 @@ namespace Hellstrap
     { "Telemetry.EpCounter", "FFlagDebugDisableTelemetryEphemeralCounter" },
     { "Telemetry.EpStats", "FFlagDebugDisableTelemetryEphemeralStat" },
     { "Telemetry.Event", "FFlagDebugDisableTelemetryEventIngest" },
-    { "Telemetry.V2Counter", "FFlagDebugDisableTelemetryV2Counter" },
-    { "Telemetry.V2Event", "FFlagDebugDisableTelemetryV2Event" },
-    { "Telemetry.V2Stats", "FFlagDebugDisableTelemetryV2Stat" },
     { "Telemetry.Point", "FFlagDebugDisableTelemetryPoint" },
 
             // DarkMode
@@ -346,53 +348,59 @@ namespace Hellstrap
         public override void Load(bool alertFailure = false)
         {
             base.Load(alertFailure);
+            OriginalProp = Prop.ToDictionary(pair => pair.Key, pair => (object)(pair.Value?.ToString() ?? string.Empty));
 
-            // Clone the dictionary
-            OriginalProp = new(Prop);
-
-            // Presets to be checked and set
-            var presets = new Dictionary<string, string>
-    {
-        { "InertialScrolling.Log", "True" },
-        { "Decomposition.Log", "True" },
-        { "Perf.Log", "True" },
-        { "Rendering.ManualFullscreen", "True" },  // dx and vulkan alt enter fix
-        { "Rendering.FixHighlights", "True" }
-    };
-
-            // Check and set the presets
-            foreach (var preset in presets)
+            if (!HasFastFlags())
             {
-                if (GetPreset(preset.Key) != preset.Value)
+                var presets = new Dictionary<string, string>
+        {
+            { "FStringGetPlayerImageDefaultTimeout", "1" },
+            { "FFlagFixSensitivityTextPrecision", "False" },
+            { "DFIntMaxFrameBufferSize", "4" },
+            { "DFFlagDebugPerfMode", "True" },
+            { "FFlagHandleAltEnterFullscreenManually", "False" },  // Yeh I fixed it W
+            { "FFlagHighlightOutlinesOnMobile", "True" },
+            { "FFlagLuaAppEnableFoundationColors7", "True" }
+        };
+
+                foreach (var (key, value) in presets)
                 {
-                    SetPreset(preset.Key, preset.Value);
+                    if (!Prop.ContainsKey(key))
+                    {
+                        Prop[key] = value;
+                    }
                 }
             }
+        }
 
+        private bool HasFastFlags()
+        {
+            return Prop.Keys.Any(key => key.StartsWith("FastFlag"));
         }
 
 
-        public void DeleteProfile(string profile)
+
+        public void DeleteBackup(string Backup)
         {
-            if (string.IsNullOrWhiteSpace(profile))
+            if (string.IsNullOrWhiteSpace(Backup))
                 return; // Exit early if the profile name is invalid
 
             try
             {
-                string profilesDirectory = Path.Combine(Paths.Base, Paths.SavedBackups);
-                Directory.CreateDirectory(profilesDirectory); // Ensures the directory exists
+                string backupsDirectory = Path.Combine(Paths.Base, Paths.SavedBackups);
+                Directory.CreateDirectory(backupsDirectory); // Ensures the directory exists
 
-                string profilePath = Path.Combine(profilesDirectory, Path.GetFileName(profile)); // Prevents path traversal
+                string BackupPath = Path.Combine(backupsDirectory, Path.GetFileName(Backup)); // Prevents path traversal
 
-                if (File.Exists(profilePath))
+                if (File.Exists(BackupPath))
                 {
-                    File.Delete(profilePath);
+                    File.Delete(BackupPath);
                 }
             }
             catch (Exception ex)
             {
                 // Optionally log the exception here
-                Frontend.ShowMessageBox($"Error deleting profile: {ex.Message}", MessageBoxImage.Error);
+                Frontend.ShowMessageBox($"Error deleting backup: {ex.Message}", MessageBoxImage.Error);
             }
         }
     }

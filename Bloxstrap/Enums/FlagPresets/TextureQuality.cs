@@ -2,31 +2,31 @@
 {
     public enum TextureQuality
     {
-        [EnumName(FromTranslation = "Common.Automatic")]
-        Default, // Automatically adjusts texture quality
+        [EnumName(FromTranslation = "Common.Automatic")]// Ha loser imagin using this joking I use it TF
+        Default,
 
-        [EnumName(StaticName = "Max (Blurry icons)")]
+        [EnumName(StaticName = "Level 1")]
         Level1,
 
-        [EnumName(StaticName = "Ultra")]
+        [EnumName(StaticName = "Level 2")]
         Level2,
 
-        [EnumName(StaticName = "Very High")]
+        [EnumName(StaticName = "Level 3")]
         Level3,
 
-        [EnumName(StaticName = "High")]
+        [EnumName(StaticName = "Level 4")]
         Level4,
 
-        [EnumName(StaticName = "Low")]
+        [EnumName(StaticName = "Level 5")]
         Level5,
 
-        [EnumName(StaticName = "Medium")]
+        [EnumName(StaticName = "Level 6")]
         Level6,
 
-        [EnumName(StaticName = "Very Low")]
+        [EnumName(StaticName = "Level 7")]
         Level7,
 
-        [EnumName(StaticName = "Lowest (Removes textures)")]
+        [EnumName(StaticName = "Level 8")]
         Level8
     }
 }

@@ -148,7 +148,8 @@ namespace Hellstrap.UI.Elements.Bootstrapper
             if (string.IsNullOrEmpty(value))
                 value = "Default";
 
-            switch (value) {
+            switch (value)
+            {
                 case "Default":
                     return WindowCornerPreference.Default;
 
@@ -596,17 +597,17 @@ namespace Hellstrap.UI.Elements.Bootstrapper
             return gs;
         }
 
-/*        private static PathGeometry HandleXmlElement_PathGeometry(CustomDialog dialog, XElement xmlElement) 
-        {
-            var pg = new PathGeometry();
-            object? data = GetGeometryFromXElement(xmlElement, "Figures");
-            if (data is Geometry)
-                pg.Figures = (PathFigureCollection)data;
+        /*        private static PathGeometry HandleXmlElement_PathGeometry(CustomDialog dialog, XElement xmlElement) 
+                {
+                    var pg = new PathGeometry();
+                    object? data = GetGeometryFromXElement(xmlElement, "Figures");
+                    if (data is Geometry)
+                        pg.Figures = (PathFigureCollection)data;
 
-            pg.FillRule = ParseXmlAttribute<FillRule>(xmlElement, "FillRule", FillRule.EvenOdd);
+                    pg.FillRule = ParseXmlAttribute<FillRule>(xmlElement, "FillRule", FillRule.EvenOdd);
 
-            return pg;
-        }*/
+                    return pg;
+                }*/
 
         private static Brush HandleXmlElement_LinearGradientBrush(CustomDialog dialog, XElement xmlElement)
         {
@@ -632,7 +633,8 @@ namespace Hellstrap.UI.Elements.Bootstrapper
             return brush;
         }
 
-        private static Brush HandleXmlElement_RadialGradientBrush(CustomDialog dialog, XElement xmlElement) {
+        private static Brush HandleXmlElement_RadialGradientBrush(CustomDialog dialog, XElement xmlElement)
+        {
             var radialbrush = new RadialGradientBrush();
 
             HandleXml_Brush(radialbrush, xmlElement);
@@ -1080,7 +1082,7 @@ namespace Hellstrap.UI.Elements.Bootstrapper
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.HighQuality); // should this be modifiable by the user?
 
             var sourceData = GetImageSourceData(dialog, "Source", xmlElement);
-            
+
 
             if (sourceData.IsIcon)
             {

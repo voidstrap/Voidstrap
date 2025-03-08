@@ -108,7 +108,7 @@
                     <controls:MarkdownTextBlock MarkdownText="[srthMD](https://github.com/srthMD)" />
                     <controls:MarkdownTextBlock MarkdownText="[axellse](https://github.com/axellse)" />
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Bratic](https://www.youtube.com/@Braticbigboy)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
                 </StackPanel>
             </controls:Expander>
 
@@ -143,7 +143,7 @@
                 </StackPanel>
             </controls:Expander>
 
-            <controls:Expander Grid.Column="2" Margin="4,0,0,0" HeaderIcon="Heart16" HeaderText="{x:Static resources:Strings.Menu_About_Contributors_SpecialThanks}" IsExpanded="True">
+            <controls:Expander Grid.Column="2" Margin="4,0,0,0" HeaderIcon="Heart20" HeaderText="{x:Static resources:Strings.Menu_About_Contributors_SpecialThanks}" IsExpanded="True">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/MaximumADHD)" />
                     <controls:MarkdownTextBlock MarkdownText="[Multako](https://www.roblox.com/users/2485612194/profile)" />
@@ -152,6 +152,7 @@
                     <controls:MarkdownTextBlock MarkdownText="[apprehensions](https://github.com/apprehensions)" />
                     <controls:MarkdownTextBlock MarkdownText="[axellse](https://github.com/axellse)" />
                     <controls:MarkdownTextBlock MarkdownText="[BlueOutside](https://github.com/BlueOutside)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Flemish](discord.com/users/1286961047990702124)" />
                     <controls:MarkdownTextBlock MarkdownText="[Stoof](https://guns.lol/stoof)" />
                 </StackPanel>
             </controls:Expander>

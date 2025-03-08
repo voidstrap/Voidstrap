@@ -26,19 +26,21 @@
         <!-- Hellstrap Settings Section -->
         <TextBlock Text="Hellstrap" FontSize="16" FontWeight="Medium" Margin="0,16,0,0" />
 
+        <controls:OptionControl Header="Disable Hardware Acceleration"
+                                Description="Hellstrap will consume more resources if this option is unchecked.">
+            <ui:ToggleSwitch IsChecked="{Binding HWAsselEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
         <!-- Auto Update Toggle -->
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_Behaviour_AutoUpdate_Title}"
                                 Description="{x:Static resources:Strings.Menu_Behaviour_AutoUpdate_Description}">
             <ui:ToggleSwitch IsChecked="{Binding UpdateCheckingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <!-- Analytics Toggle -->
-        <controls:OptionControl Header="{x:Static resources:Strings.Menu_Hellstrap_Analytics_Title}"
-                                Description="{Binding Source={x:Static resources:Strings.Menu_Hellstrap_Analytics_Description}, 
-                                                     Converter={StaticResource StringFormatConverter}, 
-                                                     ConverterParameter='https://github.com/bloxstraplabs/bloxstrap/wiki/Privacy-Policy#analytical-functionality'}">
-            <ui:ToggleSwitch IsChecked="{Binding AnalyticsEnabled, Mode=TwoWay}" />
-        </controls:OptionControl>
+
+
+
+
 
         <!-- Roblox Settings Section -->
         <TextBlock Text="Roblox" FontSize="16" FontWeight="Medium" Margin="0,16,0,0" />
@@ -60,7 +62,7 @@
 
         <!-- Roblox Updates Toggle -->
         <controls:OptionControl Header="Roblox updates"
-                        Description="When disabled, Roblox won't update to any newer version.">
+                        Description="When disabled, Roblox won't update to newer versions. (This feature is currently in **beta**)">
             <controls:OptionControl.Style>
                 <Style TargetType="controls:OptionControl">
                     <Style.Triggers>
@@ -73,8 +75,77 @@
             <ui:ToggleSwitch IsChecked="{Binding UpdateRoblox, Mode=TwoWay}" />
         </controls:OptionControl>
 
+
+
+
+        <ui:CardExpander Margin="0,8,0,0">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left Side (Channel Header and Description) -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                        <TextBlock FontSize="14" Text="Channels" />
+                        <TextBlock FontSize="12" 
+                                   Text="Choose deployment channel." 
+                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                   TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!-- Right Side (ComboBox for Channel Selection) -->
+                    <ComboBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200" 
+          SelectedValue="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=115}"
+          SelectedValuePath="Content">
+                        <ComboBoxItem Content="production"/>
+                        <ComboBoxItem Content="live" />
+                        <ComboBoxItem Content="zlive" />
+                    </ComboBox>
+
+
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <!-- Expanded Area with Additional Text -->
+            <ui:CardExpander.Content>
+                <StackPanel Margin="12,8">
+                    <!-- Introductory Text Block -->
+                    <TextBlock FontSize="12" Text="Select a channel to change the current stream setting. Choose from Production, Live, or Zlive based on your requirements." 
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <TextBlock FontSize="12" FontWeight="Bold" Text="Channel Explanations:" Foreground="{DynamicResource TextFillColorPrimaryBrush}" Height="18" Margin="0,10,0,0" />
+
+                    <!-- Channel Explanations Section -->
+
+                    <TextBlock Margin="0,5,0,0" FontSize="12" Text="Production: This is the main channel where your final, stable versions of the game are deployed. Use this for public releases and official versions of Roblox." 
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+
+                    <TextBlock Margin="0,5,0,0" FontSize="12" Text="Live: This channel is used for live game testing, often with a larger user base. It allows you to test features in a near-real environment, but not as stable as production." 
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+
+                    <TextBlock Margin="0,5,0,0" FontSize="12" Text="Zlive: This is a special live channel typically used for experimental or special events. It might be used for events or content that isn't yet ready for broader use." 
+               Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </ui:CardExpander.Content>
+        </ui:CardExpander>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         <!-- Data Export Section -->
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+        <ui:CardExpander Margin="0,8,0,0">
             <ui:CardExpander.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>

@@ -1,107 +1,120 @@
-﻿using System.Windows.Input;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Input;
 using Hellstrap.Integrations;
 using CommunityToolkit.Mvvm.Input;
-using System.Threading.Tasks;
 
 namespace Hellstrap.UI.ViewModels.ContextMenu
 {
-    internal class ServerHistoryViewModel : NotifyPropertyChangedViewModel
+    internal class ServerHistoryViewModel : NotifyPropertyChangedViewModel, IDisposable
     {
         private readonly ActivityWatcher _activityWatcher;
+        private readonly EventHandler _onGameLeaveHandler;
 
         public List<ActivityData>? GameHistory { get; private set; }
         public GenericTriState LoadState { get; private set; } = GenericTriState.Unknown;
         public string Error { get; private set; } = string.Empty;
-        public ICommand CloseWindowCommand => new RelayCommand(RequestClose);
+        public ICommand CloseWindowCommand { get; }
+        public event EventHandler? RequestCloseEvent;
 
-        public EventHandler? RequestCloseEvent;
-
-        // Constructor with activity watcher injected
         public ServerHistoryViewModel(ActivityWatcher activityWatcher)
         {
-            _activityWatcher = activityWatcher;
-            _activityWatcher.OnGameLeave += (_, _) => LoadDataAsync(); // Calls LoadData asynchronously
-
-            // Initially load data
+            _activityWatcher = activityWatcher ?? throw new ArgumentNullException(nameof(activityWatcher));
+            CloseWindowCommand = new RelayCommand(RequestClose);
+            _onGameLeaveHandler = (_, _) => LoadDataAsync();
+            _activityWatcher.OnGameLeave += _onGameLeaveHandler;
             LoadDataAsync();
         }
 
-        // Async method to load data
         private async void LoadDataAsync()
         {
-            LoadState = GenericTriState.Unknown;
-            OnPropertyChanged(nameof(LoadState));
+            SetLoadingState();
+            var history = _activityWatcher.History.ToList();
+            var entriesWithoutDetails = history.Where(x => x.UniverseDetails == null).ToList();
 
-            var entries = _activityWatcher.History.Where(x => x.UniverseDetails == null).ToList(); // Avoid multiple enumeration
+            if (entriesWithoutDetails.Any())
+            {
+                await TryLoadUniverseDetailsAsync(entriesWithoutDetails);
+            }
 
-            if (entries.Any())
+            GameHistory = new List<ActivityData>(history);
+            ConsolidateActivityEntries();
+            OnPropertyChanged(nameof(GameHistory));
+            SetSuccessState();
+        }
+
+        private void SetLoadingState()
+        {
+            if (LoadState != GenericTriState.Unknown)
+            {
+                LoadState = GenericTriState.Unknown;
+                OnPropertyChanged(nameof(LoadState));
+            }
+        }
+
+        private async Task TryLoadUniverseDetailsAsync(List<ActivityData> entries)
+        {
+            try
             {
                 string universeIds = string.Join(',', entries.Select(x => x.UniverseId).Distinct());
-
-                try
-                {
-                    // Fetch details for all the unique universe IDs
-                    await UniverseDetails.FetchBulk(universeIds);
-                }
-                catch (Exception ex)
-                {
-                    App.Logger.WriteException("ServerHistoryViewModel::LoadData", ex);
-
-                    Error = ex.Message;
-                    OnPropertyChanged(nameof(Error));
-
-                    LoadState = GenericTriState.Failed;
-                    OnPropertyChanged(nameof(LoadState));
-                    return;
-                }
-
-                // Populate UniverseDetails from the cache
+                await UniverseDetails.FetchBulk(universeIds);
                 foreach (var entry in entries)
                 {
                     entry.UniverseDetails = UniverseDetails.LoadFromCache(entry.UniverseId);
                 }
             }
+            catch (Exception ex)
+            {
+                HandleError(ex);
+            }
+        }
 
-            // Initialize the GameHistory with the current state
-            GameHistory = new List<ActivityData>(_activityWatcher.History);
+        private void HandleError(Exception ex)
+        {
+            App.Logger.WriteException("ServerHistoryViewModel::LoadData", ex);
+            Error = $"Failed to load universe details: {ex.Message}";
+            OnPropertyChanged(nameof(Error));
+            LoadState = GenericTriState.Failed;
+            OnPropertyChanged(nameof(LoadState));
+        }
 
-            var consolidatedJobIds = new List<ActivityData>();
-
-            // Consolidate activity entries from in-universe teleports
-            foreach (var entry in _activityWatcher.History)
+        private void ConsolidateActivityEntries()
+        {
+            var consolidatedJobIds = new HashSet<ActivityData>();
+            foreach (var entry in GameHistory ?? new List<ActivityData>())
             {
                 if (entry.RootActivity != null)
                 {
-                    // Update TimeLeft for root activities if necessary
                     if (entry.RootActivity.TimeLeft < entry.TimeLeft)
                     {
                         entry.RootActivity.TimeLeft = entry.TimeLeft;
                     }
 
-                    // Consolidate the JobId for public servers
                     if (entry.ServerType == ServerType.Public && !consolidatedJobIds.Contains(entry))
                     {
                         entry.RootActivity.JobId = entry.JobId;
                         consolidatedJobIds.Add(entry);
                     }
-
-                    GameHistory.Remove(entry);
                 }
             }
-
-            OnPropertyChanged(nameof(GameHistory));
-
-            LoadState = GenericTriState.Successful;
-            OnPropertyChanged(nameof(LoadState));
         }
 
-        // Close window handler
+        private void SetSuccessState()
+        {
+            if (LoadState != GenericTriState.Successful)
+            {
+                LoadState = GenericTriState.Successful;
+                OnPropertyChanged(nameof(LoadState));
+            }
+        }
+
         private void RequestClose() => RequestCloseEvent?.Invoke(this, EventArgs.Empty);
 
-        // Optional: Ensure we unsubscribe from events to prevent memory leaks
         public void Dispose()
         {
-            _activityWatcher.OnGameLeave -= (_, _) => LoadDataAsync();
+            _activityWatcher.OnGameLeave -= _onGameLeaveHandler;
         }
     }
 }

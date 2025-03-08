@@ -749,19 +749,19 @@
     <value>ดูข้อมูลเกี่ยวกับการจัดการและการสร้างม็อด</value>
     <comment>Title is Common.Help</comment>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Choose" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
     <value>เลือกฟอนต์...</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Description" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
     <value>ขนาดของฟอร์นสามารถเปลี่ยนได้ในแท็บ Engine Setting</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Invalid" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
     <value>ไฟล์ที่คุณเลือกไม่ใช่ไฟล์ฟอนต์ที่ถูกต้อง</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Remove" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
     <value>ลบ font ที่กำลังใช้</value>
   </data>
-  <data name="Menu.Mods.Misc.CustomFont.Title" xml:space="preserve">
+  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
     <value>ใช้ฟ้อนต์ที่กำหนดด้วยตัวเอง</value>
   </data>
   <data name="Menu.Mods.OpenModsFolder.Description" xml:space="preserve">

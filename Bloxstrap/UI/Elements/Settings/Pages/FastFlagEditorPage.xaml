@@ -22,10 +22,22 @@
         <TextBlock Grid.Row="0" Margin="0,0,0,16" Text="{x:Static resources:Strings.Menu_FastFlagEditor_Description}" FontSize="14" Foreground="{StaticResource TextFillColorSecondaryBrush}" />
 
         <WrapPanel Grid.Row="2" Orientation="Horizontal">
-            <ui:Button Icon="AddCircle24" Content="{x:Static resources:Strings.Menu_FastFlagEditor_AddNew}" Click="AddButton_Click" Margin="0,0,12,16" Width="110" />
-            <ui:Button Icon="Delete48" Content="Delete all" Click="DeleteAllButton_Click" Margin="0,0,12,16" />
-            <ui:Button Icon="Delete48" Content="{x:Static resources:Strings.Menu_FastFlagEditor_DeleteSelected}" Click="DeleteButton_Click" Appearance="Danger" Margin="0,0,12,16">
-                
+            <ui:Button Icon="AddCircle24" 
+               Content="{x:Static resources:Strings.Menu_FastFlagEditor_AddNew}" 
+               Click="AddButton_Click" 
+               Margin="0,0,10,16" 
+               Width="110" />
+
+            <ui:Button Icon="Delete48" 
+               Content="Delete all" 
+               Click="DeleteAllButton_Click" 
+               Margin="0,0,10,16" />
+
+            <ui:Button Icon="Delete48" 
+               Content="{x:Static resources:Strings.Menu_FastFlagEditor_DeleteSelected}" 
+               Click="DeleteButton_Click" 
+               Appearance="Danger" 
+               Margin="0,0,10,16">
                 <ui:Button.Style>
                     <Style TargetType="ui:Button" BasedOn="{StaticResource {x:Type ui:Button}}">
                         <Style.Triggers>
@@ -36,10 +48,29 @@
                     </Style>
                 </ui:Button.Style>
             </ui:Button>
-            <ToggleButton x:Name="TogglePresetsButton"  Content="{x:Static resources:Strings.Menu_FastFlagEditor_ShowPresetFlags}" Click="ToggleButton_Click"  Margin="0,0,12,16" />
-            <ui:Button Icon="ArrowExportRtl20" Content="{x:Static resources:Strings.Menu_FastFlagEditor_ExportJson}" Click="ExportJSONButton_Click" Margin="0,0,12,16" />
-            <ui:Button Icon="Open48" Content="Backups" Click="FlagProfiles_Click" Margin="0,0,12,16" VerticalAlignment="Top" Width="105" />
+
+            <ui:Button Icon="ArrowExportRtl20" 
+               Content="{x:Static resources:Strings.Menu_FastFlagEditor_ExportJson}" 
+               Click="ExportJSONButton_Click" 
+               Margin="0,0,10,16" />
+
+            <ui:Button Icon="Copy16" 
+               Content="Copy FastFlags" 
+               Click="CopyJSONButton_Click" 
+               Margin="0,0,10,16" />
+
+            <ToggleButton x:Name="TogglePresetsButton"  
+                  Content="{x:Static resources:Strings.Menu_FastFlagEditor_ShowPresetFlags}" 
+                  Click="ToggleButton_Click"  
+                  Margin="0,0,10,16" />
+
+            <ui:Button Icon="Open48" 
+               Content="Backups" 
+               Click="FlagProfiles_Click" 
+               Margin="0,0,10,16" 
+               Width="105" />
         </WrapPanel>
+
 
 
         <!-- Search Container with Enhanced Suggestion Text inside -->
@@ -63,7 +94,7 @@
 
 
 
-                <TextBlock x:Name="SuggestionTextBlock" 
+            <TextBlock x:Name="SuggestionTextBlock" 
                Foreground="#FF51A2ED" 
                Opacity="0" 
                Visibility="Collapsed" 
@@ -79,7 +110,7 @@
             </TextBlock>
         </Grid>
 
-        <DataGrid Name="DataGrid" Grid.Row="4" HeadersVisibility="Column" GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CellEditEnding="DataGrid_CellEditEnding" CanUserReorderColumns="False">
+        <DataGrid Name="DataGrid" Grid.Row="3" HeadersVisibility="Column" GridLinesVisibility="Horizontal" AutoGenerateColumns="False" CanUserAddRows="False" CanUserDeleteRows="False" CellEditEnding="DataGrid_CellEditEnding" CanUserReorderColumns="False" Margin="0,45,0,-9" Grid.RowSpan="2">
             <DataGrid.Style>
                 <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
                     <Setter Property="Background" Value="Transparent" />
@@ -90,8 +121,8 @@
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader">
                     <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
-                    <Setter Property="Height" Value="32" />
-                    <Setter Property="Padding" Value="8,0,8,0" />
+                    <Setter Property="Height" Value="30" />
+                    <Setter Property="Padding" Value="12,0,12,0" />
                     <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
                     <Setter Property="BorderThickness" Value="1" />
                 </Style>
@@ -113,7 +144,7 @@
                             </Setter>
                         </Trigger>
                     </Style.Triggers>
-                    <Setter Property="Height" Value="32" />
+                    <Setter Property="Height" Value="30" />
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="DataGridCell">
@@ -125,6 +156,7 @@
                     </Setter>
                 </Style>
             </DataGrid.CellStyle>
+
 
             <DataGrid.Columns>
                 <DataGridTextColumn Header="{x:Static resources:Strings.Common_Name}" Binding="{Binding Name}" />

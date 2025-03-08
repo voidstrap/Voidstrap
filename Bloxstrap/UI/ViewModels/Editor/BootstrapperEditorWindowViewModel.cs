@@ -17,7 +17,7 @@ namespace Hellstrap.UI.ViewModels.Editor
 
         // Properties
         public string Name { get; set; } = string.Empty;
-        public string Title { get; set; } = "Editing \"Custom Theme\"";
+        public string Title { get; set; } = "Editing \"CustomTheme\"";
         public string Code { get; set; } = string.Empty;
 
         public BootstrapperEditorWindowViewModel()
@@ -27,35 +27,34 @@ namespace Hellstrap.UI.ViewModels.Editor
             SaveCommand = new RelayCommand(Save);
         }
 
-        // Preview the custom theme
-        private async void Preview()  // Mark as async if you perform async actions
+        private async void Preview()
         {
             try
             {
                 var dialog = new CustomDialog();
                 dialog.ApplyCustomTheme(Name, Code);
 
-                // Close previous dialog if it exists
+
                 ClosePreviousDialog();
 
-                // Set message and show the preview dialog
                 dialog.Message = Strings.Bootstrapper_StylePreview_TextCancel;
                 dialog.CancelEnabled = true;
-                dialog.ShowBootstrapper();
+
+                await Task.Run(() => dialog.ShowBootstrapper());
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Show a confirmation message box to the user
                 Frontend.ShowMessageBox(
                     "No Current Theme Added To Preview!",
                     MessageBoxImage.Warning,
                     MessageBoxButton.OK
                 );
 
-                // You could log the exception if needed, like:
-                // App.Logger.WriteException("Preview method", ex);
+                // Log the error/Competeprev lol properly
+                App.Logger.WriteException("Preview method", ex);
             }
         }
+
 
         // Save the custom theme to a file
         private void Save()
