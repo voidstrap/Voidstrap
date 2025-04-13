@@ -1,0 +1,256 @@
+﻿<ui:UiPage
+    x:Class="Voidstrap.UI.Elements.About.Pages.AboutPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dmodels="clr-namespace:Voidstrap.UI.ViewModels.About"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
+    xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="AboutPage"
+    d:DataContext="{d:DesignInstance dmodels:AboutViewModel,
+                                     IsDesignTimeCreatable=True}"
+    d:DesignHeight="1500"
+    d:DesignWidth="800"
+    KeyDown="UiPage_KeyDown"
+    Scrollable="True"
+    mc:Ignorable="d">
+    <ui:UiPage.Resources>
+        <Storyboard x:Key="EggStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="Image1"
+                Storyboard.TargetProperty="Opacity"
+                From="1.0"
+                To="0.0"
+                Duration="0:0:3" />
+            <DoubleAnimation
+                Storyboard.TargetName="Image2"
+                Storyboard.TargetProperty="Opacity"
+                From="0.0"
+                To="1.0"
+                Duration="0:0:3" />
+        </Storyboard>
+    </ui:UiPage.Resources>
+
+    <StackPanel Margin="0,0,14,14">
+
+        <Grid Margin="0,0,0,24" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Image
+                x:Name="Image1"
+                Grid.Column="0"
+                Width="72"
+                Height="72"
+                VerticalAlignment="Center"
+                RenderOptions.BitmapScalingMode="HighQuality"
+                Source="pack://application:,,,/Voidstrap.ico" />
+            <Image
+                x:Name="Image2"
+                Grid.Column="0"
+                Width="72"
+                Height="72"
+                VerticalAlignment="Center"
+                Opacity="0"
+                RenderOptions.BitmapScalingMode="HighQuality"
+                Source="pack://application:,,,/Resources/BootstrapperStyles/ByfronDialog/Matt.png" />
+
+            <StackPanel
+                Grid.Column="1"
+                Margin="12,0,0,0"
+                VerticalAlignment="Center">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        Grid.Column="0"
+                        Margin="0,0,4,0"
+                        FontSize="24"
+                        FontWeight="Medium"
+                        Text="Voidstrap" />
+
+                </Grid>
+                <TextBlock Foreground="White" Text="A Bloxstrap fork." />
+
+            </StackPanel>
+        </Grid>
+
+        <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal">
+            <ui:Anchor
+                Margin="0,0,8,8"
+                Content="{x:Static resources:Strings.Menu_About_HelpInformation}"
+                Foreground="White"
+                Icon="BookQuestionMark24"
+                IconForeground="White"
+                NavigateUri="https://discord.gg/fekwAbMCfx" VerticalAlignment="Top" />
+            <ui:Anchor
+                Margin="0,0,8,8"
+                Content="{x:Static resources:Strings.Menu_About_ReportIssue}"
+                Foreground="White"
+                Icon="BookExclamationMark24"
+                IconForeground="White"
+                NavigateUri="https://github.com/midaskira/Voidstrap/issues" />
+            <ui:Anchor
+                Margin="0,0,0,8"
+                Click="Anchor_Click"
+                Content="{x:Static resources:Strings.Menu_About_DiscordServer}"
+                Foreground="White"
+                Icon="Chat48"
+                IconForeground="White"
+                NavigateUri="https://discord.gg/ScG3SnVCBR" />
+        </WrapPanel>
+
+        <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
+            <TextBlock
+                Margin="0,16,0,0"
+                FontFamily="Segoe UI Semibold"
+                FontSize="20"
+                Text="Build Information" />
+
+            <Grid Margin="0,8,0,0" Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="0,4,16,4"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    Text="Updated:" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.ColumnSpan="2"
+                    Margin="74,7,0,0"
+                    VerticalAlignment="Top"
+                    Foreground="White"
+                    Text="{Binding BuildTimestamp, Mode=OneTime}" />
+
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="0,4,16,4"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    Text="Commit Hash"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}">
+                    <Hyperlink
+                        Command="models:GlobalViewModel.OpenWebpageCommand"
+                        CommandParameter="{Binding BuildCommitHashUrl, Mode=OneTime}"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                        <TextBlock Text="{Binding BuildMetadata.CommitHash, Mode=OneTime}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,4,16,4"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    Text="Commit Ref"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    Text="{Binding BuildMetadata.CommitRef, Mode=OneTime}"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+            </Grid>
+        </StackPanel>
+
+        <TextBlock
+            Margin="0,16,0,0"
+            FontFamily="Segoe UI Semibold"
+            FontSize="20"
+            FontWeight="Medium"
+            Text="{x:Static resources:Strings.Menu_About_Contributors}" />
+        <TextBlock
+            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+            Text="These are the people who have made notable contributions to Voidstrap, helping make it what it is."
+            TextWrapping="Wrap" />
+        <Grid Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <controls:Expander
+                Grid.Column="0"
+                Margin="0,0,4,0"
+                BorderThickness="2,2,2,2"
+                Foreground="{x:Null}"
+                HeaderIcon="Code24"
+                HeaderText="{x:Static resources:Strings.Menu_About_Contributors_Code}"
+                IsExpanded="True"
+                OpacityMask="Black">
+                <StackPanel>
+                    <controls:MarkdownTextBlock MarkdownText="[pizzaboxer](https://github.com/pizzaboxer)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
+                    <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
+                    <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
+                    <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
+                </StackPanel>
+            </controls:Expander>
+
+            <controls:Expander
+                Grid.Column="1"
+                Margin="4,0,4,0"
+                BorderThickness="2,2,2,2"
+                HeaderIcon="AppsAddIn28"
+                HeaderText="Contribution"
+                IsExpanded="True">
+                <StackPanel>
+                    <controls:MarkdownTextBlock MarkdownText="[TnoobixRT](https://guns.lol/tnoobixrt)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Flemish](discord.com/users/1286961047990702124)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Stoof](https://guns.lol/stoof)" />
+                    <controls:MarkdownTextBlock MarkdownText="[RecBacon](discord.com/users/931627573656559656)" />
+                    <controls:MarkdownTextBlock MarkdownText="[5070](discord.com/users/1272494435690610800)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Slut](discord.com/users/1211640594082832404)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bren](discord.com/users/1211640594082832404)" />
+                    <controls:MarkdownTextBlock MarkdownText="[NazoCD](discord.com/users/1094216231415984140)" />
+                </StackPanel>
+            </controls:Expander>
+
+            <controls:Expander
+                Grid.Column="2"
+                Margin="4,0,0,0"
+                BorderThickness="2,2,2,2"
+                HeaderIcon="Heart20"
+                HeaderText="Inspirations"
+                IsExpanded="True">
+                <StackPanel>
+                    <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/fishstrap)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />
+                    <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/bloxstraplabs)" />
+                </StackPanel>
+            </controls:Expander>
+        </Grid>
+    </StackPanel>
+</ui:UiPage>
