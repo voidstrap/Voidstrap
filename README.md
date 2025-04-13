@@ -1,33 +1,33 @@
-# **Hellstrap - The Ultimate Bloxstrap Fork for Roblox Optimization**
+# **Voidstrap - The Ultimate Bloxstrap Fork for Roblox Optimization**
 
-**Hellstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
+**Voidstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
 
 <p align="center">
-   <img src="https://github.com/midaskira/Hellstrap/blob/main/Images/Hellstrap-full-light.png"
+   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png"
 </p>
 
 <p align="center">
 
-**⭐ If you find Hellstrap useful, please consider giving us a star! It helps a lot! ⭐**
+**⭐ If you find Voidstrap useful, please consider giving us a star! It helps a lot! ⭐**
 
 </p>
 
 
 > [!CAUTION]
-> **The only official places to download Hellstrap are this GitHub repository and [Our Discord](https://discord.gg/UuxcfqPNnA). Any other websites offering downloads or claiming to be us are not controlled by us.**
+> **The only official places to download Voidstrap are this GitHub repository and [Our Discord](https://discord.gg/UuxcfqPNnA). Any other websites offering downloads or claiming to be us are not controlled by us.**
 
 <p align="center">
-  <a href="https://github.com/midaskira/Hellstrap/blob/main/LICENSE.md">
-    <img src="https://img.shields.io/github/license/midaskira/Hellstrap?&color=FFC000&border_radius=3" alt="License" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+  <a href="https://github.com/midaskira/Voidstrap/blob/main/LICENSE.md">
+    <img src="https://img.shields.io/github/license/midaskira/Voidstrap?&color=FFC000&border_radius=3" alt="License" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
-  <a href="https://github.com/midaskira/Hellstrap/releases">
-    <img src="https://img.shields.io/github/downloads/midaskira/Hellstrap/total?color=981bfe&label=Downloads&border_radius=3" alt="Downloads" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+  <a href="https://github.com/midaskira/Voidstrap/releases">
+    <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads&border_radius=3" alt="Downloads" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
-  <a href="https://github.com/midaskira/Hellstrap/releases">
-    <img src="https://img.shields.io/github/v/release/midaskira/Hellstrap?color=7a39fb&label=Latest&border_radius=3" alt="GitHub Stars" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+  <a href="https://github.com/midaskira/Voidstrap/releases">
+    <img src="https://img.shields.io/github/v/release/midaskira/Voidstrap?color=7a39fb&label=Latest&border_radius=3" alt="GitHub Stars" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
   </a>
   <a href="https://github.com/midaskira/">
-    <img src="https://img.shields.io/github/stars/midaskira/Hellstrap?color=FFD700&label=Stars&border_radius=3" alt="GitHub Stars">
+    <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars&border_radius=3" alt="GitHub Stars">
   </a>
 </p>
 
@@ -55,10 +55,10 @@
 
 ---
 
-## 🌟 Join the Hellstrap Community!
-- 📂 [Download Hellstrap](https://github.com/midaskira/Hellstrap/releases)
+## 🌟 Join the Voidstrap Community!
+- 📂 [Download Voidstrap](https://github.com/midaskira/Voidstrap/releases)
 - 💬 [Join our Discord](https://discord.gg/UuxcfqPNnA)
-- ⭐ [Star Hellstrap on GitHub](https://github.com/midaskira/Hellstrap/stargazers)
+- ⭐ [Star Voidstrap on GitHub](https://github.com/midaskira/Voidstrap/stargazers)
 
 ---
 
@@ -105,21 +105,21 @@
 ---
 
 ## 🛠️ Installation Guide
-1. **[Download the latest version](https://github.com/midaskira/Hellstrap/releases)**  
+1. **[Download the latest version](https://github.com/midaskira/Voidstrap/releases)**  
 2. Run the installer and configure your settings  
-3. Enjoy a smoother Roblox experience with Hellstrap!  
+3. Enjoy a smoother Roblox experience with Voidstrap!  
 
 ---
 
 ## 🐞 Found a Bug? Need Help?
 💬 **[Join our Discord](https://discord.gg/UuxcfqPNnA)** for support.  
-📌 **[Submit an issue](https://github.com/midaskira/Hellstrap/issues)** on GitHub.
+📌 **[Submit an issue](https://github.com/midaskira/Voidstrap/issues)** on GitHub.
 
 ---
 
 ## 🎨 Credits
 - **Logo**: [midaskira](https://github.com/midaskira)  
-- **Hellstrap Code**: [midaskira (Co-Owner)](https://github.com/midaskira) & [KloBraticc (Owner)](https://github.com/KloBraticc)  
+- **Voidstrap Code**: [midaskira (Co-Owner)](https://github.com/midaskira) & [KloBraticc (Owner)](https://github.com/KloBraticc) & [meddsam (Co-Owner)](https://github.com/Meddsam)
 - **Contributors**: [stoof](https://github.com/stoofis), [Flemish](https://github.com/LeventGameing), [5070], [DynamicFF](https://github.com/DynamicFastFlag), [TnoobixRT](https://github.com/TnoobixRT)
 - **Inspiration**: [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)  
 - **looking for coders or person who would like to help us** [Join our Discord and ping or dm me and bratic](https://discord.gg/UuxcfqPNnA)
