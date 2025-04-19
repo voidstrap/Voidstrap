@@ -3,7 +3,7 @@
 **Voidstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
 
 <p align="center">
-   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png"
+   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrape-full-light.png"
 </p>
 
 <p align="center">
