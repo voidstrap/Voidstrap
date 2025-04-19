@@ -1,0 +1,244 @@
+<ui:UiPage
+    x:Class="Voidstrap.UI.Elements.Settings.Pages.ChannelPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.Settings"
+    xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="ChannelPage"
+    d:DataContext="{d:DesignInstance Type=models:ChannelViewModel}"
+    d:DesignHeight="600"
+    d:DesignWidth="800"
+    Scrollable="True"
+    mc:Ignorable="d">
+
+    <!--  Main StackPanel for content structure  -->
+    <StackPanel Margin="0,0,14,14">
+
+        <!--  Channel Description Section  -->
+        <TextBlock
+            Margin="0,0,0,8"
+            FontSize="14"
+            Foreground="{StaticResource TextFillColorSecondaryBrush}"
+            Text="{x:Static resources:Strings.Menu_Channel_Description}" />
+
+        <!--  Voidstrap Settings Section  -->
+        <TextBlock
+            Margin="0,16,0,0"
+            FontSize="16"
+            FontWeight="Medium"
+            Text="Voidstrap" />
+
+        <!--  Auto Update Toggle  -->
+        <controls:OptionControl
+            Description="(Currently doesn't work)"
+            Header="Automatically Update Voidstrap"
+            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation"
+            Loaded="OptionControl_Loaded">
+            <ui:ToggleSwitch IsChecked="True" />
+        </controls:OptionControl>
+
+        
+        <!--  Roblox Settings Section  -->
+        <TextBlock
+            Margin="0,16,0,0"
+            FontSize="16"
+            FontWeight="Medium"
+            Text="Roblox" />
+
+        <!--  Force Roblox Reinstallation  -->
+        <controls:OptionControl Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxReinstall_Description}" Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxReinstall_Title}">
+            <controls:OptionControl.Style>
+                <Style TargetType="controls:OptionControl">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ForceRobloxReinstallation, Mode=OneTime}" Value="True">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </controls:OptionControl.Style>
+            <ui:ToggleSwitch IsChecked="{Binding ForceRobloxReinstallation, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!--  Roblox Updates Toggle  -->
+        <controls:OptionControl Description="When disabled, Roblox won't update to newer versions. (This feature is currently in **beta**)" Header="Roblox updates">
+            <controls:OptionControl.Style>
+                <Style TargetType="controls:OptionControl">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ForceRobloxReinstallation, Mode=OneTime}" Value="True">
+                            <Setter Property="IsEnabled" Value="False" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </controls:OptionControl.Style>
+            <ui:ToggleSwitch IsChecked="{Binding UpdateRoblox, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+
+
+
+        <ui:CardExpander Margin="0,8,0,0" >
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!--  Left Side (Channel Header and Description)  -->
+                    <StackPanel
+                        Grid.Column="0"
+                        Margin="0,0,12,0"
+                        VerticalAlignment="Center">
+                        <TextBlock FontSize="14" Text="Channels" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Text="Choose deployment channel."
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!--  Right Side (ComboBox for Channel Selection)  -->
+                    <ComboBox
+                        Grid.Column="1"
+                        Width="200"
+                        Margin="8,0,8,0"
+                        Padding="10,5,10,5"
+                        SelectedValue="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=115}"
+                        SelectedValuePath="Content" >
+                        <ComboBoxItem Content="production" />
+                        <ComboBoxItem Content="live" />
+                        <ComboBoxItem Content="zlive" />
+                    </ComboBox>
+
+
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <!--  Expanded Area with Additional Text  -->
+            <ui:CardExpander.Content>
+                <StackPanel Margin="12,8">
+                    <!--  Introductory Text Block  -->
+                    <TextBlock
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="Select a channel to change the current stream setting. Choose from Production, Live, or Zlive based on your requirements."
+                        TextWrapping="Wrap" />
+                    <TextBlock
+                        Height="18"
+                        Margin="0,10,0,0"
+                        FontSize="12"
+                        FontWeight="Bold"
+                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                        Text="Channel Explanations:" />
+
+                    <!--  Channel Explanations Section  -->
+
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="Production: This is the main channel where your final, stable versions of the game are deployed. Use this for public releases and official versions of Roblox."
+                        TextWrapping="Wrap" />
+
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="Live: This channel is used for live game testing, often with a larger user base. It allows you to test features in a near-real environment, but not as stable as production."
+                        TextWrapping="Wrap" />
+
+                    <TextBlock
+                        Margin="0,5,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        Text="Zlive: This is a special live channel typically used for experimental or special events. It might be used for events or content that isn't yet ready for broader use."
+                        TextWrapping="Wrap" />
+                </StackPanel>
+            </ui:CardExpander.Content>
+        </ui:CardExpander>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        <!--  Data Export Section  -->
+        <ui:CardExpander Margin="0,8,0,0" >
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="{x:Static resources:Strings.Menu_Voidstrap_ExportData_Title}" />
+                        <TextBlock
+                            FontSize="12"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Text="{x:Static resources:Strings.Menu_Voidstrap_ExportData_Description}"
+                            TextWrapping="Wrap" />
+                    </StackPanel>
+
+                    <!--  Export Button  -->
+                    <ui:Button
+                        Grid.Column="1"
+                        MinWidth="100"
+                        Margin="0,0,16,0"
+                        Command="{Binding ExportDataCommand}"
+                        Content="{x:Static resources:Strings.Common_Export}"
+                        Icon="CopySelect20" >
+                        <ui:Button.Style>
+                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
+                                <Style.Triggers>
+                                    <MultiDataTrigger>
+                                        <MultiDataTrigger.Conditions>
+                                            <Condition Binding="{Binding ElementName=ShouldExportConfig, Path=IsChecked}" Value="False" />
+                                            <Condition Binding="{Binding ElementName=ShouldExportLogs, Path=IsChecked}" Value="False" />
+                                        </MultiDataTrigger.Conditions>
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </MultiDataTrigger>
+                                </Style.Triggers>
+                                <Setter Property="IsEnabled" Value="True" />
+                            </Style>
+                        </ui:Button.Style>
+                    </ui:Button>
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <!--  Export Checkboxes  -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <CheckBox
+                    Name="ShouldExportConfig"
+                    Grid.Column="0"
+                    Content="{x:Static resources:Strings.Menu_Voidstrap_ExportData_ExportConfig}"
+                    IsChecked="{Binding ShouldExportConfig}" />
+
+                <CheckBox
+                    Name="ShouldExportLogs"
+                    Grid.Column="1"
+                    Content="{x:Static resources:Strings.Menu_Voidstrap_ExportData_ExportLogs}"
+                    IsChecked="{Binding ShouldExportLogs}" />
+            </Grid>
+        </ui:CardExpander>
+    </StackPanel>
+</ui:UiPage>
