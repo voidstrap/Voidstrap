@@ -118,7 +118,7 @@
 ---
 
 ## 🎨 Credits
-- **Logo**: [midaskira](https://github.com/midaskira)  
+- **New Logo**: [meddsam](https://github.com/Meddsam)  
 - **Voidstrap Code**: [midaskira (Co-Owner)](https://github.com/midaskira) & [KloBraticc (Owner)](https://github.com/KloBraticc) & [meddsam (Co-Owner)](https://github.com/Meddsam)
 - **Contributors**: [stoof](https://github.com/stoofis), [Flemish](https://github.com/LeventGameing), [5070], [DynamicFF](https://github.com/DynamicFastFlag), [TnoobixRT](https://github.com/TnoobixRT)
 - **Inspiration**: [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)  
