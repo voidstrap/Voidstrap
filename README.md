@@ -1,126 +1,112 @@
-# **Voidstrap - The Ultimate Bloxstrap Fork for Roblox Optimization**
+# **Voidstrap – A Modern, Feature-Rich Bloxstrap Fork**
 
-**Voidstrap is an advanced, feature-packed fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to optimize and enrich your **Roblox** experience with additional features, improvements, and performance boosts.**
-
-<p align="center">
-   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png"
-</p>
+**Voidstrap** is a powerful, optimized fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), built to enhance your **Roblox** experience with advanced features, stability improvements, and performance enhancements.
 
 <p align="center">
-
-**⭐ If you find Voidstrap useful, please consider giving us a star! It helps a lot! ⭐**
-
+   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png" alt="Voidstrap Logo">
 </p>
 
+<p align="center"><strong>If you find Voidstrap helpful, please consider starring the repository—it really helps!</strong></p>
 
-> [!CAUTION]
-> **The only official places to download Voidstrap are this GitHub repository and [Our Discord](https://discord.gg/UuxcfqPNnA). Any other websites offering downloads or claiming to be us are not controlled by us.**
+> [!IMPORTANT]
+> The only official sources for downloading Voidstrap are this GitHub repository and our [Discord server](https://discord.gg/UuxcfqPNnA). Avoid third-party sites to ensure your safety.
+
 
 <p align="center">
   <a href="https://github.com/midaskira/Voidstrap/blob/main/LICENSE.md">
-    <img src="https://img.shields.io/github/license/midaskira/Voidstrap?&color=FFC000&border_radius=3" alt="License" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+    <img src="https://img.shields.io/github/license/midaskira/Voidstrap?color=FFC000" alt="License">
   </a>
   <a href="https://github.com/midaskira/Voidstrap/releases">
-    <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads&border_radius=3" alt="Downloads" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+    <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads" alt="Downloads">
   </a>
   <a href="https://github.com/midaskira/Voidstrap/releases">
-    <img src="https://img.shields.io/github/v/release/midaskira/Voidstrap?color=7a39fb&label=Latest&border_radius=3" alt="GitHub Stars" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+    <img src="https://img.shields.io/github/v/release/midaskira/Voidstrap?color=7a39fb&label=Latest" alt="Latest Release">
   </a>
-  <a href="https://github.com/midaskira/">
-    <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars&border_radius=3" alt="GitHub Stars">
+  <a href="https://github.com/midaskira/Voidstrap/stargazers">
+    <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars">
   </a>
 </p>
 
 <p align="center">
-  <a href="https://discord.gg/UuxcfqPNnA">
-    <img src="https://img.shields.io/discord/1333479052853383199?logo=discord&logoColor=white&label=Discord&color=4d3dff&border_radius=3" alt="Join Discord" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+  <a href="https://discord.gg/kyh25qeRVp">
+    <img src="https://img.shields.io/discord/1333479052853383199?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
   </a>
   <a href="https://opentip.kaspersky.com/87EBA70EE3385DE38C2A705499B4899E4CEF6C6734C83632C4A5D6C33C84CD88/results?tab=upload">
-    <img src="https://img.shields.io/badge/Virus%20Free-✔️-00B140?&border_radius=3" alt="Virus Free" style="box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+    <img src="https://img.shields.io/badge/Virus%20Free-✔️-00B140" alt="Virus Free">
   </a>
 </p>
 
 ---
 
-## 🚀 Key Features
-- ✅ **Enhanced functionality** over Bloxstrap  
-- ✅ **Optimized performance** for smooth operation  
-- ✅ **Multi-instance support** for launching multiple Roblox clients  
-- ✅ **Advanced logging & tracking** for smoother experience  
-- ✅ **Bug fixes & stability improvements**  
-- ✅ **Cross-Game Teleport** – Added an option to enable cross-game teleport (fixes Error 773)  
-- ✅ **Channels Manager** – Switch between Production, Live, and ZLive channels  
-- ✅ **Hardware Acceleration Toggle** – Disable hardware acceleration for better performance  
-- ✅ **UI Improvements** – Enhanced readability, theme previews, and redesigned shortcuts  
+## 🔧 Key Features
+
+- Optimized fork of Bloxstrap with extended functionality  
+- Multi-instance support for running multiple Roblox clients  
+- Cross-game teleport (fixes Error 773)  
+- Complete Channels Manager  
+- Enhanced UI with theme previews and customization  
+- Bug fixes and performance improvements  
+- Option to disable Roblox updates
 
 ---
 
-## 🌟 Join the Voidstrap Community!
-- 📂 [Download Voidstrap](https://github.com/midaskira/Voidstrap/releases)
-- 💬 [Join our Discord](https://discord.gg/UuxcfqPNnA)
-- ⭐ [Star Voidstrap on GitHub](https://github.com/midaskira/Voidstrap/stargazers)
+## 📥 Get Started
+
+1. [Download the latest version](https://github.com/midaskira/Voidstrap/releases)  
+2. Run the installer and configure your preferences  
+3. Launch Roblox with enhanced control and performance
 
 ---
 
-## ✨ Features & Enhancements
+## 🧩 Feature Overview
 
-### 🔹 **Integrations**
-- **Player Logs** – Track players as they join and leave  
-- **Message Logs** – Log chat messages for monitoring  
+**Integrations**
 
-### 🔹 **Fast Flags**
-- Easy **flag backups & restoration**  
-- Eliminates **editor warnings & flag validation**  
-- **Customizable** Roblox menus for personal preferences  
-- Additional **presets & shortcuts** for quick use  
-- **Removed outdated flags** that were no longer relevant  
+* Player logs  
+* Message logs  
 
-### 🔹 **Channels**
-- Option to **cancel forced Roblox updates**  
-- **New Channels Manager** – Switch between Production, Live, and ZLive  
+**Fast Flags**
 
-### 🔹 **Bootstrapper Enhancements**
-- **Bloxshade support** for improved visual aesthetics  
-- **Multi-instance launching** for Roblox  
-- **Fixed launch errors & improved Windows detection**  
-- **Uninstall settings now save when checkbox is checked**  
+* Flag backup & restore  
+* Removes warning page
 
-### 🔹 **Appearance & Customization**
-- Tailored **themes** for a personalized launcher  
-- Customizable **download status bar**  
-- **Improved UI layout & icons for better readability**  
-- **Theme Preview Mode** – See changes before applying  
-- **Draggable cursor image & fixed cursor issues**  
+**Channels**
 
-### 🔹 **Extras**
-- Save **last opened settings page** for convenience  
-- Apply **custom bootstrapper themes** for unique looks  
-- Various **bug fixes & updates** for smoother experience  
-- **Disable Roblox updates** to maintain desired version  
-- **Rewritten code for better performance and stability**  
-- **Added beta warning to Roblox Updates to inform users of potential bugs**  
+* Cancel forced updates  
+* Fully working channel manager  
 
-💡 *Expect more features soon!* 🚀
+**Bootstrapper Enhancements**
+
+* Multi-instance support  
+* Improved error handling  
+* Saves uninstall settings  
+
+**UI & Customization**
+
+* Theme interface  
+* Refined layout and icons  
+
+**Extras**
+
+* Remembers last settings tab  
+* Disable automatic updates  
 
 ---
 
-## 🛠️ Installation Guide
-1. **[Download the latest version](https://github.com/midaskira/Voidstrap/releases)**  
-2. Run the installer and configure your settings  
-3. Enjoy a smoother Roblox experience with Voidstrap!  
+## 🧠 Community & Support
+
+-  [Join our Discord](https://discord.gg/kyh25qeRVp) for help and announcements  
+-  [Submit an issue](https://github.com/midaskira/Voidstrap/issues) to report bugs or request features  
+-  [Star the project](https://github.com/midaskira/Voidstrap) if you enjoy using Voidstrap
 
 ---
 
-## 🐞 Found a Bug? Need Help?
-💬 **[Join our Discord](https://discord.gg/UuxcfqPNnA)** for support.  
-📌 **[Submit an issue](https://github.com/midaskira/Voidstrap/issues)** on GitHub.
+## 🙌 Credits
 
----
-
-## 🎨 Credits
-- **New Logo**: [meddsam](https://github.com/Meddsam)  
-- **Voidstrap Code**: [midaskira (Co-Owner)](https://github.com/midaskira) & [KloBraticc (Owner)](https://github.com/KloBraticc) & [meddsam (Co-Owner)](https://github.com/Meddsam)
-- **Contributors**: [stoof](https://github.com/stoofis), [Flemish](https://github.com/LeventGameing), [5070], [DynamicFF](https://github.com/DynamicFastFlag), [TnoobixRT](https://github.com/TnoobixRT)
-- **Inspiration**: [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)  
-- **looking for coders or person who would like to help us** [Join our Discord and ping or dm me and bratic](https://discord.gg/UuxcfqPNnA)
----
+- **Logo & Branding**: [meddsam](https://github.com/Meddsam)  
+- **Development Team**:  
+  - [meddsam](https://github.com/Meddsam) *(Lead Developer)*  
+  - [KloBraticc](https://github.com/KloBraticc) *(Former Maintainer)*  
+  - [midaskira](https://github.com/midaskira) *(Former Maintainer)*  
+- **Contributors**: [stoof](https://github.com/stoofis), [Flemish](https://github.com/LeventGameing), [DynamicFF](https://github.com/DynamicFastFlag), [TnoobixRT](https://github.com/TnoobixRT)  
+- **Inspired by**: [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), [Fishstrap](https://github.com/fishstrap/fishstrap)
