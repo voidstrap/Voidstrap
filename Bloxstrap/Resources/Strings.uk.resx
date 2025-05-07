@@ -389,6 +389,12 @@
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Світла</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Світла</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Світла</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap було оновлено до версії {0}</value>
   </data>
@@ -1230,6 +1236,26 @@ Voidstrap встановлено на "{1}".</value>
     <value>Іконки</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Запустити Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>Версія {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap намагався оновити Roblox, але не може, тому що файли Roblox все ще у використанні.
+
+Будь ласка, закрийте застосунки, які можуть використовувати файли Roblox і перезапустіться.</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>Архів Zip</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Експорт</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>Ймовірно, щось заважає Voidstrap приєднатися до інтернету.</value>
   </data>
@@ -1254,25 +1280,5 @@ Voidstrap встановлено на "{1}".</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Запустити Roblox Studio</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>Версія {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap намагався оновити Roblox, але не може, тому що файли Roblox все ще у використанні.
-
-Будь ласка, закрийте застосунки, які можуть використовувати файли Roblox і перезапустіться.</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>Архів Zip</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>Експорт</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

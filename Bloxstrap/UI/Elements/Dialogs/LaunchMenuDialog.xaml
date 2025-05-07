@@ -24,9 +24,17 @@
 
     <Grid>
         <!--  Main layout definition  -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!--  Title Bar  -->
@@ -57,38 +65,30 @@
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
 
-                <!--  App Logo and Info  -->
-                <Grid
-                    Grid.Row="0"
-                    Margin="0,0,0,32"
-                    HorizontalAlignment="Center">
+                <Grid Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,32">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <Image
-                        Grid.Column="0"
-                        Height="96"
-                        RenderOptions.BitmapScalingMode="HighQuality"
-                        Source="pack://application:,,,/Voidstrap.ico" Margin="-10,0,0,0" />
-                    <StackPanel
-                        Grid.Column="1"
-                        Margin="12,0,0,0"
-                        VerticalAlignment="Center">
-                        <TextBlock FontSize="26" Text="Voidstrap" />
-                        <TextBlock
-                            VerticalAlignment="Bottom"
-                            FontSize="12"
-                            Text="{Binding Version, Mode=OneTime}" />
+                    <Image Grid.Column="0" Width="72" Height="72" Source="pack://application:,,,/Voidstrap.ico" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="LaunchTitle" Text="Voidstrap" FontSize="24" />
+                        <TextBlock Text="{Binding Version, Mode=OneTime}" VerticalAlignment="Bottom" FontSize="12" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
                 </Grid>
 
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center">
+                    <ui:Hyperlink Icon="QuestionCircle48" Content="{x:Static resources:Strings.About_Title}" Command="{Binding LaunchAboutCommand, Mode=OneTime}" />
+                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/kyh25qeRVp" HorizontalAlignment="Center" />
+                </StackPanel>
+
+
                 <!--  About Link  -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" />
 
                 <!--  About Link  -->
-                <StackPanel Grid.Row="1" HorizontalAlignment="Center" />
+                <StackPanel Grid.Row="1" HorizontalAlignment="Center"/>
             </Grid>
 
 

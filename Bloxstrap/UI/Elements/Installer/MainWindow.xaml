@@ -23,6 +23,13 @@
 
     <Grid>
         <!--  Define Layout  -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -67,15 +74,15 @@
                     <ui:NavigationItem
                         BorderThickness="1,1,1,1"
                         Content="{x:Static resources:Strings.Installer_Welcome_Title}"
-                        Icon="ArrowCircleRight48"
+                        Icon="NumberCircle116"
                         PageType="{x:Type pages:WelcomePage}" />
                     <ui:NavigationItem
                         Content="{x:Static resources:Strings.Installer_Install_Title}"
-                        Icon="ArrowCircleRight48"
+                        Icon="NumberCircle216"
                         PageType="{x:Type pages:InstallPage}" />
                     <ui:NavigationItem
                         Content="{x:Static resources:Strings.Installer_Completion_Title}"
-                        Icon="ArrowCircleRight48"
+                        Icon="NumberCircle316"
                         PageType="{x:Type pages:CompletionPage}" />
                 </ui:NavigationFluent.Items>
             </ui:NavigationFluent>
@@ -100,7 +107,7 @@
                 <Frame
                     x:Name="RootFrame"
                     Grid.Row="1"
-                    Content="This installation process will be quick and simple,                         and you will be able to configure any of Voidstrap's settings after installation." />
+                    Content="This installation process will be quick and simple,                         and you will be able to configure any of Voidstrap's settings after installation." Navigated="RootFrame_Navigated" />
             </Grid>
         </Grid>
 
@@ -109,8 +116,8 @@
             x:Name="RootStatusBar"
             Grid.Row="2"
             Padding="14,10"
-            Background="{ui:ThemeResource ApplicationBackgroundBrush}"
-            BorderThickness="0,1,0,0">
+            BorderThickness="0,1,0,0"
+            Background="{DynamicResource PrimaryBackgroundColor}">
 
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>

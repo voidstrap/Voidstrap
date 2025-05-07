@@ -389,6 +389,12 @@
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>สว่าง</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>สว่าง</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>สว่าง</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap ได้รับการอัปเกรดเป็น v{0}</value>
   </data>
@@ -748,21 +754,6 @@
   <data name="Menu.Mods.Help.Description" xml:space="preserve">
     <value>ดูข้อมูลเกี่ยวกับการจัดการและการสร้างม็อด</value>
     <comment>Title is Common.Help</comment>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
-    <value>เลือกฟอนต์...</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
-    <value>ขนาดของฟอร์นสามารถเปลี่ยนได้ในแท็บ Engine Setting</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
-    <value>ไฟล์ที่คุณเลือกไม่ใช่ไฟล์ฟอนต์ที่ถูกต้อง</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
-    <value>ลบ font ที่กำลังใช้</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
-    <value>ใช้ฟ้อนต์ที่กำหนดด้วยตัวเอง</value>
   </data>
   <data name="Menu.Mods.OpenModsFolder.Description" xml:space="preserve">
     <value>จัดการม็อดต่างๆ ได้ที่นี้</value>
@@ -1227,6 +1218,26 @@ Voidstrap จะติดตั้งไว้ที่ "{1}"</value>
     <value>ไอคอน</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>เปิด Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>เวอร์ชั่น {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap พยายามที่จะอัปเดต Roblox แต่ไม่สามารถทำได้เพราะมีไฟล์ของ Roblox ที่กำลังถูกใช้
+
+โปรดปิดแอปพลิเคชันที่กำลังใช้ไฟล์ของ Roblox แล้วลองใหม่อีกครั้ง</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>ไฟล์ซิป</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>ส่งออก</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>มีบางอย่างที่อาจทำให้ Voidstrap ไม่สามารถเชื่อมต่อกับอินเทอร์เน็ตได้</value>
   </data>
@@ -1252,24 +1263,19 @@ Voidstrap จะติดตั้งไว้ที่ "{1}"</value>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>เปิด Roblox Studio</value>
+  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
+    <value>เลือกฟอนต์...</value>
   </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>เวอร์ชั่น {0}</value>
+  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
+    <value>ขนาดของฟอร์นสามารถเปลี่ยนได้ในแท็บ Engine Setting</value>
   </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap พยายามที่จะอัปเดต Roblox แต่ไม่สามารถทำได้เพราะมีไฟล์ของ Roblox ที่กำลังถูกใช้
-
-โปรดปิดแอปพลิเคชันที่กำลังใช้ไฟล์ของ Roblox แล้วลองใหม่อีกครั้ง</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
+    <value>ไฟล์ที่คุณเลือกไม่ใช่ไฟล์ฟอนต์ที่ถูกต้อง</value>
   </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>ไฟล์ซิป</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
+    <value>ลบ font ที่กำลังใช้</value>
   </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>ส่งออก</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
+    <value>ใช้ฟ้อนต์ที่กำหนดด้วยตัวเอง</value>
   </data>
 </root>

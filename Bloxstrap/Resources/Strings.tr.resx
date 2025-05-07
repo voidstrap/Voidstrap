@@ -389,6 +389,12 @@ Değilse, lütfen bu sorunu oluşturulan kayıt dosyasının bir kopyasıyla bir
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Aydınlık</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Aydınlık</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Aydınlık</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap v{0} sürümüne güncellendi</value>
   </data>
@@ -1230,6 +1236,26 @@ Test modu açmak ister misiniz?</value>
     <value>Simgeler</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Roblox Studio'u başlat</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>Sürüm {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap Roblox'u yükseltmeye çalıştı ancak başaramadı çünkü Roblox'un dosyaları hâlâ kullanımda.
+
+Lütfen Roblox'un dosyalarını kullanabilecek olan uygulamaları kapatın, ve tekrar başlatın.</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>Zip arşivi</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Dışa aktar</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>Muhtemelen bir şey Voidstrap'ın internet'e bağlanmasına engel oluyor.</value>
   </data>
@@ -1254,25 +1280,5 @@ Test modu açmak ister misiniz?</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Roblox Studio'u başlat</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>Sürüm {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap Roblox'u yükseltmeye çalıştı ancak başaramadı çünkü Roblox'un dosyaları hâlâ kullanımda.
-
-Lütfen Roblox'un dosyalarını kullanabilecek olan uygulamaları kapatın, ve tekrar başlatın.</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>Zip arşivi</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>Dışa aktar</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

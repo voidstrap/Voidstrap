@@ -12,16 +12,17 @@
 
         public static string TempUpdates => Path.Combine(Temp, "Updates");
         public static string TempLogs => Path.Combine(Temp, "Logs");
-        public static string Base { get; private set; } = string.Empty;
-        public static string Downloads { get; private set; } = string.Empty;
-        public static string SavedBackups { get; private set; } = string.Empty;
-        public static string Logs { get; private set; } = string.Empty;
-        public static string Integrations { get; private set; } = string.Empty;
-        public static string Versions { get; private set; } = string.Empty;
-        public static string Mods { get; private set; } = string.Empty;
-        public static string Roblox { get; private set; } = string.Empty;
+        public static string Base { get; private set; } = "";
+        public static string Downloads { get; private set; } = "";
+        public static string SavedBackups { get; private set; } = "";
+        public static string Logs { get; private set; } = "";
+        public static string Integrations { get; private set; } = "";
+        public static string Versions { get; private set; } = "";
+        public static string Mods { get; private set; } = "";
+        public static string Roblox { get; private set; } = "";
         public static string CustomThemes { get; private set; } = "";
-        public static string Application { get; private set; } = string.Empty;
+
+        public static string Application { get; private set; } = "";
 
         public static string CustomFont => Path.Combine(Mods, "content", "fonts", "CustomFont.ttf");
  
@@ -39,6 +40,7 @@
             Integrations = Path.Combine(Base, "Integrations");
             Versions = Path.Combine(Base, "RblxVersions");
             Mods = Path.Combine(Base, "Mods");
+            Roblox = Path.Combine(Base, "Roblox");
             CustomThemes = Path.Combine(Base, "CustomThemes");
 
             Application = Path.Combine(Base, $"{App.ProjectName}.exe");

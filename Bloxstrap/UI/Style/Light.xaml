@@ -1,5 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <SolidColorBrush x:Key="NewTextEditorBackground" Color="White" />
-    <SolidColorBrush x:Key="NewTextEditorForeground" Color="Black" />
-    <SolidColorBrush x:Key="NewTextEditorLink" Color="Blue" />
+    <SolidColorBrush x:Key="NewTextEditorForeground" Color="#2D2D2D" />
+    <SolidColorBrush x:Key="NewTextEditorLink" Color="#3A9CEA" />
+    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#eeeeee" />
+    <Color x:Key="ControlFillColorDefault"></Color>
+    <Color x:Key="WindowBackgroundColorPrimary">#E9E9E9</Color>
+    <Color x:Key="WindowBackgroundColorSecondary">White</Color>
+    <Color x:Key="WindowBackgroundColorThird">#E9E9E9</Color>
 </ResourceDictionary>

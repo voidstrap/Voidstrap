@@ -199,11 +199,11 @@ namespace Voidstrap.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Icon IconVoidstrapClassic
+        internal static System.Drawing.Icon IconHellstrapClassic
         {
             get
             {
-                object obj = ResourceManager.GetObject("IconVoidstrapClassic", resourceCulture);
+                object obj = ResourceManager.GetObject("IconHellstrapClassic", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

@@ -83,7 +83,7 @@
                             Margin="0,2,0,0"
                             FontSize="12"
                             Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                            Text="Configure your graphics and rendering settings" />
+                            Text="Configure basic graphic and rendering settings" />
                     </StackPanel>
                 </Grid>
             </ui:CardExpander.Header>
@@ -104,13 +104,8 @@
                     </ComboBox>
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Import a monitoring UI for FPS."
-                                        Header="Display FPS">
-                    <ui:ToggleSwitch IsChecked="{Binding DisplayFps, Mode=TwoWay}" />
-                </controls:OptionControl>
-
                 <controls:OptionControl Description="Eliminates lighting and shadows."
-                                        Header="Pause voxelizer">
+                                        Header="Disable Shadows">
                     <ui:ToggleSwitch IsChecked="{Binding DisablePlayerShadows, Mode=TwoWay}" />
                 </controls:OptionControl>
 
@@ -118,7 +113,7 @@
                     <ui:ToggleSwitch IsChecked="{Binding DisableTerrainTextures, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Removes the individual blades of grass being rendered." Header="Remove grass strands">
+                <controls:OptionControl Description="Removes the individual blades of grass being rendered." Header="Remove Grass">
                     <ui:ToggleSwitch IsChecked="{Binding RemoveGrass, Mode=TwoWay}" />
                 </controls:OptionControl>
 
@@ -129,7 +124,7 @@
                     <ui:ToggleSwitch IsChecked="{Binding DisablePostFX, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Override the sky with a solid gray color." Header="Force gray sky">
+                <controls:OptionControl Description="Override the sky with a solid gray color." Header="Force Gray Sky">
                     <ui:ToggleSwitch IsChecked="{Binding EnableGraySky, Mode=TwoWay}" />
                 </controls:OptionControl>
                 <controls:OptionControl
@@ -151,13 +146,34 @@
                     <ui:ToggleSwitch IsChecked="{Binding FixDisplayScaling, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Configure the rendering api for Roblox. Setting to Vulkan may cause some bugs!" Header="{x:Static resources:Strings.Menu_FastFlags_Presets_RenderingMode_Title}">
+                <controls:OptionControl
+                    Description="Makes every avatar in the game gray."
+                    Header="Gray Avatars">
+                    <ui:ToggleSwitch IsChecked="{Binding GrayAvatar, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Configure the rendering api for Roblox. Press Alt Enter when going to Fullscreen if using Direct3D. Setting to Vulkan may cause some bugs!" Header="{x:Static resources:Strings.Menu_FastFlags_Presets_RenderingMode_Title}">
                     <ComboBox
                 Width="200"
                 Margin="5,0,0,0"
                 Padding="10,5,10,5"
                 ItemsSource="{Binding RenderingModes.Keys, Mode=OneTime}"
                 Text="{Binding SelectedRenderingMode, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Adjust the quality of textures. Higher levels increase quality." Header="Texture quality">
+                    <ComboBox
+                Width="200"
+                Margin="5,0,0,0"
+                Padding="10,5,10,5"
+                ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}"
+                Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -234,10 +250,6 @@
                             <ui:ToggleSwitch IsChecked="{Binding SoothsayerCheck, Mode=TwoWay}" />
                         </controls:OptionControl>
 
-                        <controls:OptionControl Description="Hides the Haptic button." Header="Haptic Button">
-                            <ui:ToggleSwitch IsChecked="{Binding Haptics, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
                         <controls:OptionControl Description="Hides the chat translation option." Header="Chat Translation">
                             <ui:ToggleSwitch IsChecked="{Binding ChatTranslation, Mode=TwoWay}" />
                         </controls:OptionControl>
@@ -254,12 +266,29 @@
                     <ui:ToggleSwitch IsChecked="{Binding FullscreenTitlebarDisabled, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Revert Roblox's gray and green themed desktop app." Header="Old desktop theme">
+                <controls:OptionControl Description="This disables the new chrome ui top bar." Header="Disable Chrome UI">
+                    <ui:ToggleSwitch IsChecked="{Binding DisableChrome, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Removes blur effects like the blur effect when loading." Header="Remove Blur Effect">
+                    <ui:ToggleSwitch IsChecked="{Binding NoGuiBlur, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Revert Roblox's gray and green themed desktop app." Header="Old Desktop Theme">
                     <ui:ToggleSwitch IsChecked="{Binding EnableDarkMode, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Refrain chat bubbles from appearing above characters." Header="Disable chat bubble">
-                    <ui:ToggleSwitch IsChecked="{Binding DisableChatBubble, Mode=TwoWay}" />
+                <controls:OptionControl Description="Import a monitoring UI for FPS."
+                                        Header="Display FPS">
+                    <ui:ToggleSwitch IsChecked="{Binding DisplayFps, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Bring back the old positions in the game page." Header="Revert Game Page Position">
+                    <ui:ToggleSwitch IsChecked="{Binding NoMoreMiddle, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Refrain chat bubbles from appearing above characters." Header="Disable Chat Bubble">
+                    <ui:ToggleSwitch IsChecked="{Binding ChatBubble, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl Description="Adds a text size changer in roblox settings." Header="Text Size Changer">
@@ -275,7 +304,7 @@
                         Margin="5,0,0,0"
                         Padding="10,5,10,5"
                         PreviewTextInput="ValidateUInt32"
-                        Text="{Binding GuiHidingId, Mode=TwoWay}" />
+                        Text="{Binding HideGUI, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
@@ -310,25 +339,39 @@
             </ui:CardExpander.Header>
             <StackPanel>
 
-                <controls:OptionControl Description="Only applies to games that has not affected the default zoom limit." Header="Unlimited zoom distance">
+                <controls:OptionControl Description="Only applies to games that has not affected the default zoom limit." Header="Unlimited Zoom Distance">
                     <ui:ToggleSwitch IsChecked="{Binding UnlimitedCameraZoom, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Accessories and classic clothing are not affected." Header="Disable layered clothing">
+                <controls:OptionControl Description="Accessories and classic clothing are not affected." Header="Disable Layered Clothing">
                     <ui:ToggleSwitch IsChecked="{Binding Layered, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl Description="Increases brightness by adding a blue filter."
-                                        Header="Brighter visual display">
+                                        Header="Brighter Visuals">
                     <ui:ToggleSwitch IsChecked="{Binding MoreLighting, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Apply Roblox BuilderSans font to use red font (Dont Use Any Custom Font If Using This)" Header="Red font">
+                <controls:OptionControl Description="Apply Roblox BuilderSans font to use red font (Dont Use Any Custom Font If Using This)" Header="Red Font">
                     <ui:ToggleSwitch IsChecked="{Binding RedFont, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Highlights UI elements that aren’t using a theme and give it a random color." Header="Rainbow font">
+                <controls:OptionControl Description="Highlights UI elements that aren’t using a theme and give it a random color." Header="Rainbow Font">
                     <ui:ToggleSwitch IsChecked="{Binding RainbowTheme, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Enables the feature to set your own custom error message." Header="Enable Custom Disconnect Message">
+                    <ui:ToggleSwitch IsChecked="{Binding EnableCustomDisconnectError, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+                    x:Name="CustomDisconnectMessage"
+                    Description="Set your own Custom Disconnect Message."
+                    Header="Custom Disconnect Message">
+                    <ui:TextBox
+                    Width="200"
+                    Padding="10,5,10,5"
+                    Text="{Binding CustomDisconnectError, Mode=TwoWay}" />
                 </controls:OptionControl>
 
             </StackPanel>
@@ -360,7 +403,7 @@
                 </Grid>
             </ui:CardExpander.Header>
             <StackPanel>
-                <controls:OptionControl Description="Select the preferred GPU for rendering Roblox. Useful for PCs with more GPUs." Header="Preferred graphics processor">
+                <controls:OptionControl Description="Select the preferred GPU for rendering Roblox. Useful for PCs with more GPUs." Header="Preferred Graphics Processor">
                     <ComboBox
                         Width="200"
                         Margin="5,0,0,0"
@@ -374,22 +417,8 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </controls:OptionControl>
-                <controls:OptionControl Description="Force Roblox to use vulkan on older GPUs. (You need to use Vulkan rendering API first)" Header="Force Vulkan®">
-                    <ComboBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        ItemsSource="{Binding GPUs.Keys, Mode=OneWay}"
-                        SelectedItem="{Binding ForceBuggyVulkan, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </controls:OptionControl>
 
-                <controls:OptionControl Description="Configure the logical cores to run Roblox." Header="Force CPU logical cores">
+                <controls:OptionControl Description="Configure the logical cores to run Roblox." Header="Force CPU Logical Cores">
                     <ComboBox
                         Width="200"
                         Margin="5,0,0,0"
@@ -404,16 +433,7 @@
                     </ComboBox>
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Set to the amount of logical processors you got." Header="Cpu Optimization">
-                    <ui:TextBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        PreviewTextInput="ValidateUInt32"
-                        Text="{Binding LogicalProcessor, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="This will make the task scheduler avoids sleep for more fps." Header="Task Scheduler Avoids Sleep">
+                <controls:OptionControl Description="Prohibits the task scheduler from sleeping." Header="Avoid Task Scheduler Sleep">
                     <ui:ToggleSwitch IsChecked="{Binding TaskSchedulerAvoidingSleep, Mode=TwoWay}" />
                 </controls:OptionControl>
 
@@ -421,7 +441,7 @@
                     <ui:ToggleSwitch IsChecked="{Binding LightCulling, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Optimizes memory usage for low end PCs." Header="Memory probing">
+                <controls:OptionControl Description="Optimizes memory usage for low end PCs." Header="Memory Probing">
                     <ui:ToggleSwitch IsChecked="{Binding MemoryProbing, Mode=TwoWay}" />
                 </controls:OptionControl>
 
@@ -429,23 +449,23 @@
                     <ui:ToggleSwitch IsChecked="{Binding Threading, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
+                <controls:OptionControl                     
                     Description="Adjusts the resolution in game, such as 720p, 1080p, 1440p, and 4k. Similar to adjusting video quality on YouTube."
-                    Header="Dynamic resolution"
+                    Header="Dynamic Resolution"
                     HelpLink="https://www.vdocipher.com/blog/video-resolution">
-                    <ui:TextBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        PreviewTextInput="ValidateUInt32"
-                        Text="{Binding DynamicRenderResolution, Mode=TwoWay}">
-                        <ui:TextBox.BorderBrush>
-                            <LinearGradientBrush MappingMode="Absolute" EndPoint="0,3">
-                                <GradientStop Offset="0.33" Color="#18FFFFFF" />
-                                <GradientStop Offset="1" />
-                            </LinearGradientBrush>
-                        </ui:TextBox.BorderBrush>
-                    </ui:TextBox>
+                    <ComboBox
+                Width="200"
+                Margin="5,0,0,0"
+                Padding="10,5,10,5"
+                ItemsSource="{Binding DynamicResolutions.Keys, Mode=OneTime}"
+                Text="{Binding SelectedDynamicResolution, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
                 </controls:OptionControl>
 
             </StackPanel>
@@ -465,18 +485,22 @@
                     Margin="0,2,0,0"
                     FontSize="12"
                     Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                    Text="Configure advanced graphics quality and textures" />
+                    Text="Configure advanced graphics quality and textures settings" />
                     </StackPanel>
                 </Grid>
             </ui:CardExpander.Header>
 
             <StackPanel>
 
-                <controls:OptionControl Description="will prevent objects and terrain from loading their given texture. Compared to SkipMips, these don't tear away at the quality of GUI." Header="Texture Remover">
+                <controls:OptionControl Description="Removes texutre but unlike texture skipping it dosent affect the quality of the ui." Header="Remove Textures">
                     <ui:ToggleSwitch IsChecked="{Binding TextureRemover, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Sets the initial graphics level to match the selected amount when loading in game." Header="Start at graphics level">
+                <controls:OptionControl Description="Render Occlusion Prohibits object behind walls from loadding resulting in better performance." Header="Render Occlusion">
+                    <ui:ToggleSwitch IsChecked="{Binding RenderOcclusion, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Sets the initial graphics level to match the selected amount when loading in game." Header="Start At Graphics Level">
                     <ComboBox
                 Width="200"
                 Margin="5,0,0,0"
@@ -492,7 +516,7 @@
                     </ComboBox>
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Locks texture quality to your selected setting, allowing for high render distance with low quality if set to 1." Header="Override graphics level">
+                <controls:OptionControl Description="Locks texture quality to your selected setting, allowing for high render distance with low quality if set to 1." Header="Override Graphics Level">
                     <ComboBox
                 Width="200"
                 Margin="5,0,0,0"
@@ -507,7 +531,7 @@
 
                     </ComboBox>
                 </controls:OptionControl>
-                <controls:OptionControl Description="Higher values may blur icons and remove textures at levels 4-8." Header="Texture skipping">
+                <controls:OptionControl Description="Higher values may blur icons and remove textures at levels 4-8." Header="Texture Skipping">
                     <ComboBox
                 Width="200"
                 Margin="5,0,0,0"
@@ -522,24 +546,8 @@
 
                     </ComboBox>
                 </controls:OptionControl>
-                <controls:OptionControl Description="Adjust the quality of textures. Higher levels increase quality." Header="Texture quality">
-                    <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}"
-                Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </controls:OptionControl>
 
-
-
-                <controls:OptionControl Description="Decreases the visibility of rendered distance from your location. Requires streaming enabled. (Shift + F3)" Header="Render distance">
+                <controls:OptionControl Description="Decreases the visibility of rendered distance from your location. Requires streaming enabled. (Shift + F3)" Header="Render Distance">
                     <ComboBox
                 Width="200"
                 Margin="5,0,0,0"
@@ -554,6 +562,7 @@
 
                     </ComboBox>
                 </controls:OptionControl>
+
             </StackPanel>
         </ui:CardExpander>
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
@@ -577,48 +586,47 @@
 
                 <controls:OptionControl
                     Description="Disables only a couple of telemetry."
-                    Header="Disable roblox telemetry">
+                    Header="Disable Roblox Telemetry">
                     <ui:ToggleSwitch IsChecked="{Binding DisableTelemetry, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
                     Description="Prevent lag spikes by smoothing out the network output."
-                    Header="Reduce lag spikes">
+                    Header="Reduce Lag Spikes">
                     <ui:ToggleSwitch IsChecked="{Binding LessLagSpikes, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
-                    Description="Disables Network Data transfer limit, Could lead to network overhead if packets are too large so use at your own risk."
+                    Description="Disables network data transfer limit, could lead to network overhead if packets are too large so use at your own risk."
                     Header="No Payload Limit">
                     <ui:ToggleSwitch IsChecked="{Binding NoPayloadLimit, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
                     Description="Stabilizes connection by optimizing roblox's core."
-                    Header="Roblox core">
+                    Header="RCore">
                     <ui:ToggleSwitch IsChecked="{Binding RobloxCore, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
                     Description="Increases the speed of large reads and writes."
-                    Header="Large replicator">
+                    Header="Large Replicator">
                     <ui:ToggleSwitch IsChecked="{Binding EnableLargeReplicator, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
             Description="Preloads most textures and fonts. May increase loading time in games!"
-            Header="Force preloading"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
+            Header="Force Preloading">
                     <ui:ToggleSwitch IsChecked="{Binding Preload, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
                     Description="Decreases wait time by optimizing loading speeds."
-                    Header="Faster loading">
+                    Header="Faster Loading">
                     <ui:ToggleSwitch IsChecked="{Binding LoadFaster, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Configure bytes of data that are transferred over your network. 1396 is the default." Header="MTU size">
+                <controls:OptionControl Description="Configure bytes of data that are transferred over your network. 1396 is the default." Header="MTU Size">
                     <ui:TextBox
                         Width="200"
                         Margin="5,0,0,0"
@@ -647,6 +655,7 @@
                 Padding="10,5,10,5"
                 Text="{Binding FlagState, Mode=TwoWay}" />
         </controls:OptionControl>
+        
         <controls:OptionControl
             x:Name="PingBreakdownOption"
             Description="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Description}"

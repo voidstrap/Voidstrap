@@ -19,10 +19,10 @@ namespace Voidstrap
         public const string ProjectName = "Voidstrap";
 #endif
         public const string ProjectOwner = "Voidstrap";
-        public const string ProjectRepository = "midaskira/Voidstrap";
-        public const string ProjectDownloadLink = "https://github.com/midaskira/Voidstrap/releases";
+        public const string ProjectRepository = "Voidstrap/Voidstrap";
+        public const string ProjectDownloadLink = "https://github.com/Voidstrap/Voidstrap/releases";
         public const string ProjectHelpLink = "https://github.com/Bloxstraplabs/Bloxstrap/wiki";
-        public const string ProjectSupportLink = "https://github.com/midaskira/Voidstrap/issues/new";
+        public const string ProjectSupportLink = "https://github.com/Voidstrap/Voidstrap/issues/new";
 
         public const string RobloxPlayerAppName = "RobloxPlayerBeta";
         public const string RobloxStudioAppName = "RobloxStudioBeta";

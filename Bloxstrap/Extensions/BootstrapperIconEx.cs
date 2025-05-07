@@ -15,7 +15,7 @@ namespace Voidstrap.Extensions
             BootstrapperIcon.IconEarly2015,
             BootstrapperIcon.Icon2011,
             BootstrapperIcon.Icon2008,
-            BootstrapperIcon.IconVoidstrapClassic,
+            BootstrapperIcon.IconHellstrapClassic,
             BootstrapperIcon.IconCustom
         };
 
@@ -64,7 +64,7 @@ namespace Voidstrap.Extensions
                 BootstrapperIcon.Icon2017 => Properties.Resources.Icon2017,
                 BootstrapperIcon.Icon2019 => Properties.Resources.Icon2019,
                 BootstrapperIcon.Icon2022 => Properties.Resources.Icon2022,
-                BootstrapperIcon.IconVoidstrapClassic => Properties.Resources.IconVoidstrapClassic,
+                BootstrapperIcon.IconHellstrapClassic => Properties.Resources.IconHellstrapClassic,
                 _ => Properties.Resources.IconVoidstrap
             };
         }

@@ -393,6 +393,12 @@
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>浅色</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>浅色</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>浅色</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap 现已更新至 v{0}</value>
   </data>
@@ -759,21 +765,6 @@
   <data name="Menu.Mods.Help.Description" xml:space="preserve">
     <value>查阅关于如何管理和创建模组的指南。</value>
     <comment>Title is Common.Help</comment>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
-    <value>选择字体文件...</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
-    <value>字体大小可在 “FFlags” 选项卡中进行调整。</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
-    <value>您当前选择的文件似乎不是有效的字体文件。</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
-    <value>移除已应用的字体</value>
-  </data>
-  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
-    <value>使用自定义字体</value>
   </data>
   <data name="Menu.Mods.OpenModsFolder.Description" xml:space="preserve">
     <value>您可以在此处自定义 Roblox 的模组。</value>
@@ -1256,6 +1247,26 @@ Voidstrap 的安装路径是：
     <value>已提取的图标 (Icons)</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>启动 Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>版本 {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap 目前无法更新 Roblox；因为当前 Roblox 的文件被占用。
+
+请关闭任何可能正在占用 Roblox 文件的应用程序，然后重启 Voidstrap。</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>压缩文件</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>导出</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>某些东西可能正在阻止 Voidstrap 连接至互联网。</value>
   </data>
@@ -1281,24 +1292,19 @@ Voidstrap 的安装路径是：
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
   </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>启动 Roblox Studio</value>
+  <data name="Menu.Mods.Misc.CustomCursor.Choose" xml:space="preserve">
+    <value>选择字体文件...</value>
   </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>版本 {0}</value>
+  <data name="Menu.Mods.Misc.CustomCursor.Description" xml:space="preserve">
+    <value>字体大小可在 “FFlags” 选项卡中进行调整。</value>
   </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap 目前无法更新 Roblox；因为当前 Roblox 的文件被占用。
-
-请关闭任何可能正在占用 Roblox 文件的应用程序，然后重启 Voidstrap。</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Invalid" xml:space="preserve">
+    <value>您当前选择的文件似乎不是有效的字体文件。</value>
   </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>压缩文件</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Remove" xml:space="preserve">
+    <value>移除已应用的字体</value>
   </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>导出</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  <data name="Menu.Mods.Misc.CustomCursor.Title" xml:space="preserve">
+    <value>使用自定义字体</value>
   </data>
 </root>

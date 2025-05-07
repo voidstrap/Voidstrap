@@ -98,7 +98,7 @@
                 Click="Anchor_Click"
                 Content="{x:Static resources:Strings.Menu_About_DiscordServer}"
                 Icon="Chat48"
-                NavigateUri="https://discord.gg/ScG3SnVCBR" />
+                NavigateUri="https://discord.gg/kyh25qeRVp" />
         </WrapPanel>
 
         <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
@@ -211,7 +211,7 @@
                     <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
                     <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
-                    <controls:MarkdownTextBlock MarkdownText="[meddsam](roblox.com/users/1144764103/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[meddsam](https://www.roblox.com/users/1144764103/profile)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
                     <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
                 </StackPanel>
@@ -226,13 +226,13 @@
                 IsExpanded="True">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[TnoobixRT](https://guns.lol/tnoobixrt)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Flemish](discord.com/users/1286961047990702124)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Stoof](https://guns.lol/stoof)" />
-                    <controls:MarkdownTextBlock MarkdownText="[RecBacon](discord.com/users/931627573656559656)" />
-                    <controls:MarkdownTextBlock MarkdownText="[5070](discord.com/users/1272494435690610800)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Slut](discord.com/users/1211640594082832404)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Bren](discord.com/users/1211640594082832404)" />
-                    <controls:MarkdownTextBlock MarkdownText="[NazoCD](discord.com/users/1094216231415984140)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Flemish](https://www.discord.com/users/1286961047990702124)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Stoof](https://www.youtube.com/@stoofis)" />
+                    <controls:MarkdownTextBlock MarkdownText="[RecBacon](https://www.discord.com/users/931627573656559656)" />
+                    <controls:MarkdownTextBlock MarkdownText="[5070](https://www.discord.com/users/1272494435690610800)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Slut](https://www.discord.com/users/1211640594082832404)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bren](https://www.discord.com/users/1211640594082832404)" />
+                    <controls:MarkdownTextBlock MarkdownText="[NazoCD](https://www.discord.com/users/1094216231415984140)" />
                 </StackPanel>
             </controls:Expander>
 

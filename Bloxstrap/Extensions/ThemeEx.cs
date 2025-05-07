@@ -11,10 +11,10 @@ namespace Voidstrap.Extensions
 
             using var key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize");
 
-            if (key?.GetValue("AppsUseLightTheme") is int value && value == 0)
-                return Theme.Dark;
+            if (key?.GetValue("AppsUseDarkTheme") is int value && value == 0)
+                return Theme.Light;
 
-            return Theme.Light;
+            return Theme.Dark;
         }
     }
 }

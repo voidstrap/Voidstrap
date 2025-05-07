@@ -31,9 +31,19 @@ namespace Voidstrap
             // frm quality level
             { "Rendering.FrmQuality", "DFIntDebugFRMQualityLevelOverride" },
 
-            // frm quality level
-            { "Rendering.RemoveTexture1", "FFlagTextureUseACR2" },
+            // No Texture
+            { "Rendering.RemoveTexture1", "FFlagTextureUseACR3" },
             { "Rendering.RemoveTexture2", "FIntTextureUseACRHundredthPercent" },
+
+            // More Sensetivity Numbers
+            { "UI.SensetivityNumbers", "FFlagFixSensitivityTextPrecision" },
+
+            // Remove GUI Blur
+            { "UI.NoGuiBlur", "FIntRobloxGuiBlurIntensity" },
+
+            // Custom Disconnect Error
+            { "UI.CustomDisconnectError1", "FFlagReconnectDisabled" },
+            { "UI.CustomDisconnectError2", "FStringReconnectDisabledReason" },
 
             // Less lag spikes
             { "Network.DefaultBps", "DFIntBandwidthManagerApplicationDefaultBps" },
@@ -56,7 +66,7 @@ namespace Voidstrap
             { "Network.Payload8", "DFIntRccTcMaxPayloadSnd" },
 
             // Allow vulkan on older gpus
-            { "Rendering.ForceVulkan", "FStringVulkanBuggyRenderpassList" },
+            { "Rendering.ForceVulkan", "FStringBuggyRenderpassList2" },
 
             //Brighter Visuals
             { "Rendering.BrighterVisual", "FFlagRenderFixFog" },
@@ -99,9 +109,6 @@ namespace Voidstrap
             { "Rendering.CpuCore6", "FIntSmoothClusterTaskQueueMaxParallelTasks" },
             { "Rendering.CpuCore7", "DFIntPhysicsReceiveNumParallelTasks" },
 
-            //Shadows and lighting
-            { "Rendering.ShadowIntensity", "DFFlagDebugPauseVoxelizer" },
-
             //Chat Bubble
             { "UI.Chatbubble", "FFlagEnableBubbleChatFromChatService" },
 
@@ -116,7 +123,7 @@ namespace Voidstrap
             { "Network.Mtusize","DFIntConnectionMTUSize" },
 
             //Dynamic Render Resolution
-            { "Rendering.Pixel","DFIntDebugDynamicRenderKiloPixels"},
+            { "Rendering.Dynamic.Resolution","DFIntDebugDynamicRenderKiloPixels"},
 
             // Rendering engines
             { "Rendering.Mode.DisableD3D11", "FFlagDebugGraphicsDisableDirect3D11" },
@@ -128,6 +135,9 @@ namespace Voidstrap
 
             // Task Scheduler Avoid sleep
             { "Rendering.AvoidSleep", "DFFlagTaskSchedulerAvoidSleep" },
+
+            // Task Scheduler Avoid sleep
+            { "Rendering.GrayAvatar", "DFIntTextureCompositorActiveJobs" },
 
             // Lighting technology
             { "Rendering.Lighting.Voxel", "DFFlagDebugRenderForceTechnologyVoxel" },
@@ -165,7 +175,6 @@ namespace Voidstrap
             { "Telemetry.RenderFidelity", "DFFlagSendRenderFidelityTelemetry" },
             { "Telemetry.RenderDistance", "DFFlagReportRenderDistanceTelemetry" },
             { "Telemetry.PhysicsSolverPerf", "DFFlagSimSolverSendPerfTelemetryToElasticSearch2" },
-            { "Telemetry.BadMoverConstraint", "DFFlagSimEnableBadMoverConstraintTelemetry" },
             { "Telemetry.AudioPlugin", "DFFlagCollectAudioPluginTelemetry" },
             { "Telemetry.FmodErrors", "DFFlagEnableFmodErrorsTelemetry" },
             { "Telemetry.SoundLength", "DFFlagRccLoadSoundLengthTelemetryEnabled" },
@@ -208,9 +217,9 @@ namespace Voidstrap
             { "Network.RCore6", "DFIntSignalRCoreHubMaxBackoffMs"},
 
             // Next Gen Replicator
-            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled3"},
-            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite2"},
-            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead2"},
+            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled5"},
+            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite3"},
+            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead3"},
 
             // Ads
             { "UI.Disable.Ads", "FFlagAdServiceEnabled" },
@@ -228,8 +237,18 @@ namespace Voidstrap
             // Display Fps
             { "Rendering.DisplayFps", "FFlagDebugDisplayFPS" },
 
-            // Pause Voxelizer
+            // No Shadows
             { "Rendering.Pause.Voxelizer", "DFFlagDebugPauseVoxelizer" },
+            { "Rendering.ShadowIntensity", "FIntRenderShadowIntensity" },
+            { "Rendering.ShadowMapBias", "FIntRenderShadowmapBias" },
+
+            // Render Occlusion
+            { "Rendering.Occlusion1", "DFFlagUseVisBugChecks" },
+            { "Rendering.Occlusion2", "FFlagEnableVisBugChecks27" },
+            { "Rendering.Occlusion3", "FFlagVisBugChecksThreadYield" },
+
+            // No More Middle
+            { "UI.RemoveMiddle", "FFlagUIBloxMoveDetailsPageToLuaApps" },
 
             //Distance Rendering
             { "Rendering.Distance.Chunks", "DFIntDebugRestrictGCDistance" },
@@ -296,7 +315,6 @@ namespace Voidstrap
             { MSAAMode.x1, "1" },
             { MSAAMode.x2, "2" },
             { MSAAMode.x4, "4" },
-            { MSAAMode.x6, "6" },
             { MSAAMode.x8, "8" }
         };
 
@@ -331,6 +349,20 @@ namespace Voidstrap
             { DistanceRendering.Chunks14x, "14" },
             { DistanceRendering.Chunks15x, "15" },
             { DistanceRendering.Chunks16x, "16" }
+        };
+
+        public static IReadOnlyDictionary<DynamicResolution, string?> DynamicResolutions => new Dictionary<DynamicResolution, string?>
+        {
+            { DynamicResolution.Default, null },
+            { DynamicResolution.Resolution1, "37" },
+            { DynamicResolution.Resolution2, "77" },
+            { DynamicResolution.Resolution3, "230" },
+            { DynamicResolution.Resolution4, "410" },
+            { DynamicResolution.Resolution5, "922" },
+            { DynamicResolution.Resolution6, "2074" },
+            { DynamicResolution.Resolution7, "3686" },
+            { DynamicResolution.Resolution8, "8294" },
+            { DynamicResolution.Resolution9, "33178 " },
         };
 
         public static IReadOnlyDictionary<TextureQuality, string?> TextureQualityLevels => new Dictionary<TextureQuality, string?>
@@ -395,31 +427,42 @@ namespace Voidstrap
         public static IReadOnlyDictionary<RomarkStart, string?> RomarkStartMappings => new Dictionary<RomarkStart, string?>
         {
             { RomarkStart.Disabled, null },
-            { RomarkStart.One, "1" },
-            { RomarkStart.Two, "2" },
-            { RomarkStart.Three, "3" },
-            { RomarkStart.Four, "4" },
-            { RomarkStart.Five, "5" },
-            { RomarkStart.Six, "6" },
-            { RomarkStart.Seven, "7" },
-            { RomarkStart.Eight, "8" },
-            { RomarkStart.Nine, "9" },
-            { RomarkStart.Ten, "10" }
+            { RomarkStart.Bar1, "1" },
+            { RomarkStart.Bar2, "2" },
+            { RomarkStart.Bar3, "3" },
+            { RomarkStart.Bar4, "4" },
+            { RomarkStart.Bar5, "5" },
+            { RomarkStart.Bar6, "6" },
+            { RomarkStart.Bar7, "7" },
+            { RomarkStart.Bar8, "8" },
+            { RomarkStart.Bar9, "9" },
+            { RomarkStart.Bar10, "10" }
         };
 
         public static IReadOnlyDictionary<QualityLevel, string?> QualityLevels => new Dictionary<QualityLevel, string?>
         {
             { QualityLevel.Disabled, null },
-            { QualityLevel.One, "1" },
-            { QualityLevel.Two, "2" },
-            { QualityLevel.Three, "3" },
-            { QualityLevel.Four, "4" },
-            { QualityLevel.Five, "5" },
-            { QualityLevel.Six, "6" },
-            { QualityLevel.Seven, "7" },
-            { QualityLevel.Eight, "8" },
-            { QualityLevel.Nine, "9" },
-            { QualityLevel.Ten, "10" }
+            { QualityLevel.Level1, "1" },
+            { QualityLevel.Level2, "2" },
+            { QualityLevel.Level3, "3" },
+            { QualityLevel.Level4, "4" },
+            { QualityLevel.Level5, "5" },
+            { QualityLevel.Level6, "6" },
+            { QualityLevel.Level7, "7" },
+            { QualityLevel.Level8, "8" },
+            { QualityLevel.Level9, "9" },
+            { QualityLevel.Level10, "10" },
+            { QualityLevel.Level11, "11" },
+            { QualityLevel.Level12, "12" },
+            { QualityLevel.Level13, "13" },
+            { QualityLevel.Level14, "14" },
+            { QualityLevel.Level15, "15" },
+            { QualityLevel.Level16, "16" },
+            { QualityLevel.Level17, "17" },
+            { QualityLevel.Level18, "18" },
+            { QualityLevel.Level19, "19" },
+            { QualityLevel.Level20, "20" },
+            { QualityLevel.Level21, "21" }
         };
 
         public void SetValue(string key, object? value)

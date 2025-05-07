@@ -34,12 +34,10 @@
             Text="Voidstrap" />
 
         <!--  Auto Update Toggle  -->
-        <controls:OptionControl
-            Description="(Currently doesn't work)"
-            Header="Automatically Update Voidstrap"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation"
-            Loaded="OptionControl_Loaded">
-            <ui:ToggleSwitch IsChecked="True" />
+        <controls:OptionControl 
+            Header="{x:Static resources:Strings.Menu_Behaviour_AutoUpdate_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_AutoUpdate_Description}">
+            <ui:ToggleSwitch IsChecked="{Binding UpdateCheckingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
         
@@ -81,99 +79,125 @@
 
 
 
-        <ui:CardExpander Margin="0,8,0,0" >
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="True">
             <ui:CardExpander.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-
-                    <!--  Left Side (Channel Header and Description)  -->
-                    <StackPanel
-                        Grid.Column="0"
-                        Margin="0,0,12,0"
-                        VerticalAlignment="Center">
-                        <TextBlock FontSize="14" Text="Channels" />
-                        <TextBlock
-                            FontSize="12"
-                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                            Text="Choose deployment channel."
-                            TextWrapping="Wrap" />
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Channel}" />
+                        <TextBlock Margin="0,2,0,0" FontSize="12" Text="{x:Static resources:Strings.Menu_ChannelChanger_Description}" Foreground="{DynamicResource TextFillColorTertiaryBrush}"  />
                     </StackPanel>
-
-                    <!--  Right Side (ComboBox for Channel Selection)  -->
-                    <ComboBox
-                        Grid.Column="1"
-                        Width="200"
-                        Margin="8,0,8,0"
-                        Padding="10,5,10,5"
-                        SelectedValue="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=115}"
-                        SelectedValuePath="Content" >
-                        <ComboBoxItem Content="production" />
-                        <ComboBoxItem Content="live" />
-                        <ComboBoxItem Content="zlive" />
-                    </ComboBox>
-
-
+                    <ui:TextBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200" Text="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}" />
                 </Grid>
             </ui:CardExpander.Header>
 
-            <!--  Expanded Area with Additional Text  -->
-            <ui:CardExpander.Content>
-                <StackPanel Margin="12,8">
-                    <!--  Introductory Text Block  -->
-                    <TextBlock
-                        FontSize="12"
-                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                        Text="Select a channel to change the current stream setting. Choose from Production, Live, or Zlive based on your requirements."
-                        TextWrapping="Wrap" />
-                    <TextBlock
-                        Height="18"
-                        Margin="0,10,0,0"
-                        FontSize="12"
-                        FontWeight="Bold"
-                        Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                        Text="Channel Explanations:" />
+            <StackPanel>
+                <Grid Margin="0,0,4,0">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ChannelDeployInfo}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Collapsed" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
 
-                    <!--  Channel Explanations Section  -->
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                    <TextBlock
-                        Margin="0,5,0,0"
-                        FontSize="12"
-                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                        Text="Production: This is the main channel where your final, stable versions of the game are deployed. Use this for public releases and official versions of Roblox."
-                        TextWrapping="Wrap" />
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                    <TextBlock
-                        Margin="0,5,0,0"
-                        FontSize="12"
-                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                        Text="Live: This channel is used for live game testing, often with a larger user base. It allows you to test features in a near-real environment, but not as stable as production."
-                        TextWrapping="Wrap" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,16,8" VerticalAlignment="Center" Text="{x:Static resources:Strings.Common_Version}" />
+                    <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding ChannelDeployInfo.Version, Mode=OneWay}" />
 
-                    <TextBlock
-                        Margin="0,5,0,0"
-                        FontSize="12"
-                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                        Text="Zlive: This is a special live channel typically used for experimental or special events. It might be used for events or content that isn't yet ready for broader use."
-                        TextWrapping="Wrap" />
-                </StackPanel>
-            </ui:CardExpander.Content>
+                    <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,16,8" VerticalAlignment="Center" Text="{x:Static resources:Strings.Common_VersionGuid}" />
+                    <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding ChannelDeployInfo.VersionGuid, Mode=OneWay}" />
+
+                    <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,16,0,0" Orientation="Horizontal">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowChannelWarning, Mode=OneWay}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <Image Grid.Column="0" Width="24" Height="24" RenderOptions.BitmapScalingMode="HighQuality" Source="pack://application:,,,/Resources/MessageBox/Warning.png" />
+                        <TextBlock Margin="8,0,0,0" VerticalAlignment="Center" Text="{x:Static resources:Strings.Menu_Deployment_Channel_OutOfDate}" />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Column="0">
+                    <Grid.Style>
+                        <Style TargetType="Grid">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ChannelDeployInfo}" Value="{x:Null}">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Grid.Style>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <ui:ProgressRing Grid.Column="0" Margin="6" IsIndeterminate="True">
+                        <ui:ProgressRing.Style>
+                            <Style TargetType="ui:ProgressRing" BasedOn="{StaticResource {x:Type ui:ProgressRing}}">
+                                <Setter Property="Visibility" Value="Visible" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowLoadingError, Mode=OneWay}" Value="True">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ui:ProgressRing.Style>
+                    </ui:ProgressRing>
+
+                    <Image Grid.Column="0" Margin="6" Width="60" Height="60" Source="pack://application:,,,/Resources/MessageBox/Error.png">
+                        <Image.Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ShowLoadingError, Mode=OneWay}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Image.Style>
+                    </Image>
+
+                    <TextBlock Grid.Column="1" Margin="16" VerticalAlignment="Center" Text="{Binding ChannelInfoLoadingText, Mode=OneWay}" TextWrapping="Wrap" />
+                </Grid>
+            </StackPanel>
         </ui:CardExpander>
 
-
-
-
-
-
-
-
-
-
-
-
-
+        <ui:CardControl Margin="0,8,0,0">
+            <ui:CardControl.Header>
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="{x:Static resources:Strings.Menu_Channel_ChangeAction_Title}" />
+                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="{x:Static resources:Strings.Menu_Channel_ChangeAction_Description}" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </ui:CardControl.Header>
+            <ComboBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" ItemsSource="{Binding ChannelChangeModes.Keys, Mode=OneTime}" Text="{Binding SelectedChannelChangeMode, Mode=TwoWay}" />
+        </ui:CardControl>
 
 
         <!--  Data Export Section  -->

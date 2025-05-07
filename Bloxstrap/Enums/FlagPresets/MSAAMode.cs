@@ -10,8 +10,6 @@
         x2,
         [EnumName(StaticName = "4x")]
         x4,
-        [EnumName(StaticName = "6x")]
-        x6,
         [EnumName(StaticName = "8x")]
         x8
     }

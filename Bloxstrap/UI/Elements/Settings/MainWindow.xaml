@@ -20,6 +20,7 @@
     Closed="WpfUiWindow_Closed"
     Closing="WpfUiWindow_Closing"
     ExtendsContentIntoTitleBar="True"
+    WindowBackdropType="Mica"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
@@ -29,6 +30,13 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
 
         <!--  Snackbars  -->
         <ui:Snackbar
@@ -39,7 +47,15 @@
             Panel.ZIndex="10"
             Icon="Info20"
             Message="{x:Static resources:Strings.Menu_AlreadyRunning_Caption}"
-            Timeout="10000" />
+            Timeout="10000" >
+            <ui:Snackbar.Background>
+                <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                    <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                    <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                    <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+                </LinearGradientBrush>
+            </ui:Snackbar.Background>
+        </ui:Snackbar>
 
         <ui:Snackbar
             x:Name="SettingsSavedSnackbar"
@@ -69,11 +85,11 @@
             Title="{x:Static resources:Strings.Menu_Title}"
             Grid.Row="0"
             Padding="8"
-            
             ForceShutdown="False"
             Icon="pack://application:,,,/Voidstrap.ico"
-            MinimizeToTray="True"
-            UseSnapLayout="True" />
+            MinimizeToTray="False"
+            UseSnapLayout="True" >
+        </ui:TitleBar>
 
         <!--  Main Content Grid  -->
         <Grid
@@ -98,8 +114,8 @@
                 Frame="{Binding ElementName=RootFrame}"
                 SelectedPageIndex="0">
                 <ui:NavigationFluent.Items>
-                    
-                    
+
+
                     <!--  Menu Items  -->
                     <ui:NavigationItem
                         Content="{x:Static resources:Strings.Menu_Integrations_Title}"
@@ -115,15 +131,12 @@
                     </ui:NavigationItem>
 
 
-
-                    
-
-                    <!--  Modification Menu Item  -->
+                    <!--  Deployment Menu Item  -->
                     <ui:NavigationItem
-                        Content="Modifications"
-                        Icon="WrenchScrewdriver20"
-                        PageType="{x:Type pages:ModsPage}"
-                        Tag="mods">
+                        Content="Deployment"
+                        Icon="PlaySettings20"
+                        PageType="{x:Type pages:BehaviourPage}"
+                        Tag="bootstrapper">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -133,13 +146,12 @@
                     </ui:NavigationItem>
 
 
-                    <!--  Fast Flag Editor Menu Item  -->
+                    <!--  Modification Menu Item  -->
                     <ui:NavigationItem
-                        Content="FastFlag Editor"
-                        Icon="Flag28"
-                        PageType="{x:Type pages:FastFlagEditorPage}"
-                        Tag="fastflageditor"
-                        Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        Content="Modifications"
+                        Icon="WrenchScrewdriver20"
+                        PageType="{x:Type pages:ModsPage}"
+                        Tag="mods">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -163,13 +175,13 @@
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
 
-
-                    <!--  Bootstrapper Menu Item  -->
+                    <!--  Fast Flag Editor Menu Item  -->
                     <ui:NavigationItem
-                        Content="{x:Static resources:Strings.Menu_Behaviour_Title}"
-                        Icon="PlaySettings20"
-                        PageType="{x:Type pages:BehaviourPage}"
-                        Tag="bootstrapper">
+                        Content="FastFlag Editor"
+                        Icon="Flag28"
+                        PageType="{x:Type pages:FastFlagEditorPage}"
+                        Tag="fastflageditor"
+                        Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -178,7 +190,7 @@
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
 
-
+                    
                     <!--  Appreance Menu Item  -->
                     <ui:NavigationItem
                         Content="Appearance"
@@ -210,8 +222,8 @@
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
                 </ui:NavigationFluent.Items>
-                
-                
+
+
 
                 <!--  Footer Items  -->
                 <ui:NavigationFluent.Footer>
@@ -295,23 +307,22 @@
                 </StackPanel>
             </StatusBarItem>
 
-            <!--  Launch Roblox Button  -->
+            <!--  Launch And Save Button  -->
             <StatusBarItem Grid.Column="2" Padding="0,0,8,0">
                 <ui:Button
-                    Width="140"
+                    Width="130"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
                     Appearance="Primary"
                     Background="{DynamicResource SystemAccentBrush}"
                     Click="Button_Click"
                     Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}"
-                    Content="Launch Roblox"/>
+                    Content="Save And Launch"/>
             </StatusBarItem>
 
             <!--  Save Button  -->
             <StatusBarItem Grid.Column="3" Padding="0,0,9,0">
                 <ui:Button
-                    Width="80"
+                    Width="56.587"
                     Appearance="Primary"
                     Background="{DynamicResource SystemAccentBrush}"
                     Click="Button_Click_1"
@@ -322,9 +333,8 @@
             <!--  Close Button  -->
             <StatusBarItem Grid.Column="4" Padding="0,0,8,0">
                 <ui:Button
-                    Width="80"
+                    Width="56.587"
                     HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
                     Appearance="Secondary"
                     Command="{Binding CloseWindowCommand, Mode=OneTime}"
                     Content="{x:Static resources:Strings.Common_Close}" />

@@ -115,7 +115,7 @@ namespace Voidstrap
             else
             {
 #if QA_BUILD
-                Frontend.ShowMessageBox("You are about to install a QA build of Voidstrap. The red window border indicates that this is a QA build.\n\nQA builds are handled completely separately of your standard installation, like a virtual environment.", MessageBoxImage.Information);
+                Frontend.ShowMessageBox("You are about to install a QA build of Bloxstrap. The red window border indicates that this is a QA build.\n\nQA builds are handled completely separately of your standard installation, like a virtual environment.", MessageBoxImage.Information);
 #endif
 
                 new LanguageSelectorDialog().ShowDialog();
@@ -210,6 +210,8 @@ namespace Voidstrap
         {
             const string LOG_IDENT = "LaunchHandler::LaunchRoblox";
 
+            const string MutexName = "ROBLOX_singletonMutex";
+
             if (launchMode == LaunchMode.None)
                 throw new InvalidOperationException("No Roblox launch mode set");
 
@@ -251,29 +253,22 @@ namespace Voidstrap
                 dialog.Bootstrapper = App.Bootstrapper;
             }
 
-            Mutex? singletonMutex = null;
+            App.Logger.WriteLine(LOG_IDENT, $"Creating {MutexName}");
 
+            Mutex? mutex = null;
             if (App.Settings.Prop.MultiInstanceLaunching)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Attempting to create singleton mutex...");
                 try
                 {
-                    Mutex.OpenExisting("ROBLOX_singletonMutex");
-                    App.Logger.WriteLine(LOG_IDENT, "Singleton mutex already exists.");
+                    mutex = new Mutex(true, MutexName);
+                    App.Logger.WriteLine(LOG_IDENT, $"Created {MutexName}");
                 }
                 catch
                 {
-                    // create the singleton mutex before the game client does
-                    singletonMutex = new Mutex(true, "ROBLOX_singletonMutex");
-                    App.Logger.WriteLine(LOG_IDENT, "Created singleton mutex.");
+                    App.Logger.WriteLine(LOG_IDENT, $"Failed to create {MutexName}");
                 }
             }
 
-            // only applying the fix after game join allows the user to open the desktop app before joining any game
-            if (!App.Settings.Prop.EnableActivityTracking)
-            {
-                Utilities.ApplyTeleportFix();
-            }
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {
                 App.Logger.WriteLine(LOG_IDENT, "Bootstrapper task has finished");
@@ -285,22 +280,22 @@ namespace Voidstrap
                     if (t.Exception is not null)
                         App.FinalizeExceptionHandling(t.Exception);
                 }
-                else if (singletonMutex is not null)
+                if (mutex != null)
                 {
-                    App.Logger.WriteLine(LOG_IDENT, "We have singleton mutex ownership! Running in background until all Roblox processes are closed");
+                    // we do .Split(".") because the names have .exe extension
+                    // getprocessbyname doesnt support .exe extensions
 
-                    // we've got ownership of the roblox singleton mutex!
-                    // if we stop running, everything will screw up once any more roblox instances launched
-                    while (Process.GetProcessesByName("RobloxPlayerBeta").Any())
-                    {
-                        Thread.Sleep(920);
-                    };
+                    // get process name
+                    string ProcessName = App.RobloxPlayerAppName.Split(".")[0];
+                    App.Logger.WriteLine(LOG_IDENT, $"Resolved Roblox name {ProcessName}.exe, running Fishstrap in background.");
 
-                    App.Logger.WriteLine(LOG_IDENT, "All Roblox processes closed!");
+                    // now yield until the processes are closed
+                    while (Process.GetProcessesByName(ProcessName).Any())
+                        Thread.Sleep(5000);
 
-                    if (File.Exists(App.RobloxCookiesFilePath))
-                        Utilities.RemoveTeleportFix();
+                    App.Logger.WriteLine(LOG_IDENT, "Every Roblox instance is closed, terminating the process");
                 }
+
 
                 App.Terminate();
             });
@@ -344,13 +339,6 @@ namespace Voidstrap
         public static void LaunchBloxshadeConfig()
         {
             const string LOG_IDENT = "LaunchHandler::LaunchBloxshade";
-
-            // ansel setting
-            //App.Settings.Prop.RenameClientToEuroTrucks2 = true;
-            //App.Settings.Save();
-
-            //App.State.Prop.ShowBloxshadeWarning = true;
-            //App.State.Save();
 
             App.Logger.WriteLine(LOG_IDENT, "Showing unsupported warning");
 

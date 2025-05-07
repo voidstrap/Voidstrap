@@ -389,6 +389,12 @@
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>ライト</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>ライト</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>ライト</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>VoidstrapはVer. {0}に更新されました。</value>
   </data>
@@ -1246,6 +1252,26 @@ Robloxが[正規のランチャー]({1})で動作するか確認してくださ�
     <value>アイコン</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Roblox Studioを起動</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>Ver. {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Robloxのアプリファイルが使用中のため、Robloxを更新できませんでした。
+
+Robloxのアプリファイルを使用している可能性のあるアプリを閉じて、もう一度お試しください。</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>zip 形式</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>エクスポート</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>何らかの原因でVoidstrapはインターネット接続を制限されています。</value>
   </data>
@@ -1270,25 +1296,5 @@ Robloxが[正規のランチャー]({1})で動作するか確認してくださ�
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Roblox Studioを起動</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>Ver. {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Robloxのアプリファイルが使用中のため、Robloxを更新できませんでした。
-
-Robloxのアプリファイルを使用している可能性のあるアプリを閉じて、もう一度お試しください。</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>zip 形式</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>エクスポート</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

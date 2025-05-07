@@ -154,7 +154,7 @@
   <data name="IconLate2015" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\IconLate2015.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="IconVoidstrapClassic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\IconVoidstrapClassic2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="IconHellstrapClassic" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\IconHellstrapClassic2.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

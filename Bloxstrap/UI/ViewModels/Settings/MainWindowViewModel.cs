@@ -15,8 +15,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public ICommand SaveAndLaunchSettingsCommand => new RelayCommand(SaveAndLaunchSettings);
 
-        public event PropertyChangedEventHandler PropertyChanged;
-
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ICommand CloseWindowCommand => new RelayCommand(CloseWindow);
 
@@ -71,6 +70,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             RequestSaveNoticeEvent?.Invoke(this, EventArgs.Empty);
         }
+
         public void SaveAndLaunchSettings()
         {
             SaveSettings();
@@ -78,7 +78,8 @@ namespace Voidstrap.UI.ViewModels.Settings
             LaunchHandler.LaunchRoblox(LaunchMode.Player);
         }
 
-        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        // ✅ Fix #2: make propertyName nullable
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, newValue))
             {
@@ -86,7 +87,10 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
 
             field = newValue;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+            // ✅ Optional: throw if propertyName is null (defensive)
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? throw new ArgumentNullException(nameof(propertyName))));
+
             return true;
         }
     }

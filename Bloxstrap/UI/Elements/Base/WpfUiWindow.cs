@@ -1,7 +1,5 @@
-﻿using System;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Interop;
-using Voidstrap;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Contracts;
@@ -22,7 +20,7 @@ namespace Voidstrap.UI.Elements.Base
         {
             const int customThemeIndex = 2; // index for CustomTheme merged dictionary
 
-            _themeService.SetTheme(App.Settings.Prop.Theme.GetFinal() == Enums.Theme.Dark ? ThemeType.Dark : ThemeType.Light);
+            _themeService.SetTheme(App.Settings.Prop.Theme.GetFinal() == Enums.Theme.Light ? ThemeType.Light : ThemeType.Dark);
             _themeService.SetSystemAccent();
 
             // there doesn't seem to be a way to query the name for merged dictionaries

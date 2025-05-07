@@ -389,6 +389,12 @@ Caso contrário, por favor reporte este erro através de uma [issue no GitHub]({
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Claro</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Claro</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Claro</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>O Voidstrap atualizou para a versão {0}</value>
   </data>
@@ -1234,31 +1240,6 @@ Gostaria de habilitar o modo de teste?</value>
     <value>Ícones</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
-	<data name="Dialog.Connectivity.Preventing" xml:space="preserve">
-    <value>Algo parece estar impedindo o Voidstrap de se conectar à internet.</value>
-  </data>
-	<data name="Dialog.Connectivity.TimedOut" xml:space="preserve">
-    <value>A conexão expirou, o que pode indicar uma conexão de internet ruim ou um bloqueio de firewall.</value>
-  </data>
-	<assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-	<data name="Menu.Channel.Description" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
-	<data name="Common.Channel" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
-	<data name="Menu.ChannelChanger.Description" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
-	<data name="Common.Version" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
-	<data name="Common.VersionGuid" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
-	<data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
-		<value />
-	</data>
   <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
     <value>Iniciar o Roblox Studio</value>
   </data>
@@ -1278,5 +1259,30 @@ Feche quaisquer aplicativos que possam estar usando os arquivos do Roblox e rein
   <data name="Common.Export" xml:space="preserve">
     <value>Exportar</value>
     <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
+  <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
+    <value>Algo parece estar impedindo o Voidstrap de se conectar à internet.</value>
+  </data>
+  <data name="Dialog.Connectivity.TimedOut" xml:space="preserve">
+    <value>A conexão expirou, o que pode indicar uma conexão de internet ruim ou um bloqueio de firewall.</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="Menu.Channel.Description" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Common.Channel" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Menu.ChannelChanger.Description" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Common.Version" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Common.VersionGuid" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
+  </data>
+  <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
+    <value />
   </data>
 </root>

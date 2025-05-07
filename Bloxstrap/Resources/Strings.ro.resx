@@ -389,6 +389,12 @@ Dacă nu, atunci vă rugăm să raportați această eroare printr-o [problemă G
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Luminos</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Luminos</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Luminos</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap a fost actualizat la v{0}</value>
   </data>
@@ -1233,6 +1239,26 @@ Doriți să activați modul de testare?</value>
     <value>Pictograme</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Lansează Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>Versiunea {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap a încercat să actualizeze Roblox, dar nu poate fiindcă fișierele Roblox sunt în folosință.
+
+Vă rugăm să închideți orice aplicație care poate folosi fișierele Roblox, și să relansați.</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>Arhivă Zip</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Exportă</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>Este posibil ca ceva să împiedice Voidstrap să se conecteze la internet.</value>
   </data>
@@ -1257,25 +1283,5 @@ Doriți să activați modul de testare?</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Lansează Roblox Studio</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>Versiunea {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap a încercat să actualizeze Roblox, dar nu poate fiindcă fișierele Roblox sunt în folosință.
-
-Vă rugăm să închideți orice aplicație care poate folosi fișierele Roblox, și să relansați.</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>Arhivă Zip</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>Exportă</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

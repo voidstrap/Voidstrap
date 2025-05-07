@@ -7,38 +7,8 @@ using Microsoft.Win32;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
-    public class VoidstraptrapViewModel : NotifyPropertyChangedViewModel
+    public class VoidstrapViewModel : NotifyPropertyChangedViewModel
     {
-        public bool UpdateCheckingEnabled
-        {
-            get => App.Settings.Prop.CheckForUpdates;
-            set => App.Settings.Prop.CheckForUpdates = value;
-        }
-
-        public bool HWAsselEnabled
-        {
-            get => App.Settings.Prop.WPFSoftwareRender;
-            set => App.Settings.Prop.WPFSoftwareRender = value;
-        }
-
-        public bool AnalyticsEnabled
-        {
-            get => App.Settings.Prop.EnableAnalytics;
-            set => App.Settings.Prop.EnableAnalytics = value;
-        }
-
-        public bool ExportConfig
-        {
-            get => App.Settings.Prop.ShouldExportConfig;
-            set => App.Settings.Prop.ShouldExportConfig = value;
-        }
-
-        public bool ExportLogs
-        {
-            get => App.Settings.Prop.ShouldExportLogs;
-            set => App.Settings.Prop.ShouldExportLogs = value;
-        }
-
         public bool ShouldExportConfig { get; set; } = true;
 
         public bool ShouldExportLogs { get; set; } = true;
@@ -51,7 +21,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             var dialog = new SaveFileDialog
             {
-                FileName = $"Voidstrap-export-{timestamp}.zip",
+                FileName = $"Bloxstrap-export-{timestamp}.zip",
                 Filter = $"{Strings.FileTypes_ZipArchive}|*.zip"
             };
 
@@ -108,4 +78,5 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
     }
+
 }

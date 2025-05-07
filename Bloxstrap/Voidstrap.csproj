@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.2.2</Version>
-		<FileVersion>1.0.2.2</FileVersion>
+		<Version>1.0.3.3</Version>
+		<FileVersion>1.0.3.3</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -17,6 +17,7 @@
 		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<PackageIcon>Voidstrap.png</PackageIcon>
+		<RepositoryUrl>https://github.com/voidstrap/Voidstrap</RepositoryUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -45,48 +46,56 @@
 		<Resource Include="Resources\MessageBox\Information.png" />
 		<Resource Include="Resources\MessageBox\Question.png" />
 		<Resource Include="Resources\MessageBox\Warning.png" />
-	
-     <EmbeddedResource Include="UI\Style\Editor-Theme-Dark.xshd" />
-     <EmbeddedResource Include="UI\Style\Editor-Theme-Light.xshd" />      
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Voidstrap.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Blue.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Red.xshd" />
+        <EmbeddedResource Include="UI\Style\Editor-Theme-Dark.xshd" />
+        <EmbeddedResource Include="UI\Style\Editor-Theme-Light.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Cyan.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Orange.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Green.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Pink.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Yellow.xshd" />
 	</ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\CustomBootstrapperSchema.json" />
-     <EmbeddedResource Include="Resources\CustomBootstrapperTemplate_Blank.xml" />
-     <EmbeddedResource Include="Resources\CustomBootstrapperTemplate_Simple.xml" />    <EmbeddedResource Include="Resources\Icon2008.ico" />
-    <EmbeddedResource Include="Resources\Icon2011.ico" />
-    <EmbeddedResource Include="Resources\Icon2017.ico" />
-    <EmbeddedResource Include="Resources\Icon2019.ico" />
-    <EmbeddedResource Include="Resources\Icon2022.ico" />
-	<EmbeddedResource Include="Resources\IconVoidstrap.ico" />
-	<EmbeddedResource Include="Resources\IconVoidstrapClassic2.ico" />
-    <EmbeddedResource Include="Resources\IconEarly2015.ico" />
-    <EmbeddedResource Include="Resources\IconLate2015.ico" />
-    <EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursor.png" />
-    <EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursorDecalDrag.png" />
-    <EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursor.png" />
-    <EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursorDecalDrag.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursorDecalDrag.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursorDecalDrag.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursorDecalDrag.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowFarCursor.png" />
-	<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursorDecalDrag.png" />
-    <EmbeddedResource Include="Resources\Mods\Sounds\OldDeath.ogg" />
-    <EmbeddedResource Include="Resources\Mods\Sounds\OldGetUp.mp3" />
-    <EmbeddedResource Include="Resources\Mods\Sounds\OldJump.mp3" />
-    <EmbeddedResource Include="Resources\Mods\Sounds\OldWalk.mp3" />
-    <EmbeddedResource Include="Resources\Mods\Sounds\Empty.mp3" />
-    <EmbeddedResource Include="Resources\Mods\OldAvatarBackground.rbxl" />
-  </ItemGroup>
+	<ItemGroup>
+		<EmbeddedResource Include="Resources\CustomBootstrapperSchema.json" />
+		<EmbeddedResource Include="Resources\CustomBootstrapperTemplate_Blank.xml" />
+		<EmbeddedResource Include="Resources\CustomBootstrapperTemplate_Simple.xml" />	
+		<EmbeddedResource Include="Resources\Icon2008.ico" />
+		<EmbeddedResource Include="Resources\Icon2011.ico" />
+		<EmbeddedResource Include="Resources\Icon2017.ico" />
+		<EmbeddedResource Include="Resources\Icon2019.ico" />
+		<EmbeddedResource Include="Resources\Icon2022.ico" />
+		<EmbeddedResource Include="Resources\IconVoidstrap.ico" />
+		<EmbeddedResource Include="Resources\IconHellstrapClassic2.ico" />
+		<EmbeddedResource Include="Resources\IconEarly2015.ico" />
+		<EmbeddedResource Include="Resources\IconLate2015.ico" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2006\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\From2013\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\FPSCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\DotCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\StoofsCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Sounds\OldDeath.ogg" />
+		<EmbeddedResource Include="Resources\Mods\Sounds\OldGetUp.mp3" />
+		<EmbeddedResource Include="Resources\Mods\Sounds\OldJump.mp3" />
+		<EmbeddedResource Include="Resources\Mods\Sounds\OldWalk.mp3" />
+		<EmbeddedResource Include="Resources\Mods\Sounds\Empty.mp3" />
+		<EmbeddedResource Include="Resources\Mods\OldAvatarBackground.rbxl" />
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="AvalonEdit" Version="6.3.0.90" />
@@ -165,7 +174,20 @@
 		</Compile>
 	</ItemGroup>
 
-	<ItemGroup>
+  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>	<ItemGroup>
 		<EmbeddedResource Update="Resources\Strings.resx">
 			<Generator>PublicResXFileCodeGenerator</Generator>
 			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
@@ -178,8 +200,27 @@
 			<LastGenOutput>Strings.Designer.cs</LastGenOutput>
 		</EmbeddedResource>
 	</ItemGroup>
+	
+	  <ItemGroup>
+    <Compile Update="Resources\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
 
 	<ItemGroup>
+	  <None Update="Properties\Settings.settings">
+	    <Generator>SettingsSingleFileGenerator</Generator>
+	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
 	  <None Update="Voidstrap.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>

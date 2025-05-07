@@ -16,11 +16,21 @@
                   MinHeight="180"
                   SizeToContent="Height"
                   ResizeMode="NoResize"
-                  Background="{ui:ThemeResource ApplicationBackgroundBrush}"
                   ExtendsContentIntoTitleBar="True"
-                  WindowStartupLocation="CenterScreen">
+                  WindowStartupLocation="CenterScreen" Height="198">
 
-    <Grid Margin="10">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="247*"/>
+            <ColumnDefinition Width="213*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.90" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.05" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -28,7 +38,7 @@
         </Grid.RowDefinitions>
 
         <!-- Title Bar -->
-        <ui:TitleBar Grid.Row="0"
+        <ui:TitleBar
                      x:Name="RootTitleBar"
                      Padding="8"
                      Title="Voidstrap"
@@ -36,10 +46,10 @@
                      ShowMaximize="False"
                      CanMaximize="False"
                      KeyboardNavigation.TabNavigation="None"
-                     VerticalAlignment="Center" />
+                     VerticalAlignment="Center" Grid.ColumnSpan="2" />
 
         <!-- Content Area -->
-        <Grid Grid.Row="1" Margin="15">
+        <Grid Grid.Row="1" Margin="15,15,15,15" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -62,8 +72,8 @@
                                         Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
         </Grid>
 
-<!-- Buttons Section -->
-        <Border Grid.Row="2" Margin="0,10,0,0" Padding="15" Background="{ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}" Grid.ColumnSpan="3">
+        <!-- Buttons Section -->
+        <Border Grid.Row="2" Margin="0,10,0,0" Padding="15" Background="{DynamicResource PrimaryBackgroundColor}" Grid.ColumnSpan="2">
             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
                 <Button x:Name="ButtonOne" MinWidth="100" Content="Gay" />
                 <Button x:Name="ButtonTwo" MinWidth="100" Margin="12,0,0,0" Content="Stoof = pooks" />

@@ -332,13 +332,10 @@ Kung hindi, paki ulat itong pagbubukod, gamit ang [GitHub issue]({1}) kasama ang
   <data name="Enums.CursorType.From2013" xml:space="preserve">
     <value>2013 (Angular)</value>
   </data>
-	<data name="Enums.CursorType.FPSCursor" xml:space="preserve">
+  <data name="Enums.CursorType.FPSCursor" xml:space="preserve">
     <value>FPSCursor</value>
   </data>
-	<data name="Enums.CursorType.Custom" xml:space="preserve">
-    <value>Custom</value>
-  </data>
-	<data name="Enums.CursorType.StoofsCursor" xml:space="preserve">
+  <data name="Enums.CursorType.StoofsCursor" xml:space="preserve">
     <value>StoofsCursor</value>
   </data>
   <data name="Enums.EmojiType.Catmoji" xml:space="preserve">
@@ -396,6 +393,12 @@ Kung hindi, paki ulat itong pagbubukod, gamit ang [GitHub issue]({1}) kasama ang
     <value>Dark</value>
   </data>
   <data name="Enums.Theme.Light" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Light</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
     <value>Light</value>
   </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
@@ -1217,56 +1220,59 @@ Pakialisin mismo ang Voidstrap.exe sa install location o subukan mong i-restart 
   <data name="Dialog.Exception.Report" xml:space="preserve">
     <value>Report exception</value>
   </data>
-	<data name="Menu.TestMode.Prompt" xml:space="preserve">
+  <data name="Menu.TestMode.Prompt" xml:space="preserve">
     <value>Pinapadali ang "Test Mode" para paulit-ulit na masubok kung paano ina-apekto ang settings mo sa Roblox.
 
 Habang naka-enable, kusang bubukas ang Roblox pagkatapos isara ang mga settings, at bubuksan ulit ang mga settings pagkatapos isara ang Roblox, sa isang cycle hanggang sa i-disable mo ito.
 
 Gusto mo bang i-enable ang "Test Mode"?</value>
   </data>
-	<data name="About.Translators.Description" xml:space="preserve">
+  <data name="About.Translators.Description" xml:space="preserve">
     <value>Lahat ng translations para sa Voidstrap ay crowdsourced galing sa [Crowdin]({0}). Lahat nakalista dito ang mga tao na nakapagboluntaryo para sa oras at pagsisikap para tulungan i-localize at Voidstrap. Malaking pasasalamat sa iyong lahat!</value>
   </data>
-	<data name="Common.Navigation.Install" xml:space="preserve">
+  <data name="Common.Navigation.Install" xml:space="preserve">
     <value>I-install</value>
     <comment>The word "Install" is being used as a verb in this instance, like the other navigation button texts of "Next" and "Back"</comment>
   </data>
-	<data name="Paths.Icons" xml:space="preserve">
+  <data name="Paths.Icons" xml:space="preserve">
     <value>Mga icon</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
-	<data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
     <value>I-launch ang Roblox Studio</value>
   </data>
-	<data name="Dialog.Exception.Version" xml:space="preserve">
+  <data name="Dialog.Exception.Version" xml:space="preserve">
     <value>Version {0}</value>
   </data>
-	<data name="Bootstrapper.FilesInUse" xml:space="preserve">
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
     <value>Sinubukan ng Voidstrap mag-upgrade ng Roblox pero hindi kaya kasi ginagamit pa ang mga file ng Roblox.
 
 Isarado muna ang kahit anong application na maaaring gamitin ang mga file ng Roblox, at mag relaunch.</value>
     <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
   </data>
-	<data name="FileTypes.ZipArchive" xml:space="preserve">
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
     <value>Zip archive</value>
     <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
   </data>
-	<data name="Common.Export" xml:space="preserve">
+  <data name="Common.Export" xml:space="preserve">
     <value>I-export</value>
     <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
-	<data name="Menu.Voidstrap.ExportData.Title" xml:space="preserve">
+  <data name="Menu.Voidstrap.ExportData.Title" xml:space="preserve">
     <value>I-export ang diagnostic data</value>
   </data>
-	<data name="Menu.Voidstrap.ExportData.Description" xml:space="preserve">
+  <data name="Menu.Voidstrap.ExportData.Description" xml:space="preserve">
     <value>I-gather ang impormasyon na pwedeng I-upload online para ma-troubleshoot ang iyong nararanasan na problema.</value>
   </data>
-	<data name="Menu.Voidstrap.ExportData.ExportConfig" xml:space="preserve">
+  <data name="Menu.Voidstrap.ExportData.ExportConfig" xml:space="preserve">
     <value>Voidstrap configuration</value>
     <comment>Label that appears next to a checkbox</comment>
   </data>
-	<data name="Menu.Voidstrap.ExportData.ExportLogs" xml:space="preserve">
+  <data name="Menu.Voidstrap.ExportData.ExportLogs" xml:space="preserve">
     <value>Lahat ng Voidstrap logs</value>
     <comment>Label that appears next to a checkbox</comment>
+  </data>
+  <data name="Enums.CursorType.Custom" xml:space="preserve">
+    <value>Custom</value>
   </data>
 </root>

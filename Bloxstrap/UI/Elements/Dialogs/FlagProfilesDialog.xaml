@@ -24,6 +24,13 @@
     </ui:UiWindow.Resources>
 
     <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.90" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -104,7 +111,7 @@
             Grid.Row="2"
             Margin="0,10,0,0"
             Padding="15"
-            Background="{ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}">
+            Background="{DynamicResource PrimaryBackgroundColor}">
             <StackPanel
                 HorizontalAlignment="Right"
                 FlowDirection="LeftToRight"
@@ -112,7 +119,7 @@
                 <!--  Clear Flags CheckBox  -->
                 <CheckBox
                     Name="ClearFlags"
-                    Width="103"
+                    Width="167"
                     Content="{x:Static resources:Strings.Menu_FlagProfiles_ClearFlags}">
                     <CheckBox.Style>
                         <Style BasedOn="{StaticResource {x:Type CheckBox}}" TargetType="CheckBox">
@@ -154,7 +161,7 @@
 
                 <!--  OK Button  -->
                 <Button
-                    Width="132"
+                    Width="100"
                     MinWidth="100"
                     Click="OKButton_Click"
                     Content="{x:Static resources:Strings.Common_OK}">

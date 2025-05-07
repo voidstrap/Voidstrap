@@ -2,31 +2,31 @@
 {
     public enum TextureSkipping
     {
-        [EnumName(FromTranslation = "NoSkip")]// Ha loser imagin using this joking I use it TF // Are you sure?
+        [EnumName(FromTranslation = "Disabled")]
         Noskip,
 
-        [EnumName(StaticName = "Skip1x")]
+        [EnumName(StaticName = "1x")]
         Skip1x,
 
-        [EnumName(StaticName = "Skip2x")]
+        [EnumName(StaticName = "2x")]
         Skip2x,
 
-        [EnumName(StaticName = "Skip3x")]
+        [EnumName(StaticName = "3x")]
         Skip3x,
 
-        [EnumName(StaticName = "Skip4x")]
+        [EnumName(StaticName = "4x")]
         Skip4x,
 
-        [EnumName(StaticName = "Skip5x")]
+        [EnumName(StaticName = "5x")]
         Skip5x,
 
-        [EnumName(StaticName = "Skip6x")]
+        [EnumName(StaticName = "6x")]
         Skip6x,
 
-        [EnumName(StaticName = "Skip7x")]
+        [EnumName(StaticName = "7x")]
         Skip7x,
 
-        [EnumName(StaticName = "Skip8x")]
+        [EnumName(StaticName = "8x")]
         Skip8x
     }
 }

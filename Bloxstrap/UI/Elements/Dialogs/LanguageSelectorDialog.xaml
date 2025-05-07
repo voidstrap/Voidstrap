@@ -20,6 +20,13 @@
     mc:Ignorable="d">
 
     <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -56,19 +63,17 @@
             Grid.Row="2"
             Margin="0,10,0,0"
             Padding="15"
-            Background="{ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}">
+            Background="{DynamicResource PrimaryBackgroundColor}">
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button
                     MinWidth="100"
                     Command="{Binding SetLocaleCommand}"
-                    Content="{x:Static resources:Strings.Common_OK}"
-                    Foreground="White" />
+                    Content="{x:Static resources:Strings.Common_OK}"/>
                 <!--  Uncomment the Cancel button if needed  -->
                 <Button
                     MinWidth="100"
                     Margin="12,0,0,0"
                     Content="{x:Static resources:Strings.Common_Cancel}"
-                    Foreground="White"
                     IsCancel="True" />
             </StackPanel>
         </Border>

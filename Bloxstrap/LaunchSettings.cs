@@ -7,32 +7,31 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
+using Voidstrap;
 
 namespace Voidstrap
 {
     public class LaunchSettings
     {
-        public LaunchFlag MenuFlag      { get; } = new("preferences,menu,settings");
+        public LaunchFlag MenuFlag { get; } = new("preferences,menu,settings");
 
-        public LaunchFlag WatcherFlag   { get; } = new("watcher");
+        public LaunchFlag WatcherFlag { get; } = new("watcher");
 
-        public LaunchFlag QuietFlag     { get; } = new("quiet");
+        public LaunchFlag QuietFlag { get; } = new("quiet");
 
         public LaunchFlag UninstallFlag { get; } = new("uninstall");
 
-        public LaunchFlag InstallFlag { get; } = new("install");
+        public LaunchFlag NoLaunchFlag { get; } = new("nolaunch");
 
-        public LaunchFlag NoLaunchFlag  { get; } = new("nolaunch");
-        
-        public LaunchFlag TestModeFlag  { get; } = new("testmode");
+        public LaunchFlag TestModeFlag { get; } = new("testmode");
 
-        public LaunchFlag NoGPUFlag     { get; } = new("nogpu");
+        public LaunchFlag NoGPUFlag { get; } = new("nogpu");
 
-        public LaunchFlag UpgradeFlag   { get; } = new("upgrade");
-        
-        public LaunchFlag PlayerFlag    { get; } = new("player");
-        
-        public LaunchFlag StudioFlag    { get; } = new("studio");
+        public LaunchFlag UpgradeFlag { get; } = new("upgrade");
+
+        public LaunchFlag PlayerFlag { get; } = new("player");
+
+        public LaunchFlag StudioFlag { get; } = new("studio");
 
         public LaunchFlag BloxshadeFlag { get; } = new("bloxshade");
 
@@ -83,7 +82,7 @@ namespace Voidstrap
             {
                 string arg = Args[0];
 
-                if (arg.StartsWith("roblox:", StringComparison.OrdinalIgnoreCase) 
+                if (arg.StartsWith("roblox:", StringComparison.OrdinalIgnoreCase)
                     || arg.StartsWith("roblox-player:", StringComparison.OrdinalIgnoreCase))
                 {
                     App.Logger.WriteLine(LOG_IDENT, "Got Roblox player argument");
@@ -114,7 +113,7 @@ namespace Voidstrap
 
                 flag.Active = true;
 
-                if (i < Args.Length - 1 && Args[i+1] is string nextArg && !nextArg.StartsWith('-'))
+                if (i < Args.Length - 1 && Args[i + 1] is string nextArg && !nextArg.StartsWith('-'))
                 {
                     flag.Data = nextArg;
                     i++;

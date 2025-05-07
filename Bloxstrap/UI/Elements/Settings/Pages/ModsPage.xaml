@@ -181,6 +181,5 @@
                     Visibility="{Binding DeleteCustomFontVisibility, Mode=OneWay}" />
             </StackPanel>
         </controls:OptionControl>
-
     </StackPanel>
 </ui:UiPage>

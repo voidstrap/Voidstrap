@@ -356,19 +356,114 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         private void ExportJSONButton_Click(object sender, RoutedEventArgs e)
         {
-            string json = JsonSerializer.Serialize(App.FastFlags.Prop, new JsonSerializerOptions { WriteIndented = true });
+            var flags = App.FastFlags.Prop;
 
-                SaveJSONToFile(json);
+            // Group by flag prefix using regex (e.g., DFFlag, DFInt, FFlag, etc.)
+            var groupedFlags = flags
+                .GroupBy(kvp =>
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
+                    return match.Success ? match.Value : "Other";
+                })
+                .OrderBy(g => g.Key); // Prefix group ordering (alphabetical)
+
+            var formattedJson = new StringBuilder();
+            formattedJson.AppendLine("{");
+
+            int totalItems = flags.Count;
+            int writtenItems = 0;
+            int groupIndex = 0;
+
+            foreach (var group in groupedFlags)
+            {
+                // Optional: blank line between groups
+                if (groupIndex > 0)
+                    formattedJson.AppendLine();
+
+                // Sort entries in this group by the length of the full line string
+                var sortedGroup = group
+                    .OrderByDescending(kvp => kvp.Key.Length + (kvp.Value?.ToString()?.Length ?? 0));
+
+                foreach (var kvp in sortedGroup)
+                {
+                    writtenItems++;
+                    bool isLast = (writtenItems == totalItems);
+                    string line = $"    \"{kvp.Key}\": \"{kvp.Value}\"";
+
+                    if (!isLast)
+                        line += ",";
+
+                    formattedJson.AppendLine(line);
+                }
+
+                groupIndex++;
+            }
+
+            formattedJson.AppendLine("}");
+
+            // Save the formatted JSON to a file
+            SaveJSONToFile(formattedJson.ToString());
         }
 
-        private void CopyJSONButton_Click(object sender, RoutedEventArgs e)
+
+        private void CopyJSONButton_Click1(object sender, RoutedEventArgs e)
         {
             string json = JsonSerializer.Serialize(App.FastFlags.Prop, new JsonSerializerOptions { WriteIndented = true });
 
                 Clipboard.SetText(json);
+        }
+
+        private void CopyJSONButton_Click2(object sender, RoutedEventArgs e)
+        {
+            var flags = App.FastFlags.Prop;
+
+            // Group by flag prefix using regex (e.g., DFFlag, DFInt, FFlag, etc.)
+            var groupedFlags = flags
+                .GroupBy(kvp =>
+                {
+                    var match = System.Text.RegularExpressions.Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
+                    return match.Success ? match.Value : "Other";
+                })
+                .OrderBy(g => g.Key); // Prefix group ordering (alphabetical)
+
+            var formattedJson = new StringBuilder();
+            formattedJson.AppendLine("{");
+
+            int totalItems = flags.Count;
+            int writtenItems = 0;
+            int groupIndex = 0;
+
+            foreach (var group in groupedFlags)
+            {
+                // Optional: blank line between groups
+                if (groupIndex > 0)
+                    formattedJson.AppendLine();
+
+                // Sort entries in this group by the length of the full line string
+                // Fix for the null reference issue
+                var sortedGroup = group
+                    .OrderByDescending(kvp => kvp.Key.Length + (kvp.Value?.ToString()?.Length ?? 0));
+
+
+                foreach (var kvp in sortedGroup)
+                {
+                    writtenItems++;
+                    bool isLast = (writtenItems == totalItems);
+                    string line = $"    \"{kvp.Key}\": \"{kvp.Value}\"";
+
+                    if (!isLast)
+                        line += ",";
+
+                    formattedJson.AppendLine(line);
+                }
+
+                groupIndex++;
             }
 
+            formattedJson.AppendLine("}");
 
+            Clipboard.SetText(formattedJson.ToString());
+        }
 
 
         private void SaveJSONToFile(string json)
@@ -414,7 +509,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
 
 
-        private CancellationTokenSource _searchCancellationTokenSource;
+        private CancellationTokenSource? _searchCancellationTokenSource;
 
 
         private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)

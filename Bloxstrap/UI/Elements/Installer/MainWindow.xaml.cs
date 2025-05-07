@@ -145,5 +145,10 @@ namespace Voidstrap.UI.Elements.Installer
         public void CloseWindow() => Close();
 
         #endregion INavigationWindow methods
+
+        private void RootFrame_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
+        {
+
+        }
     }
 }

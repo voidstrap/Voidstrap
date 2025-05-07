@@ -22,6 +22,13 @@
     WindowStartupLocation="CenterScreen">
 
     <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -103,7 +110,7 @@
         <Border 
             Grid.Row="2" 
             Padding="15" 
-            Background="{ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}">
+            Background="{DynamicResource PrimaryBackgroundColor}">
             <StackPanel 
                 Orientation="Horizontal" 
                 FlowDirection="LeftToRight" 

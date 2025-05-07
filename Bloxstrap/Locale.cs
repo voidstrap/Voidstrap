@@ -120,8 +120,10 @@ namespace Voidstrap
                 }
 
 
-                window.BorderBrush = System.Windows.Media.Brushes.Red;
-                window.BorderThickness = new Thickness(4);
+#if QA_BUILD
+            this.BorderBrush = System.Windows.Media.Brushes.Red;
+            this.BorderThickness = new Thickness(4);
+#endif
 
             }));
         }

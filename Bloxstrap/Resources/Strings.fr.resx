@@ -389,6 +389,12 @@ Sinon, veuillez signaler cette exception via un [problème GitHub]({1}) accompag
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Clair</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Clair</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Clair</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap a été mis à jour vers la version v{0}</value>
   </data>
@@ -1232,6 +1238,26 @@ Voulez-vous activer le mode test ?</value>
     <value>Icônes</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Lancer Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>Version {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap a tenté de mettre Roblox à jour mais a échoué car des fichiers de Roblox sont utilisés.
+
+Veuillez fermer toute application pouvant utiliser les fichiers de Roblox, et relancez.</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>Archive Zip</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Exporter</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>Il est probable que quelque chose empêche Voidstrap de se connecter à Internet.</value>
   </data>
@@ -1256,25 +1282,5 @@ Voulez-vous activer le mode test ?</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Lancer Roblox Studio</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>Version {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap a tenté de mettre Roblox à jour mais a échoué car des fichiers de Roblox sont utilisés.
-
-Veuillez fermer toute application pouvant utiliser les fichiers de Roblox, et relancez.</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>Archive Zip</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>Exporter</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

@@ -7,7 +7,10 @@ namespace Voidstrap.RobloxInterfaces
     {
         public const string DefaultChannel = "production";
 
-        public static string Channel = DefaultChannel;
+        private const string VersionStudioHash = "version-012732894899482c";
+
+
+        public static string Channel = App.Settings.Prop.Channel;
 
         public static string BinaryType = "WindowsPlayer";
 
@@ -50,9 +53,11 @@ namespace Voidstrap.RobloxInterfaces
                 response.EnsureSuccessStatusCode();
 
                 // versionStudio is the version hash for the last MFC studio to be deployed.
+                // the response body should always be "version-012732894899482c".
                 string content = await response.Content.ReadAsStringAsync(token);
 
-
+                if (content != VersionStudioHash)
+                    throw new InvalidHTTPResponseException($"versionStudio response does not match (expected \"{VersionStudioHash}\", got \"{content}\")");
             }
             catch (TaskCanceledException)
             {
@@ -187,6 +192,8 @@ namespace Voidstrap.RobloxInterfaces
                 }
 
                 // check if channel is behind LIVE
+
+
                 if (!isDefaultChannel)
                 {
                     var defaultClientVersion = await GetInfo(DefaultChannel);

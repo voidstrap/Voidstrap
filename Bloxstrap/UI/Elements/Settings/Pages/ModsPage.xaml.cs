@@ -12,5 +12,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             DataContext = new ModsViewModel();
             InitializeComponent();
         }
+
+        private void OptionControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+        }
     }
 }

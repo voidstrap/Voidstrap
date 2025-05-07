@@ -26,13 +26,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             { "ttc", new byte[] { 0x74, 0x74, 0x63, 0x66 } }
         };
 
-        private static readonly Dictionary<string, byte[]> CursorHeaders = new()
-        {
-            { "png", new byte[] { 0x89, 0x50, 0x4E, 0x47 } }, // PNG header
-        };
-
         public ICommand ManageCustomFontCommand => new RelayCommand(ManageCustomFont);
-        public ICommand ManageCustomCursorCommand => new RelayCommand(ManageCustomCursor);
         public ICommand OpenCompatSettingsCommand => new RelayCommand(OpenCompatSettings);
 
         public Visibility ChooseCustomFontVisibility =>
@@ -40,12 +34,6 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public Visibility DeleteCustomFontVisibility =>
             string.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Collapsed : Visibility.Visible;
-
-        public Visibility ChooseCustomCursorVisibility =>
-            CursorTypeTask.NewState.Equals(default(Voidstrap.Enums.CursorType)) ? Visibility.Visible : Visibility.Collapsed;
-
-        public Visibility DeleteCustomCursorVisibility =>
-            CursorTypeTask.NewState.Equals(default(Voidstrap.Enums.CursorType)) ? Visibility.Collapsed : Visibility.Visible;
 
 
         public ModPresetTask OldDeathSoundTask { get; } = new("OldDeathSound", "content\\sounds\\ouch.ogg", "Sounds.OldDeath.ogg");
@@ -98,6 +86,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             }}
         });
 
+
         private void ManageCustomFont()
         {
             if (!string.IsNullOrEmpty(TextFontTask.NewState))
@@ -124,36 +113,6 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             OnPropertyChanged(nameof(ChooseCustomFontVisibility));
             OnPropertyChanged(nameof(DeleteCustomFontVisibility));
-        }
-
-        private void ManageCustomCursor()
-        {
-            if (!CursorTypeTask.NewState.Equals(default(Voidstrap.Enums.CursorType)))
-            {
-                CursorTypeTask.NewState = default(Voidstrap.Enums.CursorType);
-            }
-            else
-            {
-                var dialog = new OpenFileDialog { Filter = "Cursor files|*.png" };
-
-                if (dialog.ShowDialog() != true) return;
-
-                string type = Path.GetExtension(dialog.FileName).TrimStart('.').ToLowerInvariant();
-                byte[] fileHeader = File.ReadAllBytes(dialog.FileName).Take(4).ToArray();
-
-                if (!CursorHeaders.TryGetValue(type, out var expectedHeader) || !expectedHeader.SequenceEqual(fileHeader))
-                {
-                    Frontend.ShowMessageBox("Custom Cursor Invalid", MessageBoxImage.Error);
-                    return;
-                }
-
-                // Assuming you want to store the file path in a separate property
-                // Removed invalid 'CustomCursor' enum value assignment
-                // Add logic to store the file path if needed
-            }
-
-            OnPropertyChanged(nameof(ChooseCustomCursorVisibility));
-            OnPropertyChanged(nameof(DeleteCustomCursorVisibility));
         }
 
 

@@ -389,6 +389,12 @@ Jei ne, praneškite apie šią išimtį per [„GitHub“ problemą]({1}) kartu 
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>Šviesi</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>Šviesi</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>Šviesi</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>„Voidstrap“ buvo atnaujintas į v{0}.</value>
   </data>
@@ -1233,6 +1239,26 @@ Ar norėtumėte įjungti bandymo režimą?</value>
     <value>Piktogramos</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>Paleisti „Roblox Studio“</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>{0} versija</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>„Voidstrap“ bandė atnaujinti „Roblox“, bet negali, nes „Roblox“ failai vis dar naudojami.
+
+Uždarykite visas programas, kurios gali naudoti „Roblox“ failus, ir paleiskite iš naujo.</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>ZIP archyvas</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>Eksportuoti</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>Greičiausiai kažkas trukdo „Voidstrap“ prisijungti prie interneto.</value>
   </data>
@@ -1257,25 +1283,5 @@ Ar norėtumėte įjungti bandymo režimą?</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>Paleisti „Roblox Studio“</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>{0} versija</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>„Voidstrap“ bandė atnaujinti „Roblox“, bet negali, nes „Roblox“ failai vis dar naudojami.
-
-Uždarykite visas programas, kurios gali naudoti „Roblox“ failus, ir paleiskite iš naujo.</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>ZIP archyvas</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>Eksportuoti</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

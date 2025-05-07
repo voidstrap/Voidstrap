@@ -389,6 +389,12 @@
   <data name="Enums.Theme.Light" xml:space="preserve">
     <value>明亮</value>
   </data>
+  <data name="Enums.Theme.Red" xml:space="preserve">
+    <value>明亮</value>
+  </data>
+  <data name="Enums.Theme.Blue" xml:space="preserve">
+    <value>明亮</value>
+  </data>
   <data name="InstallChecker.Updated" xml:space="preserve">
     <value>Voidstrap 已經更新至 v{0}</value>
   </data>
@@ -1235,6 +1241,26 @@ Voidstrap 安裝在 "{1}"。</value>
     <value>圖示</value>
     <comment>Name of the folder that gets created according to the "create shortcut icons" option. Ensure that it is a valid folder name.</comment>
   </data>
+  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
+    <value>啟動 Roblox Studio</value>
+  </data>
+  <data name="Dialog.Exception.Version" xml:space="preserve">
+    <value>版本 {0}</value>
+  </data>
+  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
+    <value>Voidstrap 目前無法更新 Roblox；因為當前 Roblox 的文件被其他佔用。
+
+請關閉任何可能正在使用 Roblox 程式文件的應用程式，然後重新啟動 Voidstrap。</value>
+    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
+  </data>
+  <data name="FileTypes.ZipArchive" xml:space="preserve">
+    <value>Zip 壓縮檔</value>
+    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
+  </data>
+  <data name="Common.Export" xml:space="preserve">
+    <value>導出</value>
+    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
+  </data>
   <data name="Dialog.Connectivity.Preventing" xml:space="preserve">
     <value>可能有東西正在阻止 Voidstrap 去連接網路。</value>
   </data>
@@ -1259,25 +1285,5 @@ Voidstrap 安裝在 "{1}"。</value>
   </data>
   <data name="Menu.Channel.RobloxUpgrades" type="System.Resources.ResXNullRef, System.Windows.Forms">
     <value />
-  </data>
-  <data name="LaunchMenu.LaunchRobloxStudio" xml:space="preserve">
-    <value>啟動 Roblox Studio</value>
-  </data>
-  <data name="Dialog.Exception.Version" xml:space="preserve">
-    <value>版本 {0}</value>
-  </data>
-  <data name="Bootstrapper.FilesInUse" xml:space="preserve">
-    <value>Voidstrap 目前無法更新 Roblox；因為當前 Roblox 的文件被其他佔用。
-
-請關閉任何可能正在使用 Roblox 程式文件的應用程式，然後重新啟動 Voidstrap。</value>
-    <comment>This is *not* for when Roblox is still running when trying to upgrade. This applies to files being open (i.e. image assets)</comment>
-  </data>
-  <data name="FileTypes.ZipArchive" xml:space="preserve">
-    <value>Zip 壓縮檔</value>
-    <comment>Shown in the save file dialog, where the file type selection dropdown is, e.g. "Zip archive (*.zip)"</comment>
-  </data>
-  <data name="Common.Export" xml:space="preserve">
-    <value>導出</value>
-    <comment>Currently used under the "Voidstrap" settings tab for the button to export diagnostic data</comment>
   </data>
 </root>

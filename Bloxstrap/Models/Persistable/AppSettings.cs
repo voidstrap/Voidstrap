@@ -57,7 +57,9 @@ namespace Voidstrap.Models.Persistable
         public bool UseDisableAppPatch { get; set; } = false;
 
         // Roblox Deployment Settings
-        public string Channel { get; set; } = "production";
+        public string Channel { get; set; } = RobloxInterfaces.Deployment.DefaultChannel;
+        public ChannelChangeMode ChannelChangeMode { get; set; } = ChannelChangeMode.Automatic;
+        public string ChannelHash { get; set; } = "";
 
     }
 }

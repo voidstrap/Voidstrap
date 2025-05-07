@@ -5,52 +5,52 @@
         [EnumName(FromTranslation = "Default")]
         Default,
 
-        [EnumName(StaticName = "Chunks1x")]
+        [EnumName(StaticName = "1x")]
         Chunks1x,
 
-        [EnumName(StaticName = "Chunks2x")]
+        [EnumName(StaticName = "2x")]
         Chunks2x,
 
-        [EnumName(StaticName = "Chunks3x")]
+        [EnumName(StaticName = "3x")]
         Chunks3x,
 
-        [EnumName(StaticName = "Chunks4x")]
+        [EnumName(StaticName = "4x")]
         Chunks4x,
 
-        [EnumName(StaticName = "Chunks5x")]
+        [EnumName(StaticName = "5x")]
         Chunks5x,
 
-        [EnumName(StaticName = "Chunks6x")]
+        [EnumName(StaticName = "6x")]
         Chunks6x,
 
-        [EnumName(StaticName = "Chunks7x")]
+        [EnumName(StaticName = "7x")]
         Chunks7x,
 
-        [EnumName(StaticName = "Chunks8x")]
+        [EnumName(StaticName = "8x")]
         Chunks8x,
 
-        [EnumName(StaticName = "Chunks9x")]
+        [EnumName(StaticName = "9x")]
         Chunks9x,
 
-        [EnumName(StaticName = "Chunks10x")]
+        [EnumName(StaticName = "10x")]
         Chunks10x,
 
-        [EnumName(StaticName = "Chunks11x")]
+        [EnumName(StaticName = "11x")]
         Chunks11x,
 
-        [EnumName(StaticName = "Chunks12x")]
+        [EnumName(StaticName = "12x")]
         Chunks12x,
 
-        [EnumName(StaticName = "Chunks13x")]
+        [EnumName(StaticName = "13x")]
         Chunks13x,
 
-        [EnumName(StaticName = "Chunks14x")]
+        [EnumName(StaticName = "14x")]
         Chunks14x,
 
-        [EnumName(StaticName = "Chunks15x")]
+        [EnumName(StaticName = "15x")]
         Chunks15x,
 
-        [EnumName(StaticName = "Chunks16x")]
+        [EnumName(StaticName = "16x")]
         Chunks16x
     }
 }

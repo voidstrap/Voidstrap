@@ -5,34 +5,34 @@
         [EnumName(FromTranslation = "Disabled")]
         Disabled,
 
-        [EnumName(StaticName = "One")]
-        One,
+        [EnumName(StaticName = "1 Bar")]
+        Bar1,
 
-        [EnumName(StaticName = "Two")]
-        Two,
+        [EnumName(StaticName = "2 Bars")]
+        Bar2,
 
-        [EnumName(StaticName = "Three")]
-        Three,
+        [EnumName(StaticName = "3 Bars")]
+        Bar3,
 
-        [EnumName(StaticName = "Four")]
-        Four,
+        [EnumName(StaticName = "4 Bars")]
+        Bar4,
 
-        [EnumName(StaticName = "Five")]
-        Five,
+        [EnumName(StaticName = "5 Bars")]
+        Bar5,
 
-        [EnumName(StaticName = "Six")]
-        Six,
+        [EnumName(StaticName = "6 Bars")]
+        Bar6,
 
-        [EnumName(StaticName = "Seven")]
-        Seven,
+        [EnumName(StaticName = "7 Bars")]
+        Bar7,
 
-        [EnumName(StaticName = "Eight")]
-        Eight,
+        [EnumName(StaticName = "8 Bars")]
+        Bar8,
 
-        [EnumName(StaticName = "Nine")]
-        Nine,
+        [EnumName(StaticName = "9 Bars")]
+        Bar9,
 
-        [EnumName(StaticName = "Ten")]
-        Ten,
+        [EnumName(StaticName = "10 Bars")]
+        Bar10,
     }
 }

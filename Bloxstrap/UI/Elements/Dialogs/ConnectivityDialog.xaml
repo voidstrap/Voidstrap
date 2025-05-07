@@ -13,9 +13,15 @@
         MinHeight="0"
         SizeToContent="Height"
         Title="{x:Static resources:Strings.Dialog_Connectivity_Title}"
-        Background="{ui:ThemeResource ApplicationBackgroundBrush}"
         ExtendsContentIntoTitleBar="True"
         WindowStartupLocation="CenterScreen">
+    <base:WpfUiWindow.Background>
+        <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+            <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+            <GradientStop Offset="0.90" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+            <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}"/>
+        </LinearGradientBrush>
+    </base:WpfUiWindow.Background>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -39,7 +45,8 @@
             </StackPanel>
         </Grid>
 
-        <Border Grid.Row="2" Padding="15" Background="{ui:ThemeResource SolidBackgroundFillColorSecondaryBrush}">
+        <Border Grid.Row="2" Padding="15" Background="{DynamicResource PrimaryBackgroundColor}"
+                >
             <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
                 <Button x:Name="CloseButton" MinWidth="100" Content="{x:Static resources:Strings.Common_Close}" Margin="12,0,0,0" Foreground="White" />
             </StackPanel>

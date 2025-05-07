@@ -95,8 +95,8 @@
             <ui:CardAction
                 Grid.Row="1"
                 Grid.Column="1"
-                Grid.ColumnSpan="2"
-                Margin="0,8,0,0"
+                Margin="0,8,8,0"
+                VerticalAlignment="Top"
                 Command="models:GlobalViewModel.OpenWebpageCommand"
                 CommandParameter="https://github.com/MaximumADHD/Roblox-Studio-Mod-Manager/blob/main/LICENSE">
                 <StackPanel>
@@ -140,13 +140,88 @@
                 </StackPanel>
             </ui:CardAction>
             <ui:CardAction
-                Grid.Row="2"
+                Grid.Row="1"
                 Grid.Column="2"
                 Margin="0,8,0,0"
+                VerticalAlignment="Top"
                 Command="models:GlobalViewModel.OpenWebpageCommand"
                 CommandParameter="https://github.com/icsharpcode/AvalonEdit/blob/master/LICENSE">
                 <StackPanel>
                     <TextBlock FontSize="14" Text="AvalonEdit" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="{x:Static resources:Strings.Menu_About_Licenses_MIT}" />
+                </StackPanel>
+            </ui:CardAction>
+        </Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ui:CardAction
+                Grid.Row="0"
+                Grid.Column="0"
+                Margin="0,8,8,0"
+                Command="models:GlobalViewModel.OpenWebpageCommand"
+                CommandParameter="https://github.com/sharpdx/SharpDX/blob/master/LICENSE">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="SharpDX/SharpDXGI" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="{x:Static resources:Strings.Menu_About_Licenses_MIT}" />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction
+                Grid.Row="0"
+                Grid.Column="1"
+                Margin="0,8,8,0"
+                Command="models:GlobalViewModel.OpenWebpageCommand"
+                CommandParameter="https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="WPFXamlAnimatedGIf UI" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="Apache 2.0" />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction
+                Grid.Column="2"
+                Margin="0,-64,0,0"
+                VerticalAlignment="Top"
+                Command="models:GlobalViewModel.OpenWebpageCommand"
+                CommandParameter="https://github.com/fishstrap/fishstrap/blob/main/LICENSE">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Fishstrap - MIT" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="{x:Static resources:Strings.Menu_About_Licenses_MIT}" />
+                </StackPanel>
+            </ui:CardAction>
+            <ui:CardAction
+                Grid.RowSpan="3"
+                Grid.Column="2"
+                Margin="0,8,0,0"
+                VerticalAlignment="Top"
+                Command="models:GlobalViewModel.OpenWebpageCommand"
+                CommandParameter="https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="NewtonsoftJSON" />
                     <TextBlock
                         Margin="0,2,0,0"
                         FontSize="12"
