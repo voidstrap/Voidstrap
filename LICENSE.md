@@ -1,21 +1,8 @@
 <p align="center">
-   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png" alt="Voidstrap Logo">
-</p>
-> [!IMPORTANT]
-> The only official sources for downloading Voidstrap are this GitHub repository and our [Discord server](https://discord.gg/UuxcfqPNnA). Avoid third-party sites to ensure your safety.
-<p align="center">
    <img src="https://github.com/voidstrap/Voidstrap/blob/main/Images/showcase.png" alt="showcase">
 </p>
+
 ---
-
-
-
-
-
-
-
-
-
 
 <h2>MIT License</h2>
 <p>Copyright (c) 2023 meddsam</p>
