@@ -9,7 +9,7 @@
 <p align="center"><strong>If you find Voidstrap helpful, please consider starring the repository—it really helps!</strong></p>
 
 > [!IMPORTANT]
-> The only official sources for downloading Voidstrap are this GitHub repository and our [Discord server](https://discord.gg/UuxcfqPNnA). Avoid third-party sites to ensure your safety.
+> The only official sources for downloading Voidstrap are this GitHub repository and our [Discord server](https://discord.gg/PE8ZeNSdS2). Avoid third-party sites to ensure your safety.
 
 
 <p align="center">
@@ -29,7 +29,7 @@
 
 <p align="center">
   <a href="https://discord.gg/kyh25qeRVp">
-    <img src="https://img.shields.io/discord/1333479052853383199?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
+    <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
   </a>
   <a href="https://opentip.kaspersky.com/87EBA70EE3385DE38C2A705499B4899E4CEF6C6734C83632C4A5D6C33C84CD88/results?tab=upload">
     <img src="https://img.shields.io/badge/Virus%20Free-✔️-00B140" alt="Virus Free">
@@ -95,7 +95,7 @@
 
 ## 🧠 Community & Support
 
--  [Join our Discord](https://discord.gg/kyh25qeRVp) for help and announcements  
+-  [Join our Discord](hhttps://discord.gg/PE8ZeNSdS2) for help and announcements  
 -  [Submit an issue](https://github.com/midaskira/Voidstrap/issues) to report bugs or request features  
 -  [Star the project](https://github.com/midaskira/Voidstrap) if you enjoy using Voidstrap
 
