@@ -1,7 +1,3 @@
-Below is an improved version of the GitHub README for Voidstrap. The revised version refines the structure, sharpens the language, and emphasizes clarity and usability while keeping the original content and important details intact.
-
----
-
 # Voidstrap: A Modern, Feature-Rich Bloxstrap Fork
 
 **Voidstrap** is an optimized fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap) designed to elevate your **Roblox** experience. With advanced features, enhanced stability, and top-notch performance improvements, Voidstrap transforms your gameplay into a smoother, more controlled adventure.
