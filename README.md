@@ -1,4 +1,4 @@
-# Voidstrap: A Modern, Feature-Rich Bloxstrap Fork
+# Voidstrap: A Modern, Feature Rich Bloxstrap Fork
 
 **Voidstrap** is an optimized fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap) designed to elevate your **Roblox** experience. With advanced features, enhanced stability, and top-notch performance improvements, Voidstrap transforms your gameplay into a smoother, more controlled adventure.
 
@@ -39,7 +39,7 @@
 
 - **Optimized Bloxstrap Fork:** Experience enhanced performance and extended functionality.
 - **Multi-Instance Support:** Run multiple Roblox clients simultaneously.
-- **Cross-Game Teleport:** Seamlessly switch between games (resolves Error 773).
+- **Cross Game Teleport:** Seamlessly switch between games (resolves Error 773).
 - **Complete Channels Manager:** Enjoy full control over Roblox channels.
 - **Enhanced UI & Customization:** Modern themes, refined layout, and personalized icons.
 - **Reliable Stability:** Benefit from bug fixes and continuous performance improvements.
