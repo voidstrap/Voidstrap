@@ -93,7 +93,7 @@ Below is an improved version of the GitHub README for Voidstrap. The revised ver
 
 ## 🧠 Community & Support
 
-- **Discord:** Join our community on [Discord](https://discord.gg/PE8ZeNSdS2) for announcements, support, and to connect with fellow users.
+- **Discord:** Join our community on [Discord](https://discord.gg/8ZVvFTmMR8) for announcements, support, and to connect with fellow users.
 - **Issues:** Encounter a bug or have a feature request? [Submit an issue](https://github.com/midaskira/Voidstrap/issues).
 - **Stars:** If you enjoy using Voidstrap, show your support by [starring the project](https://github.com/midaskira/Voidstrap).
 
@@ -101,13 +101,9 @@ Below is an improved version of the GitHub README for Voidstrap. The revised ver
 
 ## 🙌 Credits & Acknowledgements
 
-### Logo & Branding
-- **Meddsam:** [GitHub](https://github.com/Meddsam)
-
 ### Development Team
-- **Meddsam:** Lead Developer – [GitHub](https://github.com/Meddsam)
-- **KloBraticc:** Former Maintainer – [GitHub](https://github.com/KloBraticc)
-- **midaskira:** Former Maintainer – [GitHub](https://github.com/midaskira)
+- **Bratic:** Owner/Developer – [GitHub](https://github.com/nobadboy)
+- **midaskira:** Co-Owner Maintainer – [GitHub](https://github.com/midaskira)
 
 ### Contributors
 - [stoof](https://github.com/stoofis)
