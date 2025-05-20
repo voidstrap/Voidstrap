@@ -16,9 +16,6 @@
 ## 🚀 Quick Links
 
 <p align="center">
-  <a href="https://github.com/midaskira/Voidstrap/blob/main/LICENSE.md">
-    <img src="https://img.shields.io/github/license/midaskira/Voidstrap?color=FFC000" alt="License">
-  </a>
   <a href="https://github.com/midaskira/Voidstrap/releases">
     <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads" alt="Downloads">
   </a>
