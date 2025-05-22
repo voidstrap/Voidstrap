@@ -6,7 +6,7 @@
   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/Voidstrap-full-light.png" alt="Voidstrap Logo">
 </p>
 
-<p align="center"><strong>If you find Voidstrap helpful, please consider starring the repository—it really helps!</strong></p>
+<p align="center"><strong>If you find Voidstrap helpful, please consider starring the repository it really helps!</strong></p>
 
 > **Important:**  
 > The only official sources for downloading Voidstrap are this GitHub repository and our [Discord server](https://discord.gg/PE8ZeNSdS2). Avoid third-party sites to ensure your safety.
