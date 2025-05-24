@@ -86,7 +86,7 @@
 
 ## 🤝 Community & Support
 
-- 💬 **Join Us on Discord:** [Voidstrap Discord Server](https://discord.gg/8ZVvFTmMR8) for support, updates, and community talk.
+- 💬 **Join Us on Discord:** [Voidstrap Discord Server](https://discord.gg/PE8ZeNSdS2) for support, updates, and community talk.
 - 🐞 **Report Bugs / Suggest Features:** Use our [Issues tab](https://github.com/midaskira/Voidstrap/issues) to contribute.
 - ⭐ **Star the Repo:** Show support and help Voidstrap grow!
 
