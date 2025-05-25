@@ -71,6 +71,7 @@
 - **Hub Page** – Get Themes, Mods, and FFlags from others
 - **Voidstrap Discord RPC** – Shows that you're using Voidstrap on Discord (can be disabled)
 - **Cross Game Teleport** - (Fixes Error 773)
+- **Windows (7) and Up Support**
 
 
 ### ⚙️ Fast Flags
