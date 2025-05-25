@@ -65,6 +65,7 @@
 
 ### 🔄 Integrations
 - **Player & Message Logs** – Track actions for moderation or debugging.
+- **AI Chat (BETA)** - Chat with a AI that only talks FFlags.
 
 ### ⚙️ Fast Flags
 - **Settings Backup** – Save and restore your custom config.
