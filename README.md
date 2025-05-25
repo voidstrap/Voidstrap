@@ -65,10 +65,20 @@
 
 ### 🔄 Integrations
 - **Player & Message Logs** – Track actions for moderation or debugging.
+- **Hardware Acceleration** – Disables Hardware Acceleration and UI animations
+- **Launch Roblox Studio** – Launch Studio via Voidstrap or shortcut
 - **AI Chat (BETA)** - Chat with a AI that only talks FFlags.
+- **Hub Page** – Get Themes, Mods, and FFlags from others
+- **Voidstrap Discord RPC** – Shows that you're using Voidstrap on Discord (can be disabled)
+- **Cross Game Teleport** - (Fixes Error 773)
+
 
 ### ⚙️ Fast Flags
 - **Settings Backup** – Save and restore your custom config.
+- **Over 800+ FFlags in one place**
+- **Easy flag backups & restoration**
+- **FFlag History**
+- **Customizable Roblox menus**
 - **Remove Splash Warnings** – Skip unnecessary Roblox warnings.
 
 ### 📡 Channel Management
@@ -77,15 +87,20 @@
 
 ### 🚀 Bootstrap Enhancements
 - **Multiple Instance Booting** – Great for developers and alt accounts.
+- **Theme Preview Mode** – See changes before applying
 - **Robust Error Management** – Stability first.
 - **Persistent Uninstall Settings** – Keeps your data intact.
 
 ### 🎨 UI & Theming
 - **Live Theme Switching** – Customize on the go.
+- **Tailored themes** - for a personalized launcher
+- **Over 10+ Themes** - to select from
 - **Icon & Layout Tweaks** – Sleek and modern.
+- **Over 7+ Different Mouse Cursors to choose**
 
 ### 🧠 Smart Utilities
 - **Session Memory** – Picks up where you left off.
+- **Log Cleaner** - Cleans all old log files to free space.
 - **Auto-Update Control** – Disable updates when needed.
 
 ---
