@@ -94,8 +94,8 @@
 ## 🙌 Credits
 
 ### 👨‍💻 Core Team
-- **Bratic** – Owner / Lead Dev · [GitHub](https://github.com/nobadboy)
-- **midaskira** – Co-Owner / Maintainer · [GitHub](https://github.com/midaskira)
+- **Bratic** – Owner · [GitHub](https://github.com/nobadboy)
+- **midaskira** – Co-Owner · [GitHub](https://github.com/midaskira)
 
 ### 🧪 Contributors
 - [stoof](https://github.com/stoofis)
