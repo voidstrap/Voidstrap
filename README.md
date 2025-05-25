@@ -1,15 +1,15 @@
-# Voidstrap: A Modern, Feature-Rich Bloxstrap Fork
+# 🌌 Voidstrap: A Next-Gen Bloxstrap Fork
 
-**Voidstrap** is a next-gen fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), crafted to supercharge your **Roblox** experience. With sleek design upgrades, advanced functionality, and robust performance improvements, Voidstrap puts you in total control of your Roblox client.
+**Voidstrap** is a modern and feature-rich fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to elevate your **Roblox** experience. With a refined interface, enhanced stability, and powerful features, Voidstrap gives you full control over how you play.
 
 <p align="center">
   <img src="https://github.com/midaskira/Voidstrap/blob/main/Images/VOIDSTRAP-Photoroom.png" alt="Voidstrap Logo">
 </p>
 
-<p align="center"><strong>⭐ Enjoying Voidstrap? Star the repo and help it grow!</strong></p>
+<p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
 
-> ⚠️ **Only download Voidstrap from official sources:**  
-> [This GitHub repo](https://github.com/midaskira/Voidstrap) and our [Discord server](https://discord.gg/PE8ZeNSdS2) are the only verified sources. Avoid third-party links for your safety.
+> ⚠️ **Only download Voidstrap from trusted sources:**  
+> [This GitHub repo](https://github.com/midaskira/Voidstrap) and our [Discord server](https://discord.gg/PE8ZeNSdS2) are the only official channels. Never download from third-party links.
 
 ---
 
@@ -25,7 +25,7 @@
   <a href="https://github.com/midaskira/Voidstrap/stargazers">
     <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars">
   </a>
-  <a href="https://discord.gg/kyh25qeRVp">
+  <a href="https://discord.gg/PE8ZeNSdS2">
     <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
   </a>
   <a href="https://www.virustotal.com/gui/file/a19d94eaed61dfa779610f1271a9379f2dae45d876e45564cd324b69c07e9a29">
@@ -35,67 +35,66 @@
 
 ---
 
-## ✨ Why Choose Voidstrap?
+## ✨ Why Use Voidstrap?
 
-- 🔧 **Fully Optimized Bloxstrap Fork** – Lightweight, faster, and feature-packed.
-- 📦 **Multi-Instance Support** – Run multiple Roblox sessions at once.
-- 🔁 **Cross-Game Teleporting** – Bypass Error 773 with smooth game switching.
-- 📺 **Channel Control** – Take charge of Roblox channels for max stability.
-- 🎨 **Modern UI & Themes** – Refreshing design with customizable icons and layouts.
-- 🚫 **Update Control** – Disable forced Roblox updates with ease.
-- ⚙️ **Stability First** – Polished error handling and fewer crashes.
-
----
-
-## 📥 Getting Started
-
-1. **Download:** Grab the latest release from the [releases page](https://github.com/midaskira/Voidstrap/releases).
-2. **Install:** Launch the installer and follow the simple setup.
-3. **Launch:** Enjoy Roblox with enhanced power and features!
+- ⚡ **Faster & Lighter** – Slimmed-down, tuned-up, and blazing fast.
+- 🌀 **Multi-Instance Support** – Run multiple Roblox clients at once.
+- 🌐 **Cross-Game Teleport** – No more Error 773—seamless game switching.
+- 🔧 **Channel Control** – Full access to Roblox's internal channel system.
+- 🎨 **Customizable UI** – Modern themes, refined layout, and icon tweaks.
+- 🚫 **Update Bypass** – Take control of forced Roblox updates.
+- 🧠 **Stable & Smart** – Polished handling and fewer random errors.
 
 ---
 
-## 🧩 Feature Overview
+## 📥 Installation
+
+1. **Download:** Get the latest release from the [Releases page](https://github.com/midaskira/Voidstrap/releases).
+2. **Install:** Open the installer and follow the setup.
+3. **Launch:** Experience Roblox like never before!
+
+---
+
+## 🧩 Features Breakdown
 
 ### 🔄 Integrations
-- **Player Logs** – Monitor in-game activity.
-- **Message Logs** – Detailed logs for diagnostics and moderation.
+- **Player & Message Logs** – Track actions for moderation or debugging.
 
 ### ⚙️ Fast Flags
-- **Backup & Restore** – Never lose your settings again.
-- **Remove Warning Pages** – Eliminate unnecessary Roblox splash prompts.
+- **Settings Backup** – Save and restore your custom config.
+- **Remove Splash Warnings** – Skip unnecessary Roblox warnings.
 
-### 📡 Channels
-- **Cancel Forced Updates** – Keep your preferred version.
-- **Channel Manager** – Complete control over your Roblox environment.
+### 📡 Channel Management
+- **Prevent Forced Updates** – Stay on your terms.
+- **Channel Switcher** – Fine-tune your Roblox environment.
 
-### 🚀 Bootstrapper Enhancements
-- **Run Multiple Instances** – Great for testing or alt accounts.
-- **Improved Error Handling** – Fewer bugs, better stability.
-- **Persistent Uninstall Settings** – Settings survive reinstallations.
+### 🚀 Bootstrap Enhancements
+- **Multiple Instance Booting** – Great for developers and alt accounts.
+- **Robust Error Management** – Stability first.
+- **Persistent Uninstall Settings** – Keeps your data intact.
 
-### 🎨 UI & Customization
-- **Themes Interface** – Swap themes on the fly.
-- **Icon/Layout Tweaks** – Refined and modernized UI.
+### 🎨 UI & Theming
+- **Live Theme Switching** – Customize on the go.
+- **Icon & Layout Tweaks** – Sleek and modern.
 
-### 🧠 Extra Tools
-- **Memory of Last Settings** – Start exactly where you left off.
-- **Auto-Update Control** – Disable auto-updates when needed.
+### 🧠 Smart Utilities
+- **Session Memory** – Picks up where you left off.
+- **Auto-Update Control** – Disable updates when needed.
 
 ---
 
 ## 🤝 Community & Support
 
-- 💬 **Join Us on Discord:** [Voidstrap Discord Server](https://discord.gg/PE8ZeNSdS2) for support, updates, and community talk.
-- 🐞 **Report Bugs / Suggest Features:** Use our [Issues tab](https://github.com/midaskira/Voidstrap/issues) to contribute.
-- ⭐ **Star the Repo:** Show support and help Voidstrap grow!
+- 💬 **Join our Discord:** [Voidstrap Server](https://discord.gg/PE8ZeNSdS2) for help, news, and chat.
+- 🐞 **Found a bug or have an idea?** Use our [Issues tab](https://github.com/midaskira/Voidstrap/issues).
+- ⭐ **Star the repo:** Show your support!
 
 ---
 
-## 🙌 Credits & Acknowledgments
+## 🙌 Credits
 
 ### 👨‍💻 Core Team
-- **Bratic** – Owner / Developer · [GitHub](https://github.com/nobadboy)
+- **Bratic** – Owner / Lead Dev · [GitHub](https://github.com/nobadboy)
 - **midaskira** – Co-Owner / Maintainer · [GitHub](https://github.com/midaskira)
 
 ### 🧪 Contributors
@@ -110,6 +109,6 @@
 
 ---
 
-Voidstrap is here to enhance every session of Roblox you launch. Whether you're a developer, content creator, or a casual player – this fork is built to give you more freedom, performance, and polish.
+Voidstrap isn’t just a fork—it’s your launchpad to a better Roblox experience. Whether you're a creator, tester, or player, take full control and game your way.
 
-*Thanks for using Voidstrap – and happy gaming! 🎮*
+*Thanks for choosing Voidstrap. Happy gaming! 🎮*
