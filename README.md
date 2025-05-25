@@ -8,9 +8,9 @@
 
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
 
-> ⚠️ **Only download Voidstrap from trusted sources:**  
-> [This GitHub repo](https://github.com/midaskira/Voidstrap) and our [Discord server](https://discord.gg/PE8ZeNSdS2) are the only official channels. Never download from third-party links.
-
+> [!CAUTION]
+> The only official places to download Voidstrap are this GitHub repository and [Voidstrap Website](https://voidstrapweb.netlify.app). Any other websites offering downloads or claiming to be us are not controlled by us.
+> 
 ---
 
 ## 🚀 Quick Links
