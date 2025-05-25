@@ -28,7 +28,7 @@
   <a href="https://discord.gg/kyh25qeRVp">
     <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
   </a>
-  <a href="https://opentip.kaspersky.com/87EBA70EE3385DE38C2A705499B4899E4CEF6C6734C83632C4A5D6C33C84CD88/results?tab=upload">
+  <a href="https://www.virustotal.com/gui/file/a19d94eaed61dfa779610f1271a9379f2dae45d876e45564cd324b69c07e9a29">
     <img src="https://img.shields.io/badge/Virus%20Free-✔️-00B140" alt="Virus Free">
   </a>
 </p>
