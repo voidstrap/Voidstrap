@@ -116,6 +116,4 @@
 
 ---
 
-Voidstrap isn’t just a fork—it’s your launchpad to a better Roblox experience. Whether you're a creator, tester, or player, take full control and game your way.
-
 *Thanks for choosing Voidstrap. Happy gaming! 🎮*
