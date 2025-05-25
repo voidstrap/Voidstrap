@@ -39,7 +39,7 @@
 
 - ⚡ **Faster & Lighter** – Slimmed-down, tuned-up, and blazing fast.
 - 🌀 **Multi-Instance Support** – Run multiple Roblox clients at once.
-- 🌐 **Cross-Game Teleport** – No more Error 773—seamless game switching.
+- 🌐 **Cross-Game Teleport** – No more Error 773 game switching.
 - 🔧 **Channel Control** – Full access to Roblox's internal channel system.
 - 🎨 **Customizable UI** – Modern themes, refined layout, and icon tweaks.
 - 🚫 **Update Bypass** – Take control of forced Roblox updates.
