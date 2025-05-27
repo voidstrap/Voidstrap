@@ -13,11 +13,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 {
     public partial class AIChatPage : Page
     {
-        private readonly string backgroundImagePath = Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-            "Voidstrap",
-            "chat_bg.png"
-        );
+
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         public AIChatPage()
@@ -100,17 +96,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
         }
 
-        private void CommandItem_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is ListBoxItem item && item.DataContext is string command)
-            {
-                // Assuming DataContext is your ViewModel with UserInput property
-                if (DataContext is AIChatPageViewModel vm)
-                {
-                    vm.UserInput = command;
-                }
-            }
-        }
 
         private string _userInput;
         public string UserInput
