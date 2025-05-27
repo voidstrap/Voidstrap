@@ -191,31 +191,7 @@ namespace Voidstrap
                 Terminate(ErrorCode.ERROR_INVALID_FUNCTION);
             }
         }
-        private void InitializeDiscordRPC()
-        {
-            const string discordAppId = "1375529225230094507";
 
-            DiscordClient = new DiscordRpcClient(discordAppId)
-            {
-                Logger = new ConsoleLogger() { Level = LogLevel.Warning }
-            };
-
-            if (Settings.Prop.VoidstrapRPCReal)
-            {
-                DiscordClient.Initialize();
-
-                // Set presence only after initialization
-                DiscordClient.SetPresence(new DiscordRPC.RichPresence()
-                {
-                    State = "Using Voidstrap",
-                    Assets = new DiscordRPC.Assets()
-                    {
-                        LargeImageKey = "large_image",
-                        LargeImageText = "Voidstrap"
-                    }
-                });
-            }
-        }
 
         protected override void OnStartup(StartupEventArgs e)
         {
