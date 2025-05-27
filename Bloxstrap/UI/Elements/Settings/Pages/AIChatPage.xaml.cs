@@ -26,11 +26,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         private void AddCustomBackground_Click(object sender, RoutedEventArgs e)
         {
-            var openFileDialog = new OpenFileDialog
-            {
-                Title = "Select Background Image",
-                Filter = "Image Files (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp"
-            };
 
             if (openFileDialog.ShowDialog() == true)
             {
