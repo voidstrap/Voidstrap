@@ -33,6 +33,20 @@
             FontWeight="Medium"
             Text="Voidstrap" />
 
+
+        <controls:OptionControl 
+    Header="CPU Core Limit"
+    Description="Limit the max CPU cores that the app uses. (This feature is currently in **beta**)">
+
+            <ComboBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200"
+              ItemsSource="{Binding CpuLimitOptions}" 
+              SelectedItem="{Binding SelectedCpuLimit, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </controls:OptionControl>
+
+
+
+
+
         <!--  Auto Update Toggle  -->
         <controls:OptionControl 
             Header="{x:Static resources:Strings.Menu_Behaviour_AutoUpdate_Title}"
@@ -40,7 +54,16 @@
             <ui:ToggleSwitch IsChecked="{Binding UpdateCheckingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        
+        <controls:OptionControl Header="Disable hardware acceleration"
+    Description="When disabled, Voidstrap won't take up as much memory usage and disables All Animations and Transparency effects. Requires App Restart.">
+            <ui:ToggleSwitch IsChecked="{Binding HWAsselEnabled, Mode=TwoWay}"
+                     Checked="ToggleSwitch_Checked_1"
+                     Unchecked="ToggleSwitch_Unchecked_1" />
+        </controls:OptionControl>
+
+
+
+
         <!--  Roblox Settings Section  -->
         <TextBlock
             Margin="0,16,0,0"
@@ -86,13 +109,28 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Channel}" />
-                        <TextBlock Margin="0,2,0,0" FontSize="12" Text="{x:Static resources:Strings.Menu_ChannelChanger_Description}" Foreground="{DynamicResource TextFillColorTertiaryBrush}"  />
+
+                    <!-- Left Side (Channel Header and Description) -->
+                    <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                        <TextBlock FontSize="14" Text="Channels" />
+                        <TextBlock FontSize="12" 
+                                   Text="Choose deployment channel." 
+                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                   TextWrapping="Wrap" />
                     </StackPanel>
-                    <ui:TextBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200" Text="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=250}" />
+
+                    <!-- Right Side (ComboBox for Channel Selection) -->
+                    <ComboBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200" 
+          SelectedValue="{Binding ViewChannel, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=115}"
+          SelectedValuePath="Content">
+                        <ComboBoxItem Content="production"/>
+                        <ComboBoxItem Content="live" />
+                    </ComboBox>
+
+
                 </Grid>
             </ui:CardExpander.Header>
+
 
             <StackPanel>
                 <Grid Margin="0,0,4,0">

@@ -88,14 +88,6 @@ namespace Voidstrap.Resources {
             }
         }
         
-        /// <summary>
-        ///   Looks up a localized string similar to One-off.
-        /// </summary>
-        public static string About_Supporters_OneOff {
-            get {
-                return ResourceManager.GetString("About.Supporters.OneOff", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Voidstrap supporters.
@@ -1632,7 +1624,7 @@ namespace Voidstrap.Resources {
         /// <summary>
         ///   Looks up a localized string similar to Check the [Voidstrap Wiki]({0}) first to see if this problem has already been addressed with a fix.
         ///
-        ///If not, then please report this exception to the maintainers of this fork. Do NOT report this to Bloxstrap&apos;s GitHub issues, as this is an unoffical build..
+        ///If not, then please report this exception to the maintainers of this fork. Do NOT report this to Voidstrap&apos;s GitHub issues, as this is an unoffical build..
         /// </summary>
         public static string Dialog_Exception_Info_2_Alt {
             get {
@@ -2496,7 +2488,7 @@ namespace Voidstrap.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A Bloxstrap fork..
+        ///   Looks up a localized string similar to A Bloxstrap Fork..
         /// </summary>
         public static string Menu_About_Description {
             get {

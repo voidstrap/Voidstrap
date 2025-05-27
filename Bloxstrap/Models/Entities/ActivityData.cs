@@ -1,18 +1,19 @@
-﻿using System.DirectoryServices.ActiveDirectory;
-using System.Runtime.InteropServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Input;
 using Voidstrap.AppData;
 using Voidstrap.Models.APIs;
-using CommunityToolkit.Mvvm.Input;
-using Voidstrap;
 
 namespace Voidstrap.Models.Entities
 {
     public class ActivityData
     {
-
         private long _universeId = 0;
 
         /// <summary>
@@ -46,7 +47,6 @@ namespace Voidstrap.Models.Entities
         }
 
         public long PlaceId { get; set; } = 0;
-
         public string JobId { get; set; } = string.Empty;
 
         /// <summary>
@@ -55,20 +55,15 @@ namespace Voidstrap.Models.Entities
         public string AccessCode { get; set; } = string.Empty;
 
         public long UserId { get; set; } = 0;
-
         public string MachineAddress { get; set; } = string.Empty;
 
-        public bool MachineAddressValid => !string.IsNullOrEmpty(MachineAddress) && !MachineAddress.StartsWith("10.");
+        public bool MachineAddressValid =>
+            !string.IsNullOrEmpty(MachineAddress) && !MachineAddress.StartsWith("10.");
 
         public bool IsTeleport { get; set; } = false;
-
         public ServerType ServerType { get; set; } = ServerType.Public;
-
         public DateTime TimeJoined { get; set; }
-
         public DateTime? TimeLeft { get; set; }
-
-        // everything below here is optional strictly for Voidstraprpc, discord rich presence, or game history
 
         /// <summary>
         /// This is intended only for other people to use, i.e. context menu invite link, rich presence joining
@@ -83,10 +78,10 @@ namespace Voidstrap.Models.Entities
             {
                 string desc = string.Format(
                     "{0} • {1} {2} {3}",
-                    UniverseDetails?.Data.Creator.Name,
+                    UniverseDetails?.Data.Creator.Name ?? "Unknown",
                     TimeJoined.ToString("t"),
                     Locale.CurrentCulture.Name.StartsWith("ja") ? '~' : '-',
-                    TimeLeft?.ToString("t")
+                    TimeLeft?.ToString("t") ?? "?"
                 );
 
                 if (ServerType != ServerType.Public)
@@ -99,7 +94,6 @@ namespace Voidstrap.Models.Entities
         public ICommand RejoinServerCommand => new RelayCommand(RejoinServer);
 
         public Dictionary<int, UserLog> PlayerLogs { get; internal set; } = new();
-
         public Dictionary<int, UserMessage> MessageLogs { get; internal set; } = new();
 
         private SemaphoreSlim serverQuerySemaphore = new(1, 1);
@@ -108,7 +102,7 @@ namespace Voidstrap.Models.Entities
         {
             string deeplink = $"https://www.roblox.com/games/start?placeId={PlaceId}";
 
-            if (ServerType == ServerType.Private) // thats not going to work
+            if (ServerType == ServerType.Private)
                 deeplink += "&accessCode=" + AccessCode;
             else
                 deeplink += "&gameInstanceId=" + JobId;
@@ -128,11 +122,13 @@ namespace Voidstrap.Models.Entities
 
             await serverQuerySemaphore.WaitAsync();
 
-            if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out string? location))
+            if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out string? cachedLocation))
             {
                 serverQuerySemaphore.Release();
-                return location;
+                return cachedLocation;
             }
+
+            string? location = null;
 
             try
             {
@@ -141,13 +137,11 @@ namespace Voidstrap.Models.Entities
                 if (string.IsNullOrEmpty(ipInfo.City))
                     throw new InvalidHTTPResponseException("Reported city was blank");
 
-                if (ipInfo.City == ipInfo.Region)
-                    location = $"{ipInfo.Region}, {ipInfo.Country}";
-                else
-                    location = $"{ipInfo.City}, {ipInfo.Region}, {ipInfo.Country}";
+                location = ipInfo.City == ipInfo.Region
+                    ? $"{ipInfo.Region}, {ipInfo.Country}"
+                    : $"{ipInfo.City}, {ipInfo.Region}, {ipInfo.Country}";
 
                 GlobalCache.ServerLocation[MachineAddress] = location;
-                serverQuerySemaphore.Release();
             }
             catch (Exception ex)
             {
@@ -155,7 +149,6 @@ namespace Voidstrap.Models.Entities
                 App.Logger.WriteException(LOG_IDENT, ex);
 
                 GlobalCache.ServerLocation[MachineAddress] = location;
-                serverQuerySemaphore.Release();
 
                 Frontend.ShowConnectivityDialog(
                     string.Format(Strings.Dialog_Connectivity_UnableToConnect, "ipinfo.io"),
@@ -163,6 +156,10 @@ namespace Voidstrap.Models.Entities
                     MessageBoxImage.Warning,
                     ex
                 );
+            }
+            finally
+            {
+                serverQuerySemaphore.Release();
             }
 
             return location;
@@ -173,7 +170,6 @@ namespace Voidstrap.Models.Entities
         private void RejoinServer()
         {
             string playerPath = new RobloxPlayerData().ExecutablePath;
-
             Process.Start(playerPath, GetInviteDeeplink(false));
         }
     }

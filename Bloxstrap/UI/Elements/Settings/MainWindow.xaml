@@ -10,10 +10,10 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.Menu_Title}"
-    Width="1000"
-    Height="580"
-    MinWidth="1000"
-    MinHeight="580"
+    Width="1080"
+    Height="610"
+    MinWidth="1080"
+    MinHeight="610"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel,
                                      IsDesignTimeCreatable=True}"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
@@ -95,7 +95,7 @@
         <Grid
             x:Name="RootGrid"
             Grid.Row="1"
-            Margin="12,12,0,0">
+            Margin="8,12,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -110,7 +110,7 @@
                 x:Name="RootNavigation"
                 Grid.Row="1"
                 Grid.Column="0"
-                Margin="0,0,12,0"
+                Margin="0,0,9,0"
                 Frame="{Binding ElementName=RootFrame}"
                 SelectedPageIndex="0">
                 <ui:NavigationFluent.Items>
@@ -160,21 +160,6 @@
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
 
-
-                    <!--  Fast Flag Settings Menu Item  -->
-                    <ui:NavigationItem
-                        Content="FastFlag Settings"
-                        Icon="Settings28"
-                        PageType="{x:Type pages:FastFlagsPage}"
-                        Tag="fastflags">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
                     <!--  Fast Flag Editor Menu Item  -->
                     <ui:NavigationItem
                         Content="FastFlag Editor"
@@ -190,7 +175,23 @@
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
 
-                    
+
+                    <!--  Fast Flag Settings Menu Item  -->
+                    <ui:NavigationItem
+                        Content="FastFlag Settings"
+                        Icon="Settings28"
+                        PageType="{x:Type pages:FastFlagsPage}"
+                        Tag="fastflags">
+                        <ui:NavigationItem.BorderBrush>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Color="Black" />
+                                <GradientStop Offset="1" Color="White" />
+                            </LinearGradientBrush>
+                        </ui:NavigationItem.BorderBrush>
+                    </ui:NavigationItem>
+
+
+
                     <!--  Appreance Menu Item  -->
                     <ui:NavigationItem
                         Content="Appearance"
@@ -221,14 +222,41 @@
                             </LinearGradientBrush>
                         </ui:NavigationItem.BorderBrush>
                     </ui:NavigationItem>
+
+                    <!--  Shortcuts Menu Item  -->
+                    <ui:NavigationItem
+                        Click="NavigationItem_Click_1"
+                        Content="Ai Chat"
+                        Icon="Chat28"
+                        PageType="{x:Type pages:AIChatPage}"
+                        Tag="ai chat">
+                        <ui:NavigationItem.BorderBrush>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Color="Black" />
+                                <GradientStop Offset="1" Color="White" />
+                                <GradientStop Offset="0.847" Color="#FFD6D6D6" />
+                            </LinearGradientBrush>
+                        </ui:NavigationItem.BorderBrush>
+                    </ui:NavigationItem>
                 </ui:NavigationFluent.Items>
 
-
-
+                
                 <!--  Footer Items  -->
                 <ui:NavigationFluent.Footer>
-
-                    <!--  SETTINGS DONT CHANGE OR GAYY!! -->
+                    <ui:NavigationItem
+                        Click="NavigationItem_Click_1"
+                        Content="Hub"
+                        Icon="CloudWords16"
+                        PageType="{x:Type pages:HubPage}"
+                        Tag="hub">
+                        <ui:NavigationItem.BorderBrush>
+                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                <GradientStop Color="Black" />
+                                <GradientStop Offset="1" Color="White" />
+                                <GradientStop Offset="0.847" Color="#FFD6D6D6" />
+                            </LinearGradientBrush>
+                        </ui:NavigationItem.BorderBrush>
+                    </ui:NavigationItem>
                     <ui:NavigationItem
                         Click="NavigationItem_Click"
                         Content="Settings"
@@ -268,16 +296,10 @@
         </Grid>
 
         <!--  Status Bar  -->
-        <StatusBar
-            x:Name="RootStatusBar"
-            Grid.Row="2"
-            Height="55"
-            Padding="14,8"
-            BorderThickness="0,1.4,0,0">
+        <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,10" BorderThickness="0,1,0,0">
             <StatusBar.Background>
-                <SolidColorBrush Opacity="0.45" Color="{ui:ThemeResource ApplicationBackgroundColor}" />
+                <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="0" />
             </StatusBar.Background>
-
             <StatusBar.ItemsPanel>
                 <ItemsPanelTemplate>
                     <Grid>
@@ -337,7 +359,7 @@
                     HorizontalAlignment="Center"
                     Appearance="Secondary"
                     Command="{Binding CloseWindowCommand, Mode=OneTime}"
-                    Content="{x:Static resources:Strings.Common_Close}" />
+                    Content="{x:Static resources:Strings.Common_Close}" Click="Button_Click_2" />
             </StatusBarItem>
         </StatusBar>
     </Grid>

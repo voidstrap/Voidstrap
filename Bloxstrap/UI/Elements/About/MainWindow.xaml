@@ -82,7 +82,7 @@
                         Icon="Heart24"
                         PageType="{x:Type pages:SupportersPage}"
                         Tag="translators"
-                        Visibility="Collapsed" />
+                        />
                     <ui:NavigationItem
                         Margin="0,0,0,12"
                         Icon="Translate24"

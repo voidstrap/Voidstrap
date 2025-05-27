@@ -20,10 +20,10 @@ namespace Voidstrap
             // Activity watcher
             { "FpsFix.Log", "FFlagTaskSchedulerLimitTargetFpsTo2402" },
             { "Players.LogLevel", "FStringDebugLuaLogLevel" },
+            { "Players.LogPattern", "FStringDebugLuaLogPattern" },
 
             // Hyper Threading
             { "Hyper.Threading1", "FFlagDebugCheckRenderThreading" },
-            { "Hyper.Threading2", "FFlagRenderDebugCheckThreading2" },
 
             // Memory Probing
             { "Memory.Probe", "DFFlagPerformanceControlEnableMemoryProbing3" },
@@ -93,6 +93,11 @@ namespace Voidstrap
             // Gray Sky
             { "Rendering.GraySky", "FFlagDebugSkyGray" },
 
+            // Refresh Rate
+            { "System.TargetRefreshRate1", "DFIntGraphicsOptimizationModeFRMFrameRateTarget" },
+            { "System.TargetRefreshRate2", "FIntTargetRefreshRate" },
+            { "System.TargetRefreshRate3", "FIntRefreshRateLowerBound" },
+
             // Presets and stuff
             { "Rendering.Framerate", "DFIntTaskSchedulerTargetFps" },
             { "Rendering.DisableScaling", "DFFlagDisableDPIScale" },
@@ -108,6 +113,10 @@ namespace Voidstrap
             { "Rendering.CpuCore5", "FIntLuaGcParallelMinMultiTasks" },
             { "Rendering.CpuCore6", "FIntSmoothClusterTaskQueueMaxParallelTasks" },
             { "Rendering.CpuCore7", "DFIntPhysicsReceiveNumParallelTasks" },
+            { "System.CpuThreads", "DFIntRuntimeConcurrency"},
+
+            // Cpu cores
+            { "System.CpuCoreMinThreadCount", "FIntTaskSchedulerAsyncTasksMinimumThreadCount"},
 
             //Chat Bubble
             { "UI.Chatbubble", "FFlagEnableBubbleChatFromChatService" },
@@ -174,14 +183,12 @@ namespace Voidstrap
             { "Telemetry.GpuVsCpuBound", "DFFlagGpuVsCpuBoundTelemetry" },
             { "Telemetry.RenderFidelity", "DFFlagSendRenderFidelityTelemetry" },
             { "Telemetry.RenderDistance", "DFFlagReportRenderDistanceTelemetry" },
-            { "Telemetry.PhysicsSolverPerf", "DFFlagSimSolverSendPerfTelemetryToElasticSearch2" },
             { "Telemetry.AudioPlugin", "DFFlagCollectAudioPluginTelemetry" },
             { "Telemetry.FmodErrors", "DFFlagEnableFmodErrorsTelemetry" },
             { "Telemetry.SoundLength", "DFFlagRccLoadSoundLengthTelemetryEnabled" },
             { "Telemetry.AssetRequestV1", "DFFlagReportAssetRequestV1Telemetry" },
             { "Telemetry.SeparateEventPoints", "DFFlagPerformanceControlUseSeparateTelemetryEventsForPointsAndEventIngest_DataCenterFilter" },
             { "Telemetry.DeviceRAM", "DFFlagRobloxTelemetryAddDeviceRAMPointsV2" },
-            { "Telemetry.TelemetryFlush", "DFFlagRemoveTelemetryFlushOnJobClose" },
             { "Telemetry.V2FrameRateMetrics", "DFFlagEnableTelemetryV2FRMStats" },
             { "Telemetry.GlobalSkipUpdating", "DFFlagEnableSkipUpdatingGlobalTelemetryInfo2" },
             { "Telemetry.CallbackSafety", "DFFlagEmitSafetyTelemetryInCallbackEnable" },
@@ -217,9 +224,9 @@ namespace Voidstrap
             { "Network.RCore6", "DFIntSignalRCoreHubMaxBackoffMs"},
 
             // Next Gen Replicator
-            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled5"},
-            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite3"},
-            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead3"},
+            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled6"},
+            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite4"},
+            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead4"},
 
             // Ads
             { "UI.Disable.Ads", "FFlagAdServiceEnabled" },
@@ -258,6 +265,8 @@ namespace Voidstrap
 
             // Chrome ui
             { "UI.Menu.ChromeUI", "FFlagEnableInGameMenuChromeABTest4" },
+            { "UI.Menu.ChromeUI2", "FFlagEnableInGameMenuChrome" },
+
             
             // Preferred GPU
             { "Rendering.PreferredGPU", "FStringDebugGraphicsPreferredGPUName"},
@@ -354,7 +363,6 @@ namespace Voidstrap
         public static IReadOnlyDictionary<DynamicResolution, string?> DynamicResolutions => new Dictionary<DynamicResolution, string?>
         {
             { DynamicResolution.Default, null },
-            { DynamicResolution.Resolution1, "37" },
             { DynamicResolution.Resolution2, "77" },
             { DynamicResolution.Resolution3, "230" },
             { DynamicResolution.Resolution4, "410" },
@@ -439,6 +447,12 @@ namespace Voidstrap
             { RomarkStart.Bar10, "10" }
         };
 
+        public static IReadOnlyDictionary<Presents, string?> PresentsStartMappings => new Dictionary<Presents, string?>
+        {
+            { Presents.Default, null },
+            { Presents.Stoofs, "1" }
+        };
+
         public static IReadOnlyDictionary<QualityLevel, string?> QualityLevels => new Dictionary<QualityLevel, string?>
         {
             { QualityLevel.Disabled, null },
@@ -463,6 +477,23 @@ namespace Voidstrap
             { QualityLevel.Level19, "19" },
             { QualityLevel.Level20, "20" },
             { QualityLevel.Level21, "21" }
+        };
+
+        public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dictionary<RefreshRate, string?>
+        {
+            { RefreshRate.Default, null },
+            { RefreshRate.RefreshRate1, "75" },
+            { RefreshRate.RefreshRate2, "120" },
+            { RefreshRate.RefreshRate3, "144" },
+            { RefreshRate.RefreshRate4, "165" },
+            { RefreshRate.RefreshRate5, "180" },
+            { RefreshRate.RefreshRate6, "240" },
+            { RefreshRate.RefreshRate7, "360" },
+            { RefreshRate.RefreshRate8, "400" },
+            { RefreshRate.RefreshRate9, "480" },
+            { RefreshRate.RefreshRate10, "500" },
+            { RefreshRate.RefreshRate11, "540" },
+            { RefreshRate.RefreshRate12, "600" }
         };
 
         public void SetValue(string key, object? value)
@@ -576,7 +607,7 @@ namespace Voidstrap
                 var presets = new Dictionary<string, string>
         {
             { "DFFlagDebugPerfMode", "True" },
-            { "FFlagHandleAltEnterFullscreenManually", "False" },  // Yeh I fixed it W
+            { "FFlagHandleAltEnterFullscreenManually", "False" },
         }
             ;
 

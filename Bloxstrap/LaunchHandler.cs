@@ -5,6 +5,7 @@ using Windows.Win32.Foundation;
 
 using Voidstrap.UI.Elements.Dialogs;
 using Voidstrap;
+using Voidstrap.Integrations;
 
 namespace Voidstrap
 {
@@ -115,7 +116,7 @@ namespace Voidstrap
             else
             {
 #if QA_BUILD
-                Frontend.ShowMessageBox("You are about to install a QA build of Bloxstrap. The red window border indicates that this is a QA build.\n\nQA builds are handled completely separately of your standard installation, like a virtual environment.", MessageBoxImage.Information);
+                Frontend.ShowMessageBox("You are about to install a QA build of Voidstrap. The red window border indicates that this is a QA build.\n\nQA builds are handled completely separately of your standard installation, like a virtual environment.", MessageBoxImage.Information);
 #endif
 
                 new LanguageSelectorDialog().ShowDialog();
@@ -331,6 +332,8 @@ namespace Voidstrap
                     if (t.Exception is not null)
                         App.FinalizeExceptionHandling(t.Exception);
                 }
+                if (App.Settings.Prop.CleanerOptions != CleanerOptions.Never)
+                    Cleaner.DoCleaning();
 
                 App.Terminate();
             });

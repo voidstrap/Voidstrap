@@ -77,17 +77,12 @@
                         Text="Voidstrap" />
 
                 </Grid>
-                <TextBlock Text="A Bloxstrap fork." />
+                <TextBlock Text="A Bloxstrap Fork." />
 
             </StackPanel>
         </Grid>
 
         <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal">
-            <ui:Anchor
-                Margin="0,0,8,8"
-                Content="{x:Static resources:Strings.Menu_About_HelpInformation}"
-                Icon="BookQuestionMark24"
-                NavigateUri="https://discord.gg/fekwAbMCfx" VerticalAlignment="Top" />
             <ui:Anchor
                 Margin="0,0,8,8"
                 Content="{x:Static resources:Strings.Menu_About_ReportIssue}"
@@ -98,7 +93,7 @@
                 Click="Anchor_Click"
                 Content="{x:Static resources:Strings.Menu_About_DiscordServer}"
                 Icon="Chat48"
-                NavigateUri="https://discord.gg/kyh25qeRVp" />
+                NavigateUri="https://discord.com/invite/voidstrap" />
         </WrapPanel>
 
         <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
@@ -245,8 +240,8 @@
                 IsExpanded="True">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/fishstrap)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />
-                    <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/bloxstraplabs)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Voidstrap](https://github.com/MaximumADHD)" />
+                    <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/BloxstrapLabs)" />
                 </StackPanel>
             </controls:Expander>
         </Grid>

@@ -2,8 +2,8 @@
     <SolidColorBrush x:Key="NewTextEditorBackground" Color="#8C000000" />
     <SolidColorBrush x:Key="NewTextEditorForeground" Color="White" />
     <SolidColorBrush x:Key="NewTextEditorLink" Color="#3A9CEA" />
-    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#58000000" />
-    <Color x:Key="ControlFillColorDefault">#8C000000</Color>
+    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#19000000" />
+    <Color x:Key="ControlFillColorDefault">#8C444444</Color>
     <Color x:Key="WindowBackgroundColorPrimary">#8C000000</Color>
     <Color x:Key="WindowBackgroundColorSecondary">Teal</Color>
     <Color x:Key="WindowBackgroundColorThird">#8C000000</Color>

@@ -102,10 +102,11 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool DiscordActivityEnabled
         {
-            get => App.Settings.Prop.UseDiscordRichPresence;
+            get => App.Settings.Prop.UseDiscordRichPresence || App.Settings.Prop.VoidstrapRPCReal;
             set
             {
                 App.Settings.Prop.UseDiscordRichPresence = value;
+                App.Settings.Prop.VoidstrapRPCReal = value;
 
                 if (!value)
                 {
@@ -116,6 +117,7 @@ namespace Voidstrap.UI.ViewModels.Settings
                 }
             }
         }
+
 
         public bool DiscordActivityJoinEnabled
         {

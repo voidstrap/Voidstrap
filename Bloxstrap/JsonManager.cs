@@ -11,12 +11,15 @@ namespace Voidstrap
         public T Prop { get; set; } = new();
 
         public virtual string ClassName => typeof(T).Name;
-        
+        public string? LastFileHash { get; private set; }
+
         public virtual string BackupsLocation => Path.Combine(Paths.Base, $"Backup.json");
 
         public virtual string FileLocation => Path.Combine(Paths.Base, $"{ClassName}.json");
 
         public virtual string LOG_IDENT_CLASS => $"JsonManager<{ClassName}>";
+
+
 
         public virtual void Load(bool alertFailure = true)
         {
@@ -93,6 +96,11 @@ namespace Voidstrap
             }
 
             App.Logger.WriteLine(LOG_IDENT, "Save complete!");
+        }
+
+        public bool HasFileOnDiskChanged()
+        {
+            return LastFileHash != MD5Hash.FromFile(FileLocation);
         }
 
         public void SaveBackup(string name)

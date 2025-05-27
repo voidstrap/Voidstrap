@@ -451,7 +451,7 @@ Kung hindi, paki ulat itong pagbubukod, gamit ang [GitHub issue]({1}) kasama ang
   </data>
   <data name="Menu.About.Version" xml:space="preserve">
     <value>Version {0}</value>
-    <comment>{0} is replaced with the version, i.e. "Version 2.8.0"</comment>
+    <comment>{0} is replaced with the version, i.e. "Version 1.0.3.6"</comment>
   </data>
   <data name="Menu.AllFiles" xml:space="preserve">
     <value>Lahat ng files</value>

@@ -36,11 +36,14 @@
                     </Setter.Value>
                 </Setter>
             </Style>
+            
+            
 
             <converters:StringFormatConverter x:Key="StringFormatConverter" />
             <converters:RangeConverter x:Key="RangeConverter" />
             <converters:EnumNameConverter x:Key="EnumNameConverter" />
             <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+
             <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Application.Resources>

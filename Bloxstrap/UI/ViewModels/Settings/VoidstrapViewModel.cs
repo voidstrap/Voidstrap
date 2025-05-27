@@ -11,6 +11,12 @@ namespace Voidstrap.UI.ViewModels.Settings
     {
         public bool ShouldExportConfig { get; set; } = true;
 
+        public bool HWAsselEnabled
+        {
+            get => App.Settings.Prop.WPFSoftwareRender;
+            set => App.Settings.Prop.WPFSoftwareRender = value;
+        }
+
         public bool ShouldExportLogs { get; set; } = true;
 
         public ICommand ExportDataCommand => new RelayCommand(ExportData);
@@ -21,7 +27,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             var dialog = new SaveFileDialog
             {
-                FileName = $"Bloxstrap-export-{timestamp}.zip",
+                FileName = $"Voidstrap-export-{timestamp}.zip",
                 Filter = $"{Strings.FileTypes_ZipArchive}|*.zip"
             };
 

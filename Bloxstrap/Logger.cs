@@ -1,20 +1,31 @@
-﻿using Voidstrap;
+﻿using System.Collections.Concurrent;
+using System.Globalization;
+using System.Text;
+using System.Diagnostics;
 
 namespace Voidstrap
 {
-    // https://stackoverflow.com/a/53873141/11852173
-
-    public class Logger
+    public class Logger : IDisposable
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private readonly ConcurrentQueue<string> _logQueue = new();
+        private readonly CancellationTokenSource _cts = new();
+        private Task? _logTask;
+
         private FileStream? _filestream;
 
         public readonly List<string> History = new();
-        public bool Initialized = false;
-        public bool NoWriteMode = false;
-        public string? FileLocation;
+        public bool Initialized { get; private set; } = false;
+        public bool NoWriteMode { get; private set; } = false;
+        public string? FileLocation { get; private set; }
 
-        public string AsDocument => String.Join('\n', History);
+        private bool IsLoggingEnabled => Initialized && !NoWriteMode;
+
+        // Example throttling
+        private DateTime _lastLogTime = DateTime.MinValue;
+        private readonly TimeSpan _logCooldown = TimeSpan.FromMilliseconds(100);
+
+        public string AsDocument => string.Join('\n', History);
 
         public void Initialize(bool useTempDir = false)
         {
@@ -25,123 +36,157 @@ namespace Voidstrap
             string filename = $"{App.ProjectName}_{timestamp}.log";
             string location = Path.Combine(directory, filename);
 
-            WriteLine(LOG_IDENT, $"Initializing at {location}");
-
             if (Initialized)
             {
-                WriteLine(LOG_IDENT, "Failed to initialize because logger is already initialized");
+                WriteLine(LOG_IDENT, "Logger already initialized");
                 return;
             }
 
             Directory.CreateDirectory(directory);
 
-            if (File.Exists(location))
-            {
-                WriteLine(LOG_IDENT, "Failed to initialize because log file already exists");
-                return;
-            }
-
             try
             {
                 _filestream = File.Open(location, FileMode.Create, FileAccess.Write, FileShare.Read);
             }
-            catch (IOException)
-            {
-                WriteLine(LOG_IDENT, "Failed to initialize because log file already exists");
-                return;
-            }
             catch (UnauthorizedAccessException)
             {
-                if (NoWriteMode)
-                    return;
-
-                WriteLine(LOG_IDENT, $"Failed to initialize because Voidstrap cannot write to {directory}");
-
-                Frontend.ShowMessageBox(
-                    String.Format(Strings.Logger_NoWriteMode, directory),
-                    System.Windows.MessageBoxImage.Warning,
-                    System.Windows.MessageBoxButton.OK
-                );
+                if (!NoWriteMode)
+                {
+                    WriteLine(LOG_IDENT, $"Cannot write to {directory}");
+                    Frontend.ShowMessageBox(
+                        string.Format(Strings.Logger_NoWriteMode, directory),
+                        System.Windows.MessageBoxImage.Warning,
+                        System.Windows.MessageBoxButton.OK
+                    );
+                }
 
                 NoWriteMode = true;
-
                 return;
             }
 
-
             Initialized = true;
-
-            if (History.Count > 0)
-                WriteToLog(string.Join("\r\n", History));
-
-            WriteLine(LOG_IDENT, "Finished initializing!");
-
             FileLocation = location;
 
-            // clean up any logs older than a week
+            foreach (var entry in History)
+                _logQueue.Enqueue(entry);
+
+            _logTask = Task.Run(() => BackgroundWriterAsync(_cts.Token));
+
+            WriteLine(LOG_IDENT, "Logger initialized");
+
             if (Paths.Initialized && Directory.Exists(Paths.Logs))
             {
-                foreach (FileInfo log in new DirectoryInfo(Paths.Logs).GetFiles())
+                foreach (var log in new DirectoryInfo(Paths.Logs).GetFiles())
                 {
-                    if (log.LastWriteTimeUtc.AddDays(7) > DateTime.UtcNow)
-                        continue;
-
-                    WriteLine(LOG_IDENT, $"Cleaning up old log file '{log.Name}'");
-
-                    try
+                    if (log.LastWriteTimeUtc.AddDays(2) <= DateTime.UtcNow)
                     {
-                        log.Delete();
-                    }
-                    catch (Exception ex)
-                    {
-                        WriteLine(LOG_IDENT, "Failed to delete log!");
-                        WriteException(LOG_IDENT, ex);
+                        try { log.Delete(); }
+                        catch (Exception ex) { WriteException(LOG_IDENT, ex); }
                     }
                 }
             }
         }
 
+        private async Task BackgroundWriterAsync(CancellationToken token)
+        {
+            var batch = new List<string>();
+            var flushInterval = TimeSpan.FromSeconds(2);
+            var lastFlush = DateTime.UtcNow;
+
+            while (!token.IsCancellationRequested)
+            {
+                while (_logQueue.TryDequeue(out var line))
+                {
+                    batch.Add(line);
+                }
+
+                if (batch.Count > 0 && (DateTime.UtcNow - lastFlush) >= flushInterval)
+                {
+                    try
+                    {
+                        await _semaphore.WaitAsync(token);
+                        if (_filestream != null)
+                        {
+                            var combined = string.Join("\r\n", batch) + "\r\n";
+                            byte[] data = Encoding.UTF8.GetBytes(combined);
+                            await _filestream.WriteAsync(data, 0, data.Length, token);
+                            await _filestream.FlushAsync(token);
+                            batch.Clear();
+                            lastFlush = DateTime.UtcNow;
+                        }
+                    }
+                    finally
+                    {
+                        _semaphore.Release();
+                    }
+                }
+
+                await Task.Delay(250, token); // Less aggressive polling
+            }
+
+            // Final flush
+            if (batch.Count > 0)
+            {
+                try
+                {
+                    await _semaphore.WaitAsync(token);
+                    if (_filestream != null)
+                    {
+                        var combined = string.Join("\r\n", batch) + "\r\n";
+                        byte[] data = Encoding.UTF8.GetBytes(combined);
+                        await _filestream.WriteAsync(data, 0, data.Length, token);
+                        await _filestream.FlushAsync(token);
+                    }
+                }
+                finally
+                {
+                    _semaphore.Release();
+                }
+            }
+        }
+
+
         private void WriteLine(string message)
         {
-            string timestamp = DateTime.UtcNow.ToString("s") + "Z";
-            string outcon = $"{timestamp} {message}";
-            string outlog = outcon.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
+            if (!IsLoggingEnabled) return;
 
-            Debug.WriteLine(outcon);
-            WriteToLog(outlog);
+            var now = DateTime.UtcNow;
+            if ((now - _lastLogTime) < _logCooldown) return; // skip if too soon
+            _lastLogTime = now;
 
-            History.Add(outlog);
+            string timestamp = now.ToString("s") + "Z";
+            string formatted = $"{timestamp} {message}";
+            string sanitized = formatted.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
+
+            Debug.WriteLine(sanitized);
+            _logQueue.Enqueue(sanitized);
+            History.Add(sanitized);
+
+            if (History.Count > 1000)
+                History.RemoveRange(0, History.Count - 1000);
         }
 
         public void WriteLine(string identifier, string message) => WriteLine($"[{identifier}] {message}");
 
         public void WriteException(string identifier, Exception ex)
         {
+            var originalCulture = Thread.CurrentThread.CurrentUICulture;
             Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
-            string hresult = "0x" + ex.HResult.ToString("X8");
-
+            string hresult = $"0x{ex.HResult:X8}";
             WriteLine($"[{identifier}] ({hresult}) {ex}");
 
-            Thread.CurrentThread.CurrentUICulture = Locale.CurrentCulture;
+            Thread.CurrentThread.CurrentUICulture = originalCulture;
         }
 
-        private async void WriteToLog(string message)
+        public void Dispose()
         {
-            if (!Initialized)
-                return;
+            _cts.Cancel();
+            _logTask?.Wait();
 
-            try
-            {
-                await _semaphore.WaitAsync();
-                await _filestream!.WriteAsync(Encoding.UTF8.GetBytes($"{message}\r\n"));
-
-                _ = _filestream.FlushAsync();
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
+            _filestream?.Dispose();
+            _semaphore.Dispose();
+            _cts.Dispose();
         }
     }
 }

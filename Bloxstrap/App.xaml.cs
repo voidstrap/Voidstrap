@@ -3,8 +3,13 @@ using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Shell;
 using System.Windows.Threading;
-
 using Microsoft.Win32;
+using DiscordRPC;
+using DiscordRPC.Logging;
+using Wpf.Ui.Hardware;
+using System.Windows.Media.Animation;
+using System.Runtime.InteropServices;
+using System.Windows.Media;
 
 namespace Voidstrap
 {
@@ -21,7 +26,7 @@ namespace Voidstrap
         public const string ProjectOwner = "Voidstrap";
         public const string ProjectRepository = "Voidstrap/Voidstrap";
         public const string ProjectDownloadLink = "https://github.com/Voidstrap/Voidstrap/releases";
-        public const string ProjectHelpLink = "https://github.com/Bloxstraplabs/Bloxstrap/wiki";
+        public const string ProjectHelpLink = "https://github.com/BloxstrapLabs/Bloxstrap/wiki";
         public const string ProjectSupportLink = "https://github.com/Voidstrap/Voidstrap/issues/new";
 
         public const string RobloxPlayerAppName = "RobloxPlayerBeta";
@@ -60,15 +65,23 @@ namespace Voidstrap
 
         public static readonly JsonManager<State> State = new();
 
-        public static readonly FastFlagManager FastFlags = new();
+        public static readonly JsonManager<RobloxState> RobloxState = new();
 
-        public static readonly HttpClient HttpClient = new(
+        public static readonly FastFlagManager FastFlags = new();
+        private static readonly MD5 mD5 = MD5.Create();
+
+        // IDisposable fields to dispose on exit
+        private static MD5? _md5Provider = mD5;
+
+        private static HttpClient? _httpClient;
+        public static HttpClient HttpClient => _httpClient ??= new HttpClient(
             new HttpClientLoggingHandler(
                 new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All }
             )
         );
 
         private static bool _showingExceptionDialog = false;
+        public static DiscordRpcClient? DiscordClient;
 
         public static void Terminate(ErrorCode exitCode = ErrorCode.ERROR_SUCCESS)
         {
@@ -162,15 +175,58 @@ namespace Voidstrap
         {
 
         }
+
+        public static void AssertWindowsOSVersion()
+        {
+            const string LOG_IDENT = "App::AssertWindowsOSVersion";
+
+            int major = Environment.OSVersion.Version.Major;
+            if (major < 7)
+            {
+                Logger.WriteLine(LOG_IDENT, $"Detected unsupported Windows version ({Environment.OSVersion.Version}).");
+
+                if (!LaunchSettings.QuietFlag.Active)
+                    Frontend.ShowMessageBox("Your Windows Version is not supported with Voidstrap!", MessageBoxImage.Error);
+
+                Terminate(ErrorCode.ERROR_INVALID_FUNCTION);
+            }
+        }
+        private void InitializeDiscordRPC()
+        {
+            const string discordAppId = "1375529225230094507";
+
+            DiscordClient = new DiscordRpcClient(discordAppId)
+            {
+                Logger = new ConsoleLogger() { Level = LogLevel.Warning }
+            };
+
+            if (Settings.Prop.VoidstrapRPCReal)
+            {
+                DiscordClient.Initialize();
+
+                // Set presence only after initialization
+                DiscordClient.SetPresence(new DiscordRPC.RichPresence()
+                {
+                    State = "Using Voidstrap",
+                    Assets = new DiscordRPC.Assets()
+                    {
+                        LargeImageKey = "large_image",
+                        LargeImageText = "Voidstrap"
+                    }
+                });
+            }
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             const string LOG_IDENT = "App::OnStartup";
 
             Locale.Initialize();
-
             base.OnStartup(e);
 
-            Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
+
+
+        Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
 
             string userAgent = $"{ProjectName}/{Version}";
 
@@ -290,9 +346,25 @@ namespace Voidstrap
                 }
 
                 DownloadStats.Load();
-                Settings.Load();
                 State.Load();
+                RobloxState.Load();
                 FastFlags.Load();
+
+                Settings.Load();
+
+                if (Settings?.Prop?.WPFSoftwareRender == true)
+                {
+                    HardwareAcceleration.DisableAllAnimations();
+                    HardwareAcceleration.FreeMemory();
+                    HardwareAcceleration.OptimizeVisualRendering();
+                    HardwareAcceleration.DisableTransparencyEffects();
+                    HardwareAcceleration.MinimizeMemoryFootprint();
+                }
+
+                if (Settings?.Prop?.VoidstrapRPCReal == true)
+                {
+                    InitializeDiscordRPC();
+                }
 
                 if (!Locale.SupportedLocales.ContainsKey(Settings.Prop.Locale))
                 {
@@ -310,8 +382,17 @@ namespace Voidstrap
 
                 LaunchHandler.ProcessLaunchArgs();
             }
+        }
 
             // you must *explicitly* call terminate when everything is done, it won't be called implicitly
+
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            DiscordClient?.Dispose();
+            DiscordClient = null;
+
+            base.OnExit(e);
         }
     }
 }

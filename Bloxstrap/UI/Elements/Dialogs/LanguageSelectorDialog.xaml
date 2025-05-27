@@ -20,45 +20,49 @@
     mc:Ignorable="d">
 
     <Grid>
+        <!-- Gradient Background -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!--  Title Bar  -->
+        <!-- Title Bar -->
         <ui:TitleBar
-            Title="{x:Static resources:Strings.Installer_Title}"
             Grid.Row="0"
-            Grid.ColumnSpan="2"
             Padding="8"
-            CanMaximize="False"
+            Title="{x:Static resources:Strings.Installer_Title}"
             Icon="pack://application:,,,/Voidstrap.ico"
             KeyboardNavigation.TabNavigation="None"
+            CanMaximize="False"
             ShowMaximize="False"
             ShowMinimize="False" />
 
-        <!--  Main Content  -->
-        <StackPanel Grid.Row="1" Margin="12">
+        <!-- Main Content -->
+        <StackPanel Grid.Row="1" Margin="20,12">
             <TextBlock
                 FontSize="20"
                 FontWeight="SemiBold"
                 Text="{x:Static resources:Strings.Dialog_LanguageSelector_Header}" />
             <TextBlock
-                Margin="0,0,0,12"
+                Margin="0,6,0,12"
                 Text="{x:Static resources:Strings.Dialog_LanguageSelector_Subtext}"
                 TextWrapping="Wrap" />
-            <ComboBox ItemsSource="{Binding Languages, Mode=OneTime}" Text="{Binding SelectedLanguage, Mode=TwoWay}" />
+            <ComboBox
+                MinWidth="200"
+                ItemsSource="{Binding Languages, Mode=OneTime}"
+                SelectedItem="{Binding SelectedLanguage, Mode=TwoWay}" />
         </StackPanel>
 
-        <!--  Buttons  -->
+        <!-- Action Buttons -->
         <Border
             Grid.Row="2"
             Margin="0,10,0,0"
@@ -66,10 +70,10 @@
             Background="{DynamicResource PrimaryBackgroundColor}">
             <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
                 <Button
-                    MinWidth="100"
-                    Command="{Binding SetLocaleCommand}"
-                    Content="{x:Static resources:Strings.Common_OK}"/>
-                <!--  Uncomment the Cancel button if needed  -->
+                    MinWidth="120"
+                    Margin="0,0,0,0"
+                    Content="{x:Static resources:Strings.Common_OK}"
+                    Command="{Binding SetLocaleCommand}" />
                 <Button
                     MinWidth="100"
                     Margin="12,0,0,0"
@@ -78,5 +82,4 @@
             </StackPanel>
         </Border>
     </Grid>
-
 </base:WpfUiWindow>

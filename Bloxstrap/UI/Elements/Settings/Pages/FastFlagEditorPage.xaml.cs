@@ -8,7 +8,11 @@ using Wpf.Ui.Mvvm.Contracts;
 using Voidstrap.UI.Elements.Dialogs;
 using Microsoft.Win32;
 using System.Windows.Media.Animation;
-
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Threading;
+using Voidstrap.UI.Elements.Settings.Pages;
+using Voidstrap;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -17,9 +21,9 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     /// </summary>
     public partial class FastFlagEditorPage
     {
-
-
         private readonly ObservableCollection<FastFlag> _fastFlagList = new();
+        private readonly ObservableCollection<FlagHistoryEntry> _flagHistory = new();
+
 
         private bool _showPresets = true;
         private string _searchFilter = string.Empty;
@@ -27,12 +31,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         private DateTime _lastSearchTime = DateTime.MinValue;
         private const int _debounceDelay = 70;
 
-
-
         public FastFlagEditorPage()
         {
             InitializeComponent();
             SetDefaultStates();
+            HistoryListBox.ItemsSource = _flagHistory;
         }
 
         private void SetDefaultStates()
@@ -40,30 +43,27 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             TogglePresetsButton.IsChecked = true;
         }
 
-
         private void ReloadList()
         {
-            var selectedEntry = DataGrid.SelectedItem as FastFlag;
-
             _fastFlagList.Clear();
 
             var presetFlags = FastFlagManager.PresetFlags.Values;
 
             foreach (var pair in App.FastFlags.Prop.OrderBy(x => x.Key))
             {
-                // Skip preset flags if not shown
                 if (!_showPresets && presetFlags.Contains(pair.Key))
                     continue;
 
-                // Skip if flag name doesn't match the search filter
-                if (!pair.Key.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase) &&
-                    !pair.Value.ToString()?.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase) == true)
+                if (!pair.Key.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 var entry = new FastFlag
                 {
                     Name = pair.Key,
-                    Value = pair.Value.ToString()!
+                    Value = pair.Value?.ToString() ?? string.Empty,
+                    Preset = presetFlags.Contains(pair.Key)
+                        ? "pack://application:,,,/Resources/Checkmark.ico"
+                        : "pack://application:,,,/Resources/CrossMark.ico"
                 };
 
                 _fastFlagList.Add(entry);
@@ -72,15 +72,42 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             if (DataGrid.ItemsSource is null)
                 DataGrid.ItemsSource = _fastFlagList;
 
-            if (selectedEntry is null)
-                return;
+            UpdateTotalFlagsCount();
+        }
 
-            var newSelectedEntry = _fastFlagList.FirstOrDefault(x => x.Name == selectedEntry.Name);
-            if (newSelectedEntry is null)
-                return;
 
-            DataGrid.SelectedItem = newSelectedEntry;
-            DataGrid.ScrollIntoView(newSelectedEntry);
+        public class FlagHistoryEntry
+        {
+            public string FlagName { get; set; }
+            public string? OldValue { get; set; }
+            public string? NewValue { get; set; }
+            public DateTime Timestamp { get; set; }
+            public override string ToString()
+            {
+                return $"{Timestamp:HH:mm:ss} - '{FlagName}' changed from '{OldValue}' to '{NewValue}'";
+            }
+        }
+
+        private void AddToHistory(string flagName, string? newValue)
+        {
+            string? oldValue = App.FastFlags.GetValue(flagName);
+
+            var historyEntry = new FlagHistoryEntry
+            {
+                FlagName = flagName,
+                OldValue = oldValue,
+                NewValue = newValue,
+                Timestamp = DateTime.Now
+            };
+
+            _flagHistory.Add(historyEntry);
+        }
+
+
+
+        private void UpdateTotalFlagsCount()
+        {
+            TotalFlagsTextBlock.Text = $"Total flags: {_fastFlagList.Count}";
         }
 
         private void ClearSearch(bool refresh = true)
@@ -106,7 +133,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 ImportJSON(dialog.JsonTextBox.Text);
         }
 
-        private void ShowBackupsDialog()
+        private void ShowProfilesDialog()
         {
             var dialog = new FlagProfilesDialog();
             dialog.ShowDialog();
@@ -123,7 +150,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 App.FastFlags.LoadBackup(dialog.LoadBackup.SelectedValue.ToString(), dialog.ClearFlags.IsChecked);
             }
 
-            Thread.Sleep(98);
+            Thread.Sleep(1000);
             ReloadList();
         }
 
@@ -135,17 +162,15 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             {
                 entry = new FastFlag
                 {
-                    // Enabled = true,
                     Name = name,
                     Value = value
                 };
 
-                if (!name.Contains(_searchFilter))
+                if (!name.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                     ClearSearch();
 
-                _fastFlagList.Add(entry);
-
                 App.FastFlags.SetValue(entry.Name, entry.Value);
+                _fastFlagList.Add(entry);
             }
             else
             {
@@ -160,7 +185,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                     refresh = true;
                 }
 
-                if (!name.Contains(_searchFilter))
+                if (!name.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                 {
                     ClearSearch(false);
                     refresh = true;
@@ -169,11 +194,12 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 if (refresh)
                     ReloadList();
 
-                entry = _fastFlagList.Where(x => x.Name == name).FirstOrDefault();
+                entry = _fastFlagList.FirstOrDefault(x => x.Name == name);
             }
 
             DataGrid.SelectedItem = entry;
             DataGrid.ScrollIntoView(entry);
+            UpdateTotalFlagsCount();
         }
 
         private void ImportJSON(string json)
@@ -193,7 +219,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 if (lastIndex == -1)
                     json += '}';
                 else
-                    json = json.Substring(0, lastIndex+1);
+                    json = json.Substring(0, lastIndex + 1);
             }
 
             try
@@ -211,26 +237,14 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
             catch (Exception ex)
             {
-                Frontend.ShowMessageBox(                    
-                    String.Format(Strings.Menu_FastFlagEditor_InvalidJSON, ex.Message),
+                Frontend.ShowMessageBox(
+                    string.Format(Strings.Menu_FastFlagEditor_InvalidJSON, ex.Message),
                     MessageBoxImage.Error
                 );
 
                 ShowAddDialog();
 
                 return;
-            }
-
-            if (list.Count > 16)
-            {
-                var result = Frontend.ShowMessageBox(
-                    Strings.Menu_FastFlagEditor_LargeConfig, 
-                    MessageBoxImage.Warning,
-                    MessageBoxButton.YesNo
-                );
-
-                if (result != MessageBoxResult.Yes)
-                    return;
             }
 
             var conflictingFlags = App.FastFlags.Prop.Where(x => list.ContainsKey(x.Key)).Select(x => x.Key);
@@ -240,10 +254,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             {
                 int count = conflictingFlags.Count();
 
-                string message = String.Format(
+                string message = string.Format(
                     Strings.Menu_FastFlagEditor_ConflictingImport,
                     count,
-                    String.Join(", ", conflictingFlags.Take(25))
+                    string.Join(", ", conflictingFlags.Take(25))
                 );
 
                 if (count > 25)
@@ -267,28 +281,32 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 if (val is null)
                     continue;
 
-                App.FastFlags.SetValue(pair.Key, pair.Value);
+                App.FastFlags.SetValue(pair.Key, val);
             }
 
             ClearSearch();
         }
 
-        // refresh list on page load to synchronize with preset page
         private void Page_Loaded(object sender, RoutedEventArgs e) => ReloadList();
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
+            if (e.EditAction != DataGridEditAction.Commit)
+                return;
+
             if (e.Row.DataContext is not FastFlag entry)
                 return;
 
             if (e.EditingElement is not TextBox textbox)
                 return;
 
+            string newText = textbox.Text;
+
             switch (e.Column.Header)
             {
                 case "Name":
                     string oldName = entry.Name;
-                    string newName = textbox.Text;
+                    string newName = newText;
 
                     if (newName == oldName)
                         return;
@@ -301,25 +319,45 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                         return;
                     }
 
+                    // Record deletion of old flag
+                    AddToHistory(oldName, null);
+
+                    // Rename the flag
                     App.FastFlags.SetValue(oldName, null);
                     App.FastFlags.SetValue(newName, entry.Value);
 
-                    if (!newName.Contains(_searchFilter))
+                    // Record addition of new flag
+                    AddToHistory(newName, entry.Value);
+
+                    if (!newName.Contains(_searchFilter, StringComparison.OrdinalIgnoreCase))
                         ClearSearch();
 
                     entry.Name = newName;
-
                     break;
 
                 case "Value":
                     string oldValue = entry.Value;
-                    string newValue = textbox.Text;
+                    string newValue = newText;
+
+                    if (string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
+                    {
+                        // New flag entry
+                        AddToHistory(entry.Name, newValue);
+                    }
+                    else if (oldValue != newValue)
+                    {
+                        AddToHistory(entry.Name, newValue);
+                    }
 
                     App.FastFlags.SetValue(entry.Name, newValue);
-
                     break;
+
             }
+
+            UpdateTotalFlagsCount();
         }
+
+
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
@@ -329,7 +367,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         private void AddButton_Click(object sender, RoutedEventArgs e) => ShowAddDialog();
 
-        private void FlagProfiles_Click(object sender, RoutedEventArgs e) => ShowBackupsDialog();
+        private void FlagProfiles_Click(object sender, RoutedEventArgs e) => ShowProfilesDialog();
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -343,12 +381,16 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 _fastFlagList.Remove(entry);
                 App.FastFlags.SetValue(entry.Name, null);
             }
+
+            UpdateTotalFlagsCount();
         }
 
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not ToggleButton button)
                 return;
+
+            DataGrid.Columns[0].Visibility = button.IsChecked ?? false ? Visibility.Visible : Visibility.Collapsed;
 
             _showPresets = button.IsChecked ?? true;
             ReloadList();
@@ -358,14 +400,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
             var flags = App.FastFlags.Prop;
 
-            // Group by flag prefix using regex (e.g., DFFlag, DFInt, FFlag, etc.)
             var groupedFlags = flags
                 .GroupBy(kvp =>
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
+                    var match = Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
                     return match.Success ? match.Value : "Other";
                 })
-                .OrderBy(g => g.Key); // Prefix group ordering (alphabetical)
+                .OrderBy(g => g.Key);
 
             var formattedJson = new StringBuilder();
             formattedJson.AppendLine("{");
@@ -376,11 +417,9 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             foreach (var group in groupedFlags)
             {
-                // Optional: blank line between groups
                 if (groupIndex > 0)
                     formattedJson.AppendLine();
 
-                // Sort entries in this group by the length of the full line string
                 var sortedGroup = group
                     .OrderByDescending(kvp => kvp.Key.Length + (kvp.Value?.ToString()?.Length ?? 0));
 
@@ -401,30 +440,26 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             formattedJson.AppendLine("}");
 
-            // Save the formatted JSON to a file
             SaveJSONToFile(formattedJson.ToString());
         }
-
 
         private void CopyJSONButton_Click1(object sender, RoutedEventArgs e)
         {
             string json = JsonSerializer.Serialize(App.FastFlags.Prop, new JsonSerializerOptions { WriteIndented = true });
-
-                Clipboard.SetText(json);
+            Clipboard.SetText(json);
         }
 
         private void CopyJSONButton_Click2(object sender, RoutedEventArgs e)
         {
             var flags = App.FastFlags.Prop;
 
-            // Group by flag prefix using regex (e.g., DFFlag, DFInt, FFlag, etc.)
             var groupedFlags = flags
                 .GroupBy(kvp =>
                 {
-                    var match = System.Text.RegularExpressions.Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
+                    var match = Regex.Match(kvp.Key, @"^[A-Z]+[a-z]*");
                     return match.Success ? match.Value : "Other";
                 })
-                .OrderBy(g => g.Key); // Prefix group ordering (alphabetical)
+                .OrderBy(g => g.Key);
 
             var formattedJson = new StringBuilder();
             formattedJson.AppendLine("{");
@@ -435,15 +470,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             foreach (var group in groupedFlags)
             {
-                // Optional: blank line between groups
                 if (groupIndex > 0)
                     formattedJson.AppendLine();
 
-                // Sort entries in this group by the length of the full line string
-                // Fix for the null reference issue
                 var sortedGroup = group
                     .OrderByDescending(kvp => kvp.Key.Length + (kvp.Value?.ToString()?.Length ?? 0));
-
 
                 foreach (var kvp in sortedGroup)
                 {
@@ -464,7 +495,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             Clipboard.SetText(formattedJson.ToString());
         }
-
 
         private void SaveJSONToFile(string json)
         {
@@ -503,110 +533,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 }
             }
         }
-
-
-
-
-
-
-        private CancellationTokenSource? _searchCancellationTokenSource;
-
-
-        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            if (sender is not TextBox textbox) return;
-
-            string newSearch = textbox.Text.Trim();
-
-            // Return early if the search text hasn't changed or the debounce delay hasn't passed
-            if (newSearch == _lastSearch && (DateTime.Now - _lastSearchTime).TotalMilliseconds < _debounceDelay)
-                return;
-
-            // Cancel the previous search operation if ongoing
-            _searchCancellationTokenSource?.Cancel();
-            _searchCancellationTokenSource = new CancellationTokenSource();
-
-            _searchFilter = newSearch;
-            _lastSearch = newSearch;
-            _lastSearchTime = DateTime.Now;
-
-            try
-            {
-                // Apply debounce delay using Task.Delay without blocking the UI
-                await Task.Delay(_debounceDelay, _searchCancellationTokenSource.Token);
-
-                // If the task was cancelled, exit early
-                if (_searchCancellationTokenSource.Token.IsCancellationRequested)
-                    return;
-
-                // Reload the list and show search suggestion after debounce delay
-                Dispatcher.Invoke(() =>
-                {
-                    ReloadList();
-                    ShowSearchSuggestion(newSearch);
-                });
-            }
-            catch (TaskCanceledException)
-            {
-                // Handle task cancellation gracefully
-            }
-        }
-
-
-        private void ShowSearchSuggestion(string searchFilter)
-        {
-            if (string.IsNullOrWhiteSpace(searchFilter))
-            {
-                AnimateSuggestionVisibility(0);
-                return;
-            }
-
-            // Smarter search: Prioritize matches that start with the filter
-            var bestMatch = App.FastFlags.Prop.Keys
-                .Where(flag => flag.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(flag => !flag.StartsWith(searchFilter, StringComparison.OrdinalIgnoreCase))
-                .ThenBy(flag => flag.IndexOf(searchFilter, StringComparison.OrdinalIgnoreCase))
-                .ThenBy(flag => flag.Length)
-                .FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(bestMatch))
-            {
-                SuggestionTextBlock.Text = $"Looking For ({bestMatch})?";
-                AnimateSuggestionVisibility(1);
-            }
-            else
-            {
-                AnimateSuggestionVisibility(0);
-            }
-        }
-
-
-        private void AnimateSuggestionVisibility(double targetOpacity)
-        {
-            var opacityAnimation = new DoubleAnimation
-            {
-                To = targetOpacity,
-                Duration = TimeSpan.FromMilliseconds(95),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
-            };
-
-            opacityAnimation.Completed += (s, e) =>
-            {
-                if (targetOpacity == 0)
-                {
-                    SuggestionTextBlock.Visibility = Visibility.Collapsed;
-                }
-            };
-
-            if (targetOpacity > 0)
-            {
-                SuggestionTextBlock.Visibility = Visibility.Visible;
-            }
-
-            SuggestionTextBlock.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
-        }
-
-
 
         private void ShowDeleteAllFlagsConfirmation()
         {
@@ -678,13 +604,109 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         }
 
 
-
-
-
-
         private void DeleteAllButton_Click(object sender, RoutedEventArgs e) => ShowDeleteAllFlagsConfirmation();
 
+        private CancellationTokenSource? _searchCancellationTokenSource;
 
+        private async void SearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (sender is not TextBox textbox) return;
+
+            string newSearch = textbox.Text.Trim();
+
+            if (newSearch == _lastSearch && (DateTime.Now - _lastSearchTime).TotalMilliseconds < _debounceDelay)
+                return;
+
+            _searchCancellationTokenSource?.Cancel();
+            _searchCancellationTokenSource = new CancellationTokenSource();
+
+            _searchFilter = newSearch;
+            _lastSearch = newSearch;
+            _lastSearchTime = DateTime.Now;
+
+            try
+            {
+                await Task.Delay(_debounceDelay, _searchCancellationTokenSource.Token);
+
+                if (_searchCancellationTokenSource.Token.IsCancellationRequested)
+                    return;
+
+                Dispatcher.Invoke(() =>
+                {
+                    ReloadList();
+                    ShowSearchSuggestion(newSearch);
+                });
+            }
+            catch (TaskCanceledException)
+            {
+            }
+        }
+
+
+        private void ShowSearchSuggestion(string searchFilter)
+        {
+            if (string.IsNullOrWhiteSpace(searchFilter))
+            {
+                AnimateSuggestionVisibility(0);
+                return;
+            }
+
+            var bestMatch = App.FastFlags.Prop.Keys
+                .Where(flag => flag.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(flag => !flag.StartsWith(searchFilter, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(flag => flag.IndexOf(searchFilter, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(flag => flag.Length)
+                .FirstOrDefault();
+
+            if (!string.IsNullOrEmpty(bestMatch))
+            {
+                SuggestionKeywordRun.Text = bestMatch;
+                AnimateSuggestionVisibility(1);
+            }
+            else
+            {
+                AnimateSuggestionVisibility(0);
+            }
+        }
+
+        private void SuggestionTextBlock_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            var suggestion = SuggestionKeywordRun.Text;
+            if (!string.IsNullOrEmpty(suggestion))
+            {
+                SearchTextBox.Text = suggestion;
+                SearchTextBox.CaretIndex = suggestion.Length;
+            }
+        }
+
+        private void AnimateSuggestionVisibility(double targetOpacity)
+        {
+            const int animationDurationMs = 120;
+            var opacityAnimation = new DoubleAnimation
+            {
+                To = targetOpacity,
+                Duration = TimeSpan.FromMilliseconds(animationDurationMs),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            var translateAnimation = new DoubleAnimation
+            {
+                To = targetOpacity > 0 ? 0 : 10,
+                Duration = TimeSpan.FromMilliseconds(animationDurationMs),
+                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+            };
+
+            opacityAnimation.Completed += (s, e) =>
+            {
+                if (targetOpacity == 0)
+                    SuggestionTextBlock.Visibility = Visibility.Collapsed;
+            };
+
+            if (targetOpacity > 0)
+                SuggestionTextBlock.Visibility = Visibility.Visible;
+
+            SuggestionTextBlock.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
+            SuggestionTranslateTransform.BeginAnimation(TranslateTransform.XProperty, translateAnimation);
+        }
     }
 }
-

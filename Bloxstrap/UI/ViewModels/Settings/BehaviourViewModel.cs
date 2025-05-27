@@ -1,4 +1,4 @@
-﻿using System.Windows;
+﻿using System.Collections.Generic;
 using Voidstrap.AppData;
 using Voidstrap.RobloxInterfaces;
 
@@ -6,10 +6,9 @@ namespace Voidstrap.UI.ViewModels.Settings
 {
     public class BehaviourViewModel : NotifyPropertyChangedViewModel
     {
-
         public BehaviourViewModel()
         {
-            
+            CleanerItems = new List<string>(App.Settings.Prop.CleanerDirectories);
         }
 
         public bool MultiInstanceLaunchingEnabled
@@ -59,6 +58,84 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.RenameClientToEuroTrucks2;
             set => App.Settings.Prop.RenameClientToEuroTrucks2 = value;
+        }
+
+        public CleanerOptions SelectedCleanUpMode
+        {
+            get => App.Settings.Prop.CleanerOptions;
+            set => App.Settings.Prop.CleanerOptions = value;
+        }
+
+        public IEnumerable<CleanerOptions> CleanerOptions => CleanerOptionsEx.Selections;
+
+        public CleanerOptions CleanerOption
+        {
+            get => App.Settings.Prop.CleanerOptions;
+            set => App.Settings.Prop.CleanerOptions = value;
+        }
+
+        private List<string> CleanerItems;
+
+        private void UpdateCleanerItems()
+        {
+            App.Settings.Prop.CleanerDirectories = new List<string>(CleanerItems);
+        }
+
+        public bool CleanerLogs
+        {
+            get => CleanerItems.Contains("RobloxLogs");
+            set
+            {
+                if (value && !CleanerItems.Contains("RobloxLogs"))
+                {
+                    CleanerItems.Add("RobloxLogs");
+                    UpdateCleanerItems();
+                }
+                else if (!value && CleanerItems.Contains("RobloxLogs"))
+                {
+                    CleanerItems.Remove("RobloxLogs");
+                    UpdateCleanerItems();
+                }
+                OnPropertyChanged(nameof(CleanerLogs));
+            }
+        }
+
+        public bool CleanerCache
+        {
+            get => CleanerItems.Contains("RobloxCache");
+            set
+            {
+                if (value && !CleanerItems.Contains("RobloxCache"))
+                {
+                    CleanerItems.Add("RobloxCache");
+                    UpdateCleanerItems();
+                }
+                else if (!value && CleanerItems.Contains("RobloxCache"))
+                {
+                    CleanerItems.Remove("RobloxCache");
+                    UpdateCleanerItems();
+                }
+                OnPropertyChanged(nameof(CleanerCache));
+            }
+        }
+
+        public bool CleanerVoidstrap
+        {
+            get => CleanerItems.Contains("VoidstrapLogs");
+            set
+            {
+                if (value && !CleanerItems.Contains("VoidstrapLogs"))
+                {
+                    CleanerItems.Add("VoidstrapLogs");
+                    UpdateCleanerItems();
+                }
+                else if (!value && CleanerItems.Contains("VoidstrapLogs"))
+                {
+                    CleanerItems.Remove("VoidstrapLogs");
+                    UpdateCleanerItems();
+                }
+                OnPropertyChanged(nameof(CleanerVoidstrap));
+            }
         }
     }
 }

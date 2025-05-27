@@ -1,4 +1,7 @@
-﻿namespace Voidstrap.AppData
+﻿using Voidstrap.AppData;
+using Voidstrap;
+
+namespace Voidstrap.AppData
 {
     public class RobloxStudioData : CommonAppData, IAppData
     {

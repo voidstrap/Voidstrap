@@ -59,6 +59,16 @@ namespace Voidstrap.UI.ViewModels.Settings
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.DotCursor.ArrowFarCursor.png" },
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.DotCursor.ArrowCursorDecalDrag.png" }
             }},
+                { Enums.CursorType.WhiteDotCursor, new() {
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.WhiteDotCursor.ArrowCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.WhiteDotCursor.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.WhiteDotCursor.ArrowCursorDecalDrag.png" }
+            }},
+                { Enums.CursorType.VerySmallWhiteDot, new() {
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.VerySmallWhiteDot.ArrowCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.VerySmallWhiteDot.ArrowFarCursor.png" },
+                { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursorDecalDrag.png", "Cursor.VerySmallWhiteDot.ArrowCursorDecalDrag.png" }
+            }},
             { Enums.CursorType.StoofsCursor, new() {
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowCursor.png", "Cursor.StoofsCursor.ArrowCursor.png" },
                 { "content\\textures\\Cursors\\KeyboardMouse\\ArrowFarCursor.png", "Cursor.StoofsCursor.ArrowFarCursor.png" },

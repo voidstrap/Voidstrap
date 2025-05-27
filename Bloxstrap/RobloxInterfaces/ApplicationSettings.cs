@@ -1,21 +1,19 @@
 ﻿using System.ComponentModel;
-using Voidstrap.RobloxInterfaces;
+using System.Collections.Concurrent;
+using System.Net.Http;
+using System.Text.Json;
 using Voidstrap;
 
 namespace Voidstrap.RobloxInterfaces
 {
-    // i am 100% sure there is a much, MUCH better way to handle this
-    // matt wrote this so this is effectively a black box to me right now
-    // i'll likely refactor this at some point
     public class ApplicationSettings
     {
-        private string _applicationName;
-        private string _channelName;
-
+        private readonly string _applicationName;
+        private readonly string _channelName;
         private bool _initialised = false;
         private Dictionary<string, string>? _flags;
 
-        private SemaphoreSlim semaphoreSlim = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
 
         private ApplicationSettings(string applicationName, string channelName)
         {
@@ -23,12 +21,12 @@ namespace Voidstrap.RobloxInterfaces
             _channelName = channelName;
         }
 
-        private async Task Fetch()
+        private async Task FetchAsync()
         {
             if (_initialised)
                 return;
 
-            await semaphoreSlim.WaitAsync();
+            await _semaphore.WaitAsync().ConfigureAwait(false);
             try
             {
                 if (_initialised)
@@ -45,93 +43,78 @@ namespace Voidstrap.RobloxInterfaces
 
                 try
                 {
-                    response = await App.HttpClient.GetAsync("https://clientsettingscdn.roblox.com" + path);
+                    response = await App.HttpClient.GetAsync("https://clientsettingscdn.roblox.com" + path).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
                     App.Logger.WriteLine(logIndent, "Failed to contact clientsettingscdn! Falling back to clientsettings...");
                     App.Logger.WriteException(logIndent, ex);
 
-                    response = await App.HttpClient.GetAsync("https://clientsettings.roblox.com" + path);
+                    response = await App.HttpClient.GetAsync("https://clientsettings.roblox.com" + path).ConfigureAwait(false);
                 }
 
-                string rawResponse = await response.Content.ReadAsStringAsync();
+                using (response)
+                {
+                    response.EnsureSuccessStatusCode();
+                    string rawResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
 
-                response.EnsureSuccessStatusCode();
+                    var clientSettings = JsonSerializer.Deserialize<ClientFlagSettings>(rawResponse);
 
-                var clientSettings = JsonSerializer.Deserialize<ClientFlagSettings>(rawResponse);
+                    if (clientSettings?.ApplicationSettings == null)
+                        throw new Exception("Deserialized application settings is null!");
 
-                if (clientSettings == null)
-                    throw new Exception("Deserialised client settings is null!");
-
-                if (clientSettings.ApplicationSettings == null)
-                    throw new Exception("Deserialised application settings is null!");
-
-                _flags = clientSettings.ApplicationSettings;
-                _initialised = true;
+                    _flags = clientSettings.ApplicationSettings;
+                    _initialised = true;
+                }
             }
             finally
             {
-                semaphoreSlim.Release();
+                _semaphore.Release();
             }
         }
 
         public async Task<T?> GetAsync<T>(string name)
         {
-            await Fetch();
+            await FetchAsync().ConfigureAwait(false);
 
-            if (!_flags!.ContainsKey(name))
+            if (_flags == null || !_flags.TryGetValue(name, out string value))
                 return default;
-
-            string value = _flags[name];
 
             try
             {
                 var converter = TypeDescriptor.GetConverter(typeof(T));
-                if (converter == null)
-                    return default;
-
-                return (T?)converter.ConvertFromString(value);
+                if (converter != null && converter.CanConvertFrom(typeof(string)))
+                {
+                    return (T?)converter.ConvertFromInvariantString(value);
+                }
             }
-            catch (NotSupportedException) // boohoo
+            catch (Exception ex)
             {
-                return default;
+                App.Logger.WriteException("ApplicationSettings::GetAsync", ex);
             }
+
+            return default;
         }
 
-        public T? Get<T>(string name)
-        {
-            return GetAsync<T>(name).Result;
-        }
+        // Remove sync-over-async: Get<T>() is discouraged
+        // If absolutely needed, use responsibly (e.g., test app startup)
+        public T? Get<T>(string name) => GetAsync<T>(name).ConfigureAwait(false).GetAwaiter().GetResult();
 
-        // _cache[applicationName][channelName]
-        private static Dictionary<string, Dictionary<string, ApplicationSettings>> _cache = new();
+        private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Lazy<ApplicationSettings>>> _cache = new();
 
         public static ApplicationSettings PCDesktopClient => GetSettings("PCDesktopClient");
-
         public static ApplicationSettings PCClientBootstrapper => GetSettings("PCClientBootstrapper");
 
         public static ApplicationSettings GetSettings(string applicationName, string channelName = Deployment.DefaultChannel, bool shouldCache = true)
         {
             channelName = channelName.ToLowerInvariant();
 
-            lock (_cache)
-            {
-                if (_cache.ContainsKey(applicationName) && _cache[applicationName].ContainsKey(channelName))
-                    return _cache[applicationName][channelName];
+            if (!shouldCache)
+                return new ApplicationSettings(applicationName, channelName);
 
-                var flags = new ApplicationSettings(applicationName, channelName);
-
-                if (shouldCache)
-                {
-                    if (!_cache.ContainsKey(applicationName))
-                        _cache[applicationName] = new();
-
-                    _cache[applicationName][channelName] = flags;
-                }
-
-                return flags;
-            }
+            var channelMap = _cache.GetOrAdd(applicationName, _ => new ConcurrentDictionary<string, Lazy<ApplicationSettings>>());
+            return channelMap.GetOrAdd(channelName, _ => new Lazy<ApplicationSettings>(() =>
+                new ApplicationSettings(applicationName, channelName))).Value;
         }
     }
 }

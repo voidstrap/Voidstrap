@@ -445,7 +445,7 @@
   </data>
   <data name="Menu.About.Version" xml:space="preserve">
     <value>版本 {0}</value>
-    <comment>{0} is replaced with the version, i.e. "Version 2.8.0"</comment>
+    <comment>{0} is replaced with the version, i.e. "Version 1.0.3.6"</comment>
   </data>
   <data name="Menu.AllFiles" xml:space="preserve">
     <value>所有檔案</value>

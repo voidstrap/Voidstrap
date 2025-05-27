@@ -17,6 +17,8 @@ namespace Voidstrap
 
         public LaunchFlag WatcherFlag { get; } = new("watcher");
 
+        public LaunchFlag BackgroundUpdaterFlag { get; } = new("backgroundupdater");
+
         public LaunchFlag QuietFlag { get; } = new("quiet");
 
         public LaunchFlag UninstallFlag { get; } = new("uninstall");
@@ -32,6 +34,12 @@ namespace Voidstrap
         public LaunchFlag PlayerFlag { get; } = new("player");
 
         public LaunchFlag StudioFlag { get; } = new("studio");
+
+        public LaunchFlag VersionFlag { get; } = new("version");
+
+        public LaunchFlag ChannelFlag { get; } = new("channel");
+
+        public LaunchFlag ForceFlag { get; } = new("force");
 
         public LaunchFlag BloxshadeFlag { get; } = new("bloxshade");
 

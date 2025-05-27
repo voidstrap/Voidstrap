@@ -15,9 +15,14 @@
         <TextBlock Text="{x:Static resources:Strings.Menu_Appearance_Description}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
 
         <controls:OptionControl
-            Header="{x:Static resources:Strings.Menu_Appearance_Global_Theme_Title}"
-            Description="Check out some of out built in custom themes!">
-            <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding Themes, Mode=OneTime}" Text="{Binding Theme, Mode=TwoWay}">
+    Header="{x:Static resources:Strings.Menu_Appearance_Global_Theme_Title}"
+    Description="Check out some of our built-in custom themes!">
+
+            <ComboBox Width="200"
+              Padding="10,5,10,5"
+              ItemsSource="{Binding Themes, Mode=OneTime}"
+              Text="{Binding Theme, Mode=TwoWay}"
+              SelectionChanged="ThemeComboBox_SelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
@@ -25,6 +30,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
         </controls:OptionControl>
+
 
         <controls:OptionControl
             Header="{x:Static resources:Strings.Menu_Appearance_Language_Title}"
@@ -41,7 +47,7 @@
                 <TextBlock Text="{x:Static resources:Strings.Menu_Appearance_Bootstrapper_Title}" FontSize="20" FontWeight="Medium" VerticalAlignment="Bottom" />
                 <TextBlock Text="{x:Static resources:Strings.Menu_Appearance_Bootstrapper_Description}" TextWrapping="Wrap" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
             </StackPanel>
-            <ui:Button Grid.Column="1" Content="{x:Static resources:Strings.Menu_Appearance_Preview}" HorizontalAlignment="Stretch" Margin="0,16,0,0" Command="{Binding PreviewBootstrapperCommand}" />
+            <ui:Button Content="{x:Static resources:Strings.Menu_Appearance_Preview}" HorizontalAlignment="Stretch" Margin="569,16,0,0" Command="{Binding PreviewBootstrapperCommand}" Grid.ColumnSpan="2" VerticalAlignment="Top" />
         </Grid>
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="{Binding Path=CustomThemesExpanded, Mode=OneWay}" Style="{StaticResource NoUserExpansionCardExpanderStyle}">
@@ -108,7 +114,7 @@
                         <ui:Button Grid.Column="2" Margin="4,0,0,0" Icon="ArrowExportRtl24" Content="{x:Static resources:Strings.Common_Export}" HorizontalAlignment="Stretch" Command="{Binding ExportCustomThemeCommand, Mode=OneTime}" />
                     </Grid>
                 </StackPanel>
-                <TextBlock Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{x:Static resources:Strings.Menu_Appearance_CustomThemes_NoneSelected}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Text="{x:Static resources:Strings.Menu_Appearance_CustomThemes_NoneSelected}" TextWrapping="Wrap" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0,50,0,0">
                     <TextBlock.Style>
                         <Style>
                             <Style.Triggers>

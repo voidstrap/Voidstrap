@@ -42,7 +42,7 @@ namespace Voidstrap.UI.ViewModels.About
 
             try
             {
-                SupporterData = await Http.GetJson<SupporterData>("https://raw.githubusercontent.com/Bloxstraplabs/config/main/supporters.json");
+                SupporterData = await Http.GetJson<SupporterData>("https://raw.githubusercontent.com/voidstrap/Voidstrap/main/supportersdata7.json");
             }
             catch (Exception ex)
             {

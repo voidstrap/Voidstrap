@@ -1,40 +1,40 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-
+using Wpf.Ui.Controls;
+using Wpf.Ui.Hardware;
+using Voidstrap.UI.Elements.Dialogs;
 using Voidstrap.UI.ViewModels.Settings;
+using System.Collections.ObjectModel;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    /// <summary>
-    /// Interaction logic for ChannelPage.xaml
-    /// </summary>
     public partial class ChannelPage
     {
         public ChannelPage()
         {
-            DataContext = new ChannelViewModel();
             InitializeComponent();
+            DataContext = new ChannelViewModel();
         }
 
-        private void ToggleSwitch_Checked(object sender, RoutedEventArgs e)
-        {
 
+        private void ToggleSwitch_Checked_1(object sender, RoutedEventArgs e)
+        {
+            HardwareAcceleration.DisableAllAnimations();
+            HardwareAcceleration.FreeMemory();
+            HardwareAcceleration.OptimizeVisualRendering();
+            HardwareAcceleration.DisableTransparencyEffects();
+            HardwareAcceleration.MinimizeMemoryFootprint();
         }
 
-        private void OptionControl_Loaded(object sender, RoutedEventArgs e)
+        private void ToggleSwitch_Unchecked_1(object sender, RoutedEventArgs e)
         {
+            Frontend.ShowMessageBox(
+                "Please restart the application to re-enable animations.",
+                MessageBoxImage.Warning,
+                MessageBoxButton.OK
+            );
 
         }
     }

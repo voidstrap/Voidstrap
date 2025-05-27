@@ -8,7 +8,7 @@
 	<Color foreground="#CE9178" name="AttributeValue" exampleText='&lt;tag attribute="value" /&gt;' />
 	<Color foreground="White" name="Entity" exampleText="index.aspx?a=1&amp;amp;b=2" />
 	<Color foreground="White" name="BrokenEntity" exampleText="index.aspx?a=1&amp;b=2" />
-	
+
 	<RuleSet>
 		<Span color="Comment" multiline="true">
 			<Begin>&lt;!--</Begin>
@@ -46,7 +46,7 @@
 		</Span>
 		<Import ruleSet="EntitySet"/>
 	</RuleSet>
-	
+
 	<RuleSet name="EntitySet">
 		<Rule color="Entity">
 			&amp;

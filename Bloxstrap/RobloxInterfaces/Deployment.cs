@@ -1,4 +1,5 @@
-﻿using Voidstrap.RobloxInterfaces;
+﻿using System.Collections.Concurrent;
+using Voidstrap.RobloxInterfaces;
 using Voidstrap;
 
 namespace Voidstrap.RobloxInterfaces
@@ -6,29 +7,21 @@ namespace Voidstrap.RobloxInterfaces
     public static class Deployment
     {
         public const string DefaultChannel = "production";
-
         private const string VersionStudioHash = "version-012732894899482c";
+        public static string Channel { get; set; } = App.Settings.Prop.Channel;
+        public static string BinaryType { get; set; } = "WindowsPlayer";
+        public static bool IsDefaultChannel => string.Equals(Channel, DefaultChannel, StringComparison.OrdinalIgnoreCase);
+        public static string BaseUrl { get; private set; } = string.Empty;
 
-
-        public static string Channel = App.Settings.Prop.Channel;
-
-        public static string BinaryType = "WindowsPlayer";
-
-        public static bool IsDefaultChannel => Channel.Equals(DefaultChannel, StringComparison.OrdinalIgnoreCase);
-
-        public static string BaseUrl { get; private set; } = null!;
-
-        public static readonly List<HttpStatusCode?> BadChannelCodes = new()
+        public static readonly HashSet<HttpStatusCode?> BadChannelCodes = new()
         {
             HttpStatusCode.Unauthorized,
             HttpStatusCode.Forbidden,
             HttpStatusCode.NotFound
         };
 
-        private static readonly Dictionary<string, ClientVersion> ClientVersionCache = new();
+        private static readonly ConcurrentDictionary<string, ClientVersion> ClientVersionCache = new();
 
-        // a list of roblox deployment locations that we check for, in case one of them don't work
-        // these are all weighted based on their priority, so that we pick the most optimal one that we can. 0 = highest
         private static readonly Dictionary<string, int> BaseUrls = new()
         {
             { "https://setup.rbxcdn.com", 0 },
@@ -38,173 +31,129 @@ namespace Voidstrap.RobloxInterfaces
             { "https://s3.amazonaws.com/setup.roblox.com", 4 }
         };
 
-        private static async Task<string?> TestConnection(string url, int priority, CancellationToken token)
+        private static async Task<string?> TestConnection(string url, int delaySeconds, CancellationToken token)
         {
-            string LOG_IDENT = $"Deployment::TestConnection<{url}>";
-
-            await Task.Delay(priority * 1000, token);
-
-            App.Logger.WriteLine(LOG_IDENT, "Connecting...");
+            string logIdent = $"Deployment::TestConnection<{url}>";
 
             try
             {
-                var response = await App.HttpClient.GetAsync($"{url}/versionStudio", token);
+                await Task.Delay(delaySeconds * 1000, token);
+                App.Logger.WriteLine(logIdent, "Connecting...");
 
+                using var response = await App.HttpClient.GetAsync($"{url}/versionStudio", token);
                 response.EnsureSuccessStatusCode();
 
-                // versionStudio is the version hash for the last MFC studio to be deployed.
-                // the response body should always be "version-012732894899482c".
-                string content = await response.Content.ReadAsStringAsync(token);
+                var content = await response.Content.ReadAsStringAsync(token);
+                if (!string.Equals(content.Trim(), VersionStudioHash, StringComparison.Ordinal))
+                    throw new InvalidHTTPResponseException($"Expected {VersionStudioHash}, got {content}");
 
-                if (content != VersionStudioHash)
-                    throw new InvalidHTTPResponseException($"versionStudio response does not match (expected \"{VersionStudioHash}\", got \"{content}\")");
+                return url;
             }
-            catch (TaskCanceledException)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Connectivity test cancelled.");
-                throw;
+                App.Logger.WriteException(logIdent, ex);
+                return null;
             }
-            catch (Exception ex)
-            {
-                App.Logger.WriteException(LOG_IDENT, ex);
-                throw;
-            }
-
-            return url;
         }
 
-        /// <summary>
-        /// This function serves double duty as the setup mirror enumerator, and as our connectivity check.
-        /// Returns null for success.
-        /// </summary>
-        /// <returns></returns>
         public static async Task<Exception?> InitializeConnectivity()
         {
-            const string LOG_IDENT = "Deployment::InitializeConnectivity";
+            const string logIdent = "Deployment::InitializeConnectivity";
 
-            var tokenSource = new CancellationTokenSource();
+            using var cts = new CancellationTokenSource();
+            var tasks = BaseUrls.Select(entry => TestConnection(entry.Key, entry.Value, cts.Token)).ToList();
 
-            var exceptions = new List<Exception>();
-            var tasks = (from entry in BaseUrls select TestConnection(entry.Key, entry.Value, tokenSource.Token)).ToList();
+            App.Logger.WriteLine(logIdent, "Testing connectivity...");
 
-            App.Logger.WriteLine(LOG_IDENT, "Testing connectivity...");
-
-            while (tasks.Any() && String.IsNullOrEmpty(BaseUrl))
+            while (tasks.Any() && string.IsNullOrEmpty(BaseUrl))
             {
-                var finishedTask = await Task.WhenAny(tasks);
+                var finished = await Task.WhenAny(tasks);
+                tasks.Remove(finished);
 
-                tasks.Remove(finishedTask);
-
-                if (finishedTask.IsFaulted)
-                    exceptions.Add(finishedTask.Exception!.InnerException!);
-                else if (!finishedTask.IsCanceled)
-                    BaseUrl = finishedTask.Result;
+                var result = await finished;
+                if (!string.IsNullOrEmpty(result))
+                {
+                    BaseUrl = result;
+                    cts.Cancel(); // Cancel others
+                }
             }
-
-            // stop other running connectivity tests
-            tokenSource.Cancel();
 
             if (string.IsNullOrEmpty(BaseUrl))
-            {
-                if (exceptions.Any())
-                    return exceptions[0];
+                return new Exception("Failed to connect to any setup mirrors.");
 
-                // task cancellation exceptions don't get added to the list
-                return new TaskCanceledException("All connection attempts timed out.");
-            }
-
-            App.Logger.WriteLine(LOG_IDENT, $"Got {BaseUrl} as the optimal base URL");
-
+            App.Logger.WriteLine(logIdent, $"Using base URL: {BaseUrl}");
             return null;
         }
 
         public static string GetLocation(string resource)
         {
-            string location = BaseUrl;
+            var location = BaseUrl;
 
             if (!IsDefaultChannel)
             {
-                string channelName;
+                var useCommon = ApplicationSettings.GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel)
+                    .Get<bool>("FFlagReplaceChannelNameForDownload");
 
-                if (ApplicationSettings.GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel).Get<bool>("FFlagReplaceChannelNameForDownload"))
-                    channelName = "common";
-                else
-                    channelName = Channel.ToLowerInvariant();
-
+                var channelName = useCommon ? "common" : Channel.ToLowerInvariant();
                 location += $"/channel/{channelName}";
             }
 
-            location += resource;
-
-            return location;
+            return $"{location}{resource}";
         }
 
-        public static async Task<ClientVersion> GetInfo(string? channel = null)
+        public static async Task<ClientVersion> GetInfo(string? inputChannel = null)
         {
-            const string LOG_IDENT = "Deployment::GetInfo";
+            const string logIdent = "Deployment::GetInfo";
+            var channel = string.IsNullOrEmpty(inputChannel) ? Channel : inputChannel;
+            bool isDefault = string.Equals(channel, DefaultChannel, StringComparison.OrdinalIgnoreCase);
 
-            if (String.IsNullOrEmpty(channel))
-                channel = Channel;
-
-            bool isDefaultChannel = String.Compare(channel, DefaultChannel, StringComparison.OrdinalIgnoreCase) == 0;
-
-            App.Logger.WriteLine(LOG_IDENT, $"Getting deploy info for channel {channel}");
+            App.Logger.WriteLine(logIdent, $"Fetching deploy info for channel {channel}");
 
             string cacheKey = $"{channel}-{BinaryType}";
+            if (ClientVersionCache.TryGetValue(cacheKey, out var cachedVersion))
+            {
+                App.Logger.WriteLine(logIdent, "Using cached deploy info");
+                return cachedVersion;
+            }
+
+            var path = isDefault
+                ? $"/v2/client-version/{BinaryType}"
+                : $"/v2/client-version/{BinaryType}/channel/{channel}";
 
             ClientVersion clientVersion;
 
-            if (ClientVersionCache.ContainsKey(cacheKey))
+            try
             {
-                App.Logger.WriteLine(LOG_IDENT, "Deploy information is cached");
-                clientVersion = ClientVersionCache[cacheKey];
+                clientVersion = await Http.GetJson<ClientVersion>($"https://clientsettingscdn.roblox.com{path}");
             }
-            else
+            catch (HttpRequestException ex) when (!isDefault && BadChannelCodes.Contains(ex.StatusCode))
             {
-                string path = $"/v2/client-version/{BinaryType}";
-
-                if (!isDefaultChannel)
-                    path = $"/v2/client-version/{BinaryType}/channel/{channel}";
+                throw new InvalidChannelException(ex.StatusCode);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(logIdent, "Fallback to clientsettings.roblox.com");
+                App.Logger.WriteException(logIdent, ex);
 
                 try
                 {
-                    clientVersion = await Http.GetJson<ClientVersion>("https://clientsettingscdn.roblox.com" + path);
+                    clientVersion = await Http.GetJson<ClientVersion>($"https://clientsettings.roblox.com{path}");
                 }
-                catch (HttpRequestException httpEx)
-                when (!isDefaultChannel && BadChannelCodes.Contains(httpEx.StatusCode))
+                catch (HttpRequestException ex2) when (!isDefault && BadChannelCodes.Contains(ex2.StatusCode))
                 {
-                    throw new InvalidChannelException(httpEx.StatusCode);
+                    throw new InvalidChannelException(ex2.StatusCode);
                 }
-                catch (Exception ex)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "Failed to contact clientsettingscdn! Falling back to clientsettings...");
-                    App.Logger.WriteException(LOG_IDENT, ex);
-
-                    try
-                    {
-                        clientVersion = await Http.GetJson<ClientVersion>("https://clientsettings.roblox.com" + path);
-                    }
-                    catch (HttpRequestException httpEx)
-                    when (!isDefaultChannel && BadChannelCodes.Contains(httpEx.StatusCode))
-                    {
-                        throw new InvalidChannelException(httpEx.StatusCode);
-                    }
-                }
-
-                // check if channel is behind LIVE
-
-
-                if (!isDefaultChannel)
-                {
-                    var defaultClientVersion = await GetInfo(DefaultChannel);
-
-                    if (Utilities.CompareVersions(clientVersion.Version, defaultClientVersion.Version) == VersionComparison.LessThan)
-                        clientVersion.IsBehindDefaultChannel = true;
-                }
-
-                ClientVersionCache[cacheKey] = clientVersion;
             }
 
+            // Check version lag behind default
+            if (!isDefault)
+            {
+                var defaultVer = await GetInfo(DefaultChannel);
+                if (Utilities.CompareVersions(clientVersion.Version, defaultVer.Version) == VersionComparison.LessThan)
+                    clientVersion.IsBehindDefaultChannel = true;
+            }
+
+            ClientVersionCache.TryAdd(cacheKey, clientVersion);
             return clientVersion;
         }
     }

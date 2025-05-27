@@ -39,7 +39,7 @@
 
         <!--  Title Bar  -->
         <ui:TitleBar
-            Title="{x:Static resources:Strings.Menu_FastFlagEditor_ProfilesDescription}"
+            Title="Flag Profiles"
             Grid.Row="0"
             Grid.ColumnSpan="2"
             Padding="9"

@@ -17,5 +17,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
 
         }
+
+        private void CustomIntegrationSelection(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+
+        }
     }
 }

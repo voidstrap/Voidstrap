@@ -8,6 +8,6 @@
         [JsonPropertyName("name")]
         public string Name { get; set; } = null!;
 
-        public string Image => $"https://raw.githubusercontent.com/midaskira/config/main/assets/{ImageAsset}";
+        public string Image => $"https://raw.githubusercontent.com/bloxstraplabs/config/main/assets/{ImageAsset}";
     }
 }

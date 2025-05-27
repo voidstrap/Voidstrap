@@ -31,7 +31,7 @@
             x:Name="ActivityTrackingOption"
             Description="{x:Static resources:Strings.Menu_Integrations_EnableActivityTracking_Description}"
             Header="{x:Static resources:Strings.Menu_Integrations_EnableActivityTracking_Title}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F">
+            HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F">
             <ui:ToggleSwitch
                 Background="{DynamicResource SystemAccentBrush}"
                 Checked="ToggleSwitch_Checked"
@@ -41,7 +41,7 @@
         <controls:OptionControl
             Description="{Binding Source={x:Static resources:Strings.Menu_Integrations_QueryServerLocation_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://ipinfo.io'}"
             Header="{x:Static resources:Strings.Menu_Integrations_QueryServerLocation_Title}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F#server-location-querying"
+            HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F#server-location-querying"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding ShowServerDetailsEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
@@ -54,9 +54,9 @@
         </controls:OptionControl>
 
         <controls:OptionControl
-            Description="{Binding Source={x:Static resources:Strings.Menu_Integrations_DesktopApp_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F#dont-exit-to-desktop-app'}"
+            Description="{Binding Source={x:Static resources:Strings.Menu_Integrations_DesktopApp_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F#dont-exit-to-desktop-app'}"
             Header="{x:Static resources:Strings.Menu_Integrations_DesktopApp_Title}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F#dont-exit-to-desktop-app"
+            HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F#dont-exit-to-desktop-app"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DisableAppPatchEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
@@ -70,6 +70,14 @@
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
             MarkdownText="{Binding Source={x:Static resources:Strings.Menu_Integrations_RequiresActivityTracking}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F#discord-rich-presence'}"
             TextWrapping="Wrap" />
+
+        <controls:OptionControl
+            x:Name="VoidstrapRPC"
+            Description="Shows that you're using Voidstrap on Discord, but it overlaps with 'Show Game Activity'. Requires an app restart."
+            Header="Voidstrap RPC"
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DiscordActivityEnabled, Mode=TwoWay}"/>
+        </controls:OptionControl>
 
         <controls:OptionControl
             x:Name="DiscordActivityOption"

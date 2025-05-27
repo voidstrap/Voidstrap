@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.3.3</Version>
-		<FileVersion>1.0.3.3</FileVersion>
+		<Version>1.0.3.7</Version>
+		<FileVersion>1.0.3.7</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -29,14 +29,69 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<None Remove="Resources\DarkEditor.xshd" />
-		<None Remove="Resources\LightEditor.xshd" />
+		<None Remove="ThemeImages\5070.png" />
+		<None Remove="ThemeImages\AnimationEffects.png" />
+		<None Remove="ThemeImages\Balanced.png" />
+		<None Remove="ThemeImages\BloxstrapTheme.png" />
+		<None Remove="ThemeImages\BlueLockTheme.png" />
+		<None Remove="ThemeImages\BraticFF.png" />
+		<None Remove="ThemeImages\CLBB.png" />
+		<None Remove="ThemeImages\CmdBB.png" />
+		<None Remove="ThemeImages\GalaxyBackground.jpg" />
+		<None Remove="ThemeImages\GalaxyBB.jpeg" />
+		<None Remove="ThemeImages\GalaxyBB.jpg" />
+		<None Remove="ThemeImages\GWBB.png" />
+		<None Remove="ThemeImages\klikos-mod-thumbnail.png" />
+		<None Remove="ThemeImages\PureFF.jpg" />
+		<None Remove="ThemeImages\RobloxBB.png" />
+		<None Remove="UI\Elements\Bootstrapper\GalaxyBB.jpeg" />
+		<None Remove="UI\Elements\Settings\Pages\1748136310649.png" />
+		<None Remove="UI\Elements\Settings\Pages\5070.png" />
+		<None Remove="UI\Elements\Settings\Pages\AnimationEffects.png" />
+		<None Remove="UI\Elements\Settings\Pages\Balanced.png" />
+		<None Remove="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
+		<None Remove="UI\Elements\Settings\Pages\BlueLockTheme.png" />
+		<None Remove="UI\Elements\Settings\Pages\BraticFF.png" />
+		<None Remove="UI\Elements\Settings\Pages\CLBB.png" />
+		<None Remove="UI\Elements\Settings\Pages\CmdBB.png" />
+		<None Remove="UI\Elements\Settings\Pages\GWBB.png" />
+		<None Remove="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
+		<None Remove="UI\Elements\Settings\Pages\PureFF.jpg" />
+		<None Remove="UI\Elements\Settings\Pages\RobloxBB.png" />
+		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="ThemeImages\5070.png" />
+		<Resource Include="ThemeImages\AnimationEffects.png" />
+		<Resource Include="ThemeImages\Balanced.png" />
+		<Resource Include="ThemeImages\BloxstrapTheme.png" />
+		<Resource Include="ThemeImages\BlueLockTheme.png" />
+		<Resource Include="ThemeImages\BraticFF.png" />
+		<Resource Include="ThemeImages\CLBB.png" />
+		<Resource Include="ThemeImages\CmdBB.png" />
+		<Resource Include="ThemeImages\GalaxyBB.jpeg" />
+		<Resource Include="ThemeImages\GWBB.png" />
+		<Resource Include="ThemeImages\klikos-mod-thumbnail.png" />
+		<Resource Include="ThemeImages\PureFF.jpg" />
+		<Resource Include="ThemeImages\RobloxBB.png" />
+		<Resource Include="UI\Elements\Bootstrapper\GalaxyBB.jpeg" />
+		<Resource Include="UI\Elements\Settings\Pages\1748136310649.png" />
+		<Resource Include="UI\Elements\Settings\Pages\5070.png" />
+		<Resource Include="UI\Elements\Settings\Pages\AnimationEffects.png" />
+		<Resource Include="UI\Elements\Settings\Pages\Balanced.png" />
+		<Resource Include="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
+		<Resource Include="UI\Elements\Settings\Pages\BlueLockTheme.png" />
+		<Resource Include="UI\Elements\Settings\Pages\BraticFF.png" />
+		<Resource Include="UI\Elements\Settings\Pages\CLBB.png" />
+		<Resource Include="UI\Elements\Settings\Pages\CmdBB.png" />
+		<Resource Include="UI\Elements\Settings\Pages\GWBB.png" />
+		<Resource Include="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
+		<Resource Include="UI\Elements\Settings\Pages\PureFF.jpg" />
+		<Resource Include="UI\Elements\Settings\Pages\RobloxBB.png" />
 		<Resource Include="Voidstrap.ico" />
-		<Resource Include="Resources\LightEditor.xshd" />
-		<Resource Include="Resources\DarkEditor.xshd" />
+		<Resource Include="Resources\Checkmark.ico" />
+		<Resource Include="Resources\CrossMark.ico" />
 		<Resource Include="Resources\Fonts\NotoSansThai-VariableFont_wdth,wght.ttf" />
 		<Resource Include="Resources\Fonts\Rubik-VariableFont_wght.ttf" />
 		<Resource Include="Resources\BootstrapperStyles\ByfronDialog\ByfronLogoDark.jpg" />
@@ -89,6 +144,12 @@
 		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursor.png" />
 		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowFarCursor.png" />
 		<EmbeddedResource Include="Resources\Mods\Cursor\CleanCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\WhiteDotCursor\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\WhiteDotCursor\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\WhiteDotCursor\ArrowCursorDecalDrag.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\VerySmallWhiteDot\ArrowCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\VerySmallWhiteDot\ArrowFarCursor.png" />
+		<EmbeddedResource Include="Resources\Mods\Cursor\VerySmallWhiteDot\ArrowCursorDecalDrag.png" />
 		<EmbeddedResource Include="Resources\Mods\Sounds\OldDeath.ogg" />
 		<EmbeddedResource Include="Resources\Mods\Sounds\OldGetUp.mp3" />
 		<EmbeddedResource Include="Resources\Mods\Sounds\OldJump.mp3" />
@@ -107,7 +168,7 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
-		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+		<PackageReference Include="SharpDX" Version="4.2.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 		<PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
 		<PackageReference Include="XamlAnimatedGif" Version="2.3.0" />
@@ -148,6 +209,13 @@
 		</ItemGroup>
 	</Target>
 
+	<ItemGroup>
+	  <Resource Include="Voidstrap.png">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </Resource>
+	</ItemGroup>
+
 
 
 	<ItemGroup>
@@ -159,6 +227,14 @@
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+	  <Reference Include="DiscordRPC">
+	    <HintPath>..\..\..\..\Downloads\DiscordRPC.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -220,10 +296,6 @@
 	  <None Update="Properties\Settings.settings">
 	    <Generator>SettingsSingleFileGenerator</Generator>
 	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-	  </None>
-	  <None Update="Voidstrap.png">
-	    <Pack>True</Pack>
-	    <PackagePath>\</PackagePath>
 	  </None>
 	</ItemGroup>
 

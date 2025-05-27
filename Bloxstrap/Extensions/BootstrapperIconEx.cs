@@ -6,7 +6,6 @@ namespace Voidstrap.Extensions
     {
         public static IReadOnlyCollection<BootstrapperIcon> Selections => new BootstrapperIcon[]
         {
-            //BootstrapperIcon.IconVoidstrap,
             BootstrapperIcon.IconVoidstrap,
             BootstrapperIcon.Icon2022,
             BootstrapperIcon.Icon2019,
@@ -15,7 +14,6 @@ namespace Voidstrap.Extensions
             BootstrapperIcon.IconEarly2015,
             BootstrapperIcon.Icon2011,
             BootstrapperIcon.Icon2008,
-            BootstrapperIcon.IconHellstrapClassic,
             BootstrapperIcon.IconCustom
         };
 
@@ -55,7 +53,6 @@ namespace Voidstrap.Extensions
 
             return icon switch
             {
-                //BootstrapperIcon.IconVoidstrap => Properties.Resources.IconVoidstrap,
                 BootstrapperIcon.IconVoidstrap => Properties.Resources.IconVoidstrap,
                 BootstrapperIcon.Icon2008 => Properties.Resources.Icon2008,
                 BootstrapperIcon.Icon2011 => Properties.Resources.Icon2011,
@@ -64,7 +61,6 @@ namespace Voidstrap.Extensions
                 BootstrapperIcon.Icon2017 => Properties.Resources.Icon2017,
                 BootstrapperIcon.Icon2019 => Properties.Resources.Icon2019,
                 BootstrapperIcon.Icon2022 => Properties.Resources.Icon2022,
-                BootstrapperIcon.IconHellstrapClassic => Properties.Resources.IconHellstrapClassic,
                 _ => Properties.Resources.IconVoidstrap
             };
         }

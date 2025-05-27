@@ -34,7 +34,7 @@
         <controls:OptionControl
             Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
             Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Title}"
-            HelpLink="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
+            HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
             <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
         </controls:OptionControl>
 
@@ -59,6 +59,50 @@
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
             <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
+
+        <ui:CardExpander Grid.Row="1" Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="Cleaner" />
+                        <TextBlock Margin="0,2,0,0" FontSize="12" Text="Voidstrap will remove old data to save on space" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <StackPanel>
+                <controls:OptionControl 
+Header="When should the files get deleted" 
+Description="Files older than the set amount will be deleted.">
+                    <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding CleanerOptions, Mode=OneTime}" Text="{Binding CleanerOption, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </controls:OptionControl>
+                <controls:OptionControl 
+Header="Cache" 
+Description="When should the set amount be deleted.">
+                    <ui:ToggleSwitch IsChecked="{Binding CleanerCache, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl 
+Header="Logs" 
+Description="Old log files will be deleted.">
+                    <ui:ToggleSwitch IsChecked="{Binding CleanerLogs, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl 
+Header="Voidstrap logs"
+Description="Voidstrap logs will be deleted.">
+                    <ui:ToggleSwitch IsChecked="{Binding CleanerVoidstrap, Mode=TwoWay}" />
+                </controls:OptionControl>
+            </StackPanel>
+        </ui:CardExpander>
 
     </StackPanel>
 </ui:UiPage>

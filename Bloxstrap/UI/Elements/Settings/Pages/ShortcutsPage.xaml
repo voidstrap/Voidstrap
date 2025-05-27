@@ -10,40 +10,39 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="ShortcutsPage"
-    d:DataContext="{d:DesignInstance dmodels:ShortcutsViewModel,
-                                     IsDesignTimeCreatable=True}"
+    d:DataContext="{d:DesignInstance dmodels:ShortcutsViewModel, IsDesignTimeCreatable=True}"
     d:DesignHeight="600"
-    d:DesignWidth="800"
+    d:DesignWidth="820"
     Scrollable="True"
     mc:Ignorable="d">
 
-    <StackPanel Margin="0,0,14,14">
+    <StackPanel Margin="0,0,14,14" >
 
-        <!--  Description  -->
+        <!-- Description -->
         <TextBlock
-            Margin="0,0,0,16"
             FontSize="14"
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
             Text="{x:Static resources:Strings.Menu_Shortcuts_Description}" />
 
-        <!--  Extract Icons Option  -->
+        <!-- Extract Icons Option -->
         <controls:OptionControl
-            Margin="0,0,0,8"
-            Description="{Binding Source={x:Static resources:Strings.Menu_Shortcuts_ExtractIcons_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Voidstrap/wiki/Using-Roblox-icons-for-your-shortcuts'}"
+            Margin="0,0,0,12"
+            Description="{Binding Source={x:Static resources:Strings.Menu_Shortcuts_ExtractIcons_Description}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/BloxstrapLabs/Bloxstrap/wiki/Using-Roblox-icons-for-your-shortcuts'}"
             Header="{x:Static resources:Strings.Menu_Shortcuts_ExtractIcons_Title}"
             HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/Using-Roblox-icons-for-your-shortcuts">
             <ui:ToggleSwitch IsChecked="{Binding ExtractIconsTask.NewState, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <!--  General Shortcuts Section  -->
+        <!-- General Shortcuts Section -->
         <TextBlock
-            Margin="0,16,0,8"
             FontSize="20"
             FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Shortcuts_General_Title}" />
-        <TextBlock Foreground="{StaticResource TextFillColorSecondaryBrush}" Text="{x:Static resources:Strings.Menu_Shortcuts_General_Description}" />
+        <TextBlock
+            Foreground="{StaticResource TextFillColorSecondaryBrush}"
+            Text="{x:Static resources:Strings.Menu_Shortcuts_General_Description}" />
 
-        <Grid Margin="0,4,0,0">
+        <Grid Margin="0,0,0,16" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -51,28 +50,27 @@
 
             <controls:OptionControl
                 Grid.Column="0"
-                Margin="0,0,8,0"
                 Header="{x:Static resources:Strings.Common_Shortcuts_Desktop}">
                 <ui:ToggleSwitch IsChecked="{Binding DesktopIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
 
             <controls:OptionControl
                 Grid.Column="1"
-                Margin="8,0,0,0"
                 Header="{x:Static resources:Strings.Common_Shortcuts_StartMenu}">
                 <ui:ToggleSwitch IsChecked="{Binding StartMenuIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
         </Grid>
 
-        <!--  Functional Shortcuts Section  -->
+        <!-- Functional Shortcuts Section -->
         <TextBlock
-            Margin="0,16,0,8"
             FontSize="20"
             FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Shortcuts_Function_Title}" />
-        <TextBlock Foreground="{StaticResource TextFillColorSecondaryBrush}" Text="{x:Static resources:Strings.Menu_Shortcuts_Function_Description}" />
+        <TextBlock
+            Foreground="{StaticResource TextFillColorSecondaryBrush}"
+            Text="{x:Static resources:Strings.Menu_Shortcuts_Function_Description}" />
 
-        <Grid>
+        <Grid >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
@@ -81,22 +79,22 @@
 
             <controls:OptionControl
                 Grid.Column="0"
-                Margin="4"
+                Margin="0"
                 Header="{x:Static resources:Strings.LaunchMenu_LaunchRoblox}">
                 <ui:ToggleSwitch IsChecked="{Binding PlayerIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
 
-            <!--  Conditionally show Studio option  -->
+            <!-- Studio option -->
             <controls:OptionControl
                 Grid.Column="1"
-                Margin="4"
+                Margin="0"
                 Header="{x:Static resources:Strings.LaunchMenu_LaunchRobloxStudio}">
                 <ui:ToggleSwitch IsChecked="{Binding StudioIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
 
             <controls:OptionControl
                 Grid.Column="2"
-                Margin="4"
+                Margin="0"
                 Header="{x:Static resources:Strings.Menu_Title}">
                 <ui:ToggleSwitch IsChecked="{Binding SettingsIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>

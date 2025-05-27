@@ -1,10 +1,26 @@
-﻿using System.Reflection;
+﻿using System;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 
 namespace Voidstrap.Models.SettingTasks
 {
     public class ExtractIconsTask : BoolBaseTask
     {
         private string _path => Path.Combine(Paths.Base, Strings.Paths_Icons);
+
+        // List of embedded icon resource names to extract
+        private static readonly string[] AllowedIconNames =
+        {
+            "Icon2008.ico",
+            "Icon2011.ico",
+            "Icon2017.ico",
+            "Icon2019.ico",
+            "Icon2022.ico",
+            "IconVoidstrap.ico",
+            "IconEarly2015.ico",
+            "IconLate2015.ico"
+        };
 
         public ExtractIconsTask() : base("ExtractIcons")
         {
@@ -13,30 +29,32 @@ namespace Voidstrap.Models.SettingTasks
 
         public override void Execute()
         {
-            if (NewState)
+            if (!Directory.Exists(_path))
             {
                 Directory.CreateDirectory(_path);
 
                 var assembly = Assembly.GetExecutingAssembly();
-                var resourceNames = assembly.GetManifestResourceNames().Where(x => x.EndsWith(".ico"));
+                var resourceNames = assembly.GetManifestResourceNames();
 
-                foreach (string name in resourceNames)
+                foreach (string iconName in AllowedIconNames)
                 {
-                    string path = Path.Combine(_path, name.Replace("Voidstrap.Resources.", ""));
-                    var stream = assembly.GetManifestResourceStream(name)!;
+                    string fullResourceName = $"Voidstrap.Resources.{iconName}";
 
+                    if (!resourceNames.Contains(fullResourceName))
+                        continue;
+
+                    using var stream = assembly.GetManifestResourceStream(fullResourceName)!;
                     using var memoryStream = new MemoryStream();
                     stream.CopyTo(memoryStream);
 
-                    Filesystem.AssertReadOnly(path);
-                    File.WriteAllBytes(path, memoryStream.ToArray());
+                    string filePath = Path.Combine(_path, iconName);
+                    Filesystem.AssertReadOnly(filePath);
+                    File.WriteAllBytes(filePath, memoryStream.ToArray());
                 }
             }
             else if (Directory.Exists(_path))
-            {
-                Directory.Delete(_path, true);
-            }
 
+            NewState = Directory.Exists(_path);
             OriginalState = NewState;
         }
     }

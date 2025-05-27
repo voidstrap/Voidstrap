@@ -12,6 +12,9 @@
 
         public static string TempUpdates => Path.Combine(Temp, "Updates");
         public static string TempLogs => Path.Combine(Temp, "Logs");
+
+        public static string RobloxLogs { get; private set; } = "";
+        public static string RobloxCache { get; private set; } = "";
         public static string Base { get; private set; } = "";
         public static string Downloads { get; private set; } = "";
         public static string SavedBackups { get; private set; } = "";
@@ -19,6 +22,8 @@
         public static string Integrations { get; private set; } = "";
         public static string Versions { get; private set; } = "";
         public static string Mods { get; private set; } = "";
+
+        public static string SavedFlagBackup { get; private set; } = "";
         public static string Roblox { get; private set; } = "";
         public static string CustomThemes { get; private set; } = "";
 
@@ -42,6 +47,7 @@
             Mods = Path.Combine(Base, "Mods");
             Roblox = Path.Combine(Base, "Roblox");
             CustomThemes = Path.Combine(Base, "CustomThemes");
+            SavedFlagBackup = Path.Combine(Base, "SavedFlagBackup");
 
             Application = Path.Combine(Base, $"{App.ProjectName}.exe");
 

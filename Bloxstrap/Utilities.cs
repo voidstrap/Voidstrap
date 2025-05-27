@@ -1,8 +1,9 @@
 ﻿using Voidstrap.AppData;
-using Voidstrap;
 using System.ComponentModel;
 using System.Security.AccessControl;
 using System.Windows;
+using Voidstrap;
+using Microsoft.VisualBasic.Devices;
 
 namespace Voidstrap
 {
@@ -20,8 +21,6 @@ namespace Voidstrap
             }
             catch (Win32Exception ex)
             {
-                // lmfao
-
                 if (ex.NativeErrorCode != (int)ErrorCode.CO_E_APPNOTFOUND)
                     throw;
 
@@ -56,17 +55,6 @@ namespace Voidstrap
         ///  0: version1 == version2 <br />
         ///  1: version1 &gt; version2
         /// </returns>
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="versionStr1"></param>
-        /// <param name="versionStr2"></param>
-        /// <returns>
-        /// Result of System.Version.CompareTo <br />
-        /// -1: version1 &lt; version2 <br />
-        ///  0: version1 == version2 <br />
-        ///  1: version1 &gt; version2
-        /// </returns>
         public static VersionComparison CompareVersions(string versionStr1, string versionStr2)
         {
             try
@@ -79,7 +67,7 @@ namespace Voidstrap
             catch (Exception)
             {
                 // temporary diagnostic log for the issue described here:
-                // https://github.com/bloxstraplabs/bloxstrap/issues/3193
+                // https://github.com/Bloxstraplabs/Bloxstrap/issues/3193
                 // the problem is that this happens only on upgrade, so my only hope of catching this is bug reports following the next release
 
                 App.Logger.WriteLine("Utilities::CompareVersions", "An exception occurred when comparing versions");
@@ -105,8 +93,10 @@ namespace Voidstrap
             return version;
         }
 
-        public static string GetRobloxVersionStr(IAppData data)
+        public static string GetRobloxVersion(bool studio)
         {
+            IAppData data = studio ? new RobloxStudioData() : new RobloxPlayerData();
+
             string playerLocation = data.ExecutablePath;
 
             if (!File.Exists(playerLocation))
@@ -118,19 +108,6 @@ namespace Voidstrap
                 return "";
 
             return versionInfo.ProductVersion.Replace(", ", ".");
-        }
-
-        public static string GetRobloxVersionStr(bool studio)
-        {
-            IAppData data = studio ? new RobloxStudioData() : new RobloxPlayerData();
-
-            return GetRobloxVersionStr(data);
-        }
-
-        public static Version? GetRobloxVersion(IAppData data)
-        {
-            string str = GetRobloxVersionStr(data);
-            return ParseVersionSafe(str);
         }
 
         public static Process[] GetProcessesSafe()
@@ -149,6 +126,24 @@ namespace Voidstrap
             }
         }
 
+        public static bool DoesMutexExist(string name)
+        {
+            try
+            {
+                Mutex.OpenExisting(name).Close();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static void KillBackgroundUpdater()
+        {
+            using EventWaitHandle handle = new EventWaitHandle(false, EventResetMode.AutoReset, "Voidstrap-BackgroundUpdaterKillEvent");
+            handle.Set();
+        }
 
         public static void RemoveTeleportFix()
         {

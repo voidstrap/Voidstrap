@@ -1,6 +1,7 @@
 ﻿using Voidstrap.UI.ViewModels.Settings;
 
 using System.Windows.Controls;
+using System.Windows;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -25,5 +26,19 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             viewModel.OnPropertyChanged(nameof(viewModel.SelectedCustomTheme));
             viewModel.OnPropertyChanged(nameof(viewModel.SelectedCustomThemeName));
         }
+
+        private bool isThemeInitialized = false;
+
+        private void ThemeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!isThemeInitialized)
+            {
+                isThemeInitialized = true;
+                return;
+            }
+
+            Frontend.ShowMessageBox("This feature is buggy right now so reset the app to apply the new theme!");
+        }
+
     }
 }

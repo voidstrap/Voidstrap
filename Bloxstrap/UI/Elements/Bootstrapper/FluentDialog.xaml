@@ -27,7 +27,14 @@
     </Window.TaskbarItemInfo>
 
     <!--  Background is for Aero theme only  -->
-    <Grid Background="{Binding Path=BackgroundColourBrush, Mode=OneTime}">
+    <Grid>
+        <!-- Background Image -->
+        <Image Source="/UI/Elements/Bootstrapper/GalaxyBB.jpeg"
+           Stretch="Fill"/>
+
+        <!-- Color Overlay -->
+        <Rectangle Fill="{Binding Path=BackgroundColourBrush, Mode=OneWay}"/>
+
         <!--  Allow for drag  -->
         <ui:TitleBar
             VerticalAlignment="Top"
@@ -46,33 +53,44 @@
 
             <Image
                 Grid.Row="0"
-                Width="80"
-                Height="80"
+                Width="85"
+                Height="85"
                 Margin="0,30,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 RenderOptions.BitmapScalingMode="HighQuality"
-                Source="{Binding Icon, Mode=OneWay}" />
+                
+                Source="{Binding Icon, Mode=OneWay}" >
+                <Image.Effect>
+                    <DropShadowEffect 
+        Color="Black"
+        BlurRadius="10"
+        ShadowDepth="5"
+        Direction="315"
+        Opacity="0.5"/>
+                </Image.Effect>
+
+            </Image>
 
             <TextBlock
                 Grid.Row="1"
                 Margin="0,0,0,8"
                 HorizontalAlignment="Center"
-                FontSize="18"
+                FontSize="17"
                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
                 Text="{Binding Message, Mode=OneWay}"
                 TextWrapping="Wrap" />
 
             <ProgressBar
-                Grid.Row="2"
-                Margin="0,0,0,16"
+                Grid.Row="1"
+                Margin="0,35,0,16"
                 IsIndeterminate="{Binding ProgressIndeterminate, Mode=OneWay}"
                 Maximum="{Binding ProgressMaximum, Mode=OneWay}"
-                Value="{Binding ProgressValue, Mode=OneWay}" />
+                Value="{Binding ProgressValue, Mode=OneWay}" Height="10" Foreground="#FF92CAFF" />
 
             <Button
                 Grid.Row="3"
-                Width="120"
+                Width="240"
                 Padding="4"
                 HorizontalAlignment="Center"
                 Command="{Binding CancelInstallCommand}"

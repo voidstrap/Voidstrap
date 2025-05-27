@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
+using System.Windows.Controls;
 
 using Voidstrap.UI.ViewModels.Settings;
 
@@ -33,3 +34,4 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         }
     }
 }
+

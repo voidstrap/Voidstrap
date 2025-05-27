@@ -26,6 +26,8 @@ namespace Voidstrap
 
         public bool EnableAnalytics = true;
 
+        public bool VoidstrapRPCReal = true;
+
         public bool IsImplicitInstall = false;
 
         public string InstallLocationError { get; set; } = "";
@@ -99,6 +101,8 @@ namespace Voidstrap
             App.FastFlags.Load(false);
 
             App.Settings.Prop.EnableAnalytics = EnableAnalytics;
+
+            App.Settings.Prop.VoidstrapRPCReal = VoidstrapRPCReal;
 
             if (App.IsStudioVisible)
                 WindowsRegistry.RegisterStudio();
@@ -422,8 +426,8 @@ namespace Voidstrap
                 }
             }
 
-            // prior to 2.8.0, auto-updating was handled with this... bruteforce method
-            // now it's handled with the system mutex you see above, but we need to keep this logic for <2.8.0 versions
+            // prior to 1.0.3.6, auto-updating was handled with this... bruteforce method
+            // now it's handled with the system mutex you see above, but we need to keep this logic for <1.0.3.6 versions
             for (int i = 1; i <= 10; i++)
             {
                 try
@@ -520,7 +524,7 @@ namespace Voidstrap
                         App.FastFlags.SetPreset("Rendering.Framerate", null);
                 }
 
-                if (Utilities.CompareVersions(existingVer, "2.8.0") == VersionComparison.LessThan)
+                if (Utilities.CompareVersions(existingVer, "1.0.3.6") == VersionComparison.LessThan)
                 {
                     if (isAutoUpgrade)
                     {

@@ -1,15 +1,38 @@
-﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base">
-    <SolidColorBrush x:Key="NewTextEditorBackground" Color="#8C000000" />
-    <SolidColorBrush x:Key="NewTextEditorForeground" Color="White" />
-    <SolidColorBrush x:Key="NewTextEditorLink" Color="#3A9CEA" />
-    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#58000000" />
-    <SolidColorBrush x:Key="SecondaryBackgroundColor" Color="#9b0c2c45" />
-    <SolidColorBrush x:Key="TertiaryBackgroundColor" Color="#0b0b09" />
-    <Color x:Key="ControlFillColorDefault">#8C000000</Color>
-    <Color x:Key="WindowBackgroundColorPrimary">#100018</Color>
-    <Color x:Key="WindowBackgroundColorSecondary">#38006b</Color>
-    <Color x:Key="WindowBackgroundColorThird">#000000</Color>
-    <SolidColorBrush x:Key="WindowBackgroundColorBrushPrimary" Color="#100018"/>
-    <SolidColorBrush x:Key="WindowBackgroundColorBrushSecondary" Color="#38006b"/>
-    <SolidColorBrush x:Key="WindowBackgroundColorBrushThird" Color="#000000"/>
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base">
+
+    <!-- Text Editor Colors -->
+    <SolidColorBrush x:Key="NewTextEditorBackground" Color="#D0151515"/>
+    <!-- Darker semi-transparent background -->
+    <SolidColorBrush x:Key="NewTextEditorForeground" Color="#F0F0F0F0"/>
+    <!-- Light gray text for comfort -->
+    <SolidColorBrush x:Key="NewTextEditorLink" Color="#3685D6"/>
+    <!-- Slightly darker blue link -->
+
+    <!-- Background Layers -->
+    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#B0121212"/>
+    <!-- Deeper gray tone -->
+    <SolidColorBrush x:Key="SecondaryBackgroundColor" Color="#59182030"/>
+    <!-- Dark bluish overlay -->
+    <SolidColorBrush x:Key="TertiaryBackgroundColor" Color="#FF080808"/>
+    <!-- Very dark gray, close to black -->
+
+    <!-- Control Fill -->
+    <Color x:Key="ControlFillColorDefault">#B01C1C1C</Color>
+    <!-- Darker control fill -->
+
+    <!-- Window Background Color Layers -->
+    <Color x:Key="WindowBackgroundColorPrimary">#FF121212</Color>
+    <!-- True dark gray -->
+    <Color x:Key="WindowBackgroundColorSecondary">#FF221D40</Color>
+    <!-- Muted violet-gray -->
+    <Color x:Key="WindowBackgroundColorThird">#FF000000</Color>
+    <!-- Pure black -->
+
+    <!-- Brushes for Window Backgrounds -->
+    <SolidColorBrush x:Key="WindowBackgroundColorBrushPrimary" Color="{StaticResource WindowBackgroundColorPrimary}" />
+    <SolidColorBrush x:Key="WindowBackgroundColorBrushSecondary" Color="{StaticResource WindowBackgroundColorSecondary}" />
+    <SolidColorBrush x:Key="WindowBackgroundColorBrushThird" Color="{StaticResource WindowBackgroundColorThird}" />
+
 </ResourceDictionary>

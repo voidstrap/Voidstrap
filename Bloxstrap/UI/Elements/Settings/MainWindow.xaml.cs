@@ -7,17 +7,15 @@ using System.Windows.Controls;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
 using Voidstrap.UI.ViewModels.Settings;
-using Wpf.Ui.Common;
 using Voidstrap.UI.Elements.Dialogs;
+using Wpf.Ui.Common;
 
 namespace Voidstrap.UI.Elements.Settings
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : INavigationWindow
     {
         private Models.Persistable.WindowState _state => App.State.Prop.SettingsWindow;
+        private bool _isSaveAndLaunchClicked = false;
 
         public MainWindow(bool showAlreadyRunningWarning)
         {
@@ -29,12 +27,11 @@ namespace Voidstrap.UI.Elements.Settings
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
 
             if (showAlreadyRunningWarning)
-                _ = ShowAlreadyRunningSnackbar();
+                _ = ShowAlreadyRunningSnackbarAsync();
         }
 
-        /// <summary>
-        /// Initializes the ViewModel and event handlers.
-        /// </summary>
+        #region Initialization
+
         private void InitializeViewModel()
         {
             var viewModel = new MainWindowViewModel();
@@ -45,53 +42,13 @@ namespace Voidstrap.UI.Elements.Settings
             viewModel.RequestCloseWindowEvent += OnRequestCloseWindow;
         }
 
-        /// <summary>
-        /// Handles save notice event.
-        /// </summary>
-        private bool isSaveAndLaunchClicked = false; // Add a flag to track Save and Launch click
-
-        private void OnSaveAndLaunchButtonClick(object sender, EventArgs e)
-        {
-            // Set the flag to true when Save and Launch is clicked
-            isSaveAndLaunchClicked = true;
-
-            // Proceed with save and launch logic here
-        }
-
-        private void OnRequestSaveNotice(object? sender, EventArgs e)
-        {
-            if (!isSaveAndLaunchClicked) // Check the flag before showing the snackbar
-            {
-                SettingsSavedSnackbar.Show();
-            }
-        }
-
-        private void OnRequestSaveLaunchNotice(object? sender, EventArgs e)
-        {
-            if (!isSaveAndLaunchClicked) // Check the flag before showing the snackbar
-            {
-                SettingsSavedLaunchSnackbar.Show();
-            }
-        }
-
-
-        /// <summary>
-        /// Handles close window event.
-        /// </summary>
-        private async void OnRequestCloseWindow(object? sender, EventArgs e) // Added nullable reference type
-        {
-            await Task.Yield(); // Explicitly await to fix "async method lacks await"
-            Close();
-        }
-
-        /// <summary>
-        /// Restores the window state based on saved settings.
-        /// </summary>
         private void InitializeWindowState()
         {
-            // Ensure the window is within screen bounds
-            if (_state.Left > SystemParameters.VirtualScreenWidth) _state.Left = 0;
-            if (_state.Top > SystemParameters.VirtualScreenHeight) _state.Top = 0;
+            if (_state.Left > SystemParameters.VirtualScreenWidth || _state.Top > SystemParameters.VirtualScreenHeight)
+            {
+                _state.Left = 0;
+                _state.Top = 0;
+            }
 
             if (_state.Width > 0) Width = _state.Width;
             if (_state.Height > 0) Height = _state.Height;
@@ -104,31 +61,88 @@ namespace Voidstrap.UI.Elements.Settings
             }
         }
 
-        /// <summary>
-        /// Initializes navigation and restores the last selected page.
-        /// </summary>
         private void InitializeNavigation()
         {
             RootNavigation.SelectedPageIndex = App.State.Prop.LastPage;
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             RootNavigation.Navigated += SaveNavigation;
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
         }
 
-        /// <summary>
-        /// Saves the last visited navigation page index.
-        /// </summary>
+        #endregion
+
+        #region Snackbar Events
+
+        private void OnRequestSaveNotice(object? sender, EventArgs e)
+        {
+            if (!_isSaveAndLaunchClicked)
+                SettingsSavedSnackbar.Show();
+        }
+
+        private void OnRequestSaveLaunchNotice(object? sender, EventArgs e)
+        {
+            if (!_isSaveAndLaunchClicked)
+                SettingsSavedLaunchSnackbar.Show();
+        }
+
+        private async Task ShowAlreadyRunningSnackbarAsync()
+        {
+            await Task.Delay(225).ConfigureAwait(false);
+            Dispatcher.Invoke(() => AlreadyRunningSnackbar.Show());
+        }
+
+        #endregion
+
+        #region ViewModel Events
+
+        private async void OnRequestCloseWindow(object? sender, EventArgs e)
+        {
+            await Task.Yield();
+            Close();
+        }
+
+        private void OnSaveAndLaunchButtonClick(object sender, EventArgs e)
+        {
+            _isSaveAndLaunchClicked = true;
+        }
+
+        #endregion
+
+        #region Window Events
+
+        private void WpfUiWindow_Closing(object sender, CancelEventArgs e)
+        {
+            SaveWindowState();
+        }
+
+        private void WpfUiWindow_Closed(object sender, EventArgs e)
+        {
+            if (App.LaunchSettings.TestModeFlag.Active)
+                LaunchHandler.LaunchRoblox(LaunchMode.Player);
+            else
+                App.SoftTerminate();
+        }
+
+        private void SaveWindowState()
+        {
+            _state.Width = Width;
+            _state.Height = Height;
+            _state.Top = Top;
+            _state.Left = Left;
+
+            App.State.Save();
+        }
+
+        #endregion
+
+        #region Navigation
+
         private void SaveNavigation(INavigation sender, RoutedNavigationEventArgs e)
         {
             App.State.Prop.LastPage = RootNavigation.SelectedPageIndex;
         }
 
-        /// <summary>
-        /// Displays the "Already Running" snackbar after a brief delay.
-        /// </summary>
-        private async Task ShowAlreadyRunningSnackbar()
-        {
-            await Task.Delay(225).ConfigureAwait(false); // Ensure async execution
-            Dispatcher.Invoke(() => AlreadyRunningSnackbar.Show());
-        }
+        #endregion
 
         #region INavigationWindow Implementation
 
@@ -141,61 +155,15 @@ namespace Voidstrap.UI.Elements.Settings
 
         #endregion
 
-        /// <summary>
-        /// Handles window closing, ensuring unsaved changes are confirmed.
-        /// </summary>
-        private void WpfUiWindow_Closing(object sender, CancelEventArgs e)
-        {
-            if (App.FastFlags.Changed || App.PendingSettingTasks.Any())
-            {
-                var result = Frontend.ShowMessageBox(
-                    Strings.Menu_UnsavedChanges,
-                    MessageBoxImage.Warning,
-                    MessageBoxButton.YesNo
-                );
+        #region Placeholder Events
 
-                if (result != MessageBoxResult.Yes)
-                {
-                    e.Cancel = true;
-                    return;
-                }
-            }
-
-            // Save window state
-            SaveWindowState();
-        }
-
-        /// <summary>
-        /// Saves the window state to the application settings.
-        /// </summary>
-        private void SaveWindowState()
-        {
-            _state.Width = Width;
-            _state.Height = Height;
-            _state.Top = Top;
-            _state.Left = Left;
-
-            App.State.Save();
-        }
-
-        /// <summary>
-        /// Handles post-close logic.
-        /// </summary>
-        private void WpfUiWindow_Closed(object sender, EventArgs e)
-        {
-            if (App.LaunchSettings.TestModeFlag.Active)
-                LaunchHandler.LaunchRoblox(LaunchMode.Player);
-            else
-                App.SoftTerminate();
-        }
-
-        /// <summary>
-        /// Placeholder event handlers.
-        /// </summary>
+        // TODO: Implement these handlers or remove if unused
         private void NavigationItem_Click(object sender, RoutedEventArgs e) { }
-        private void Button_Click(object sender, RoutedEventArgs e) { }
         private void NavigationItem_Click_1(object sender, RoutedEventArgs e) { }
-
+        private void Button_Click(object sender, RoutedEventArgs e) { }
         private void Button_Click_1(object sender, RoutedEventArgs e) { }
+        private void Button_Click_2(object sender, RoutedEventArgs e) { }
+
+        #endregion
     }
 }

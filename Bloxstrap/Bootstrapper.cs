@@ -158,7 +158,7 @@ namespace Voidstrap
 
             App.Logger.WriteLine(LOG_IDENT, "Running bootstrapper");
 
-            // this is now always enabled as of v2.8.0
+            // this is now always enabled as of v1.0.3.6
             if (Dialog is not null)
                 Dialog.CancelEnabled = true;
 
@@ -521,9 +521,12 @@ namespace Voidstrap
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"Launching custom integration '{integration.Name}' ({integration.Location} {integration.LaunchArgs} - autoclose is {integration.AutoClose})");
 
+
                     int pid = 0;
 
                     try
+
+
                     {
                         var process = Process.Start(new ProcessStartInfo
                         {
@@ -545,6 +548,7 @@ namespace Voidstrap
                         autoclosePids.Add(pid);
                 }
             }
+            
 
             if (App.Settings.Prop.EnableActivityTracking || App.LaunchSettings.TestModeFlag.Active || autoclosePids.Any())
             {
@@ -835,45 +839,44 @@ namespace Voidstrap
         {
             const string LOG_IDENT = "Bootstrapper::UpgradeRoblox";
 
-            bool CancelUpgrade = !App.Settings.Prop.UpdateRoblox;
+            bool cancelUpgrade = !App.Settings.Prop.UpdateRoblox;
 
-            if (CancelUpgrade)
+            if (cancelUpgrade)
             {
                 SetStatus(Strings.Bootstrapper_Status_CancelUpgrade);
                 App.Logger.WriteLine(LOG_IDENT, "Upgrading disabled, cancelling the upgrade.");
-                Thread.Sleep(2250);
-            }
+                Thread.Sleep(250);
 
-            if (CancelUpgrade && !Directory.Exists(_latestVersionDirectory))
-            {
-                Frontend.ShowMessageBox(Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient, MessageBoxImage.Warning, MessageBoxButton.OK);
-            }
-            else if (CancelUpgrade)
-            {
+                if (!Directory.Exists(_latestVersionDirectory))
+                {
+                    Frontend.ShowMessageBox(Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient, MessageBoxImage.Warning, MessageBoxButton.OK);
+                }
                 return;
             }
 
-            if (String.IsNullOrEmpty(AppData.State.VersionGuid))
-                SetStatus(Strings.Bootstrapper_Status_Installing);
-            else
-                SetStatus(Strings.Bootstrapper_Status_Upgrading);
+            SetStatus(string.IsNullOrEmpty(AppData.State.VersionGuid)
+                ? Strings.Bootstrapper_Status_Installing
+                : Strings.Bootstrapper_Status_Upgrading);
 
             Directory.CreateDirectory(Paths.Base);
             Directory.CreateDirectory(Paths.Downloads);
             Directory.CreateDirectory(Paths.Versions);
 
+            var cachedPackageHashes = Directory.GetFiles(Paths.Downloads)
+                                               .Select(x => Path.GetFileName(x))
+                                               .ToList();
+
             _isInstalling = true;
 
-            // make sure nothing is running before continuing upgrade
-            if (!IsStudioLaunch) // TODO: wait for studio processes to close before updating to prevent data loss
-                KillRobloxPlayers();
-
-            // get a fully clean install
+            if (!IsStudioLaunch)
+            {
+                await Task.Run(() => KillRobloxPlayers());
+            }
             if (Directory.Exists(_latestVersionDirectory))
             {
                 try
                 {
-                    Directory.Delete(_latestVersionDirectory, false);
+                    Directory.Delete(_latestVersionDirectory, recursive: true);
                 }
                 catch (Exception ex)
                 {
@@ -883,15 +886,9 @@ namespace Voidstrap
             }
 
             Directory.CreateDirectory(_latestVersionDirectory);
-
-            var cachedPackageHashes = Directory.GetFiles(Paths.Downloads).Select(x => Path.GetFileName(x));
-
-            // package manifest states packed size and uncompressed size in exact bytes
-            int totalSizeRequired = 0;
-
-            // packed size only matters if we don't already have the package cached on disk
-            totalSizeRequired += _versionPackageManifest.Where(x => !cachedPackageHashes.Contains(x.Signature)).Sum(x => x.PackedSize);
-            totalSizeRequired += _versionPackageManifest.Sum(x => x.Size);
+            int totalPackedSize = _versionPackageManifest.Sum(p => p.PackedSize);
+            int totalUnpackedSize = _versionPackageManifest.Sum(p => p.Size);
+            int totalSizeRequired = totalPackedSize + totalUnpackedSize;
 
             if (Filesystem.GetFreeDiskSpace(Paths.Base) < totalSizeRequired)
             {
@@ -907,43 +904,49 @@ namespace Voidstrap
 
                 Dialog.ProgressMaximum = ProgressBarMaximum;
 
-                // compute total bytes to download
-                int totalPackedSize = _versionPackageManifest.Sum(package => package.PackedSize);
                 _progressIncrement = (double)ProgressBarMaximum / totalPackedSize;
 
-                if (Dialog is WinFormsDialogBase)
-                    _taskbarProgressMaximum = (double)TaskbarProgressMaximumWinForms;
-                else
-                    _taskbarProgressMaximum = (double)TaskbarProgressMaximumWpf;
+                _taskbarProgressMaximum = Dialog is WinFormsDialogBase
+                    ? TaskbarProgressMaximumWinForms
+                    : TaskbarProgressMaximumWpf;
 
-                _taskbarProgressIncrement = _taskbarProgressMaximum / (double)totalPackedSize;
+                _taskbarProgressIncrement = _taskbarProgressMaximum / totalPackedSize;
             }
 
-            var extractionTasks = new List<Task>();
+            var throttler = new SemaphoreSlim(8);
 
-            foreach (var package in _versionPackageManifest)
+            var downloadTasks = _versionPackageManifest.Select(async package =>
             {
-                if (package.Name == "WebView2RuntimeInstaller.zip")
-                    continue;
+                await throttler.WaitAsync();
+                try
+                {
+                    await DownloadPackage(package);
+                }
+                finally
+                {
+                    throttler.Release();
+                }
+            }).ToList();
 
-                totalPackageSize += package.Size;
-            }
+            await Task.WhenAll(downloadTasks);
 
-            foreach (var package in _versionPackageManifest)
+            if (_cancelTokenSource.IsCancellationRequested)
+                return;
+
+            var extractionTasks = _versionPackageManifest.Select(async package =>
             {
-                if (_cancelTokenSource.IsCancellationRequested)
-                    return;
+                await throttler.WaitAsync();
+                try
+                {
+                    await Task.Run(() => ExtractPackage(package), _cancelTokenSource.Token);
+                }
+                finally
+                {
+                    throttler.Release();
+                }
+            }).ToList();
 
-                // download all the packages synchronously
-                await DownloadPackage(package);
-
-                // we'll extract the runtime installer later if we need to
-                if (package.Name == "WebView2RuntimeInstaller.zip")
-                    continue;
-
-                // extract the package async immediately after download
-                extractionTasks.Add(Task.Run(() => ExtractPackage(package), _cancelTokenSource.Token));
-            }
+            await Task.WhenAll(extractionTasks);
 
             if (_cancelTokenSource.IsCancellationRequested)
                 return;
@@ -955,71 +958,13 @@ namespace Voidstrap
                 SetStatus(Strings.Bootstrapper_Status_Configuring);
             }
 
-            await Task.WhenAll(extractionTasks);
-
             App.Logger.WriteLine(LOG_IDENT, "Writing AppSettings.xml...");
             await File.WriteAllTextAsync(Path.Combine(_latestVersionDirectory, "AppSettings.xml"), AppSettings);
 
             if (_cancelTokenSource.IsCancellationRequested)
                 return;
 
-            if (App.State.Prop.PromptWebView2Install)
-            {
-                using var hklmKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\\WOW6432Node\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}");
-                using var hkcuKey = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\EdgeUpdate\\Clients\\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}");
-
-                if (hklmKey is not null || hkcuKey is not null)
-                {
-                    // reset prompt state if the user has it installed
-                    App.State.Prop.PromptWebView2Install = true;
-                }
-                else
-                {
-                    var result = Frontend.ShowMessageBox(Strings.Bootstrapper_WebView2NotFound, MessageBoxImage.Warning, MessageBoxButton.YesNo, MessageBoxResult.Yes);
-
-                    if (result != MessageBoxResult.Yes)
-                    {
-                        App.State.Prop.PromptWebView2Install = false;
-                    }
-                    else
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, "Installing WebView2 runtime...");
-
-                        var package = _versionPackageManifest.Find(x => x.Name == "WebView2RuntimeInstaller.zip");
-
-                        if (package is null)
-                        {
-                            App.Logger.WriteLine(LOG_IDENT, "Aborted runtime install because package does not exist, has WebView2 been added in this Roblox version yet?");
-                            return;
-                        }
-
-                        string baseDirectory = Path.Combine(_latestVersionDirectory, AppData.PackageDirectoryMap[package.Name]);
-
-                        ExtractPackage(package);
-
-                        SetStatus(Strings.Bootstrapper_Status_InstallingWebView2);
-
-                        var startInfo = new ProcessStartInfo()
-                        {
-                            WorkingDirectory = baseDirectory,
-                            FileName = Path.Combine(baseDirectory, "MicrosoftEdgeWebview2Setup.exe"),
-                            Arguments = "/silent /install"
-                        };
-
-                        await Process.Start(startInfo)!.WaitForExitAsync();
-
-                        App.Logger.WriteLine(LOG_IDENT, "Finished installing runtime");
-
-                        Directory.Delete(baseDirectory, true);
-                    }
-                }
-            }
-
-            // finishing and cleanup
-
-
-
-            MigrateCompatibilityFlags();
+        MigrateCompatibilityFlags();
 
             AppData.State.VersionGuid = _latestVersionGuid;
 
@@ -1383,7 +1328,7 @@ namespace Voidstrap
                     {
                         Frontend.ShowConnectivityDialog(
                             Strings.Dialog_Connectivity_UnableToDownload,
-                            String.Format(Strings.Dialog_Connectivity_UnableToDownloadReason, "[https://github.com/bloxstraplabs/bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox](https://github.com/bloxstraplabs/bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox)"),
+                            String.Format(Strings.Dialog_Connectivity_UnableToDownloadReason, "[https://github.com/Bloxstraplabs/Bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox](https://github.com/Bloxstraplabs/Bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox)"),
                             MessageBoxImage.Error,
                             ex
                         );

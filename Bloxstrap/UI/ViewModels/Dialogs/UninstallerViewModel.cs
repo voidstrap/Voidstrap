@@ -10,7 +10,7 @@ namespace Voidstrap.UI.ViewModels.Dialogs
     {
         public string Text => String.Format(
             Strings.Uninstaller_Text,
-            "https://github.com/Bloxstraplabs/Bloxstrap/wiki/Roblox-crashes-or-does-not-launch",
+            "https://github.com/BloxstrapLabs/Bloxstrap/wiki/Roblox-crashes-or-does-not-launch",
             Paths.Base
         );
 
