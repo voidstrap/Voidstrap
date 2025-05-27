@@ -19,8 +19,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         public AIChatPage()
 #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
-            InitializeComponent();
-            LoadSavedBackground();
             DataContext = new AIChatPageViewModel();
         }
 
@@ -44,92 +42,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
         }
 
-        private void LoadSavedBackground()
-        {
-            if (File.Exists(backgroundImagePath))
-            {
-                try
-                {
-                    ApplyBackground(backgroundImagePath);
-                }
-                catch
-                {
-                }
-            }
-        }
-
-        private void ApplyBackground(string path)
-        {
-            BitmapImage bitmap = new BitmapImage();
-
-            using (FileStream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                using (MemoryStream memoryStream = new MemoryStream())
-                {
-                    stream.CopyTo(memoryStream);
-                    memoryStream.Position = 0;
-
-                    bitmap.BeginInit();
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad; 
-                    bitmap.StreamSource = memoryStream;
-                    bitmap.EndInit();
-                    bitmap.Freeze(); 
-                }
-            }
-
-            var imageBrush = new ImageBrush
-            {
-                ImageSource = bitmap,
-                Stretch = Stretch.UniformToFill,
-                Opacity = 0.25 
-            };
-
-            ChatBorder.Background = imageBrush;
-        }
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
         }
 
-
-        private string _userInput;
-        public string UserInput
-        {
-            get => _userInput;
-            set
-            {
-                if (_userInput != value)
-                {
-                    _userInput = value;
-                    OnPropertyChanged(nameof(UserInput));
-                }
-            }
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected virtual void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-
-
-        private void CopyLatestButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (DataContext is AIChatPageViewModel vm)
-            {
-                var latestMessage = vm.ChatMessages?.LastOrDefault();
-                if (!string.IsNullOrEmpty(latestMessage))
-                {
-                    Clipboard.SetText(latestMessage);
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
 
         private void RemoveBackground_Click(object sender, RoutedEventArgs e)
         {
