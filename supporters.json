@@ -45,12 +45,16 @@
     ]
   },
 
-  "oneoff": {
+  "FFlaggers": {
     "columns": 3,
     "supporters": [
       {
         "name": "RoSeal Extension",
         "imageAsset": "5b435a91-5301-4909-b4e6-a251b8abb43f.jpg"
+      },
+      {
+        "name": "Stoof",
+        "imageAsset": "https://github.com/voidstrap/Voidstrap/blob/main/Images/channels4_profile.jpg"
       },
       {
         "name": "skrask",
