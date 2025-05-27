@@ -9,7 +9,7 @@
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
 
 > [!CAUTION]
-> The only official places to download Voidstrap are this GitHub repository and [Voidstrap Website](https://voidstrapweb.netlify.app). Any other websites offering downloads or claiming to be us are not controlled by us.
+> The only official places to download Voidstrap are this GitHub repository and ['Voidstrap Website'](https://voidstrapweb.netlify.app). Any other websites offering downloads or claiming to be us are not controlled by us.
 > 
 ---
 
