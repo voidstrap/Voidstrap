@@ -351,21 +351,6 @@ namespace Voidstrap
                 FastFlags.Load();
 
                 Settings.Load();
-
-                if (Settings?.Prop?.WPFSoftwareRender == true)
-                {
-                    HardwareAcceleration.DisableAllAnimations();
-                    HardwareAcceleration.FreeMemory();
-                    HardwareAcceleration.OptimizeVisualRendering();
-                    HardwareAcceleration.DisableTransparencyEffects();
-                    HardwareAcceleration.MinimizeMemoryFootprint();
-                }
-
-                if (Settings?.Prop?.VoidstrapRPCReal == true)
-                {
-                    InitializeDiscordRPC();
-                }
-
                 if (!Locale.SupportedLocales.ContainsKey(Settings.Prop.Locale))
                 {
                     Settings.Prop.Locale = "nil";
