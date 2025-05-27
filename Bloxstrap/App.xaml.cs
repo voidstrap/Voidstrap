@@ -345,6 +345,8 @@ namespace Voidstrap
                     Terminate();
                 }
 
+                // Removed some Code SO MEDDSAM DONT STEAL
+
                 DownloadStats.Load();
                 State.Load();
                 RobloxState.Load();
