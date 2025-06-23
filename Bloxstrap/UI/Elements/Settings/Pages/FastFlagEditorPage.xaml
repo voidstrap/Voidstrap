@@ -29,8 +29,8 @@
 
         <!-- Description -->
         <TextBlock Grid.Row="0" Margin="0,0,0,16"
-                   Text="{x:Static resources:Strings.Menu_FastFlagEditor_Description}"
-                   FontSize="14"
+                   Text="Manage your FastFlags. A checkmark in Preset means the flag is available in FFlag Settings, while a cross means it is not."
+                   FontSize="13"
                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
         <!-- Buttons and Flag Count in Grid.Row=2 -->
@@ -98,6 +98,13 @@
                 Click="FlagProfiles_Click"
                 Content="Profiles"
                 Icon="Edit28"/>
+            <ui:Button
+                Width="120"
+                Margin="0,0,10,16"
+                VerticalAlignment="Top"
+                Click="FlagFind_Click"
+                Content="Find FFlags"
+                Icon="Book24"/>
             <ToggleButton
                 x:Name="TogglePresetsButton"
                 Margin="0,0,10,16"
@@ -210,7 +217,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Width="425"  Binding="{Binding Name}" Header="{x:Static resources:Strings.Common_Name}" />
+                <DataGridTextColumn Width="425" Binding="{Binding Name}" Header="{x:Static resources:Strings.Common_Name}" />
                 <DataGridTextColumn Width="*" Binding="{Binding Value}" Header="{x:Static resources:Strings.Common_Value}" />
             </DataGrid.Columns>
         </DataGrid>
@@ -238,6 +245,5 @@
                 </ListBox>
             </ScrollViewer>
         </Expander>
-
     </Grid>
 </ui:UiPage>

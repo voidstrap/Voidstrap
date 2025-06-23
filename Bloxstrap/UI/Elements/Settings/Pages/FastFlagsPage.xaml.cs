@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Input;
-
+using System.Windows.Controls;
+using System.Text.RegularExpressions;
 using Voidstrap.UI.ViewModels.Settings;
 using Wpf.Ui.Mvvm.Contracts;
 
@@ -20,7 +21,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             SetupViewModel();
             InitializeComponent();
         }
-
         private void SetupViewModel()
         {
             _viewModel = new FastFlagsViewModel();
@@ -30,6 +30,16 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             DataContext = _viewModel;
         }
+
+        private void ValidateIntInput(object sender, TextCompositionEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            string newText = textBox.Text.Insert(textBox.SelectionStart, e.Text);
+
+            // Allow optional '+' or '-' at the beginning, followed by digits
+            e.Handled = !Regex.IsMatch(newText, @"^[\+\-]?[0-9]*$");
+        }
+
 
 
         private void OpenFlagEditor(object? sender, EventArgs e)

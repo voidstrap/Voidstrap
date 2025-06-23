@@ -10,9 +10,9 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.Menu_Title}"
-    Width="1080"
+    Width="1000"
     Height="610"
-    MinWidth="1080"
+    MinWidth="1000"
     MinHeight="610"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel,
                                      IsDesignTimeCreatable=True}"
@@ -90,6 +90,8 @@
             MinimizeToTray="False"
             UseSnapLayout="True" >
         </ui:TitleBar>
+        
+
 
         <!--  Main Content Grid  -->
         <Grid
@@ -114,14 +116,15 @@
                 Frame="{Binding ElementName=RootFrame}"
                 SelectedPageIndex="0">
                 <ui:NavigationFluent.Items>
+                    
+                    
 
 
                     <!--  Menu Items  -->
                     <ui:NavigationItem
                         Content="{x:Static resources:Strings.Menu_Integrations_Title}"
                         Icon="Add12"
-                        PageType="{x:Type pages:IntegrationsPage}"
-                        Tag="integrations">
+                        PageType="{x:Type pages:IntegrationsPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -135,8 +138,7 @@
                     <ui:NavigationItem
                         Content="Deployment"
                         Icon="PlaySettings20"
-                        PageType="{x:Type pages:BehaviourPage}"
-                        Tag="bootstrapper">
+                        PageType="{x:Type pages:BehaviourPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -150,8 +152,7 @@
                     <ui:NavigationItem
                         Content="Modifications"
                         Icon="WrenchScrewdriver20"
-                        PageType="{x:Type pages:ModsPage}"
-                        Tag="mods">
+                        PageType="{x:Type pages:ModsPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -165,7 +166,6 @@
                         Content="FastFlag Editor"
                         Icon="Flag28"
                         PageType="{x:Type pages:FastFlagEditorPage}"
-                        Tag="fastflageditor"
                         Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
@@ -180,8 +180,7 @@
                     <ui:NavigationItem
                         Content="FastFlag Settings"
                         Icon="Settings28"
-                        PageType="{x:Type pages:FastFlagsPage}"
-                        Tag="fastflags">
+                        PageType="{x:Type pages:FastFlagsPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -196,8 +195,7 @@
                     <ui:NavigationItem
                         Content="Appearance"
                         Icon="PaintBucket24"
-                        PageType="{x:Type pages:AppearancePage}"
-                        Tag="appearance">
+                        PageType="{x:Type pages:AppearancePage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -212,8 +210,7 @@
                         Click="NavigationItem_Click_1"
                         Content="{x:Static resources:Strings.Common_Shortcuts}"
                         Icon="Apps32"
-                        PageType="{x:Type pages:ShortcutsPage}"
-                        Tag="shortcuts">
+                        PageType="{x:Type pages:ShortcutsPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -228,8 +225,7 @@
                         Click="NavigationItem_Click_1"
                         Content="Ai Chat"
                         Icon="Chat28"
-                        PageType="{x:Type pages:AIChatPage}"
-                        Tag="ai chat">
+                        PageType="{x:Type pages:AIChatPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -247,8 +243,7 @@
                         Click="NavigationItem_Click_1"
                         Content="Hub"
                         Icon="CloudWords16"
-                        PageType="{x:Type pages:HubPage}"
-                        Tag="hub">
+                        PageType="{x:Type pages:HubPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -261,8 +256,7 @@
                         Click="NavigationItem_Click"
                         Content="Settings"
                         Icon="Settings20"
-                        PageType="{x:Type pages:ChannelPage}"
-                        Tag="channel">
+                        PageType="{x:Type pages:ChannelPage}">
                         <ui:NavigationItem.BorderBrush>
                             <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
                                 <GradientStop Color="Black" />
@@ -294,6 +288,8 @@
                 <Frame x:Name="RootFrame" Grid.Row="1" />
             </Grid>
         </Grid>
+        
+        
 
         <!--  Status Bar  -->
         <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,10" BorderThickness="0,1,0,0">
@@ -313,6 +309,8 @@
                     </Grid>
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
+            
+
 
             <!--  Test Mode Toggle  -->
             <StatusBarItem Grid.Column="0" Margin="0,0,4,0">
@@ -362,5 +360,7 @@
                     Content="{x:Static resources:Strings.Common_Close}" Click="Button_Click_2" />
             </StatusBarItem>
         </StatusBar>
+        
+        
     </Grid>
 </base:WpfUiWindow>

@@ -91,9 +91,15 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.ShowServerDetails = value;
         }
 
+        public bool VoidstrapEnabled
+        {
+            get => App.Settings.Prop.VoidstrapRPCReal;
+            set => App.Settings.Prop.VoidstrapRPCReal = value;
+        }
+
         public bool PlayerLogsEnabled
         {
-            get => App.FastFlags.GetPreset("Players.LogLevel") == "trace"; // we r using this to determine if its enabled
+            get => App.FastFlags.GetPreset("Players.LogLevel") == "trace";
             set {
                 App.FastFlags.SetPreset("Players.LogLevel", value ? "trace" : null);
                 App.FastFlags.SetPreset("Players.LogPattern", value ? "ExpChat/mountClientApp" : null);
@@ -106,7 +112,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             set
             {
                 App.Settings.Prop.UseDiscordRichPresence = value;
-                App.Settings.Prop.VoidstrapRPCReal = value;
 
                 if (!value)
                 {

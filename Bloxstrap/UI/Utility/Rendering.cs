@@ -13,9 +13,10 @@ namespace Voidstrap.UI.Utility
         {
             if (textBlock == null || string.IsNullOrEmpty(textBlock.Text))
                 return 0;
-
             if (_cachedDpi == null)
                 _cachedDpi = VisualTreeHelper.GetDpi(textBlock).PixelsPerDip;
+
+            TextOptions.SetTextFormattingMode(textBlock, TextFormattingMode.Ideal);
 
             var typeface = new Typeface(
                 textBlock.FontFamily,
@@ -24,16 +25,22 @@ namespace Voidstrap.UI.Utility
                 textBlock.FontStretch
             );
 
-            return new FormattedText(
+            var formattedText = new FormattedText(
                 textBlock.Text,
-                CultureInfo.CurrentCulture,
+                CultureInfo.CurrentUICulture,
                 textBlock.FlowDirection,
                 typeface,
                 textBlock.FontSize,
-                Brushes.Transparent,
+                Brushes.Black,
                 new NumberSubstitution(),
                 _cachedDpi.Value
-            ).WidthIncludingTrailingWhitespace;
+            )
+            {
+                TextAlignment = TextAlignment.Left,
+                Trimming = TextTrimming.None
+            };
+
+            return formattedText.WidthIncludingTrailingWhitespace;
         }
     }
 }

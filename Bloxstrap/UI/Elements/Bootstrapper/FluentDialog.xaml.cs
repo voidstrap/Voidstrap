@@ -1,96 +1,56 @@
 ﻿using Voidstrap.UI.Elements.Bootstrapper.Base;
 using Voidstrap.UI.ViewModels.Bootstrapper;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Forms;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using System.Windows.Shell;
 using System.Windows.Threading;
+using System.Windows.Forms;
 
 namespace Voidstrap.UI.Elements.Bootstrapper
 {
-    /// <summary>
-    /// Interaction logic for FluentDialog.xaml
-    /// </summary>
     public partial class FluentDialog : IBootstrapperDialog
     {
         private readonly FluentDialogViewModel _viewModel;
+        private bool _isClosing;
 
         public Voidstrap.Bootstrapper? Bootstrapper { get; set; }
 
-        private bool _isClosing;
-
-        #region UI Elements
+        #region Properties
         public string Message
         {
             get => _viewModel.Message;
-            set
-            {
-                _viewModel.Message = value;
-                _viewModel.OnPropertyChanged(nameof(_viewModel.Message));
-            }
+            set => SetProperty(nameof(_viewModel.Message), value, v => _viewModel.Message = v);
         }
 
         public ProgressBarStyle ProgressStyle
         {
             get => _viewModel.ProgressIndeterminate ? ProgressBarStyle.Marquee : ProgressBarStyle.Continuous;
-            set
-            {
-                _viewModel.ProgressIndeterminate = (value == ProgressBarStyle.Marquee);
-                _viewModel.OnPropertyChanged(nameof(_viewModel.ProgressIndeterminate));
-            }
+            set => SetProperty(nameof(_viewModel.ProgressIndeterminate), value == ProgressBarStyle.Marquee, v => _viewModel.ProgressIndeterminate = v);
         }
 
         public int ProgressMaximum
         {
             get => _viewModel.ProgressMaximum;
-            set
-            {
-                _viewModel.ProgressMaximum = value;
-                _viewModel.OnPropertyChanged(nameof(_viewModel.ProgressMaximum));
-            }
+            set => SetProperty(nameof(_viewModel.ProgressMaximum), value, v => _viewModel.ProgressMaximum = v);
         }
 
         public int ProgressValue
         {
             get => _viewModel.ProgressValue;
-            set
-            {
-                _viewModel.ProgressValue = value;
-                _viewModel.OnPropertyChanged(nameof(_viewModel.ProgressValue));
-            }
+            set => SetProperty(nameof(_viewModel.ProgressValue), value, v => _viewModel.ProgressValue = v);
         }
 
         public TaskbarItemProgressState TaskbarProgressState
         {
             get => _viewModel.TaskbarProgressState;
-            set
-            {
-                _viewModel.TaskbarProgressState = value;
-                _viewModel.OnPropertyChanged(nameof(_viewModel.TaskbarProgressState));
-            }
+            set => SetProperty(nameof(_viewModel.TaskbarProgressState), value, v => _viewModel.TaskbarProgressState = v);
         }
 
         public double TaskbarProgressValue
         {
             get => _viewModel.TaskbarProgressValue;
-            set
-            {
-                _viewModel.TaskbarProgressValue = value;
-                _viewModel.OnPropertyChanged(nameof(_viewModel.TaskbarProgressValue));
-            }
+            set => SetProperty(nameof(_viewModel.TaskbarProgressValue), value, v => _viewModel.TaskbarProgressValue = v);
         }
 
         public bool CancelEnabled
@@ -99,9 +59,8 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             set
             {
                 _viewModel.CancelEnabled = value;
-
-                _viewModel.OnPropertyChanged(nameof(_viewModel.CancelButtonVisibility));
                 _viewModel.OnPropertyChanged(nameof(_viewModel.CancelEnabled));
+                _viewModel.OnPropertyChanged(nameof(_viewModel.CancelButtonVisibility));
             }
         }
         #endregion
@@ -109,13 +68,12 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         public FluentDialog(bool aero)
         {
             InitializeComponent();
-
             _viewModel = new FluentDialogViewModel(this, aero);
             DataContext = _viewModel;
+
             Title = App.Settings.Prop.BootstrapperTitle;
             Icon = App.Settings.Prop.BootstrapperIcon.GetIcon().GetImageSource();
 
-            // setting this to true for mica results in the window being undraggable
             if (aero)
                 AllowsTransparency = true;
         }
@@ -123,19 +81,30 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         private void UiWindow_Closing(object sender, CancelEventArgs e)
         {
             if (!_isClosing)
+            {
                 Bootstrapper?.Cancel();
+                e.Cancel = true; // prevent auto close unless user explicitly cancels
+            }
         }
 
-        #region IBootstrapperDialog Methods
-        public void ShowBootstrapper() => this.ShowDialog();
+        #region IBootstrapperDialog Implementation
+        public void ShowBootstrapper() => ShowDialog();
 
         public void CloseBootstrapper()
         {
             _isClosing = true;
-            Dispatcher.BeginInvoke(this.Close);
+            Dispatcher.InvokeAsync(Close, DispatcherPriority.Background);
         }
 
-        public void ShowSuccess(string message, Action? callback) => BaseFunctions.ShowSuccess(message, callback);
+        public void ShowSuccess(string message, Action? callback = null) => BaseFunctions.ShowSuccess(message, callback);
+        #endregion
+
+        #region Helpers
+        private void SetProperty<T>(string propertyName, T value, Action<T> setter)
+        {
+            setter(value);
+            _viewModel.OnPropertyChanged(propertyName);
+        }
         #endregion
     }
 }

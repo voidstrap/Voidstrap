@@ -1,17 +1,18 @@
-﻿using System.Collections.Concurrent;
-using System.Globalization;
-using System.Text;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Voidstrap;
 
 namespace Voidstrap
 {
     public class Logger : IDisposable
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private readonly ConcurrentQueue<string> _logQueue = new();
-        private readonly CancellationTokenSource _cts = new();
-        private Task? _logTask;
-
         private FileStream? _filestream;
 
         public readonly List<string> History = new();
@@ -19,13 +20,9 @@ namespace Voidstrap
         public bool NoWriteMode { get; private set; } = false;
         public string? FileLocation { get; private set; }
 
-        private bool IsLoggingEnabled => Initialized && !NoWriteMode;
-
-        // Example throttling
-        private DateTime _lastLogTime = DateTime.MinValue;
-        private readonly TimeSpan _logCooldown = TimeSpan.FromMilliseconds(100);
-
         public string AsDocument => string.Join('\n', History);
+
+        private const int MaxHistoryEntries = 150;
 
         public void Initialize(bool useTempDir = false)
         {
@@ -36,9 +33,11 @@ namespace Voidstrap
             string filename = $"{App.ProjectName}_{timestamp}.log";
             string location = Path.Combine(directory, filename);
 
+            WriteLine(LOG_IDENT, $"Initializing at {location}");
+
             if (Initialized)
             {
-                WriteLine(LOG_IDENT, "Logger already initialized");
+                WriteLine(LOG_IDENT, "Failed to initialize because logger is already initialized");
                 return;
             }
 
@@ -46,19 +45,24 @@ namespace Voidstrap
 
             try
             {
-                _filestream = File.Open(location, FileMode.Create, FileAccess.Write, FileShare.Read);
+                _filestream = new FileStream(location, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
+            }
+            catch (IOException)
+            {
+                WriteLine(LOG_IDENT, "Failed to initialize due to IO exception");
+                return;
             }
             catch (UnauthorizedAccessException)
             {
-                if (!NoWriteMode)
-                {
-                    WriteLine(LOG_IDENT, $"Cannot write to {directory}");
-                    Frontend.ShowMessageBox(
-                        string.Format(Strings.Logger_NoWriteMode, directory),
-                        System.Windows.MessageBoxImage.Warning,
-                        System.Windows.MessageBoxButton.OK
-                    );
-                }
+                if (NoWriteMode) return;
+
+                WriteLine(LOG_IDENT, $"No write access to {directory}");
+
+                Frontend.ShowMessageBox(
+                    string.Format(Strings.Logger_NoWriteMode, directory),
+                    System.Windows.MessageBoxImage.Warning,
+                    System.Windows.MessageBoxButton.OK
+                );
 
                 NoWriteMode = true;
                 return;
@@ -67,126 +71,88 @@ namespace Voidstrap
             Initialized = true;
             FileLocation = location;
 
-            foreach (var entry in History)
-                _logQueue.Enqueue(entry);
+            if (History.Count > 0)
+                _ = WriteToLogAsync(string.Join("\r\n", History));
 
-            _logTask = Task.Run(() => BackgroundWriterAsync(_cts.Token));
+            WriteLine(LOG_IDENT, "Finished initializing!");
 
-            WriteLine(LOG_IDENT, "Logger initialized");
-
-            if (Paths.Initialized && Directory.Exists(Paths.Logs))
-            {
-                foreach (var log in new DirectoryInfo(Paths.Logs).GetFiles())
-                {
-                    if (log.LastWriteTimeUtc.AddDays(2) <= DateTime.UtcNow)
-                    {
-                        try { log.Delete(); }
-                        catch (Exception ex) { WriteException(LOG_IDENT, ex); }
-                    }
-                }
-            }
+            CleanupOldLogs(directory);
         }
 
-        private async Task BackgroundWriterAsync(CancellationToken token)
+        private void CleanupOldLogs(string directory)
         {
-            var batch = new List<string>();
-            var flushInterval = TimeSpan.FromSeconds(2);
-            var lastFlush = DateTime.UtcNow;
+            if (!Paths.Initialized || !Directory.Exists(directory))
+                return;
 
-            while (!token.IsCancellationRequested)
+            foreach (FileInfo log in new DirectoryInfo(directory).GetFiles())
             {
-                while (_logQueue.TryDequeue(out var line))
-                {
-                    batch.Add(line);
-                }
+                if (log.LastWriteTimeUtc.AddDays(7) > DateTime.UtcNow)
+                    continue;
 
-                if (batch.Count > 0 && (DateTime.UtcNow - lastFlush) >= flushInterval)
-                {
-                    try
-                    {
-                        await _semaphore.WaitAsync(token);
-                        if (_filestream != null)
-                        {
-                            var combined = string.Join("\r\n", batch) + "\r\n";
-                            byte[] data = Encoding.UTF8.GetBytes(combined);
-                            await _filestream.WriteAsync(data, 0, data.Length, token);
-                            await _filestream.FlushAsync(token);
-                            batch.Clear();
-                            lastFlush = DateTime.UtcNow;
-                        }
-                    }
-                    finally
-                    {
-                        _semaphore.Release();
-                    }
-                }
-
-                await Task.Delay(250, token); // Less aggressive polling
-            }
-
-            // Final flush
-            if (batch.Count > 0)
-            {
                 try
                 {
-                    await _semaphore.WaitAsync(token);
-                    if (_filestream != null)
-                    {
-                        var combined = string.Join("\r\n", batch) + "\r\n";
-                        byte[] data = Encoding.UTF8.GetBytes(combined);
-                        await _filestream.WriteAsync(data, 0, data.Length, token);
-                        await _filestream.FlushAsync(token);
-                    }
+                    log.Delete();
+                    WriteLine("Logger::Cleanup", $"Deleted old log file '{log.Name}'");
                 }
-                finally
+                catch (Exception ex)
                 {
-                    _semaphore.Release();
+                    WriteLine("Logger::Cleanup", "Failed to delete log!");
+                    WriteException("Logger::Cleanup", ex);
                 }
             }
         }
-
 
         private void WriteLine(string message)
         {
-            if (!IsLoggingEnabled) return;
+            string timestamp = DateTime.UtcNow.ToString("s") + "Z";
+            string outCon = $"{timestamp} {message}";
+            string outLog = outCon.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
 
-            var now = DateTime.UtcNow;
-            if ((now - _lastLogTime) < _logCooldown) return; // skip if too soon
-            _lastLogTime = now;
+            Debug.WriteLine(outCon);
+            _ = WriteToLogAsync(outLog);
 
-            string timestamp = now.ToString("s") + "Z";
-            string formatted = $"{timestamp} {message}";
-            string sanitized = formatted.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
-
-            Debug.WriteLine(sanitized);
-            _logQueue.Enqueue(sanitized);
-            History.Add(sanitized);
-
-            if (History.Count > 1000)
-                History.RemoveRange(0, History.Count - 1000);
+            History.Add(outLog);
+            if (History.Count > MaxHistoryEntries)
+                History.RemoveAt(0);
         }
 
         public void WriteLine(string identifier, string message) => WriteLine($"[{identifier}] {message}");
 
         public void WriteException(string identifier, Exception ex)
         {
-            var originalCulture = Thread.CurrentThread.CurrentUICulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            string hresult = "0x" + ex.HResult.ToString("X8");
+            string formatted = $"[{identifier}] ({hresult}) {ex}";
 
-            string hresult = $"0x{ex.HResult:X8}";
-            WriteLine($"[{identifier}] ({hresult}) {ex}");
+            WriteLine(formatted);
+        }
 
-            Thread.CurrentThread.CurrentUICulture = originalCulture;
+        private async Task WriteToLogAsync(string message)
+        {
+            if (!Initialized || _filestream == null)
+                return;
+
+            try
+            {
+                await _semaphore.WaitAsync().ConfigureAwait(false);
+
+                byte[] buffer = Encoding.UTF8.GetBytes($"{message}\r\n");
+                await _filestream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                await _filestream.FlushAsync().ConfigureAwait(false);
+            }
+            catch (ObjectDisposedException)
+            {
+                // Stream might be closed on shutdown
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
         }
 
         public void Dispose()
         {
-            _cts.Cancel();
-            _logTask?.Wait();
-
             _filestream?.Dispose();
-            _semaphore.Dispose();
-            _cts.Dispose();
+            _semaphore?.Dispose();
         }
     }
 }

@@ -32,17 +32,53 @@ namespace Voidstrap
             }
         }
 
-        public static Version GetVersionFromString(string version)
+        public static Version? GetVersionFromString(string? version)
         {
-            if (version.StartsWith('v'))
+            var logger = new Logger();
+
+            if (string.IsNullOrWhiteSpace(version))
+                return null;
+
+            version = version.Trim();
+
+            // Remove leading 'v' or 'V'
+            if (version.StartsWith('v') || version.StartsWith('V'))
                 version = version[1..];
 
-            int idx = version.IndexOf('+'); // commit info
-            if (idx != -1)
-                version = version[..idx];
+            // Remove metadata after '+'
+            int plusIndex = version.IndexOf('+');
+            if (plusIndex != -1)
+                version = version[..plusIndex];
 
-            return new Version(version);
+            // Remove pre-release label after '-'
+            int dashIndex = version.IndexOf('-');
+            if (dashIndex != -1)
+                version = version[..dashIndex];
+
+            version = version.Trim();
+
+            try
+            {
+                // Use Version.TryParse for safer parsing (available in .NET 7+),
+                // else fallback to new Version(string)
+#if NET7_0_OR_GREATER
+        if (Version.TryParse(version, out var parsedVersion))
+            return parsedVersion;
+        else
+            throw new ArgumentException("Invalid version format");
+#else
+                return new Version(version);
+#endif
+            }
+            catch (Exception ex)
+            {
+                logger.WriteLine("App::GetVersionFromString", $"Invalid version string '{version}': {ex.Message}");
+                return null;
+            }
         }
+
+
+
 
         /// <summary>
         /// 

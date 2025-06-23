@@ -102,7 +102,7 @@ public ObservableCollection<string> AvailableCommands { get; set; } = new Observ
         private static readonly Regex SmallTalkRegex = new(@"\b(weather|time|date|joke|fun|day|night|mood|feeling|how are you|what's up|vibe|bored|got plans|doing anything|how's it going|hows ur day|feelin good|how you doin|tell me something|news)\b", RegexOptionsCompiled);
         private static readonly Regex MoodKeywordsRegex = new(@"\b(happy|sad|angry|excited|bored|tired|anxious|love|lonely|scared|joyful|confused|proud|grumpy|calm|relaxed|hopeful|worried|sick|depressed|motivated|thrilled)\b", RegexOptionsCompiled);
         private static readonly Regex HowAreYouRegex = new(@"\b(how are you|how’s it going|how do you feel|are you good|you doing okay|you alright|how u doing|are you fine|you feeling okay|u good)\b", RegexOptionsCompiled);
-        private static readonly Regex NeedFlagsRegex = new(@"\b(i need|want|looking for|give me|can i get|need help with|gemme|i’d like|i wish for|share some|send me|can you share|recommend|any idea for|boost my|how to get|download|access to|get better|improve my)\b.*\b(flags|fflags|fps boost|performance|boost|improve|optimization|optimize|fast flags|ff|laggy|lag fix|tweaks|tweak settings|render boost|network boost|roblox speed|low latency)\b", RegexOptionsCompiled);
+        private static readonly Regex NeedFlagsRegex = new(@"\b(i need|want|looking for|give me|can i get|need help with|gemme|i’d like|i wish for|share some|send me|can you share|recommend|any idea for|boost my|how to get|download|access to|get better|improve my)\b.*\b(flags|fflags|fps boost|performance|boost|improve|optimization|optimize|fast flags|ff|laggy|lag fix|tweaks|tweak settings|render boost|network boost|roblox speed|low latency|fastflags)\b", RegexOptionsCompiled);
         private static readonly Regex YesRegex = new(@"\b(yes|yeah|yep|y|sure|of course|definitely|affirmative|correct|ye|uh huh|ya|absolutely|sure thing|bet|totally|yuh|yeah bro|for sure|true that|10-4|right)\b", RegexOptionsCompiled);
         private static readonly Regex NoRegex = new(@"\b(no|nope|nah|not really|never|negative|incorrect|I am good| n|no thanks|no need|I’m fine|don’t want to|don’t need help|cancel|pass|naw|no way|not now|I’m okay|not today|decline)\b", RegexOptionsCompiled);
 
@@ -200,9 +200,7 @@ public ObservableCollection<string> AvailableCommands { get; set; } = new Observ
     "no", "nope", "nah", "not really", "never", "negative", "incorrect", "false", "not at all", "no thanks", "denied", "cancel", "disagree", "refuse", "stop", "don’t", "no way", "uh uh", "nah fam", "false alarm"
 };
 
-
         #endregion
-
         public AIChatPageViewModel()
         {
             SendMessageCommand = new RelayCommand(async () => await EnqueueMessageProcessingAsync(), CanSendMessage);

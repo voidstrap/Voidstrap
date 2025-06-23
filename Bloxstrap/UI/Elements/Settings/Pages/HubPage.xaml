@@ -16,26 +16,30 @@
 
     <Page.Resources>
         <DataTemplate x:Key="ItemTemplate">
-            <StackPanel Orientation="Horizontal" Margin="4">
-                <Image Source="{Binding ImagePath}" Width="32" Height="32" Margin="0,0,8,0"/>
-                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"/>
+            <StackPanel Margin="4" Orientation="Horizontal">
+                <Image
+                    Width="32"
+                    Height="32"
+                    Margin="0,0,8,0"
+                    Source="{Binding ImagePath}" />
+                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
             </StackPanel>
         </DataTemplate>
 
         <Style x:Key="ThemeListBoxStyle" TargetType="ListBox">
-            <Setter Property="SelectionMode" Value="Multiple"/>
-            <Setter Property="HorizontalAlignment" Value="Left"/>
-            <Setter Property="Width" Value="390"/>
-            <Setter Property="Height" Value="228"/>
-            <Setter Property="VerticalAlignment" Value="Center"/>
-            <Setter Property="Grid.ColumnSpan" Value="2"/>
-            <Setter Property="Margin" Value="192,0,0,0"/>
+            <Setter Property="SelectionMode" Value="Multiple" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="Width" Value="390" />
+            <Setter Property="Height" Value="228" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Grid.ColumnSpan" Value="2" />
+            <Setter Property="Margin" Value="192,0,0,0" />
         </Style>
     </Page.Resources>
 
     <StackPanel Margin="0">
-        <!-- Search -->
-        <Grid Margin="0,0,0,14" Height="36">
+        <!--  Search  -->
+        <Grid Height="36" Margin="0,0,0,14">
             <ui:TextBox
                 x:Name="SearchBox"
                 Height="32"
@@ -46,20 +50,23 @@
                 FontSize="14"
                 Icon="Search48"
                 PlaceholderText="{x:Static resources:Strings.Menu_FastFlagEditor_Search}"
-                TextChanged="SearchBox_TextChanged"/>
+                TextChanged="SearchBox_TextChanged" />
         </Grid>
 
-        <!-- Results -->
+        <!--  Results  -->
         <StackPanel x:Name="ResultsPanel" Margin="0">
-            <!-- Group Template -->
+            <!--  Group Template  -->
 
-            <!-- Duplicate the structure above for other sections -->
-            <GroupBox Header="Bloxstrap theme" Margin="0,0,0,14">
+            <!--  Duplicate the structure above for other sections  -->
+            <GroupBox Margin="0,0,0,14" Header="Bloxstrap theme">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: TheKliko"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: Mod"/>
+                        <Run Foreground="Gray" Text="Credit: TheKliko" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: Mod" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -67,33 +74,38 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/BloxstrapTheme.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/BloxstrapTheme.png" Stretch="Fill" />
                             </ListBox.Background>
-                            <Border Height="100" Width="100"/>
+                            <Border Width="100" Height="100" />
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Install"
-                                   Icon="ArrowDownload48"
-                                   Click="InstallButton_Click2" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click2"
+                            Content="Install"
+                            Icon="ArrowDownload48" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Kliko's mod" Margin="0,0,0,14">
+            <GroupBox Margin="0,0,0,14" Header="Kliko's mod">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: TheKliko"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: Mod"/>
+                        <Run Foreground="Gray" Text="Credit: TheKliko" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: Mod" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -101,32 +113,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/klikos-mod-thumbnail.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/klikos-mod-thumbnail.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Install"
-                                   Icon="ArrowDownload48"
-                                   Click="InstallButton_Click3" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click3"
+                            Content="Install"
+                            Icon="ArrowDownload48" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Bayiarin Smoother Animations and Effects" Margin="0">
+            <GroupBox Margin="0" Header="Bayiarin Smoother Animations and Effects">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: bayiarin_lx"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
+                        <Run Foreground="Gray" Text="Credit: bayiarin_lx" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: FFlags" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -134,31 +151,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="pack://application:,,,/UI/Elements/Settings/Pages/AnimationEffects.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="pack://application:,,,/UI/Elements/Settings/Pages/AnimationEffects.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click" Width="370" Margin="202,186,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="CopyButton_Click"
+                            Content="Copy"
+                            Icon="Copy24" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Stoofs FFlags" Margin="0">
+            <GroupBox Margin="0" Header="Stoofs FFlags">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: Stoof"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
+                        <Run Foreground="Gray" Text="Credit: Stoof" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: FFlags" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -166,32 +189,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/Balanced.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/Balanced.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click2" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="CopyButton_Click2"
+                            Content="Copy"
+                            Icon="Copy24" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Bratics Super Performace FFlags" Margin="0">
+            <GroupBox Margin="0" Header="Bratics Super Performace FFlags">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: Bratic"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
+                        <Run Foreground="Gray" Text="Credit: Bratic" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: FFlags" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -199,31 +227,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/BraticFF.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/BraticFF.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click3" Width="370" Margin="202,186,0,0" VerticalAlignment="Top" Grid.ColumnSpan="2" />
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="CopyButton_Click3"
+                            Content="Copy"
+                            Icon="Copy24" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Better Roblox" Margin="0">
+            <GroupBox Margin="0" Header="Better Roblox">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: 7btxd"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: Theme"/>
+                        <Run Foreground="Gray" Text="Credit: 7btxd" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: Theme" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -231,32 +265,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/RobloxBB.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/RobloxBB.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Install"
-                                   Icon="ArrowDownload48"
-                                   Click="InstallButton_Click4" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click4"
+                            Content="Install"
+                            Icon="ArrowDownload48" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Cmd" Margin="0">
+            <GroupBox Margin="0" Header="Cmd">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: 7btxd"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: Theme"/>
+                        <Run Foreground="Gray" Text="Credit: 7btxd" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: Theme" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -264,32 +303,37 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/CmdBB.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/CmdBB.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Install"
-                                   Icon="ArrowDownload48"
-                                   Click="InstallButton_Click5" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click5"
+                            Content="Install"
+                            Icon="ArrowDownload48" />
                     </Grid>
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Header="Great Wave" Margin="0">
+            <GroupBox Margin="0" Header="Great Wave">
                 <StackPanel>
                     <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: 7btxd"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: Theme"/>
+                        <Run Foreground="Gray" Text="Credit: 7btxd" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: Theme" />
                     </TextBlock>
                     <Grid Margin="0,8,0,0">
                         <Grid.RowDefinitions>
@@ -297,121 +341,24 @@
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
                             <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/GWBB.png" Stretch="Fill"/>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/GWBB.png" Stretch="Fill" />
                             </ListBox.Background>
                         </ListBox>
 
                         <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Install"
-                                   Icon="ArrowDownload48"
-                                   Click="InstallButton_Click6" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
-                    </Grid>
-                </StackPanel>
-            </GroupBox>
-
-            <GroupBox Header="5070 Low Latency" Margin="0">
-                <StackPanel>
-                    <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: 5070"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
-                    </TextBlock>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
-                            <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/5070.png" Stretch="Fill"/>
-                            </ListBox.Background>
-                        </ListBox>
-
-                        <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click4" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
-                    </Grid>
-                </StackPanel>
-            </GroupBox>
-
-            <GroupBox Header="Pure Performace" Margin="0">
-                <StackPanel>
-                    <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: 7btxd"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
-                    </TextBlock>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
-                            <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/1748136310649.png" Stretch="Fill"/>
-                            </ListBox.Background>
-                        </ListBox>
-
-                        <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click5" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
-                    </Grid>
-                </StackPanel>
-            </GroupBox>
-
-            <GroupBox Header="Crazy Low!" Margin="0">
-                <StackPanel>
-                    <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: midas_kira"/>
-                        <LineBreak/>
-                        <Run Foreground="DodgerBlue" FontWeight="Bold" Text="Type: FFlags"/>
-                    </TextBlock>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <ListBox Style="{StaticResource ThemeListBoxStyle}"
-                                 ItemTemplate="{StaticResource ItemTemplate}">
-                            <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/CLBB.png" Stretch="Fill"/>
-                            </ListBox.Background>
-                        </ListBox>
-
-                        <ui:Button
-                                   Grid.ColumnSpan="2"
-                                   Content="Copy"
-                                   Icon="Copy24"
-                                   Click="CopyButton_Click6" Width="370" Margin="202,186,0,0" VerticalAlignment="Top"/>
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click6"
+                            Content="Install"
+                            Icon="ArrowDownload48" />
                     </Grid>
                 </StackPanel>
             </GroupBox>

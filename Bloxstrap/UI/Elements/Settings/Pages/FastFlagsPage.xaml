@@ -43,9 +43,7 @@
             CommandParameter="https://fastflags.space/help/how/"
             Icon="BookQuestionMark24">
             <StackPanel>
-                <TextBlock
-                    FontSize="14"
-                    Text="{x:Static resources:Strings.Common_Help}" />
+                <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Help}" />
                 <TextBlock
                     Margin="0,2,0,0"
                     Padding="0,0,16,0"
@@ -111,15 +109,13 @@
                         </ui:CardExpander.Header>
 
                         <StackPanel>
-                            <controls:OptionControl 
-                Description="Configure the logical cores to run Roblox." 
-                Header="Force Logical Processors">
+                            <controls:OptionControl Description="Configure the logical cores to run Roblox." Header="Force Logical Processors">
                                 <ComboBox
-                    Width="200"
-                    Margin="5,0,0,0"
-                    Padding="10,5,10,5"
-                    ItemsSource="{Binding CpuThreads}"
-                    SelectedItem="{Binding SelectedCpuThreads, Mode=TwoWay}">
+                                    Width="200"
+                                    Margin="5,0,0,0"
+                                    Padding="10,5,10,5"
+                                    ItemsSource="{Binding CpuThreads}"
+                                    SelectedItem="{Binding SelectedCpuThreads, Mode=TwoWay}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Key}" />
@@ -128,15 +124,13 @@
                                 </ComboBox>
                             </controls:OptionControl>
 
-                            <controls:OptionControl 
-                Description="Configure CPU Cores that run Roblox (the value will be selected minus 1)" 
-                Header="Force CPU Cores">
+                            <controls:OptionControl Description="Configure CPU Cores that run Roblox (the value will be selected minus 1)" Header="Force Async Threads">
                                 <ComboBox
-                    Width="200"
-                    Margin="5,0,0,0"
-                    Padding="10,5,10,5"
-                    ItemsSource="{Binding CpuCoreMinThreadCount}"
-                    SelectedItem="{Binding SelectedCpuCoreMinThreadCount, Mode=TwoWay}">
+                                    Width="200"
+                                    Margin="5,0,0,0"
+                                    Padding="10,5,10,5"
+                                    ItemsSource="{Binding CpuCoreMinThreadCount}"
+                                    SelectedItem="{Binding SelectedCpuCoreMinThreadCount, Mode=TwoWay}">
                                     <ComboBox.ItemTemplate>
                                         <DataTemplate>
                                             <TextBlock Text="{Binding Key}" />
@@ -149,32 +143,37 @@
                 </StackPanel>
 
 
-                <controls:OptionControl Description="Prohibits the task scheduler from sleeping." Header="Avoid Task Scheduler Sleep">
-                    <ui:ToggleSwitch IsChecked="{Binding TaskSchedulerAvoidingSleep, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Optimizes light rendering by reducing unnecessary light calculations." Header="CPU and GPU light culling">
-                    <ui:ToggleSwitch IsChecked="{Binding LightCulling, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Optimizes memory usage for low end PCs." Header="Memory Probing">
-                    <ui:ToggleSwitch IsChecked="{Binding MemoryProbing, Mode=TwoWay}" />
-                </controls:OptionControl>
-
                 <controls:OptionControl Description="Allow one CPU core handle two tasks at once, boosting efficiency and multitasking." Header="Hyper-Threading">
                     <ui:ToggleSwitch IsChecked="{Binding Threading, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl                     
+
+                <controls:OptionControl Description="Helps Roblox increase your target fps to your refresh rate, Defualt Value is 60." Header="Set Target Refresh Rate">
+                    <ComboBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding RefreshRates.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedRefreshRate, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
+                </controls:OptionControl>
+
+                <controls:OptionControl
                     Description="Adjusts the resolution in game, such as 720p, 1080p, 1440p, and 4k. Similar to adjusting video quality on YouTube."
                     Header="Dynamic Resolution"
                     HelpLink="https://www.vdocipher.com/blog/video-resolution">
                     <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding DynamicResolutions.Keys, Mode=OneTime}"
-                Text="{Binding SelectedDynamicResolution, Mode=TwoWay}">
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding DynamicResolutions.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedDynamicResolution, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -205,6 +204,8 @@
                 </Grid>
             </ui:CardExpander.Header>
 
+
+
             <StackPanel>
                 <ui:CardExpander IsExpanded="False">
                     <ui:CardExpander.Header>
@@ -214,15 +215,13 @@
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Grid.Column="0">
-                                <TextBlock FontSize="14" Text="Graphics Fast Flags" />
+                                <TextBlock FontSize="14" Text="Graphics FastFlags" />
                             </StackPanel>
                         </Grid>
                     </ui:CardExpander.Header>
 
                     <StackPanel>
-                        <controls:OptionControl
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisablePostFX_Title}"
-                    HelpLink="https://create.roblox.com/docs/environment/post-processing-effects">
+                        <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisablePostFX_Title}" HelpLink="https://create.roblox.com/docs/environment/post-processing-effects">
                             <ui:ToggleSwitch IsChecked="{Binding DisablePostFX, Mode=TwoWay}" />
                         </controls:OptionControl>
 
@@ -231,7 +230,7 @@
                         </controls:OptionControl>
 
 
-                        <controls:OptionControl  Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisableTerrainTextures_Title}">
+                        <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisableTerrainTextures_Title}">
                             <ui:ToggleSwitch IsChecked="{Binding DisableTerrainTextures, Mode=TwoWay}" />
                         </controls:OptionControl>
 
@@ -239,25 +238,29 @@
                             <ui:ToggleSwitch IsChecked="{Binding RemoveGrass, Mode=TwoWay}" />
                         </controls:OptionControl>
 
+                        <controls:OptionControl Header="Disable Clouds">
+                            <ui:ToggleSwitch IsChecked="{Binding DisableSky, Mode=TwoWay}" />
+                        </controls:OptionControl>
+
                         <controls:OptionControl Header="Force Gray Sky">
                             <ui:ToggleSwitch IsChecked="{Binding EnableGraySky, Mode=TwoWay}" />
                         </controls:OptionControl>
 
-                        <controls:OptionControl
-
-                    Header="Gray Avatars">
+                        <controls:OptionControl Header="Gray Avatars">
                             <ui:ToggleSwitch IsChecked="{Binding GrayAvatar, Mode=TwoWay}" />
                         </controls:OptionControl>
                     </StackPanel>
                 </ui:CardExpander>
 
+
+
                 <controls:OptionControl Description="Smooth out jagged edges. Higher values increases smoothness." Header="{x:Static resources:Strings.Menu_FastFlags_Presets_MSAA_Title}">
                     <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding MSAALevels.Keys, Mode=OneTime}"
-                Text="{Binding SelectedMSAALevel, Mode=TwoWay}">
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding MSAALevels.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedMSAALevel, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -266,31 +269,26 @@
                     </ComboBox>
                 </controls:OptionControl>
 
-
+                <controls:OptionControl Description="Adjust the quality of textures. Higher levels increase quality." Header="Texture quality">
+                    <ComboBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </controls:OptionControl>
 
                 <controls:OptionControl
                     Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Description}"
                     Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Title}"
                     HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
                     <ui:ToggleSwitch IsChecked="{Binding FixDisplayScaling, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl                     
-                    Description="Helps Roblox increase your target fps to your refresh rate, Defualt Value is 60." 
-                    Header="Refresh Rate">
-                    <ComboBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        ItemsSource="{Binding RefreshRates.Keys, Mode=OneTime}"
-                        Text="{Binding SelectedRefreshRate, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-
-                    </ComboBox>
                 </controls:OptionControl>
 
                 <controls:OptionControl
@@ -305,26 +303,11 @@
                         Text="{Binding FramerateLimit, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-
-                <controls:OptionControl Description="Adjust the quality of textures. Higher levels increase quality." Header="Texture quality">
-                    <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding TextureQualities.Keys, Mode=OneTime}"
-                Text="{Binding SelectedTextureQuality, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
+                <controls:OptionControl Description="Configures Roblox to use there new beta FPS and frametime system. Enabling this may potentially improve frame and input timing." Header="New Framerate Performace System">
+                    <ui:ToggleSwitch IsChecked="{Binding NewFpsSystem, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl 
-                    Header="Rendering Mode"
-                    Description="Configure the rendering api for Roblox. Press Alt Enter when going to Fullscreen if using Direct3D. Setting to Vulkan may cause some bugs!."
-                    HelpLink="https://github.com/Meddsam/Froststrap/wiki/A-guide-to-FastFlags#rendering-mode" >
+                <controls:OptionControl Description="Configure the rendering api for Roblox. Press Alt Enter when going to Fullscreen if using Direct3D. Setting to Vulkan may cause some bugs!." Header="Rendering Mode">
                     <ComboBox
                         Width="200"
                         Margin="5,0,0,0"
@@ -337,6 +320,16 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Renders certain terrian and textures at a lower quality, can improve performance" Header="Minimal Rendering">
+                    <ui:ToggleSwitch IsChecked="{Binding MinimalRendering, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+
+                <controls:OptionControl Description="Prohibits the task scheduler from sleeping." Header="Avoid Task Scheduler Sleep">
+                    <ui:ToggleSwitch IsChecked="{Binding TaskSchedulerAvoidingSleep, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
@@ -359,6 +352,7 @@
                 </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
+
         <ui:CardExpander Margin="0,8,0,0">
             <ui:CardExpander.Header>
                 <Grid>
@@ -376,7 +370,6 @@
                     </StackPanel>
                 </Grid>
             </ui:CardExpander.Header>
-
             <StackPanel>
 
 
@@ -390,10 +383,10 @@
                             <StackPanel Grid.Column="0">
                                 <TextBlock FontSize="14" Text="Roblox Menu" />
                                 <TextBlock
-                    Margin="0,8,0,0"
-                    FontSize="12"
-                    Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                    Text="Debloat roblox's built-in settings (keep disabled to remove)" />
+                                    Margin="0,8,0,0"
+                                    FontSize="12"
+                                    Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                                    Text="Debloat roblox's built-in settings (keep disabled to remove)" />
                             </StackPanel>
                         </Grid>
                     </ui:CardExpander.Header>
@@ -407,7 +400,7 @@
                             <ui:ToggleSwitch IsChecked="{Binding SoothsayerCheck, Mode=TwoWay}" />
                         </controls:OptionControl>
 
-                        <controls:OptionControl Header="Framerate Cap" >
+                        <controls:OptionControl Header="Framerate Cap">
                             <ui:ToggleSwitch IsChecked="{Binding FrameRateCap, Mode=TwoWay}" />
                         </controls:OptionControl>
 
@@ -423,6 +416,18 @@
                     <ui:ToggleSwitch IsChecked="{Binding FullscreenTitlebarDisabled, Mode=TwoWay}" />
                 </controls:OptionControl>
 
+                <controls:OptionControl Description="Enables Robloxs New Camera Controls." Header="New Camera Controls">
+                    <ui:ToggleSwitch IsChecked="{Binding NewCamera, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Disables Robloxs chat." Header="Disable Chat">
+                    <ui:ToggleSwitch IsChecked="{Binding ChatUI, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+                <controls:OptionControl Description="Disables Roblox voice chat completely." Header="Disable Voice Chat">
+                    <ui:ToggleSwitch IsChecked="{Binding ChatUI, Mode=TwoWay}" />
+                </controls:OptionControl>
 
                 <controls:OptionControl Description="Removes blur effects like the blur effect when loading." Header="Remove Blur Effect">
                     <ui:ToggleSwitch IsChecked="{Binding NoGuiBlur, Mode=TwoWay}" />
@@ -432,8 +437,7 @@
                     <ui:ToggleSwitch IsChecked="{Binding EnableDarkMode, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Description="Import a monitoring UI for FPS."
-                                        Header="Display FPS">
+                <controls:OptionControl Description="Import a monitoring UI for FPS." Header="Display FPS">
                     <ui:ToggleSwitch IsChecked="{Binding DisplayFps, Mode=TwoWay}" />
                 </controls:OptionControl>
 
@@ -443,6 +447,10 @@
 
                 <controls:OptionControl Description="Refrain chat bubbles from appearing above characters." Header="Disable Chat Bubble">
                     <ui:ToggleSwitch IsChecked="{Binding ChatBubble, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Disables Roblox Built-in Ads" Header="Disable Ads">
+                    <ui:ToggleSwitch IsChecked="{Binding DisableAds, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl Description="Adds a text size changer in roblox settings." Header="Text Size Changer">
@@ -471,7 +479,45 @@
                         PreviewTextInput="ValidateInt32"
                         Text="{Binding FontSize, Mode=TwoWay}" />
                 </controls:OptionControl>
+            </StackPanel>
+        </ui:CardExpander>
 
+        <ui:CardExpander
+            Grid.Row="1"
+            Margin="0,8,0,0"
+            IsExpanded="False">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="Privacy" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="12"
+                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                            Text="Configure settings that help protect your privacy." />
+                    </StackPanel>
+                </Grid>
+            </ui:CardExpander.Header>
+            <StackPanel>
+                <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Presets_Telemetry_Title}">
+                    <ui:ToggleSwitch IsChecked="{Binding DisableTelemetry, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Disable WebView2 Telemetry">
+                    <ui:ToggleSwitch IsChecked="{Binding DisableWebview2Telemetry, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Disable Voice-Chat Telemetry">
+                    <ui:ToggleSwitch IsChecked="{Binding DisableVoiceChatTelemetry, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Block Tencent">
+                    <ui:ToggleSwitch IsChecked="{Binding BlockTencent, Mode=TwoWay}" />
+                </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
 
@@ -483,6 +529,45 @@
             FontSize="17.65"
             FontWeight="Medium"
             Text="Advanced FastFlags" />
+
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14.4" Text="Basic Shaders" />
+                        <TextBlock
+                            Margin="0,2,0,0"
+                            FontSize="12"
+                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                            Text="Configure Shader like settings" />
+                    </StackPanel>
+                </Grid>
+            </ui:CardExpander.Header>
+            <StackPanel>
+                <controls:OptionControl Description="Enables glint-effect shader like." Header="Shader Roughness">
+                    <ComboBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding Shaders.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedShaderLevel, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
+                </controls:OptionControl>
+
+
+
+            </StackPanel>
+        </ui:CardExpander>
 
 
 
@@ -496,25 +581,72 @@
                     <StackPanel Grid.Column="0">
                         <TextBlock FontSize="14.4" Text="Graphics and Textures" />
                         <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="12"
-                    Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                    Text="Configure advanced graphics quality and textures settings" />
+                            Margin="0,2,0,0"
+                            FontSize="12"
+                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                            Text="Configure advanced graphics quality and textures settings" />
                     </StackPanel>
                 </Grid>
             </ui:CardExpander.Header>
 
             <StackPanel>
+                <controls:OptionControl Description="Faster rendering speed on GPUs which work better with BGRA." Header="DX11 BGRA Support">
+                    <ui:ToggleSwitch IsChecked="{Binding BGRA, Mode=TwoWay}" />
+                </controls:OptionControl>
 
+                <controls:OptionControl Description="This only works for low-end PCs" Header="Low-End Hardware Optimization">
+                    <ui:ToggleSwitch IsChecked="{Binding AndroidVfs, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Optimizes memory usage for low/high end-pcs." Header="Memory Probing">
+                    <ui:ToggleSwitch IsChecked="{Binding MemoryProbing, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Optimizes light rendering by reducing unnecessary light calculations." Header="CPU and GPU light culling">
+                    <ui:ToggleSwitch IsChecked="{Binding LightCulling, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Lowers the quality of Particle Effects for better Performance." Header="Low Quality Particles">
+                    <ui:ToggleSwitch IsChecked="{Binding WorserParticles, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Reduces the quality of meshes to improve rendering speeds" Header="Low Poly Meshes">
+                    <ui:ToggleSwitch IsChecked="{Binding LowPolyMeshes, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Determines how much extra time Roblox takes to prepare a single frame." Header="Frame Creation Buffer Percentage">
+                    <ui:TextBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        PreviewTextInput="ValidateUInt32"
+                        Text="{Binding FPSBufferPercentage, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Set the inital Graphic bar amount when joining a game." Header="Starting Graphic Level">
+                    <ComboBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding RomarkStartMappings.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedRomarkStart, Mode=TwoWay}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+
+                    </ComboBox>
+                </controls:OptionControl>
 
 
                 <controls:OptionControl Description="Locks texture quality to your selected setting, allowing for high render distance with low quality if set to 1." Header="Override Graphics Level">
                     <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding QualityLevels.Keys , Mode=OneTime}"
-                Text="{Binding SelectedQualityLevel, Mode=TwoWay}">
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding QualityLevels.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedQualityLevel, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -525,11 +657,11 @@
                 </controls:OptionControl>
                 <controls:OptionControl Description="Higher values may blur icons and remove textures at levels 4-8." Header="Texture Skipping">
                     <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding TextureSkippings.Keys, Mode=OneTime}"
-                Text="{Binding SelectedTextureSkipping, Mode=TwoWay}">
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding TextureSkippings.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedTextureSkipping, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -541,11 +673,11 @@
 
                 <controls:OptionControl Description="Decreases the visibility of rendered distance from your location. Requires streaming enabled. (Shift + F3)" Header="Render Distance">
                     <ComboBox
-                Width="200"
-                Margin="5,0,0,0"
-                Padding="10,5,10,5"
-                ItemsSource="{Binding DistanceRenderings.Keys, Mode=OneTime}"
-                Text="{Binding SelectedDistanceRendering, Mode=TwoWay}">
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        ItemsSource="{Binding DistanceRenderings.Keys, Mode=OneTime}"
+                        Text="{Binding SelectedDistanceRendering, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
@@ -567,49 +699,46 @@
                     <StackPanel>
                         <TextBlock FontSize="14" Text="Network and Input Delay" />
                         <TextBlock
-                    Margin="0,2,0,0"
-                    FontSize="12"
-                    Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                    Text="Configures your Network settings" />
+                            Margin="0,2,0,0"
+                            FontSize="12"
+                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                            Text="Configures your Network settings" />
                     </StackPanel>
                 </Grid>
             </ui:CardExpander.Header>
             <StackPanel>
 
-                <controls:OptionControl
-                    Description="Disables only a couple of telemetry."
-                    Header="Disable Roblox Telemetry">
-                    <ui:ToggleSwitch IsChecked="{Binding DisableTelemetry, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-                    Description="Prevent lag spikes by smoothing out the network output."
-                    Header="Reduce Lag Spikes">
+                <controls:OptionControl Description="Prevent lag spikes by smoothing out the network output." Header="Reduce Lag Spikes">
                     <ui:ToggleSwitch IsChecked="{Binding LessLagSpikes, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
-                    Description="Disables network data transfer limit, could lead to network overhead if packets are too large so use at your own risk."
-                    Header="No Payload Limit">
+                <controls:OptionControl Description="Makes roblox packet sending as soon as possible can lower ping" Header="Better Packet Sending">
+                    <ui:ToggleSwitch IsChecked="{Binding BetterPacketSending, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Disables network data transfer limit, could lead to network overhead if packets are too large so use at your own risk." Header="No Payload Limit">
                     <ui:ToggleSwitch IsChecked="{Binding NoPayloadLimit, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
-                    Description="Stabilizes connection by optimizing roblox's core."
-                    Header="RCore">
+                <controls:OptionControl Description="Stabilizes connection by optimizing roblox's core." Header="RCore">
                     <ui:ToggleSwitch IsChecked="{Binding RobloxCore, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
-                    Description="Increases the speed of large reads and writes."
-                    Header="Large Replicator">
+                <controls:OptionControl Description="Increases the speed of large reads and writes." Header="Large Replicator">
                     <ui:ToggleSwitch IsChecked="{Binding EnableLargeReplicator, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
-                    Description="Decreases wait time by optimizing loading speeds."
-                    Header="Faster Loading">
-                    <ui:ToggleSwitch IsChecked="{Binding LoadFaster, Mode=TwoWay}" />
+                <controls:OptionControl Description="Decreases wait time by optimizing loading speeds." Header="FasterLoading">
+                    <ui:ToggleSwitch IsChecked="{Binding FasterLoading, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Controls how much data is temporarily stored before being processed or sent." Header="Buffer Array Length">
+                    <ui:TextBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        PreviewTextInput="ValidateUInt32"
+                        Text="{Binding BufferArrayLength, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl Description="Configure bytes of data that are transferred over your network. 1396 is the default." Header="MTU Size">
@@ -620,7 +749,12 @@
                         PreviewTextInput="ValidateUInt32"
                         Text="{Binding MtuSize, Mode=TwoWay}" />
                 </controls:OptionControl>
-
+                <controls:OptionControl Description="Improves ping and network send and recive" Header="Improve Cache size">
+                    <ui:ToggleSwitch IsChecked="{Binding CacheSizeImprovement, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl Description="Optimizes Character Frame." Header="Optimize Cframes">
+                    <ui:ToggleSwitch IsChecked="{Binding OptimizeCFrameUpdates, Mode=TwoWay}" />
+                </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
 
@@ -632,7 +766,7 @@
                         <ColumnDefinition Width="Auto" />
                     </d:Grid.ColumnDefinitions>
                     <StackPanel>
-                        <TextBlock FontSize="14" Text="Miscellaneous Settings" />
+                        <TextBlock FontSize="14" Text="Miscellaneous" />
                         <TextBlock
                             Margin="0,2,0,0"
                             FontSize="12"
@@ -655,6 +789,10 @@
                     <ui:ToggleSwitch IsChecked="{Binding RedFont, Mode=TwoWay}" />
                 </controls:OptionControl>
 
+                <controls:OptionControl Description="Replaces standard Roblox text with a spooky, demonic-style font" Header="Pseudolocalization">
+                    <ui:ToggleSwitch IsChecked="{Binding Pseudolocalization, Mode=TwoWay}" />
+                </controls:OptionControl>
+
                 <controls:OptionControl Description="Highlights UI elements that aren’t using a theme and give it a random color." Header="Rainbow Font">
                     <ui:ToggleSwitch IsChecked="{Binding RainbowTheme, Mode=TwoWay}" />
                 </controls:OptionControl>
@@ -663,65 +801,81 @@
                     <ui:ToggleSwitch IsChecked="{Binding EnableCustomDisconnectError, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl
-                    x:Name="CustomDisconnectMessage"
-                    Description="Set your own Custom Disconnect Message."
-                    Header="Custom Disconnect Message">
+                <controls:OptionControl Description="Sets FakeVerify Icon on Players ID." Header="Fake Verifyed Icon">
                     <ui:TextBox
-                    Width="200"
-                    Padding="10,5,10,5"
-                    Text="{Binding CustomDisconnectError, Mode=TwoWay}" />
+                        Width="200"
+                        Padding="10,5,10,5"
+                        Text="{Binding FakeVerify, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Description="Set your own Custom Disconnect Message." Header="Custom Disconnect Message">
+                    <ui:TextBox
+                        Width="200"
+                        Padding="10,5,10,5"
+                        Text="{Binding CustomDisconnectError, Mode=TwoWay}" />
                 </controls:OptionControl>
 
             </StackPanel>
         </ui:CardExpander>
         <TextBlock
-                Margin="0,16,0,0"
-                FontSize="17.65"
-                FontWeight="Medium"
-                Text="Debug" />
+            Margin="0,16,0,0"
+            FontSize="17.65"
+            FontWeight="Medium"
+            Text="Debug" />
 
 
 
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="True">
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
-                <StackPanel >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock FontSize="14" Text="Debug and Test" />
 
-                    <!-- FlagStateOption -->
-                    <controls:OptionControl
-                x:Name="FlagStateOption"
-                Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Title}"
-                Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Description}">
-                        <ui:TextBox
-                    Width="200"
-                    Padding="10,5"
-                    Text="{Binding FlagState, Mode=TwoWay}" />
-                    </controls:OptionControl>
-
-                    <!-- PingBreakdownOption -->
-                    <controls:OptionControl
-                x:Name="PingBreakdownOption"
-                Header="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Title}"
-                Description="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Description}">
-                        <ui:ToggleSwitch 
-                    IsChecked="{Binding PingBreakdown, Mode=TwoWay}" />
-                    </controls:OptionControl>
-
-                </StackPanel>
+                    </StackPanel>
+                </Grid>
             </ui:CardExpander.Header>
 
+            <!--  Content inside CardExpander  -->
             <StackPanel>
-                <TextBlock 
-            FontSize="14" 
-            Text="Debug settings by putting in the FFlag and playing to test to see if the FFlag is still active/removed." 
-            Margin="0,5,0,0" 
-            TextWrapping="Wrap" />
+                <controls:OptionControl Description="Displays the worlds chunks in a similar way to Minecraft." Header="Show Chunks">
+                    <ui:ToggleSwitch IsChecked="{Binding ShowChunks, Mode=TwoWay}" />
+                </controls:OptionControl>
 
-                <TextBlock 
-            FontSize="14" 
-            Text="To use the ping breakdown while in-game, press FN+9 or type 'console' in chat to open the player console." 
-            Margin="0,5,0,0" 
-            TextWrapping="Wrap" />
+                <!--  PingBreakdownOption  -->
+                <controls:OptionControl
+                    x:Name="PingBreakdownOption"
+                    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Description}"
+                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Title}">
+                    <ui:ToggleSwitch IsChecked="{Binding PingBreakdown, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <!--  FlagStateOption  -->
+                <controls:OptionControl
+                    x:Name="FlagStateOption"
+                    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Description}"
+                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Title}">
+                    <ui:TextBox
+                        Width="200"
+                        Padding="10,5"
+                        Text="{Binding FlagState, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <!--  Debug info  -->
+                <TextBlock
+                    Margin="0,8,0,0"
+                    FontSize="14"
+                    Text="Debug settings by putting in the FFlag and playing to test to see if the FFlag is still active/removed."
+                    TextWrapping="Wrap" />
+
+                <TextBlock
+                    Margin="0,5,0,0"
+                    FontSize="14"
+                    Text="To use the ping breakdown while in-game, press FN+9 or type 'console' in chat to open the player console."
+                    TextWrapping="Wrap" />
             </StackPanel>
         </ui:CardExpander>
     </StackPanel>

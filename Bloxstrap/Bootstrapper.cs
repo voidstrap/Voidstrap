@@ -180,37 +180,39 @@ namespace Voidstrap
                     return;
             }
 #endif
-
-            // ensure only one instance of the bootstrapper is running at the time
-            // so that we don't have stuff like two updates happening simultaneously
-
             bool mutexExists = false;
 
             try
             {
-                Mutex.OpenExisting("Voidstrap-Bootstrapper").Close();
-                App.Logger.WriteLine(LOG_IDENT, "Voidstrap-Bootstrapper mutex exists, waiting...");
-                SetStatus(Strings.Bootstrapper_Status_WaitingOtherInstances);
-                mutexExists = true;
+                using (var existingMutex = Mutex.OpenExisting("Voidstrap-Bootstrapper"))
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Voidstrap-Bootstrapper mutex exists, waiting...");
+                    SetStatus(Strings.Bootstrapper_Status_WaitingOtherInstances);
+                    mutexExists = true;
+                }
             }
-            catch (Exception)
+            catch (WaitHandleCannotBeOpenedException)
             {
-                // no mutex exists
+                // No mutex exists yet
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Unexpected error checking mutex: {ex}");
             }
 
-            // wait for mutex to be released if it's not yet
+            // Create and acquire the mutex
             await using var mutex = new AsyncMutex(false, "Voidstrap-Bootstrapper");
             await mutex.AcquireAsync(_cancelTokenSource.Token);
-
             _mutex = mutex;
 
-            // reload our configs since they've likely changed by now
+            // Reload configs if waiting for other instances
             if (mutexExists)
             {
                 App.Settings.Load();
                 App.State.Load();
             }
 
+            // Your existing logic
             if (!_noConnection)
             {
                 try
@@ -231,25 +233,19 @@ namespace Voidstrap
                 if (_cancelTokenSource.IsCancellationRequested)
                     return;
 
-                // we require deployment details for applying modifications for a worst case scenario,
-                // where we'd need to restore files from a package that isn't present on disk and needs to be redownloaded
                 await ApplyModifications();
             }
-
-            // check registry entries for every launch, just in case the stock bootstrapper changes it back
 
             if (IsStudioLaunch)
                 WindowsRegistry.RegisterStudio();
             else
                 WindowsRegistry.RegisterPlayer();
 
-            if (_launchMode != LaunchMode.Player)
-                await mutex.ReleaseAsync();
+            // Release the mutex only once, here
+            await mutex.ReleaseAsync();
 
             if (!App.LaunchSettings.NoLaunchFlag.Active && !_cancelTokenSource.IsCancellationRequested)
                 StartRoblox();
-
-            await mutex.ReleaseAsync();
 
             Dialog?.CloseBootstrapper();
         }
@@ -419,18 +415,26 @@ namespace Voidstrap
 
             SetStatus(Strings.Bootstrapper_Status_Starting);
 
+            // Check if we are launching the player and language override is enabled
             if (_launchMode == LaunchMode.Player && App.Settings.Prop.ForceRobloxLanguage)
             {
-                var match = Regex.Match(_launchCommandLine, "gameLocale:([a-z_]+)", RegexOptions.CultureInvariant);
+                // Attempt to extract the game locale from the launch command line
+                var match = Regex.Match(_launchCommandLine, @"gameLocale:([a-z_]+)", RegexOptions.CultureInvariant);
 
-                if (match.Groups.Count == 2)
-                    _launchCommandLine = _launchCommandLine.Replace(
-                        "robloxLocale:en_us",
-                        $"robloxLocale:{match.Groups[1].Value}",
-                        StringComparison.OrdinalIgnoreCase);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    string detectedLocale = match.Groups[1].Value;
+
+                    // Replace the hardcoded locale with the detected one
+                    _launchCommandLine = Regex.Replace(
+                        _launchCommandLine,
+                        @"robloxLocale:[a-z_]+",
+                        $"robloxLocale:{detectedLocale}",
+                        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+                }
             }
 
-            var startInfo = new ProcessStartInfo()
+        var startInfo = new ProcessStartInfo()
             {
                 FileName = AppData.ExecutablePath,
                 Arguments = _launchCommandLine,
@@ -653,35 +657,41 @@ namespace Voidstrap
             App.Logger.WriteLine(LOG_IDENT, "Checking for updates...");
 
 #if !DEBUG_UPDATER
-            var releaseInfo = await App.GetLatestRelease();
+			var releaseInfo = await App.GetLatestRelease();
 
-            if (releaseInfo is null)
-            {
-                App.Logger.WriteLine(LOG_IDENT, "Failed to fetch release information.");
-                return false;
-            }
+			if (releaseInfo is null)
+			{
+				App.Logger.WriteLine(LOG_IDENT, "Failed to fetch release information.");
+				return false;
+			}
 
-            var versionComparison = Utilities.CompareVersions(App.Version, releaseInfo.TagName);
+			// Strip leading 'V' or 'v' from versions before comparing
+			string currentVersion = App.Version.TrimStart('V', 'v');
+			string latestVersion = releaseInfo.TagName.TrimStart('V', 'v');
 
-            // Skip update if the current version is up-to-date or newer
-            if (App.IsProductionBuild && (versionComparison == VersionComparison.Equal || versionComparison == VersionComparison.GreaterThan))
-            {
-                App.Logger.WriteLine(LOG_IDENT, "No updates found");
-                return false;
-            }
+			var versionComparison = Utilities.CompareVersions(currentVersion, latestVersion);
 
-            if (Dialog is not null)
-                Dialog.CancelEnabled = false;
+			// Skip update if current version is equal or newer
+			if (App.IsProductionBuild &&
+				(versionComparison == VersionComparison.Equal || versionComparison == VersionComparison.GreaterThan))
+			{
+				App.Logger.WriteLine(LOG_IDENT, "No updates found. Current version is up-to-date.");
+				return false;
+			}
 
-            string version = releaseInfo.TagName;
+			if (Dialog is not null)
+				Dialog.CancelEnabled = false;
+
+			string version = releaseInfo.TagName;
+
 #else
     string version = App.Version;
 #endif
 
-            SetStatus(Strings.Bootstrapper_Status_UpgradingVoidstrap);
+			SetStatus(Strings.Bootstrapper_Status_UpgradingVoidstrap);
 
-            try
-            {
+			try
+			{
 #if DEBUG_UPDATER
         string downloadLocation = Path.Combine(Paths.TempUpdates, "Voidstrap.exe");
 

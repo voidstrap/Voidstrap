@@ -76,7 +76,7 @@
             Description="Shows that you're using Voidstrap on Discord, but it overlaps with 'Show Game Activity'. Requires an app restart."
             Header="Voidstrap RPC"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DiscordActivityEnabled, Mode=TwoWay}"/>
+            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding VoidstrapEnabled, Mode=TwoWay}"/>
         </controls:OptionControl>
 
         <controls:OptionControl

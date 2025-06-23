@@ -206,7 +206,6 @@
                     <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
                     <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
-                    <controls:MarkdownTextBlock MarkdownText="[meddsam](https://www.roblox.com/users/1144764103/profile)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
                     <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
                 </StackPanel>
@@ -239,8 +238,8 @@
                 HeaderText="Inspirations"
                 IsExpanded="True">
                 <StackPanel>
-                    <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/fishstrap)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Voidstrap](https://github.com/MaximumADHD)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />
                     <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/BloxstrapLabs)" />
                 </StackPanel>
             </controls:Expander>

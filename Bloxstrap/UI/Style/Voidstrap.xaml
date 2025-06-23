@@ -25,7 +25,7 @@
     <!-- Window Background Color Layers -->
     <Color x:Key="WindowBackgroundColorPrimary">#FF121212</Color>
     <!-- True dark gray -->
-    <Color x:Key="WindowBackgroundColorSecondary">#FF221D40</Color>
+    <Color x:Key="WindowBackgroundColorSecondary">#FF231E41</Color>
     <!-- Muted violet-gray -->
     <Color x:Key="WindowBackgroundColorThird">#FF000000</Color>
     <!-- Pure black -->

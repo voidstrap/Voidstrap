@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.3.7</Version>
-		<FileVersion>1.0.3.7</FileVersion>
+		<Version>1.0.4.5</Version>
+		<FileVersion>1.0.4.5</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
@@ -44,7 +44,7 @@
 		<None Remove="ThemeImages\klikos-mod-thumbnail.png" />
 		<None Remove="ThemeImages\PureFF.jpg" />
 		<None Remove="ThemeImages\RobloxBB.png" />
-		<None Remove="UI\Elements\Bootstrapper\GalaxyBB.jpeg" />
+		<None Remove="UI\Elements\Bootstrapper\Purple.png" />
 		<None Remove="UI\Elements\Settings\Pages\1748136310649.png" />
 		<None Remove="UI\Elements\Settings\Pages\5070.png" />
 		<None Remove="UI\Elements\Settings\Pages\AnimationEffects.png" />
@@ -75,7 +75,7 @@
 		<Resource Include="ThemeImages\klikos-mod-thumbnail.png" />
 		<Resource Include="ThemeImages\PureFF.jpg" />
 		<Resource Include="ThemeImages\RobloxBB.png" />
-		<Resource Include="UI\Elements\Bootstrapper\GalaxyBB.jpeg" />
+		<Resource Include="UI\Elements\Bootstrapper\Purple.png" />
 		<Resource Include="UI\Elements\Settings\Pages\1748136310649.png" />
 		<Resource Include="UI\Elements\Settings\Pages\5070.png" />
 		<Resource Include="UI\Elements\Settings\Pages\AnimationEffects.png" />
@@ -159,17 +159,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="AvalonEdit" Version="6.3.0.90" />
-		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-		<PackageReference Include="DiscordRichPresence" Version="1.2.1.24" />
-		<PackageReference Include="Markdig" Version="0.37.0" />
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.106">
+		<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
+		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+		<PackageReference Include="DiscordRichPresence" Version="1.3.0.28" />
+		<PackageReference Include="Markdig" Version="0.41.2" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
 			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
 		<PackageReference Include="XamlAnimatedGif" Version="2.3.0" />
 	</ItemGroup>

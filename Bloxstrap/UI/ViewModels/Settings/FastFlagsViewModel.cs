@@ -20,7 +20,7 @@ public static class SystemInfo
         public IntPtr lpMinimumApplicationAddress;
         public IntPtr lpMaximumApplicationAddress;
         public IntPtr dwActiveProcessorMask;
-        public uint dwNumberOfProcessors; // This field contains the number of logical processors
+        public uint dwNumberOfProcessors;
         public uint dwProcessorType;
         public uint dwAllocationGranularity;
         public ushort wProcessorLevel;
@@ -135,8 +135,36 @@ namespace Voidstrap.UI.ViewModels.Settings
         public bool MemoryProbing
         {
             get => App.FastFlags.GetPreset("Memory.Probe") == "True";
-            set => App.FastFlags.SetPreset("Memory.Probe", value ? "True" : null);
+            set
+            {
+                // Toggle the main memory probing flag
+                App.FastFlags.SetPreset("Memory.Probe", value ? "True" : null);
+
+                if (value)
+                {
+                    // When enabling memory probing, set all individual memory probe flags.
+                    App.FastFlags.SetPreset("Memory.probe2", "0");            // DFIntMemoryUtilityCurveBaseHundrethsPercent: 0
+                    App.FastFlags.SetPreset("Memory.probe3", "1");            // DFIntMemoryUtilityCurveFinalDeltaHundredths: 1
+                    App.FastFlags.SetPreset("Memory.probe4", "1");            // DFIntMemoryUtilityCurveInitialDeltaHundredths: 1
+                    App.FastFlags.SetPreset("Memory.probe5", "3");            // DFIntMemoryUtilityCurveNumSegments: 3
+                    App.FastFlags.SetPreset("Memory.probe6", "2000000000");   // DFIntMemoryUtilityCurvePenaltyBuffer: 2000000000
+                    App.FastFlags.SetPreset("Memory.probe7", "1");            // DFIntMemoryUtilityCurveSlopeMultiplierHundreths: 1
+                    App.FastFlags.SetPreset("Memory.probe8", "102400");       // DFIntMemoryUtilityCurveTotalMemoryReserve: 102400
+                }
+                else
+                {
+                    // When disabling memory probing, clear all individual probe flags.
+                    App.FastFlags.SetPreset("Memory.probe2", null);
+                    App.FastFlags.SetPreset("Memory.probe3", null);
+                    App.FastFlags.SetPreset("Memory.probe4", null);
+                    App.FastFlags.SetPreset("Memory.probe5", null);
+                    App.FastFlags.SetPreset("Memory.probe6", null);
+                    App.FastFlags.SetPreset("Memory.probe7", null);
+                    App.FastFlags.SetPreset("Memory.probe8", null);
+                }
+            }
         }
+
 
         public bool MoreSensetivityNumbers
         {
@@ -176,15 +204,13 @@ namespace Voidstrap.UI.ViewModels.Settings
                 App.FastFlags.SetPreset("Preload.Teleport2", value ? "True" : null);
             }
         }
-
-        public bool LoadFaster
+        public bool OptimizeCFrameUpdates
         {
-            get => App.FastFlags.GetPreset("Network.AssetPreloadding") == "2147483647";
+            get => App.FastFlags.GetPreset("OptimizeCFrameUpdates") == "True";
             set
             {
-                App.FastFlags.SetPreset("Network.AssetPreloadding", value ? "2147483647" : null);
-                App.FastFlags.SetPreset("Network.MaxAssetPreload", value ? "2147483647" : null);
-                App.FastFlags.SetPreset("Network.PlayerImageDefault", value ? "1" : null);
+                App.FastFlags.SetPreset("OptimizeCFrameUpdates", value ? "True" : null);
+                App.FastFlags.SetPreset("OptimizeCFrameUpdatesIC", value ? "True" : null);
             }
         }
 
@@ -219,11 +245,25 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool LessLagSpikes
         {
-            get => App.FastFlags.GetPreset("Network.DefaultBps") == "64000";
+            get => App.FastFlags.GetPreset("Network.DefaultBps") == "796850000";
             set
             {
-                App.FastFlags.SetPreset("Network.DefaultBps", value ? "64000" : null);
-                App.FastFlags.SetPreset("Network.MaxWorkCatchupMs", value ? "20" : null);
+                App.FastFlags.SetPreset("Network.DefaultBps", value ? "796850000" : null);
+                App.FastFlags.SetPreset("Network.MaxWorkCatchupMs", value ? "5" : null);
+            }
+        }
+
+        public bool DisableAds
+        {
+            get => App.FastFlags.GetPreset("UI.DisableAds1") == "False";
+            set
+            {
+                App.FastFlags.SetPreset("UI.DisableAds1", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.DisableAds2", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.DisableAds3", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.DisableAds4", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.DisableAds5", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.DisableAds6", value ? "False" : null);
             }
         }
 
@@ -254,6 +294,18 @@ namespace Voidstrap.UI.ViewModels.Settings
                 App.FastFlags.SetPreset("Network.Payload6", value ? "2147483647" : null);
                 App.FastFlags.SetPreset("Network.Payload7", value ? "2147483647" : null);
                 App.FastFlags.SetPreset("Network.Payload8", value ? "2147483647" : null);
+                App.FastFlags.SetPreset("Network.Payload9", value ? "2147483647" : null);
+                App.FastFlags.SetPreset("Network.Payload10", value ? "2147483647" : null);
+                App.FastFlags.SetPreset("Network.Payload11", value ? "2147483647" : null);
+            }
+        }
+
+        public bool ShadersEnabled
+        {
+            get => App.FastFlags.GetPreset("Rendering.Shaders2") == "21";
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.Shaders2", value ? "21" : "0");
             }
         }
 
@@ -265,6 +317,10 @@ namespace Voidstrap.UI.ViewModels.Settings
                 App.FastFlags.SetPreset("Network.EnableLargeReplicator", value ? "True" : null);
                 App.FastFlags.SetPreset("Network.LargeReplicatorWrite", value ? "True" : null);
                 App.FastFlags.SetPreset("Network.LargeReplicatorRead", value ? "True" : null);
+                App.FastFlags.SetPreset("Network.EngineModule1", value ? "False" : null);
+                App.FastFlags.SetPreset("Network.EngineModule2", value ? "True" : null);
+                App.FastFlags.SetPreset("Network.SerializeRead", value ? "True" : null);
+                App.FastFlags.SetPreset("Network.SerializeWrite", value ? "True" : null);
             }
         }
 
@@ -333,11 +389,32 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
+        public int ShadersLimit
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("Rendering.Shaders"), out int result) ? result : 0;
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.Shaders", value == 0 ? null : value.ToString());
+
+                if (value < -64000000)
+                {
+                    Frontend.ShowMessageBox(
+                        "Going below -64000000 is not recommended for Performance.",
+                        MessageBoxImage.Warning,
+                        MessageBoxButton.OK
+                    );
+                }
+            }
+        }
+
+
         public int VolChatLimit
         {
             get => int.TryParse(App.FastFlags.GetPreset("VoiceChat.VoiceChat4"), out int x) ? x : 1000;
             set => App.FastFlags.SetPreset("VoiceChat.VoiceChat4", value > 0 ? value.ToString() : null);
         }
+
+
 
         public int HideGUI
         {
@@ -348,9 +425,112 @@ namespace Voidstrap.UI.ViewModels.Settings
         public int MtuSize
         {
             get => int.TryParse(App.FastFlags.GetPreset("Network.Mtusize"), out int x) ? x : 0;
-            set => App.FastFlags.SetPreset("Network.Mtusize", value > 0 ? value.ToString() : null);
+            set
+            {
+                int clamped = Math.Max(0, Math.Min(1500, value));
+                App.FastFlags.SetPreset(
+                    "Network.Mtusize",
+                    clamped >= 576 ? clamped.ToString() : null
+                );
+            }
         }
 
+        public bool BGRA
+        {
+            get => App.FastFlags.GetPreset("Rendering.BGRA") == "True";
+            set => App.FastFlags.SetPreset("Rendering.BGRA", value ? "True" : null);
+        }
+
+        public bool NewFpsSystem
+        {
+            get => App.FastFlags.GetPreset("Rendering.NewFpsSystem") == "True";
+            set => App.FastFlags.SetPreset("Rendering.NewFpsSystem", value ? "True" : null);
+        }
+
+        public bool DisableWebview2Telemetry
+        {
+            get => App.FastFlags?.GetPreset("Telemetry.Webview1") == "www.youtube-nocookie.com";
+            set
+            {
+                App.FastFlags.SetPreset("Telemetry.Webview1", value ? "www.youtube-nocookie.com" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview2", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview3", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview4", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview5", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview6", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Webview7", value ? "False" : null);
+            }
+        }
+
+
+        public bool WorserParticles
+        {
+            get => App.FastFlags?.GetPreset("Rendering.WorserParticles1") == "False";
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.WorserParticles1", value ? "False" : null);
+                App.FastFlags.SetPreset("Rendering.WorserParticles2", value ? "False" : null);
+                App.FastFlags.SetPreset("Rendering.WorserParticles3", value ? "False" : null);
+                App.FastFlags.SetPreset("Rendering.WorserParticles4", value ? "False" : null);
+            }
+        }
+
+        public bool LowPolyMeshes
+        {
+            get => App.FastFlags.GetPreset("Rendering.LowPolyMeshes1") == "0";
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.LowPolyMeshes1", value ? "0" : null);
+                App.FastFlags.SetPreset("Rendering.LowPolyMeshes2", value ? "0" : null);
+                App.FastFlags.SetPreset("Rendering.LowPolyMeshes3", value ? "0" : null);
+                App.FastFlags.SetPreset("Rendering.LowPolyMeshes4", value ? "0" : null);
+            }
+        }
+        public bool CacheSizeImprovement
+        {
+            get => App.FastFlags.GetPreset("Cache.Increase1") == "True";
+            set
+            {
+                App.FastFlags.SetPreset("Cache.Increase1", value ? "True" : null);
+                App.FastFlags.SetPreset("Cache.Increase2", value ? "False" : null);
+                App.FastFlags.SetPreset("Cache.Increase3", value ? "True" : null);
+                App.FastFlags.SetPreset("Cache.Increase4", value ? "1" : null);
+                App.FastFlags.SetPreset("Cache.Increase5", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase6", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase7", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase8", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase9", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase10", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase11", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase12", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase13", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase14", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase15", value ? "2147483647" : null);
+                App.FastFlags.SetPreset("Cache.Increase16", value ? "True" : null);
+                App.FastFlags.SetPreset("Cache.Increase17", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase18", value ? "1036372536" : null);
+                App.FastFlags.SetPreset("Cache.Increase19", value ? "1036372536" : null);
+            }
+        }
+
+
+        public bool AndroidVfs
+        {
+            get => App.FastFlags.GetPreset("Rendering.AndroidVfs") == "{\"and\":[ {\"=\":[\"app_bitness()\",32]}, {\"not\":[ {\"is_any_of\":[\"manufacturer()\",\"samsung\",\"amazon\",\"lge\",\"lg\",\"lg electronics\",\"vivo\"]} ]} ]}";
+            set => App.FastFlags.SetPreset("Rendering.AndroidVfs", value ? "{\"and\":[ {\"=\":[\"app_bitness()\",32]}, {\"not\":[ {\"is_any_of\":[\"manufacturer()\",\"samsung\",\"amazon\",\"lge\",\"lg\",\"lg electronics\",\"vivo\"]} ]} ]}" : null);
+        }
+
+        public bool FasterLoading
+        {
+            get => App.FastFlags.GetPreset("Network.MaxAssetPreload") == "2147483647";
+            set
+            {
+                App.FastFlags.SetPreset("Network.MaxAssetPreload", value ? "2147483647" : null);
+                App.FastFlags.SetPreset("Network.PlayerImageDefault", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.MeshPreloadding", value ? "True" : null);
+            }
+        }
+        
         public bool EnableCustomDisconnectError
         {
             get => App.FastFlags.GetPreset("UI.CustomDisconnectError1") == "True";
@@ -363,13 +543,35 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.FastFlags.SetPreset("UI.CustomDisconnectError2", value);
         }
 
+        public string? FakeVerify
+        {
+            get => App.FastFlags.GetPreset("Fake.Verify");
+            set => App.FastFlags.SetPreset("Fake.Verify", value);
+        }
+
+        public string? NewCamera
+        {
+            get => App.FastFlags.GetPreset("Camera.Controls");
+            set => App.FastFlags.SetPreset("Camera.Controls", value);
+        }
+
+        public string? ChatUI
+        {
+            get => App.FastFlags.GetPreset("Camera.Chat");
+            set => App.FastFlags.SetPreset("Camera.Chat", value);
+        }
 
         public IReadOnlyDictionary<MSAAMode, string?> MSAALevels => FastFlagManager.MSAAModes;
 
         public MSAAMode SelectedMSAALevel
         {
-            get => MSAALevels.FirstOrDefault(x => x.Value == App.FastFlags.GetPreset("Rendering.MSAA")).Key;
-            set => App.FastFlags.SetPreset("Rendering.MSAA", MSAALevels[value]);
+            get => MSAALevels.FirstOrDefault(x => x.Value == App.FastFlags.GetPreset("Rendering.MSAA1")).Key;
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.MSAA1", MSAALevels[value]);
+                App.FastFlags.SetPreset("Rendering.MSAA2", MSAALevels[value]);
+
+            }
         }
 
         public IReadOnlyDictionary<TextureQuality, string?> TextureQualities => FastFlagManager.TextureQualityLevels;
@@ -624,9 +826,10 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool EnableGraySky
         {
-            get => App.FastFlags.GetPreset("Rendering.GraySky") == "True";
-            set => App.FastFlags.SetPreset("Rendering.GraySky", value ? "True" : null);
+            get => App.FastFlags.GetPreset("Graphic.GraySky") == "True";
+            set => App.FastFlags.SetPreset("Graphic.GraySky", value ? "True" : null);
         }
+
         public int? FontSize
         {
             get => int.TryParse(App.FastFlags.GetPreset("UI.FontSize"), out int x) ? x : 1;
@@ -637,6 +840,12 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.FastFlags.GetPreset("UI.RedFont") == "rbxasset://fonts/families/BuilderSans.json";
             set => App.FastFlags.SetPreset("UI.RedFont", value ? "rbxasset://fonts/families/BuilderSans.json" : null);
+        }
+
+        public bool DisableLayeredClothing
+        {
+            get => App.FastFlags.GetPreset("UI.DisableLayeredClothing") == "-1";
+            set => App.FastFlags.SetPreset("UI.DisableLayeredClothing", value ? "-1" : null);
         }
 
         public bool DisableTerrainTextures
@@ -731,6 +940,91 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => SetFlagFromBool("Menu.Framerate", value);
         }
 
+        public bool DisableVoiceChatTelemetry
+        {
+            get => App.FastFlags?.GetPreset("Telemetry.Voicechat1") == "False";
+            set
+            {
+                App.FastFlags.SetPreset("Telemetry.Voicechat1", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat2", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat3", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat4", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat5", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat6", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat7", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat8", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat9", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat10", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat11", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat12", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat13", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat14", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat15", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat16", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat17", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat18", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat19", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.Voicechat20", value ? "-1" : null);
+            }
+        }
+
+        public bool OldChromeUI
+        {
+            get => App.FastFlags?.GetPreset("UI.OldChromeUI1") == "False";
+            set
+            {
+                App.FastFlags.SetPreset("UI.OldChromeUI1", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI2", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI3", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI4", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI5", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI6", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI7", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI8", value ? "True" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI9", value ? "False" : null);
+                App.FastFlags.SetPreset("UI.OldChromeUI10", value ? "False" : null);
+            }
+        }
+
+        public bool BlockTencent
+        {
+            get => App.FastFlags?.GetPreset("Telemetry.Tencent1") == "/tencent/";
+            set
+            {
+                App.FastFlags.SetPreset("Telemetry.Tencent1", value ? "/tencent/" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent2", value ? "/tencent/" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent3", value ? "https://www.gov.cn" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent4", value ? "https://www.gov.cn" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent5", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent6", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.Tencent7", value ? "10000" : null);
+
+            }
+        }
+
+        public bool WhiteSky
+        {
+            get => App.FastFlags.GetPreset("Graphic.WhiteSky") == "True";
+            set
+            {
+                App.FastFlags.SetPreset("Graphic.WhiteSky", value ? "True" : null);
+                App.FastFlags.SetPreset("Graphic.GraySky", value ? "True" : null);
+            }
+        }
+
+        public bool ShowChunks
+        {
+            get => App.FastFlags.GetPreset("Debug.Chunks") == "True";
+            set => App.FastFlags.SetPreset("Debug.Chunks", value ? "True" : null);
+        }
+
+        public bool Pseudolocalization
+        {
+            get => App.FastFlags.GetPreset("UI.Pseudolocalization") == "True";
+            set => App.FastFlags.SetPreset("UI.Pseudolocalization", value ? "True" : null);
+        }
+
+
         public bool ResetConfiguration
         {
             get => _preResetFlags is not null;
@@ -751,8 +1045,60 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public IReadOnlyDictionary<RefreshRate, string?> RefreshRates => FastFlagManager.RefreshRates;
+        public int FPSBufferPercentage
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("Rendering.FrameRateBufferPercentage"), out int x) ? x : 0;
+            set
+            {
+                int clamped = Math.Max(0, Math.Min(100, value));
+                App.FastFlags.SetPreset(
+                    "Rendering.FrameRateBufferPercentage",
+                    clamped >= 1 ? clamped.ToString() : null
+                );
+            }
+        }
 
+        public bool BetterPacketSending
+        {
+            get => App.FastFlags?.GetPreset("Network.BetterPacketSending1") == "0";
+            set
+            {
+                App.FastFlags.SetPreset("Network.BetterPacketSending1", value ? "0" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending2", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending3", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending4", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending5", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending6", value ? "1047483647" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending7", value ? "5000000" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending8", value ? "1" : null);
+                App.FastFlags.SetPreset("Network.BetterPacketSending9", value ? "1047483647" : null);
+            }
+        }
+
+        public int BufferArrayLength
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("Recommended.Buffer"), out int x) ? x : 0;
+            set => App.FastFlags.SetPreset("Recommended.Buffer", value == 0 ? null : value);
+        }
+
+        public bool MinimalRendering
+        {
+            get => App.FastFlags.GetPreset("Rendering.MinimalRendering") == "True";
+            set => App.FastFlags.SetPreset("Rendering.MinimalRendering", value ? "True" : null);
+        }
+
+        public bool DisableSky
+        {
+            get => App.FastFlags.GetPreset("Rendering.NoFrmBloom") == "False";
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.NoFrmBloom", value ? "False" : null);
+                App.FastFlags.SetPreset("Rendering.FRMRefactor", value ? "False" : null);
+            }
+        }
+
+
+        public IReadOnlyDictionary<RefreshRate, string?> RefreshRates => FastFlagManager.RefreshRates;
         public RefreshRate SelectedRefreshRate
         {
             get => RefreshRates.FirstOrDefault(x => x.Value == App.FastFlags.GetPreset("System.TargetRefreshRate1")).Key;
@@ -763,19 +1109,130 @@ namespace Voidstrap.UI.ViewModels.Settings
                     App.FastFlags.SetPreset("System.TargetRefreshRate1", null);
                     App.FastFlags.SetPreset("System.TargetRefreshRate2", null);
                     App.FastFlags.SetPreset("System.TargetRefreshRate3", null);
+                    App.FastFlags.SetPreset("System.TargetRefreshRate4", null);
                 }
                 else
                 {
                     App.FastFlags.SetPreset("System.TargetRefreshRate1", RefreshRates[value]);
                     App.FastFlags.SetPreset("System.TargetRefreshRate2", RefreshRates[value]);
                     App.FastFlags.SetPreset("System.TargetRefreshRate3", RefreshRates[value]);
+                    App.FastFlags.SetPreset("System.TargetRefreshRate4", RefreshRates[value]);
                 }
             }
         }
 
+        public IReadOnlyDictionary<Shader, string?> Shaders => FastFlagManager.Shaders;
+
+        public Shader SelectedShaderLevel
+        {
+            get => Shaders.FirstOrDefault(x => x.Value == App.FastFlags.GetPreset("Rendering.Shaders")).Key;
+            set
+            {
+                if (value == Shader.Disabled)
+                {
+                    App.FastFlags.SetPreset("Rendering.Shaders", null);
+                    App.FastFlags.SetPreset("Rendering.Shaders2", null);
+                }
+                else
+                {
+                    App.FastFlags.SetPreset("Rendering.Shaders", Shaders[value]);
+                    App.FastFlags.SetPreset("Rendering.Shaders2", "21");
+                }
+            }
+        }
+
+
+
         public static IReadOnlyDictionary<string, string?> GetCpuThreads()
         {
             const string LOG_IDENT = "FFlagPresets::GetCpuThreads";
+            var cpuThreads = new Dictionary<string, string?>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Automatic"] = null
+            };
+
+            try
+            {
+                int logicalProcessorCount = SystemInfo.GetLogicalProcessorCount();
+
+                if (logicalProcessorCount > 0)
+                {
+                    for (int i = 1; i <= logicalProcessorCount; i++)
+                    {
+                        string key = i.ToString();
+                        cpuThreads[key] = key;
+                    }
+                }
+                else
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Logical processor count returned 0.");
+                }
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Failed to get CPU thread count: {ex.Message}");
+            }
+
+            return cpuThreads;
+        }
+
+
+        public string BypassVulkan
+        {
+            get => App.FastFlags.GetPreset("System.BypassVulkan") ?? "Automatic";
+            set => App.FastFlags.SetPreset("System.BypassVulkan", value == "Automatic" ? null : value);
+        }
+
+
+        public IReadOnlyDictionary<string, string?>? CpuThreads => GetCpuThreads();
+        public KeyValuePair<string, string?> SelectedCpuThreads
+        {
+            get
+            {
+                string currentValue = App.FastFlags.GetPreset("System.CpuCore1") ?? "Automatic";
+                return CpuThreads?.FirstOrDefault(kvp => kvp.Key == currentValue) ?? default;
+            }
+            set
+            {
+                App.FastFlags.SetPreset("System.CpuCore1", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore2", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore3", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore4", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore5", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore6", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore7", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                App.FastFlags.SetPreset("System.CpuCore9", value.Value);
+                OnPropertyChanged(nameof(SelectedCpuThreads));
+                if (value.Value != null && int.TryParse(value.Value, out int parsedValue)) // sets cputhreads to the selected amount minus 1
+                {
+                    int adjustedValue = Math.Max(parsedValue - 1, 1); // Ensure the value does not go below on one
+                    App.FastFlags.SetPreset("System.CpuThreads", adjustedValue.ToString());
+                    OnPropertyChanged(nameof(SelectedCpuThreads));
+                    App.FastFlags.SetPreset("System.CpuCore8", adjustedValue.ToString());
+                    OnPropertyChanged(nameof(SelectedCpuThreads));
+                }
+                else
+                {
+                    // Handle the case where value.Value is null or not a valid integer
+                    App.FastFlags.SetPreset("System.CpuThreads", null);
+                    OnPropertyChanged(nameof(SelectedCpuThreads));
+                    App.FastFlags.SetPreset("System.CpuCore8", null);
+                    OnPropertyChanged(nameof(SelectedCpuThreads));
+                }
+
+            }
+        }
+
+        public static IReadOnlyDictionary<string, string?> GetCpuCoreMinThreadCount()
+        {
+            const string LOG_IDENT = "FFlagPresets::GetCpuCoreMinThreadCount";
             Dictionary<string, string?> cpuThreads = new();
 
             // Add the "Automatic" option
@@ -783,68 +1240,10 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             try
             {
-                // Get the number of logical processors
-                int logicalProcessorCount = SystemInfo.GetLogicalProcessorCount();
-
-                // Add options for 1, 2, 3, ..., up to the number of logical processors
-                for (int i = 1; i <= logicalProcessorCount; i++)
-                {
-                    cpuThreads.Add(i.ToString(), i.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                // Log the error if something goes wrong
-                App.Logger.WriteLine(LOG_IDENT, $"Failed to get CPU thread count: {ex.Message}");
-            }
-
-            return cpuThreads;
-        }
-
-        public IReadOnlyDictionary<string, string?>? CpuThreads => GetCpuThreads();
-
-        public KeyValuePair<string, string?> SelectedCpuThreads
-        {
-            get
-            {
-                string currentValue = App.FastFlags.GetPreset("Rendering.CpuCore1") ?? "Automatic";
-                return CpuThreads?.FirstOrDefault(kvp => kvp.Key == currentValue) ?? default;
-            }
-            set
-            {
-                // Update all CpuCore presets
-                for (int i = 1; i <= 7; i++)
-                {
-                    App.FastFlags.SetPreset($"Rendering.CpuCore{i}", value.Value);
-                }
-
-                // Update CpuThreads preset based on parsed integer value
-                if (!string.IsNullOrEmpty(value.Value) && int.TryParse(value.Value, out int parsedValue))
-                {
-                    int adjustedValue = Math.Max(parsedValue - 1, 1); // Ensure minimum is 1
-                    App.FastFlags.SetPreset("Rendering.CpuThreads", adjustedValue.ToString());
-                }
-                else
-                {
-                    App.FastFlags.SetPreset("Rendering.CpuThreads", null);
-                }
-
-                OnPropertyChanged(nameof(SelectedCpuThreads));
-            }
-        }
-
-        public static IReadOnlyDictionary<string, string?> GetCpuCoreMinThreadCount()
-        {
-            const string LOG_IDENT = "FFlagPresets::GetCpuCoreMinThreadCount";
-            var cpuThreads = new Dictionary<string, string?>();
-
-            // Add the "Automatic" option
-            cpuThreads.Add("Automatic", null);
-
-            try
-            {
+                // Use physical core count or logical, whichever you want:
                 int coreCount = SystemInfo.GetLogicalProcessorCount();
 
+                // Add options for 1, 2, ..., coreCount
                 for (int i = 1; i <= coreCount; i++)
                 {
                     cpuThreads.Add(i.ToString(), i.ToString());
@@ -855,9 +1254,8 @@ namespace Voidstrap.UI.ViewModels.Settings
                 App.Logger.WriteLine(LOG_IDENT, $"Failed to get CPU thread count: {ex.Message}");
             }
 
-            return new ReadOnlyDictionary<string, string?>(cpuThreads);
+            return cpuThreads;
         }
-
 
         public IReadOnlyDictionary<string, string?>? CpuCoreMinThreadCount => GetCpuCoreMinThreadCount();
 

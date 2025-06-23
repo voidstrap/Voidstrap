@@ -13,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using Voidstrap.UI.Elements.Settings.Pages;
 using Voidstrap;
+using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
+using System.Windows.Media.Imaging;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -23,6 +25,8 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     {
         private readonly ObservableCollection<FastFlag> _fastFlagList = new();
         private readonly ObservableCollection<FlagHistoryEntry> _flagHistory = new();
+        private Dictionary<string, DateTime> flagTimeAdded = new Dictionary<string, DateTime>();
+
 
 
         private bool _showPresets = true;
@@ -153,6 +157,19 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             Thread.Sleep(1000);
             ReloadList();
         }
+
+        private async void ShowFFlagSearchDialog()
+        {
+            Exception ex = null;
+
+            var dialog = new FFlagSearch(ex);
+            dialog.ShowDialog();
+
+            await Task.Delay(1000);
+
+            ReloadList();
+        }
+
 
         private void AddSingle(string name, string value)
         {
@@ -319,6 +336,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                         return;
                     }
 
+                    // Move timestamp to new name if exists
+                    if (flagTimeAdded.ContainsKey(oldName))
+                    {
+                        flagTimeAdded[newName] = flagTimeAdded[oldName];
+                        flagTimeAdded.Remove(oldName);
+                    }
+
                     // Record deletion of old flag
                     AddToHistory(oldName, null);
 
@@ -342,20 +366,23 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                     if (string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
                     {
                         // New flag entry
+                        flagTimeAdded[entry.Name] = DateTime.Now;  // record time added
                         AddToHistory(entry.Name, newValue);
                     }
                     else if (oldValue != newValue)
                     {
+                        // Update time added on change (optional)
+                        flagTimeAdded[entry.Name] = DateTime.Now;
                         AddToHistory(entry.Name, newValue);
                     }
 
                     App.FastFlags.SetValue(entry.Name, newValue);
                     break;
-
             }
 
             UpdateTotalFlagsCount();
         }
+
 
 
 
@@ -368,6 +395,8 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         private void AddButton_Click(object sender, RoutedEventArgs e) => ShowAddDialog();
 
         private void FlagProfiles_Click(object sender, RoutedEventArgs e) => ShowProfilesDialog();
+
+        private void FlagFind_Click(object sender, RoutedEventArgs e) => ShowFFlagSearchDialog();
 
         private void DeleteButton_Click(object sender, RoutedEventArgs e)
         {
@@ -678,22 +707,23 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 SearchTextBox.CaretIndex = suggestion.Length;
             }
         }
-
         private void AnimateSuggestionVisibility(double targetOpacity)
         {
-            const int animationDurationMs = 120;
+            const int animationDurationMs = 250;
+            var easing = new CubicEase { EasingMode = EasingMode.EaseInOut };
+
             var opacityAnimation = new DoubleAnimation
             {
                 To = targetOpacity,
                 Duration = TimeSpan.FromMilliseconds(animationDurationMs),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                EasingFunction = easing
             };
 
             var translateAnimation = new DoubleAnimation
             {
                 To = targetOpacity > 0 ? 0 : 10,
                 Duration = TimeSpan.FromMilliseconds(animationDurationMs),
-                EasingFunction = new QuadraticEase { EasingMode = EasingMode.EaseInOut }
+                EasingFunction = easing
             };
 
             opacityAnimation.Completed += (s, e) =>
@@ -708,5 +738,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             SuggestionTextBlock.BeginAnimation(UIElement.OpacityProperty, opacityAnimation);
             SuggestionTranslateTransform.BeginAnimation(TranslateTransform.XProperty, translateAnimation);
         }
+
+
     }
 }

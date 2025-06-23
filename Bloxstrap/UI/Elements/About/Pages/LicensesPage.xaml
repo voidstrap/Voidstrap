@@ -198,25 +198,10 @@
                         Text="Apache 2.0" />
                 </StackPanel>
             </ui:CardAction>
+
             <ui:CardAction
                 Grid.Column="2"
                 Margin="0,-64,0,0"
-                VerticalAlignment="Top"
-                Command="models:GlobalViewModel.OpenWebpageCommand"
-                CommandParameter="https://github.com/fishstrap/fishstrap/blob/main/LICENSE">
-                <StackPanel>
-                    <TextBlock FontSize="14" Text="Fishstrap - MIT" />
-                    <TextBlock
-                        Margin="0,2,0,0"
-                        FontSize="12"
-                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                        Text="{x:Static resources:Strings.Menu_About_Licenses_MIT}" />
-                </StackPanel>
-            </ui:CardAction>
-            <ui:CardAction
-                Grid.RowSpan="3"
-                Grid.Column="2"
-                Margin="0,8,0,0"
                 VerticalAlignment="Top"
                 Command="models:GlobalViewModel.OpenWebpageCommand"
                 CommandParameter="https://github.com/JamesNK/Newtonsoft.Json/blob/master/LICENSE.md">

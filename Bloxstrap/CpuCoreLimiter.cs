@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Voidstrap
 {
@@ -11,25 +12,35 @@ namespace Voidstrap
         /// <param name="coreCount">Number of CPU cores to allow (minimum 1, maximum number of logical processors).</param>
         public static void SetCpuCoreLimit(int coreCount)
         {
-            if (coreCount < 1)
-                coreCount = 1;
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.WriteLine("CPU affinity setting is only supported on Windows.");
+                return;
+            }
 
             int maxCores = Environment.ProcessorCount;
-            if (coreCount > maxCores)
+            if (coreCount < 1)
+                coreCount = 1;
+            else if (coreCount > maxCores)
                 coreCount = maxCores;
 
-            // Create an affinity mask with coreCount bits set to 1
-            IntPtr affinityMask = (IntPtr)((1 << coreCount) - 1);
-
-            Process currentProcess = Process.GetCurrentProcess();
             try
             {
-                currentProcess.ProcessorAffinity = affinityMask;
-                Console.WriteLine($"CPU affinity set to {coreCount} core(s).");
+                long affinityMask = 0;
+                for (int i = 0; i < coreCount; i++)
+                {
+                    affinityMask |= 1L << i;
+                }
+
+                Process currentProcess = Process.GetCurrentProcess();
+                currentProcess.ProcessorAffinity = (IntPtr)affinityMask;
+
+                Console.WriteLine($"CPU affinity successfully set to {coreCount} core(s).");
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Failed to set CPU affinity: " + ex.Message);
+                Console.WriteLine("Failed to set CPU affinity.");
+                Console.WriteLine($"Error: {ex.Message}");
             }
         }
     }

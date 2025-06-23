@@ -20,14 +20,14 @@ namespace Voidstrap.UI.Utility
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
         private interface ITaskbarList3
         {
-            int HrInit();
-            int AddTab(IntPtr hwnd);
-            int DeleteTab(IntPtr hwnd);
-            int ActivateTab(IntPtr hwnd);
-            int SetActiveAlt(IntPtr hwnd);
-            int MarkFullscreenWindow(IntPtr hwnd, [MarshalAs(UnmanagedType.Bool)] bool fFullscreen);
-            int SetProgressValue(IntPtr hwnd, ulong ullCompleted, ulong ullTotal);
-            int SetProgressState(IntPtr hwnd, TaskbarStates state);
+            void HrInit();
+            void AddTab(IntPtr hwnd);
+            void DeleteTab(IntPtr hwnd);
+            void ActivateTab(IntPtr hwnd);
+            void SetActiveAlt(IntPtr hwnd);
+            void MarkFullscreenWindow(IntPtr hwnd, [MarshalAs(UnmanagedType.Bool)] bool fFullscreen);
+            void SetProgressValue(IntPtr hwnd, ulong ullCompleted, ulong ullTotal);
+            void SetProgressState(IntPtr hwnd, TaskbarStates state);
         }
 
         [ComImport]
@@ -35,8 +35,8 @@ namespace Voidstrap.UI.Utility
         [ClassInterface(ClassInterfaceType.None)]
         private class TaskbarInstance { }
 
-        private static readonly object _lock = new object();
-        private static ITaskbarList3 _taskbar;
+        private static readonly object _lock = new();
+        private static ITaskbarList3? _taskbar;
 
         private static ITaskbarList3 GetTaskbar()
         {
@@ -61,17 +61,25 @@ namespace Voidstrap.UI.Utility
             _ => throw new ArgumentOutOfRangeException(nameof(state), state, "Unknown TaskbarItemProgressState")
         };
 
-        public static int SetProgressState(IntPtr windowHandle, TaskbarItemProgressState taskbarState)
+        /// <summary>
+        /// Sets the taskbar progress state (e.g. Normal, Error, Paused).
+        /// </summary>
+        public static void SetProgressState(IntPtr windowHandle, TaskbarItemProgressState state)
         {
-            return GetTaskbar().SetProgressState(windowHandle, ConvertEnum(taskbarState));
+            GetTaskbar().SetProgressState(windowHandle, ConvertEnum(state));
         }
 
-        public static int SetProgressValue(IntPtr windowHandle, int progressValue, int progressMax)
+        /// <summary>
+        /// Sets the progress value shown in the taskbar.
+        /// </summary>
+        public static void SetProgressValue(IntPtr windowHandle, int value, int maximum)
         {
-            return GetTaskbar().SetProgressValue(windowHandle, (ulong)progressValue, (ulong)progressMax);
+            GetTaskbar().SetProgressValue(windowHandle, (ulong)value, (ulong)maximum);
         }
 
-        // Call this on application exit or when taskbar usage is no longer needed
+        /// <summary>
+        /// Releases COM resources. Call this on shutdown.
+        /// </summary>
         public static void Dispose()
         {
             lock (_lock)

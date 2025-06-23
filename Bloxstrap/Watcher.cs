@@ -110,7 +110,7 @@ namespace Voidstrap
             ActivityWatcher?.Start();
 
             while (Utilities.GetProcessesSafe().Any(x => x.Id == _watcherData.ProcessId))
-                await Task.Delay(1000);
+                await Task.Delay(500);
 
             if (_watcherData.AutoclosePids is not null)
             {

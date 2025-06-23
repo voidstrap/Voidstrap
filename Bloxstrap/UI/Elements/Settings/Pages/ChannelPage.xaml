@@ -36,7 +36,7 @@
 
         <controls:OptionControl 
     Header="CPU Core Limit"
-    Description="Limit the max CPU cores that the app uses. (This feature is currently in **beta**)">
+    Description="Limit the max CPU cores that the app uses. (This feature is currently in **beta** and does not work)">
 
             <ComboBox Grid.Column="1" Margin="8,0,8,0" Padding="10,5,10,5" Width="200"
               ItemsSource="{Binding CpuLimitOptions}" 
@@ -236,71 +236,5 @@
             </ui:CardControl.Header>
             <ComboBox Margin="5,0,0,0" Padding="10,5,10,5" Width="200" ItemsSource="{Binding ChannelChangeModes.Keys, Mode=OneTime}" Text="{Binding SelectedChannelChangeMode, Mode=TwoWay}" />
         </ui:CardControl>
-
-
-        <!--  Data Export Section  -->
-        <ui:CardExpander Margin="0,8,0,0" >
-            <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14" Text="{x:Static resources:Strings.Menu_Voidstrap_ExportData_Title}" />
-                        <TextBlock
-                            FontSize="12"
-                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                            Text="{x:Static resources:Strings.Menu_Voidstrap_ExportData_Description}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-
-                    <!--  Export Button  -->
-                    <ui:Button
-                        Grid.Column="1"
-                        MinWidth="100"
-                        Margin="0,0,16,0"
-                        Command="{Binding ExportDataCommand}"
-                        Content="{x:Static resources:Strings.Common_Export}"
-                        Icon="CopySelect20" >
-                        <ui:Button.Style>
-                            <Style BasedOn="{StaticResource {x:Type ui:Button}}" TargetType="ui:Button">
-                                <Style.Triggers>
-                                    <MultiDataTrigger>
-                                        <MultiDataTrigger.Conditions>
-                                            <Condition Binding="{Binding ElementName=ShouldExportConfig, Path=IsChecked}" Value="False" />
-                                            <Condition Binding="{Binding ElementName=ShouldExportLogs, Path=IsChecked}" Value="False" />
-                                        </MultiDataTrigger.Conditions>
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </MultiDataTrigger>
-                                </Style.Triggers>
-                                <Setter Property="IsEnabled" Value="True" />
-                            </Style>
-                        </ui:Button.Style>
-                    </ui:Button>
-                </Grid>
-            </ui:CardExpander.Header>
-
-            <!--  Export Checkboxes  -->
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <CheckBox
-                    Name="ShouldExportConfig"
-                    Grid.Column="0"
-                    Content="{x:Static resources:Strings.Menu_Voidstrap_ExportData_ExportConfig}"
-                    IsChecked="{Binding ShouldExportConfig}" />
-
-                <CheckBox
-                    Name="ShouldExportLogs"
-                    Grid.Column="1"
-                    Content="{x:Static resources:Strings.Menu_Voidstrap_ExportData_ExportLogs}"
-                    IsChecked="{Binding ShouldExportLogs}" />
-            </Grid>
-        </ui:CardExpander>
     </StackPanel>
 </ui:UiPage>

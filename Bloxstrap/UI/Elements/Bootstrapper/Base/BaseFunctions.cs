@@ -1,15 +1,14 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 
 namespace Voidstrap.UI.Elements.Bootstrapper.Base
 {
     static class BaseFunctions
     {
-        public static void ShowSuccess(string message, Action? callback)
+        public static void ShowSuccess(string message, Action? callback = null)
         {
             Frontend.ShowMessageBox(message, MessageBoxImage.Information);
-
-            if (callback is not null)
-                callback();
+            callback?.Invoke();
 
             App.Terminate();
         }

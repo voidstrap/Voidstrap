@@ -24,6 +24,7 @@ namespace Voidstrap.Models.Persistable
 
         public int CpuCoreLimit { get; set; } = Environment.ProcessorCount;
 
+        public bool DisableSplashScreen { get; set; } = true;
         public bool VoidstrapRPCReal { get; set; } = true;
         public bool EnableAnalytics { get; set; } = true;
         public bool ShouldExportConfig { get; set; } = true;

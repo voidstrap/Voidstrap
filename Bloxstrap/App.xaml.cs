@@ -24,10 +24,10 @@ namespace Voidstrap
         public const string ProjectName = "Voidstrap";
 #endif
         public const string ProjectOwner = "Voidstrap";
-        public const string ProjectRepository = "Voidstrap/Voidstrap";
-        public const string ProjectDownloadLink = "https://github.com/Voidstrap/Voidstrap/releases";
+        public const string ProjectRepository = "/voidstrap/Voidstrap/";
+        public const string ProjectDownloadLink = "https://github.com/voidstrap/Voidstrap/releases";
         public const string ProjectHelpLink = "https://github.com/BloxstrapLabs/Bloxstrap/wiki";
-        public const string ProjectSupportLink = "https://github.com/Voidstrap/Voidstrap/issues/new";
+        public const string ProjectSupportLink = "https://github.com/voidstrap/Voidstrap/issues/new";
 
         public const string RobloxPlayerAppName = "RobloxPlayerBeta";
         public const string RobloxStudioAppName = "RobloxStudioBeta";
@@ -149,7 +149,7 @@ namespace Voidstrap
 
             try
             {
-                var releaseInfo = await Http.GetJson<GithubRelease>($""); //Glitchy so removed for now Adding back soon sowy
+                var releaseInfo = await Http.GetJson<GithubRelease>($"https://api.github.com/repos/{ProjectRepository}/releases/latest");
 
                 if (releaseInfo is null || releaseInfo.Assets is null)
                 {
@@ -191,7 +191,31 @@ namespace Voidstrap
                 Terminate(ErrorCode.ERROR_INVALID_FUNCTION);
             }
         }
+        private void InitializeDiscordRPC()
+        {
+            const string discordAppId = "1375529225230094507";
 
+            DiscordClient = new DiscordRpcClient(discordAppId)
+            {
+                Logger = new ConsoleLogger() { Level = LogLevel.Warning }
+            };
+
+            if (Settings.Prop.VoidstrapRPCReal)
+            {
+                DiscordClient.Initialize();
+
+                // Set presence only after initialization
+                DiscordClient.SetPresence(new DiscordRPC.RichPresence()
+                {
+                    State = "Using Voidstrap",
+                    Assets = new DiscordRPC.Assets()
+                    {
+                        LargeImageKey = "large_image",
+                        LargeImageText = "Voidstrap"
+                    }
+                });
+            }
+        }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -321,14 +345,27 @@ namespace Voidstrap
                     Terminate();
                 }
 
-                // Removed some Code SO MEDDSAM DONT STEAL
-
                 DownloadStats.Load();
                 State.Load();
                 RobloxState.Load();
                 FastFlags.Load();
 
                 Settings.Load();
+
+                if (Settings?.Prop?.WPFSoftwareRender == true)
+                {
+                    HardwareAcceleration.DisableAllAnimations();
+                    HardwareAcceleration.FreeMemory();
+                    HardwareAcceleration.OptimizeVisualRendering();
+                    HardwareAcceleration.DisableTransparencyEffects();
+                    HardwareAcceleration.MinimizeMemoryFootprint();
+                }
+
+                if (Settings?.Prop?.VoidstrapRPCReal == true)
+                {
+                    InitializeDiscordRPC();
+                }
+
                 if (!Locale.SupportedLocales.ContainsKey(Settings.Prop.Locale))
                 {
                     Settings.Prop.Locale = "nil";

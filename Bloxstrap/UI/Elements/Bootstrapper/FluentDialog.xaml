@@ -29,8 +29,8 @@
     <!--  Background is for Aero theme only  -->
     <Grid>
         <!-- Background Image -->
-        <Image Source="/UI/Elements/Bootstrapper/GalaxyBB.jpeg"
-           Stretch="Fill"/>
+        <Image Source="/UI/Elements/Bootstrapper/Purple.png"
+           Stretch="Fill" OpacityMask="Black"/>
 
         <!-- Color Overlay -->
         <Rectangle Fill="{Binding Path=BackgroundColourBrush, Mode=OneWay}"/>

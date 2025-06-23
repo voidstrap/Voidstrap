@@ -28,6 +28,10 @@ namespace Voidstrap
             // Memory Probing
             { "Memory.Probe", "DFFlagPerformanceControlEnableMemoryProbing3" },
 
+            //Optimize charcater frame
+           { "OptimizeCFrameUpdates", "FFlagOptimizeCFrameUpdates4" },
+           { "OptimizeCFrameUpdatesIC", "FFlagOptimizeCFrameUpdatesIC4" },
+
             // frm quality level
             { "Rendering.FrmQuality", "DFIntDebugFRMQualityLevelOverride" },
 
@@ -50,7 +54,6 @@ namespace Voidstrap
             { "Network.MaxWorkCatchupMs", "DFIntBandwidthManagerDataSenderMaxWorkCatchupMs" },
 
             // Load Faster
-            { "Network.AssetPreloadding", "DFIntAssetPreloading" },
             { "Network.MeshPreloadding", "DFFlagEnableMeshPreloading2" },
             { "Network.MaxAssetPreload", "DFIntNumAssetsMaxToPreload" },
             { "Network.PlayerImageDefault", "FStringGetPlayerImageDefaultTimeout" },
@@ -64,11 +67,14 @@ namespace Voidstrap
             { "Network.Payload6", "DFIntRccTcMaxPayloadRcv" },
             { "Network.Payload7", "DFIntCliTcMaxPayloadSnd" },
             { "Network.Payload8", "DFIntRccTcMaxPayloadSnd" },
+            { "Network.Payload9", "DFIntMaxDataPayloadSize" },
+            { "Network.Payload10", "DFIntMaxUREPayloadSingleLimit" },
+            { "Network.Payload11", "DFIntTotalRepPayloadLimit" },
 
             // Allow vulkan on older gpus
             { "Rendering.ForceVulkan", "FStringBuggyRenderpassList2" },
 
-            //Brighter Visuals
+            // Brighter Visuals
             { "Rendering.BrighterVisual", "FFlagRenderFixFog" },
 
             // Remove Grass
@@ -80,58 +86,91 @@ namespace Voidstrap
             { "UI.TextSize1", "FFlagEnablePreferredTextSizeScale"},
             { "UI.TextSize2", "FFlagEnablePreferredTextSizeSettingInMenus2" },
 
+            // Debug
+            { "Debug.FlagState", "FStringDebugShowFlagState" },
+            { "Debug.PingBreakdown", "DFFlagDebugPrintDataPingBreakDown" },
+            { "Debug.Chunks", "FFlagDebugLightGridShowChunks" },
+
             // Rainbow Text
             { "UI.RainbowText", "FFlagDebugDisplayUnthemedInstances" },
 
-            // Debug
-            { "Debug.FlagState", "FStringDebugShowFlagState"},
-            { "Debug.PingBreakdown", "DFFlagDebugPrintDataPingBreakDown" },
-
             // Cpu Threads
             { "Rendering.CpuThreads", "DFIntRuntimeConcurrency"},
-            
-            // Gray Sky
-            { "Rendering.GraySky", "FFlagDebugSkyGray" },
+
+            // Sky
+            { "Graphic.GraySky", "FFlagDebugSkyGray" },
+            { "Graphic.WhiteSky", "FFlagSkyUseRGBEEncoding" },
+
+            // Fake Verify Icon!
+            { "Fake.Verify", "FStringWhitelistVerifiedUserId" },
+
+            { "Camera.Controls", "FFlagNewCameraControls" },
+            { "Camera.Chat", "FFlagDebugForceChatDisabled" },
+
+            // Pseudolocalization
+            { "UI.Pseudolocalization", "FFlagDebugEnablePseudolocalization" },
+
+            { "Rendering.Shaders", "DFIntRenderClampRoughnessMax" },
+            { "Rendering.Shaders2", "DFIntDebugFRMQualityLevelOverride" },
+
+            // Webview2 telemetry
+            { "Telemetry.Webview1", "DFStringWebviewUrlAllowlist" },
+            { "Telemetry.Webview2", "DFFlagWindowsWebViewTelemetryEnabled" },
+            { "Telemetry.Webview3", "DFIntMacWebViewTelemetryThrottleHundredthsPercent" },
+            { "Telemetry.Webview4", "DFIntWindowsWebViewTelemetryThrottleHundredthsPercent" },
+            { "Telemetry.Webview5", "FIntStudioWebView2TelemetryHundredthsPercent" },
+            { "Telemetry.Webview6", "FFlagSyncWebViewCookieToEngine2" },
+            { "Telemetry.Webview7", "FFlagUpdateHTTPCookieStorageFromWKWebView" },
 
             // Refresh Rate
             { "System.TargetRefreshRate1", "DFIntGraphicsOptimizationModeFRMFrameRateTarget" },
-            { "System.TargetRefreshRate2", "FIntTargetRefreshRate" },
-            { "System.TargetRefreshRate3", "FIntRefreshRateLowerBound" },
+            { "System.TargetRefreshRate2", "DFIntGraphicsOptimizationModeMaxFrameTimeTargetMs" },
+            { "System.TargetRefreshRate3", "DFIntGraphicsOptimizationModeMinFrameTimeTargetMs" },
 
             // Presets and stuff
+            { "Rendering.LimitFramerate", "FFlagTaskSchedulerLimitTargetFpsTo2402" },
             { "Rendering.Framerate", "DFIntTaskSchedulerTargetFps" },
             { "Rendering.DisableScaling", "DFFlagDisableDPIScale" },
-            { "Rendering.DisableScaling2", "DFFlagDebugOverrideDPIScale" },
-            { "Rendering.MSAA", "FIntDebugForceMSAASamples" },
+            { "Rendering.MSAA1", "FIntDebugForceMSAASamples" },
+            { "Rendering.MSAA2", "FIntDebugFRMOptionalMSAALevelOverride" },
             { "Rendering.DisablePostFX", "FFlagDisablePostFx" },
 
-            // Cpu Optimization
-            { "Rendering.CpuCore1", "DFIntInterpolationNumParallelTasks" },
-            { "Rendering.CpuCore2", "DFIntMegaReplicatorNumParallelTasks" },
-            { "Rendering.CpuCore3", "DFIntNetworkClusterPacketCacheNumParallelTasks" },
-            { "Rendering.CpuCore4", "DFIntReplicationDataCacheNumParallelTasks" },
-            { "Rendering.CpuCore5", "FIntLuaGcParallelMinMultiTasks" },
-            { "Rendering.CpuCore6", "FIntSmoothClusterTaskQueueMaxParallelTasks" },
-            { "Rendering.CpuCore7", "DFIntPhysicsReceiveNumParallelTasks" },
+            // Force Logical Processors
+            { "System.CpuCore1", "DFIntInterpolationNumParallelTasks" },
+            { "System.CpuCore2", "DFIntMegaReplicatorNumParallelTasks" },
+            { "System.CpuCore3", "DFIntNetworkClusterPacketCacheNumParallelTasks" },
+            { "System.CpuCore4", "DFIntReplicationDataCacheNumParallelTasks" },
+            { "System.CpuCore5", "FIntLuaGcParallelMinMultiTasks" },
+            { "System.CpuCore6", "FIntSmoothClusterTaskQueueMaxParallelTasks" },
+            { "System.CpuCore7", "DFIntPhysicsReceiveNumParallelTasks" },
+            { "System.CpuCore8", "FIntTaskSchedulerAutoThreadLimit" },
+            { "System.CpuCore9", "FIntSimWorldTaskQueueParallelTasks" },
             { "System.CpuThreads", "DFIntRuntimeConcurrency"},
 
             // Cpu cores
             { "System.CpuCoreMinThreadCount", "FIntTaskSchedulerAsyncTasksMinimumThreadCount"},
 
-            //Chat Bubble
+            // Chat Bubble
             { "UI.Chatbubble", "FFlagEnableBubbleChatFromChatService" },
 
-            //Light Cullings
+            // Light Cullings
             { "Rendering.GpuCulling", "FFlagFastGPULightCulling3" },
             { "Rendering.CpuCulling", "FFlagDebugForceFSMCPULightCulling" },           
 
-            //Unlimited Camera Distance
+            // Unlimited Camera Distance
             { "Rendering.Camerazoom","FIntCameraMaxZoomDistance" },
 
-            //MTU Size
+            // Remove Sky/Clouds
+            { "Rendering.NoFrmBloom", "FFlagRenderNoLowFrmBloom"},
+            { "Rendering.FRMRefactor", "FFlagFRMRefactor"},
+
+            // Minimal Rendering
+            { "Rendering.MinimalRendering", "FFlagDebugRenderingSetDeterministic"},
+
+            // MTU Size
             { "Network.Mtusize","DFIntConnectionMTUSize" },
 
-            //Dynamic Render Resolution
+            // Dynamic Render Resolution
             { "Rendering.Dynamic.Resolution","DFIntDebugDynamicRenderKiloPixels"},
 
             // Rendering engines
@@ -152,23 +191,31 @@ namespace Voidstrap
             { "Rendering.Lighting.Voxel", "DFFlagDebugRenderForceTechnologyVoxel" },
             { "Rendering.Lighting.ShadowMap", "FFlagDebugForceFutureIsBrightPhase2" },
             { "Rendering.Lighting.Future", "FFlagDebugForceFutureIsBrightPhase3" },
-            { "Rendering.Lighting.Unified", "FFlagRenderUnifiedLighting12"},
+            { "Rendering.Lighting.Unified", "FFlagRenderUnifiedLighting13"},
+
+            // Worser Particles
+            { "Rendering.WorserParticles1", "FFlagFixOutdatedParticles2" },
+            { "Rendering.WorserParticles2", "FFlagFixOutdatedTimeScaleParticles" },
+            { "Rendering.WorserParticles3", "FFlagFixParticleAttachmentCulling" },
+            { "Rendering.WorserParticles4", "FFlagFixParticleEmissionBias2" },
+
+            // Low Poly Meshes
+            { "Rendering.LowPolyMeshes1", "DFIntCSGLevelOfDetailSwitchingDistance" },
+            { "Rendering.LowPolyMeshes2", "DFIntCSGLevelOfDetailSwitchingDistanceL12" },
+            { "Rendering.LowPolyMeshes3", "DFIntCSGLevelOfDetailSwitchingDistanceL23" },
+            { "Rendering.LowPolyMeshes4", "DFIntCSGLevelOfDetailSwitchingDistanceL34" },
+
+            // Low Quality on Low-End Devices
+            { "Rendering.AndroidVfs", "FStringAndroidVfsLowspecHwCondition" },
+
+            // BGRA
+            { "Rendering.BGRA", "FFlagD3D11SupportBGRA" },
 
             // Texture quality
             { "Rendering.TerrainTextureQuality", "FIntTerrainArraySliceSize" },
             { "Rendering.TextureSkipping.Skips", "FIntDebugTextureManagerSkipMips" },
             { "Rendering.TextureQuality.Level", "DFIntTextureQualityOverride" },
             { "Rendering.TextureQuality.OverrideEnabled", "DFFlagTextureQualityOverrideEnabled" },
-
-            // VoiceChat Google
-            { "VoiceChat.VoiceChat1", "FFlagTopBarUseNewBadge" },
-            { "VoiceChat.VoiceChat2", "FStringTopBarBadgeLearnMoreLink" },
-            { "VoiceChat.VoiceChat3", "FStringVoiceBetaBadgeLearnMoreLink" },
-
-            // VoiceChat Other
-            { "VoiceChat.VoiceChat4", "DFIntVoiceChatVolumeThousandths" },
-            { "VoiceChat.VoiceChat5", "FFlagEnablePartyVoiceOnlyForUnfilteredThreads" },
-            { "VoiceChat.VoiceChat6", "FFlagEnablePartyVoiceOnlyForEligibleUsers" },
 
 
             // Guis
@@ -177,6 +224,46 @@ namespace Voidstrap
             { "UI.FontSize", "FIntFontSizePadding" },
             { "UI.RedFont", "FStringDebugHighlightSpecificFont" },
 
+            // New Fps System
+            { "Rendering.NewFpsSystem", "FFlagEnableFPSAndFrameTime"},
+            { "Rendering.FrameRateBufferPercentage", "FIntMaquettesFrameRateBufferPercentage"},
+
+            
+            // Better Packet Sending
+            { "Network.BetterPacketSending1", "DFIntNetworkStopProducingPacketsToProcessThresholdMs" },
+            { "Network.BetterPacketSending2", "DFIntMaxWaitTimeBeforeForcePacketProcessMS" },
+            { "Network.BetterPacketSending3", "DFIntClientPacketMaxDelayMs" },
+            { "Network.BetterPacketSending4", "DFIntClientPacketMinMicroseconds" },
+            { "Network.BetterPacketSending5", "DFIntClientPacketExcessMicroseconds" },
+            { "Network.BetterPacketSending6", "DFIntClientPacketMaxFrameMicroseconds" },
+            { "Network.BetterPacketSending7", "DFIntMaxProcessPacketsJobScaling" },
+            { "Network.BetterPacketSending8", "DFIntMaxProcessPacketsStepsAccumulated" },
+            { "Network.BetterPacketSending9", "DFIntMaxProcessPacketsStepsPerCyclic" },
+
+            // Recommended Buffering
+            { "Recommended.Buffer", "FIntRakNetResendBufferArrayLength" },
+
+            // Voicechat Telemetry
+            { "Telemetry.Voicechat1", "DFFlagVoiceChatCullingRecordEventIngestTelemetry" },
+            { "Telemetry.Voicechat2", "DFFlagVoiceChatJoinProfilingUsingTelemetryStat_RCC" },
+            { "Telemetry.Voicechat3", "DFFlagVoiceChatPossibleDuplicateSubscriptionsTelemetry" },
+            { "Telemetry.Voicechat4", "DFIntVoiceChatTaskStatsTelemetryThrottleHundrethsPercent" },
+            { "Telemetry.Voicechat5", "FFlagEnableLuaVoiceChatAnalyticsV2" },
+            { "Telemetry.Voicechat6", "FFlagLuaVoiceChatAnalyticsBanMessage" },
+            { "Telemetry.Voicechat7", "FFlagLuaVoiceChatAnalyticsUseCounterV2" },
+            { "Telemetry.Voicechat8", "FFlagLuaVoiceChatAnalyticsUseEventsV2" },
+            { "Telemetry.Voicechat9", "FFlagLuaVoiceChatAnalyticsUsePointsV2" },
+            { "Telemetry.Voicechat10", "FFlagVoiceChatCullingEnableMutedSubsTelemetry" },
+            { "Telemetry.Voicechat11", "FFlagVoiceChatCullingEnableStaleSubsTelemetry" },
+            { "Telemetry.Voicechat12", "FFlagVoiceChatCustomAudioDeviceEnableNeedMorePlayoutTelemetry" },
+            { "Telemetry.Voicechat13", "FFlagVoiceChatCustomAudioDeviceEnableNeedMorePlayoutTelemetry3" },
+            { "Telemetry.Voicechat14", "FFlagVoiceChatCustomAudioMixerEnableUpdateSourcesTelemetry2" },
+            { "Telemetry.Voicechat15", "FFlagVoiceChatDontSendTelemetryForPubIceTrickle" },
+            { "Telemetry.Voicechat16", "FFlagVoiceChatPeerConnectionTelemetryDetails" },
+            { "Telemetry.Voicechat17", "FFlagVoiceChatRobloxAudioDeviceUpdateRecordedBufferTelemetryEnabled" },
+            { "Telemetry.Voicechat18", "FFlagVoiceChatSubscriptionsDroppedTelemetry" },
+            { "Telemetry.Voicechat19", "FIntLuaVoiceChatAnalyticsPointsThrottle" },
+            { "Telemetry.Voicechat20", "FIntVoiceChatPerfSensitiveTelemetryIntervalSeconds" },
 
             // Telemetry
             { "Telemetry.GraphicsQualityUsage", "DFFlagGraphicsQualityUsageTelemetry" },
@@ -187,21 +274,21 @@ namespace Voidstrap
             { "Telemetry.FmodErrors", "DFFlagEnableFmodErrorsTelemetry" },
             { "Telemetry.SoundLength", "DFFlagRccLoadSoundLengthTelemetryEnabled" },
             { "Telemetry.AssetRequestV1", "DFFlagReportAssetRequestV1Telemetry" },
-            { "Telemetry.SeparateEventPoints", "DFFlagPerformanceControlUseSeparateTelemetryEventsForPointsAndEventIngest_DataCenterFilter" },
             { "Telemetry.DeviceRAM", "DFFlagRobloxTelemetryAddDeviceRAMPointsV2" },
             { "Telemetry.V2FrameRateMetrics", "DFFlagEnableTelemetryV2FRMStats" },
             { "Telemetry.GlobalSkipUpdating", "DFFlagEnableSkipUpdatingGlobalTelemetryInfo2" },
             { "Telemetry.CallbackSafety", "DFFlagEmitSafetyTelemetryInCallbackEnable" },
             { "Telemetry.V2PointEncoding", "DFFlagRobloxTelemetryV2PointEncoding" },
             { "Telemetry.ReplaceSeparator", "DFFlagDSTelemetryV2ReplaceSeparator" },
-            { "Telemetry.EpCounter", "FFlagDebugDisableTelemetryEphemeralCounter" },
-            { "Telemetry.EpStats", "FFlagDebugDisableTelemetryEphemeralStat" },
-            { "Telemetry.Event", "FFlagDebugDisableTelemetryEventIngest" },
-            { "Telemetry.Point", "FFlagDebugDisableTelemetryPoint" },
+            { "Telemetry.TelemetryV2Url", "DFStringTelemetryV2Url" },
+            { "Telemetry.Protocol", "FFlagEnableTelemetryProtocol" },
+            { "Telemetry.TelemetryService", "FFlagEnableTelemetryService1" },
+            { "Telemetry.PropertiesTelemetry", "FFlagPropertiesEnableTelemetry" },
+            { "Telemetry.OpenTelemetry", "FFlagOpenTelemetryEnabled" },
+            { "Telemetry.FLogTelemetry", "FLogRobloxTelemetry" },
 
             // DarkMode
             { "DarkMode.BlueMode", "FFlagLuaAppEnableFoundationColors7"},
-
 
             // Clothing
             { "Layered.Clothing", "DFIntLCCageDeformLimit"},
@@ -215,7 +302,7 @@ namespace Voidstrap
             { "Preload.ItemPreload", "FFlagPreloadTextureItemsOption4"},
             { "Preload.Teleport2", "DFFlagTeleportPreloadingMetrics5"},
 
-            // Next Gen Replicator
+            // R core
             { "Network.RCore1", "DFIntSignalRCoreServerTimeoutMs"},
             { "Network.RCore2", "DFIntSignalRCoreRpcQueueSize"},
             { "Network.RCore3", "DFIntSignalRCoreHubBaseRetryMs"},
@@ -223,18 +310,28 @@ namespace Voidstrap
             { "Network.RCore5", "DFIntSignalRCoreKeepAlivePingPeriodMs"},
             { "Network.RCore6", "DFIntSignalRCoreHubMaxBackoffMs"},
 
-            // Next Gen Replicator
+            // Enable Large Replicator
             { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled6"},
-            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite4"},
-            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead4"},
+            { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite5"},
+            { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead5"},
+            { "Network.EngineModule1", "FFlagGlobalSettingsEngineModule3"},
+            { "Network.EngineModule2", "DFFlagLargeReplicatorEngineModule"},
+            { "Network.SerializeRead", "FFlagLargeReplicatorSerializeRead2"},
+            { "Network.SerializeWrite", "FFlagLargeReplicatorSerializeWrite2"},
 
-            // Ads
-            { "UI.Disable.Ads", "FFlagAdServiceEnabled" },
+
+            // Turn Off Ads
+            { "UI.DisableAds1", "FFlagAdServiceEnabled" },
+            { "UI.DisableAds2", "FFlagEnableSponsoredAdsGameCarouselTooltip3" },
+            { "UI.DisableAds3", "FFlagEnableSponsoredAdsPerTileTooltipExperienceFooter" },
+            { "UI.DisableAds4", "FFlagEnableSponsoredAdsSeeAllGamesListTooltip" },
+            { "UI.DisableAds5", "FFlagEnableSponsoredTooltipForAvatarCatalog2" },
+            { "UI.DisableAds6", "FFlagLuaAppSponsoredGridTiles" },
             
             // Fullscreen bar
             { "UI.FullscreenTitlebarDelay", "FIntFullscreenTitleBarTriggerDelayMillis" },
 
-            // useless
+            // Useless
             { "UI.Menu.Style.V2Rollout", "FIntNewInGameMenuPercentRollout3" },
             { "UI.Menu.Style.EnableV4.1", "FFlagEnableInGameMenuControls" },
             { "UI.Menu.Style.EnableV4.2", "FFlagEnableInGameMenuModernization" },
@@ -257,21 +354,22 @@ namespace Voidstrap
             // No More Middle
             { "UI.RemoveMiddle", "FFlagUIBloxMoveDetailsPageToLuaApps" },
 
-            //Distance Rendering
+            // Distance Rendering
             { "Rendering.Distance.Chunks", "DFIntDebugRestrictGCDistance" },
 
-            //Romark
+            // Romark
             { "Rendering.Start.Graphic", "FIntRomarkStartWithGraphicQualityLevel" },
 
             // Chrome ui
             { "UI.Menu.ChromeUI", "FFlagEnableInGameMenuChromeABTest4" },
             { "UI.Menu.ChromeUI2", "FFlagEnableInGameMenuChrome" },
 
-            
             // Preferred GPU
-            { "Rendering.PreferredGPU", "FStringDebugGraphicsPreferredGPUName"},
+            { "System.PreferredGPU", "FStringDebugGraphicsPreferredGPUName"},
+            { "System.DXT", "FStringGraphicsDisableUnalignedDxtGPUNameBlacklist"},
+            { "System.BypassVulkan", "FStringVulkanBuggyRenderpassList2"},
 
-            // prerender
+            // Prerender
             { "Rendering.Prerender", "FFlagMovePrerender" },
             { "Rendering.PrerenderV2", "FFlagMovePrerenderV2" },
 
@@ -287,7 +385,50 @@ namespace Voidstrap
             { "UI.Menu.Style.ABTest.1", "FFlagEnableMenuControlsABTest" },
             { "UI.Menu.Style.ABTest.2", "FFlagEnableV3MenuABTest3" },
             { "UI.Menu.Style.ABTest.3", "FFlagEnableInGameMenuChromeABTest3" },
-            { "UI.Menu.Style.ABTest.4", "FFlagEnableInGameMenuChromeABTest4" }
+            { "UI.Menu.Style.ABTest.4", "FFlagEnableInGameMenuChromeABTest4" },
+
+            
+            // Old ChromeUI
+            { "UI.OldChromeUI1", "FFlagEnableHamburgerIcon"},
+            { "UI.OldChromeUI2", "FFlagEnableUnibarV4IA"},
+            { "UI.OldChromeUI3", "FFlagEnableAlwaysOpenUnibar2"},
+            { "UI.OldChromeUI4", "FFlagUseNewUnibarIcon"},
+            { "UI.OldChromeUI5", "FFlagUseSelfieViewFlatIcon"},
+            { "UI.OldChromeUI6", "FFlagUnibarRespawn"},
+            { "UI.OldChromeUI7", "FFlagEnableChromePinIntegrations2"},
+            { "UI.OldChromeUI8", "FFlagEnableUnibarMaxDefaultOpen"},
+            { "UI.OldChromeUI9", "FFlagUpdateHealthBar"},
+            { "UI.OldChromeUI10", "FFlagUseNewPinIcon"},
+
+            // Cache Size Improvement
+            { "Cache.Increase1",  "FFlagClearCacheableContentProviderOnGameLaunch" },
+            { "Cache.Increase2",  "DFFlagAlwaysSkipDiskCache" },
+            { "Cache.Increase3",  "FFlagUseCachedAudibilityMeasurements" },
+            { "Cache.Increase4",  "DFIntCachedPatchLoadDelayMilliseconds" },
+            { "Cache.Increase5",  "DFIntHttpCacheCleanScheduleAfterMs" },
+            { "Cache.Increase6",  "DFIntHttpCacheCleanUpToAvailableSpaceMiB" },
+            { "Cache.Increase7",  "DFIntHttpCacheAsyncWriterMaxPendingSize" },
+            { "Cache.Increase8",  "DFIntHttpCacheEvictionExemptionMapMaxSize" },
+            { "Cache.Increase9",  "DFIntHttpCacheReportSlowWritesMinDuration" },
+            { "Cache.Increase10", "DFIntMemCacheMaxCapacityMB" },
+            { "Cache.Increase11", "DFIntFileCacheReserveSize" },
+            { "Cache.Increase12", "DFIntThirdPartyInMemoryCacheCapacity" },
+            { "Cache.Increase13", "DFIntSoundServiceCacheCleanupMaxAgeDays" },
+            { "Cache.Increase14", "DFIntUserIdPlayerNameCacheLifetimeSeconds" },
+            { "Cache.Increase15", "DFIntAssetCacheErrorLogHundredthsPercent" },
+            { "Cache.Increase16", "DFFlagHttpTrackSyncWriteCachePhase" },
+            { "Cache.Increase17", "DFIntHttpCachePerfSamplingRate" },
+            { "Cache.Increase18", "DFIntHttpCachePerfHundredthsPercent" },
+            { "Cache.Increase19", "DFIntReportCacheDirSizesHundredthsPercent" },
+
+            // Block Tencent
+            { "Telemetry.Tencent1", "FStringTencentAuthPath" },
+            { "Telemetry.Tencent2", "FLogTencentAuthPath" },
+            { "Telemetry.Tencent3", "FStringXboxExperienceGuidelinesUrl" },
+            { "Telemetry.Tencent4", "FStringExperienceGuidelinesExplainedPageUrl" },
+            { "Telemetry.Tencent5", "DFFlagPolicyServiceReportIsNotSubjectToChinaPolicies" },
+            { "Telemetry.Tencent6", "DFFlagPolicyServiceReportDetailIsNotSubjectToChinaPolicies" },
+            { "Telemetry.Tencent7", "DFIntPolicyServiceReportDetailIsNotSubjectToChinaPoliciesHundredthsPercentage" },
         };
 
         public static IReadOnlyDictionary<RenderingMode, string> RenderingModes => new Dictionary<RenderingMode, string>
@@ -321,6 +462,7 @@ namespace Voidstrap
         public static IReadOnlyDictionary<MSAAMode, string?> MSAAModes => new Dictionary<MSAAMode, string?>
         {
             { MSAAMode.Default, null },
+            { MSAAMode.x0, "0" },
             { MSAAMode.x1, "1" },
             { MSAAMode.x2, "2" },
             { MSAAMode.x4, "4" },
@@ -479,21 +621,29 @@ namespace Voidstrap
             { QualityLevel.Level21, "21" }
         };
 
-        public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dictionary<RefreshRate, string?>
+public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dictionary<RefreshRate, string?>
+{
+    { RefreshRate.Default, null },
+    { RefreshRate.RefreshRate75, "75" },
+    { RefreshRate.RefreshRate85, "80" },
+    { RefreshRate.RefreshRate90, "90" },
+    { RefreshRate.RefreshRate100, "100" },
+    { RefreshRate.RefreshRate120, "120" },
+    { RefreshRate.RefreshRate144, "144" },
+    { RefreshRate.RefreshRate165, "165" },
+    { RefreshRate.RefreshRate180, "180" },
+    { RefreshRate.RefreshRate200, "200" },
+    { RefreshRate.RefreshRate240, "240" },
+    { RefreshRate.RefreshRate360, "360" },
+};
+
+
+        public static IReadOnlyDictionary<Shader, string?> Shaders => new Dictionary<Shader, string?>
         {
-            { RefreshRate.Default, null },
-            { RefreshRate.RefreshRate1, "75" },
-            { RefreshRate.RefreshRate2, "120" },
-            { RefreshRate.RefreshRate3, "144" },
-            { RefreshRate.RefreshRate4, "165" },
-            { RefreshRate.RefreshRate5, "180" },
-            { RefreshRate.RefreshRate6, "240" },
-            { RefreshRate.RefreshRate7, "360" },
-            { RefreshRate.RefreshRate8, "400" },
-            { RefreshRate.RefreshRate9, "480" },
-            { RefreshRate.RefreshRate10, "500" },
-            { RefreshRate.RefreshRate11, "540" },
-            { RefreshRate.RefreshRate12, "600" }
+            { Shader.Disabled, null },
+            { Shader.x1, "-140000000" },
+            { Shader.x2, "-340000000" },
+            { Shader.x3, "-640000000" }
         };
 
         public void SetValue(string key, object? value)
@@ -557,7 +707,7 @@ namespace Voidstrap
             if (!PresetFlags.ContainsKey(name))
             {
                 App.Logger.WriteLine("FastFlagManager::GetPreset", $"Could not find preset {name}");
-                Debug.Assert(false, $"Could not find preset {name}");
+                // Removed Debug.Assert to prevent crash in Release mode
                 return null;
             }
             // Check if the preset is already set

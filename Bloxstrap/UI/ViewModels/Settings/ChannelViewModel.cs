@@ -42,16 +42,29 @@ namespace Voidstrap.UI.ViewModels.Settings
                 CpuLimitOptions.Add(i);
             }
 
-            // If saved value is invalid, reset to max cores
+            // Validate and assign default CPU core limit
             if (!CpuLimitOptions.Contains(App.Settings.Prop.CpuCoreLimit))
             {
                 SelectedCpuLimit = coreCount;
             }
 
-            RunSafeAsync(() => LoadChannelDeployInfoAsync(App.Settings.Prop.Channel));
+            // Safely load deployment info
+            _ = LoadChannelDeployInfoSafeAsync(App.Settings.Prop.Channel);
         }
 
-        private int _selectedCpuLimit;
+        private async Task LoadChannelDeployInfoSafeAsync(string channel)
+        {
+            try
+            {
+                await LoadChannelDeployInfoAsync(channel);
+            }
+            catch (Exception ex)
+            {
+                // Log or handle error appropriately
+                Debug.WriteLine($"Failed to load channel info: {ex.Message}");
+            }
+        }
+
         public int SelectedCpuLimit
         {
             get => App.Settings.Prop.CpuCoreLimit;
@@ -67,7 +80,6 @@ namespace Voidstrap.UI.ViewModels.Settings
                 }
             }
         }
-
 
 
 
