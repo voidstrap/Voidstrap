@@ -160,16 +160,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         private async void ShowFFlagSearchDialog()
         {
-            Exception ex = null;
-
-            var dialog = new FFlagSearch(ex);
+            var dialog = new FFlagSearchDialog();  // This is the NEW comprehensive dialog
             dialog.ShowDialog();
 
+            // Optionally reload the list after the dialog closes
             await Task.Delay(1000);
-
             ReloadList();
         }
-
 
         private void AddSingle(string name, string value)
         {

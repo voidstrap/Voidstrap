@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using Voidstrap.Enums;
 
 namespace Voidstrap.Models.Persistable
 {
@@ -54,6 +55,9 @@ namespace Voidstrap.Models.Persistable
         public bool ShowAccountOnRichPresence { get; set; } = true;
         public bool ShowServerDetails { get; set; } = true;
 
+        // Mod Settings
+        public string CustomFontLocation { get; set; } = string.Empty;
+        public CursorType CursorType { get; set; } = CursorType.Default;
 
         // Custom Integrations
         public ObservableCollection<CustomIntegration> CustomIntegrations { get; set; } = new();
@@ -65,6 +69,5 @@ namespace Voidstrap.Models.Persistable
         public string Channel { get; set; } = RobloxInterfaces.Deployment.DefaultChannel;
         public ChannelChangeMode ChannelChangeMode { get; set; } = ChannelChangeMode.Automatic;
         public string ChannelHash { get; set; } = "";
-
     }
 }

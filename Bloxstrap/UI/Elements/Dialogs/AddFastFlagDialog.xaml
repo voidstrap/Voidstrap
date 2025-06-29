@@ -25,9 +25,9 @@
     <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.80" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}"/>
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.80" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
         <Grid.RowDefinitions>
@@ -59,6 +59,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
                     <TextBlock
@@ -72,6 +73,7 @@
                         Name="FlagNameTextBox"
                         Grid.Row="0"
                         Grid.Column="1"
+                        Grid.ColumnSpan="2"
                         Margin="0,0,0,12" />
 
                     <TextBlock
@@ -83,7 +85,19 @@
                     <TextBox
                         Name="FlagValueTextBox"
                         Grid.Row="1"
-                        Grid.Column="1" />
+                        Grid.Column="1"
+                        Margin="0,0,8,0" />
+                    <Button
+                        Grid.Row="1"
+                        Grid.Column="2"
+                        Width="30"
+                        Height="30"
+                        Padding="0"
+                        Click="PresetValuesButton_Click"
+                        Content="⤵"
+                        FontSize="16"
+                        FontWeight="Bold"
+                        ToolTip="Select preset value" />
                 </Grid>
             </TabItem>
             <TabItem Header="{x:Static resources:Strings.Common_ImportJson}">
@@ -141,8 +155,8 @@
         <Border
             Grid.Row="2"
             Padding="14,10"
-            BorderThickness="0,1,0,0"
-            Background="{DynamicResource PrimaryBackgroundColor}">
+            Background="{DynamicResource PrimaryBackgroundColor}"
+            BorderThickness="0,1,0,0">
             <StackPanel
                 HorizontalAlignment="Right"
                 FlowDirection="LeftToRight"

@@ -1,12 +1,13 @@
-﻿using Microsoft.Win32;
-using System.IO;
-using System.Windows;
+﻿using System.Windows;
+using System.Windows.Controls;
+using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using Voidstrap.Resources;
+using Voidstrap.UI.Elements.Base;
 
 namespace Voidstrap.UI.Elements.Dialogs
 {
-    public partial class AddFastFlagDialog
+    public partial class AddFastFlagDialog : WpfUiWindow
     {
         // Define flags that are not allowed to be imported
         private readonly string[] forbiddenFlags = new[] { "DFFlagNoMinimumSwimVelocity" };
@@ -38,6 +39,15 @@ namespace Voidstrap.UI.Elements.Dialogs
             }
 
             JsonTextBox.Text = fileContent;
+        }
+
+        private void PresetValuesButton_Click(object sender, RoutedEventArgs e)
+        {
+            var presetDialog = new FFlagPresetsDialog();
+            if (presetDialog.ShowDialog() == true && !string.IsNullOrEmpty(presetDialog.SelectedValue))
+            {
+                FlagValueTextBox.Text = presetDialog.SelectedValue;
+            }
         }
 
         private bool ContainsForbiddenFlags(string jsonText)

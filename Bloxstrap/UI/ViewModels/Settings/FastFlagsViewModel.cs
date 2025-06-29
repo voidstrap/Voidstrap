@@ -60,39 +60,31 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool DisableTelemetry
         {
-            get => App.FastFlags?.GetPreset("Telemetry.EpCounter") == "True";
+            get => App.FastFlags?.GetPreset("Telemetry.TelemetryV2Url") == "0.0.0.0";
             set
             {
                 if (App.FastFlags == null) return;
 
-                App.FastFlags.SetPreset("Telemetry.EpCounter", value ? Enabled : Disabled);
-
-                var telemetryPresets = new Dictionary<string, string>
-                {
-                    { "Telemetry.EpCounter", value ? Enabled : Disabled },
-                    { "Telemetry.EpStats", value ? Enabled : Disabled },
-                    { "Telemetry.Event", value ? Enabled : Disabled },
-                    { "Telemetry.Point", value ? Enabled : Disabled },
-                    { "Telemetry.GraphicsQualityUsage", value ? Disabled : Enabled },
-                    { "Telemetry.GpuVsCpuBound", value ? Disabled : Enabled },
-                    { "Telemetry.RenderFidelity", value ? Disabled : Enabled },
-                    { "Telemetry.RenderDistance", value ? Disabled : Enabled },
-                    { "Telemetry.AudioPlugin", value ? Disabled : Enabled },
-                    { "Telemetry.FmodErrors", value ? Disabled : Enabled },
-                    { "Telemetry.SoundLength", value ? Disabled : Enabled },
-                    { "Telemetry.AssetRequestV1", value ? Disabled : Enabled },
-                    { "Telemetry.DeviceRAM", value ? Disabled : Enabled },
-                    { "Telemetry.V2FrameRateMetrics", value ? Disabled : Enabled },
-                    { "Telemetry.GlobalSkipUpdating", value ? Disabled : Enabled },
-                    { "Telemetry.CallbackSafety", value ? Disabled : Enabled },
-                    { "Telemetry.V2PointEncoding", value ? Disabled : Enabled },
-                    { "Telemetry.ReplaceSeparator", value ? Disabled : Enabled }
-                };
-
-                foreach (var (key, presetValue) in telemetryPresets)
-                {
-                    App.FastFlags.SetPreset(key, presetValue);
-                }
+                App.FastFlags.SetPreset("Telemetry.TelemetryV2Url", value ? "0.0.0.0" : null);
+                App.FastFlags.SetPreset("Telemetry.Protocol", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.GraphicsQualityUsage", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.GpuVsCpuBound", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.RenderFidelity", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.RenderDistance", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.AudioPlugin", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.FmodErrors", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.SoundLength", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.AssetRequestV1", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.DeviceRAM", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.V2FrameRateMetrics", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.GlobalSkipUpdating", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.CallbackSafety", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.V2PointEncoding", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.ReplaceSeparator", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.OpenTelemetry", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.FLogTelemetry", value ? "0" : null);
+                App.FastFlags.SetPreset("Telemetry.TelemetryService", value ? "False" : null);
+                App.FastFlags.SetPreset("Telemetry.PropertiesTelemetry", value ? "False" : null);
             }
         }
 

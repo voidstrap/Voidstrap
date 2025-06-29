@@ -11,29 +11,30 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     Loaded="Page_Loaded"
-    
     mc:Ignorable="d">
 
     <Grid Margin="0,0,14,14">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        
-        
 
-        <!-- Description -->
-        <TextBlock Grid.Row="0" Margin="0,0,0,16"
-                   Text="Manage your FastFlags. A checkmark in Preset means the flag is available in FFlag Settings, while a cross means it is not."
-                   FontSize="13"
-                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
 
-        <!-- Buttons and Flag Count in Grid.Row=2 -->
+
+        <!--  Description  -->
+        <TextBlock
+            Grid.Row="0"
+            Margin="0,0,0,16"
+            FontSize="13"
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+            Text="Manage your FastFlags. A checkmark in Preset means the flag is available in FFlag Settings, while a cross means it is not." />
+
+        <!--  Buttons and Flag Count in Grid.Row=2  -->
 
         <WrapPanel Grid.Row="2" Orientation="Horizontal">
             <ui:Button
@@ -41,7 +42,7 @@
                 Margin="0,0,10,16"
                 Click="AddButton_Click"
                 Content="{x:Static resources:Strings.Menu_FastFlagEditor_AddNew}"
-                Icon="AddCircle24"/>
+                Icon="AddCircle24" />
             <ui:Button
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
@@ -70,91 +71,98 @@
                 Margin="0,0,10,16"
                 Click="DeleteAllButton_Click"
                 Content="Delete all"
-                Icon="Delete48"/>
+                Icon="Delete48" />
             <ui:Button
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="CopyJSONButton_Click1"
                 ClipToBounds="True"
                 Content="Copy all"
-                Icon="Clipboard16"/>
+                Icon="Clipboard16" />
             <ui:Button
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="CopyJSONButton_Click2"
                 ClipToBounds="True"
                 Content="Copy Better JSON"
-                Icon="Copy16"/>
+                Icon="Copy16" />
             <ui:Button
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="ExportJSONButton_Click"
                 Content="{x:Static resources:Strings.Menu_FastFlagEditor_ExportJson}"
-                Icon="ArrowExit20"/>
+                Icon="ArrowExit20" />
             <ui:Button
                 Width="95"
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="FlagProfiles_Click"
                 Content="Profiles"
-                Icon="Edit28"/>
+                Icon="Edit28" />
             <ui:Button
                 Width="120"
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="FlagFind_Click"
                 Content="Find FFlags"
-                Icon="Book24"/>
+                Icon="Book24" />
             <ToggleButton
                 x:Name="TogglePresetsButton"
                 Margin="0,0,10,16"
                 VerticalAlignment="Top"
                 Click="ToggleButton_Click"
                 Content="{x:Static resources:Strings.Menu_FastFlagEditor_ShowPresetFlags}" />
-
         </WrapPanel>
 
-        <!-- Flag Count Text -->
+        <!--  Flag Count Text  -->
         <TextBlock
+            x:Name="TotalFlagsTextBlock"
             Grid.Row="2"
+            Margin="0,71,10,5"
             HorizontalAlignment="Right"
             FontSize="14"
-            Margin="0,71,10,5"
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
-            x:Name="TotalFlagsTextBlock"
             Text="Flags added: 0" />
-            <!-- Search Bar -->
-        <Grid Grid.Row="3" Height="40" Margin="0,0,1,5">
-            <ui:TextBox x:Name="SearchTextBox"
-                        Height="32"
-                        HorizontalContentAlignment="Left"
-                        VerticalContentAlignment="Center"
-                        BorderThickness="0"
-                        FocusVisualStyle="{x:Null}"
-                        FontSize="14"
-                        Icon="Search48"
-                        PlaceholderText="{x:Static resources:Strings.Menu_FastFlagEditor_Search}"
-                        TextChanged="SearchTextBox_TextChanged"/>
-            <TextBlock x:Name="SuggestionTextBlock"
-                       Cursor="Hand"
-                       Margin="12,0,11,0"
-                       HorizontalAlignment="Right"
-                       VerticalAlignment="Center"
-                       FontSize="13.85"
-                       Foreground="#FF51A2ED"
-                       Opacity="0"
-                       Visibility="Collapsed"
-                       RenderTransformOrigin="0.5,0.5">
+        <!--  Search Bar  -->
+        <Grid
+            Grid.Row="3"
+            Height="40"
+            Margin="0,0,1,5">
+            <ui:TextBox
+                x:Name="SearchTextBox"
+                Height="32"
+                HorizontalContentAlignment="Left"
+                VerticalContentAlignment="Center"
+                BorderThickness="0"
+                FocusVisualStyle="{x:Null}"
+                FontSize="14"
+                Icon="Search48"
+                PlaceholderText="{x:Static resources:Strings.Menu_FastFlagEditor_Search}"
+                TextChanged="SearchTextBox_TextChanged" />
+            <TextBlock
+                x:Name="SuggestionTextBlock"
+                Margin="12,0,11,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                Cursor="Hand"
+                FontSize="13.85"
+                Foreground="#FF51A2ED"
+                Opacity="0"
+                RenderTransformOrigin="0.5,0.5"
+                Visibility="Collapsed">
                 <TextBlock.RenderTransform>
-                    <TranslateTransform x:Name="SuggestionTranslateTransform" X="10"/>
+                    <TranslateTransform x:Name="SuggestionTranslateTransform" X="10" />
                 </TextBlock.RenderTransform>
-                <Run Text="Looking For"/>
-                <Run x:Name="SuggestionKeywordRun" Text="" FontWeight="Bold"/>
-                <Run Text="?"/>
+                <Run Text="Looking For" />
+                <Run
+                    x:Name="SuggestionKeywordRun"
+                    FontWeight="Bold"
+                    Text="" />
+                <Run Text="?" />
             </TextBlock>
         </Grid>
 
-        <!-- Data Grid -->
+        <!--  Data Grid  -->
         <DataGrid
             Name="DataGrid"
             Grid.Row="4"
@@ -210,36 +218,51 @@
                 </Style>
             </DataGrid.CellStyle>
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Preset" x:Name="PresetColumn">
+                <DataGridTemplateColumn x:Name="PresetColumn" Header="Preset">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Image Height="50" Width="25" Source="{Binding Preset}" />
+                            <Image
+                                Width="25"
+                                Height="50"
+                                Source="{Binding Preset}" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Width="425" Binding="{Binding Name}" Header="{x:Static resources:Strings.Common_Name}" />
-                <DataGridTextColumn Width="*" Binding="{Binding Value}" Header="{x:Static resources:Strings.Common_Value}" />
+                <DataGridTextColumn
+                    Width="425"
+                    Binding="{Binding Name}"
+                    Header="{x:Static resources:Strings.Common_Name}" />
+                <DataGridTextColumn
+                    Width="*"
+                    Binding="{Binding Value}"
+                    Header="{x:Static resources:Strings.Common_Value}" />
             </DataGrid.Columns>
         </DataGrid>
 
-        <!-- Expander -->
-        <Expander Grid.Row="6" IsExpanded="False" Header="FFlag History"
-          Margin="0,30,0,0" ExpandDirection="Up"
-          Background="{DynamicResource ControlFillColorTertiaryBrush}"
-          ToolTip="Shows the history of feature flag (FFlag) changes and updates. This only applies when you edit them. Expand to view the detailed list.">
-            <ScrollViewer VerticalScrollBarVisibility="Auto"
-                  CanContentScroll="True"
-                  PanningMode="VerticalOnly">
-                <ListBox x:Name="HistoryListBox"
-                 Background="Transparent"
-                 Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                 BorderThickness="1"
-                 FontSize="13"
-                 MaxHeight="200">
-                    <!-- Adjust height as needed -->
+        <!--  Expander  -->
+        <Expander
+            Grid.Row="6"
+            Margin="0,30,0,0"
+            Background="{DynamicResource ControlFillColorTertiaryBrush}"
+            ExpandDirection="Up"
+            Header="FFlag History"
+            IsExpanded="False"
+            ToolTip="Shows the history of feature flag (FFlag) changes and updates. This only applies when you edit them. Expand to view the detailed list.">
+            <ScrollViewer
+                CanContentScroll="True"
+                PanningMode="VerticalOnly"
+                VerticalScrollBarVisibility="Auto">
+                <ListBox
+                    x:Name="HistoryListBox"
+                    MaxHeight="200"
+                    Background="Transparent"
+                    BorderThickness="1"
+                    FontSize="13"
+                    Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+                    <!--  Adjust height as needed  -->
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding}" TextWrapping="Wrap"/>
+                            <TextBlock Text="{Binding}" TextWrapping="Wrap" />
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>

@@ -1,0 +1,438 @@
+﻿<base:WpfUiWindow
+    x:Class="Voidstrap.UI.Elements.Dialogs.FFlagSearchDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Find Fast Flags"
+    Width="1000"
+    Height="700"
+    MinWidth="800"
+    MinHeight="600"
+    Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+    ExtendsContentIntoTitleBar="True"
+    WindowStartupLocation="CenterOwner"
+    mc:Ignorable="d">
+
+    <base:WpfUiWindow.Resources>
+        <Style x:Key="SectionHeaderStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Margin" Value="0,10,0,5" />
+        </Style>
+        <Style x:Key="DescriptionStyle" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Margin" Value="0,0,0,10" />
+        </Style>
+    </base:WpfUiWindow.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.80" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}" />
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!--  Title Bar  -->
+        <ui:TitleBar
+            Title="Find Fast Flags"
+            Grid.Row="0"
+            Padding="8"
+            CanMaximize="True"
+            KeyboardNavigation.TabNavigation="None"
+            ShowMaximize="True"
+            ShowMinimize="True" />
+
+        <!--  Header  -->
+        <StackPanel Grid.Row="1" Margin="20,10,20,0">
+            <TextBlock
+                Margin="0,0,0,10"
+                FontSize="20"
+                FontWeight="Bold"
+                Text="Fast Flag Search &amp; Validation" />
+            <TextBlock Style="{StaticResource DescriptionStyle}" Text="Search, validate, and discover Fast Flags from multiple sources" />
+
+            <!--  Status Bar  -->
+            <Border
+                Margin="0,0,0,10"
+                Padding="10"
+                Background="{DynamicResource ControlFillColorDefaultBrush}"
+                CornerRadius="5">
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock
+                        x:Name="StatusText"
+                        VerticalAlignment="Center"
+                        Text="Ready" />
+                    <ProgressBar
+                        x:Name="LoadingProgress"
+                        Width="200"
+                        Height="4"
+                        Margin="10,0,0,0"
+                        IsIndeterminate="True"
+                        Visibility="Collapsed" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+
+        <!--  Main Content  -->
+        <TabControl
+            x:Name="MainTabControl"
+            Grid.Row="2"
+            Margin="20,0,20,0">
+
+            <!--  Live Search Tab  -->
+            <TabItem Header="🔍 Live Search">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Live Flag Search" />
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <TextBlock Style="{StaticResource DescriptionStyle}" Text="Search by full flag name or partial keyword match" />
+                        <ui:TextBox
+                            x:Name="SearchTextBox"
+                            Height="35"
+                            PlaceholderText="Enter flag name or keyword..."
+                            TextChanged="SearchTextBox_TextChanged" />
+
+                        <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                            <CheckBox
+                                x:Name="TrueFlagsOnlyCheckBox"
+                                Margin="0,0,15,0"
+                                Checked="TrueFlagsOnlyCheckBox_CheckedChanged"
+                                Content="True flags only"
+                                Unchecked="TrueFlagsOnlyCheckBox_CheckedChanged" />
+                            <CheckBox
+                                x:Name="FalseFlagsOnlyCheckBox"
+                                Margin="0,0,15,0"
+                                Checked="FalseFlagsOnlyCheckBox_CheckedChanged"
+                                Content="False flags only"
+                                Unchecked="FalseFlagsOnlyCheckBox_CheckedChanged" />
+                            <ui:Button
+                                x:Name="ExportSearchResultsButton"
+                                Click="ExportSearchResultsButton_Click"
+                                Content="Export Results"
+                                IsEnabled="False" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <DataGrid
+                        x:Name="SearchResultsDataGrid"
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Name}"
+                                Header="Flag Name" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding Value}"
+                                Header="Value" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock
+                        x:Name="SearchResultsCount"
+                        Grid.Row="3"
+                        Margin="0,5,0,0"
+                        HorizontalAlignment="Right"
+                        Text="0 results" />
+                </Grid>
+            </TabItem>
+
+            <!--  Bulk Validation Tab  -->
+            <TabItem Header="🧪 Bulk Validation">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Bulk Flag Validation" />
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <TextBlock Style="{StaticResource DescriptionStyle}" Text="Type flags directly or upload a file for validation" />
+
+                        <StackPanel Margin="0,0,0,5" Orientation="Horizontal">
+                            <ui:Button
+                                x:Name="LoadFileButton"
+                                Margin="0,0,10,0"
+                                Click="LoadFileButton_Click"
+                                Content="Load File" />
+                            <ui:Button
+                                x:Name="ValidateButton"
+                                Margin="0,0,10,0"
+                                Click="ValidateButton_Click"
+                                Content="Validate" />
+                            <ui:Button
+                                x:Name="ClearValidationButton"
+                                Margin="0,0,10,0"
+                                Click="ClearValidationButton_Click"
+                                Content="Clear" />
+                        </StackPanel>
+
+                        <ui:TextBox
+                            x:Name="ValidationInputTextBox"
+                            Height="200"
+                            AcceptsReturn="True"
+                            AllowDrop="True"
+                            HorizontalScrollBarVisibility="Auto"
+                            PlaceholderText="Type or paste flags here in JSON format...&#x0a;Example:&#x0a;{&#x0a;  &quot;FFlagDebugDisplayFPS&quot;: &quot;True&quot;,&#x0a;  &quot;DFIntTaskSchedulerTargetFps&quot;: &quot;120&quot;&#x0a;}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto">
+                            <ui:TextBox.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem
+                                        Click="PasteMenuItem_Click"
+                                        Header="Paste"
+                                        InputGestureText="Ctrl+V">
+                                        <MenuItem.Icon>
+                                            <ui:SymbolIcon Symbol="ClipboardPaste16" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <Separator />
+                                    <MenuItem
+                                        Click="SelectAllMenuItem_Click"
+                                        Header="Select All"
+                                        InputGestureText="Ctrl+A">
+                                        <MenuItem.Icon>
+                                            <ui:SymbolIcon Symbol="SelectAllOn20" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                    <MenuItem Click="ClearMenuItem_Click" Header="Clear">
+                                        <MenuItem.Icon>
+                                            <ui:SymbolIcon Symbol="Delete16" />
+                                        </MenuItem.Icon>
+                                    </MenuItem>
+                                </ContextMenu>
+                            </ui:TextBox.ContextMenu>
+                        </ui:TextBox>
+                    </StackPanel>
+
+                    <TextBlock
+                        Grid.Row="2"
+                        Style="{StaticResource SectionHeaderStyle}"
+                        Text="Validation Results" />
+
+                    <DataGrid
+                        x:Name="ValidationResultsDataGrid"
+                        Grid.Row="3"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Name}"
+                                Header="Flag Name" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding InputValue}"
+                                Header="Input Value" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding Status}"
+                                Header="Status" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding ValidValue}"
+                                Header="Valid Value" />
+                            <DataGridTextColumn
+                                Width="200"
+                                Binding="{Binding Notes}"
+                                Header="Notes" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel
+                        Grid.Row="4"
+                        Margin="0,10,0,0"
+                        Orientation="Horizontal">
+                        <ui:Button
+                            x:Name="ExportValidResultsButton"
+                            Margin="0,0,10,0"
+                            Click="ExportValidResultsButton_Click"
+                            Content="Export Valid Flags"
+                            IsEnabled="False" />
+                        <TextBlock
+                            x:Name="ValidationResultsCount"
+                            VerticalAlignment="Center"
+                            Text="0 results" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <!--  Recent Flags Tab  -->
+            <TabItem Header="🕒 Recent Flags (24h)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Recent Flags (Last 24 Hours)" />
+
+                    <StackPanel Grid.Row="1" Margin="0,0,0,10">
+                        <TextBlock Style="{StaticResource DescriptionStyle}" Text="Discover flags that were added or modified in the last 24 hours" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <ui:Button
+                                x:Name="FetchRecentButton"
+                                Margin="0,0,10,0"
+                                Click="FetchRecentButton_Click"
+                                Content="Fetch Recent Flags" />
+                            <ui:Button
+                                x:Name="DownloadAllRecentButton"
+                                Margin="0,0,10,0"
+                                Click="DownloadAllRecentButton_Click"
+                                Content="Download All"
+                                IsEnabled="False" />
+                            <ui:Button
+                                x:Name="DownloadTrueRecentButton"
+                                Margin="0,0,10,0"
+                                Click="DownloadTrueRecentButton_Click"
+                                Content="Download True Only"
+                                IsEnabled="False" />
+                            <ui:Button
+                                x:Name="DownloadFalseRecentButton"
+                                Click="DownloadFalseRecentButton_Click"
+                                Content="Download False Only"
+                                IsEnabled="False" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <DataGrid
+                        x:Name="RecentFlagsDataGrid"
+                        Grid.Row="2"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Name}"
+                                Header="Flag Name" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding Value}"
+                                Header="Value" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding DateAdded}"
+                                Header="Date Added" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <TextBlock
+                        x:Name="RecentFlagsCount"
+                        Grid.Row="3"
+                        Margin="0,5,0,0"
+                        HorizontalAlignment="Right"
+                        Text="0 recent flags" />
+                </Grid>
+            </TabItem>
+
+            <!--  Data Sources Tab  -->
+            <!--
+            <TabItem Header="📊 Data Sources">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Style="{StaticResource SectionHeaderStyle}" Text="Flag Data Sources" />
+
+                    <DataGrid
+                        x:Name="DataSourcesDataGrid"
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        CanUserDeleteRows="False"
+                        IsReadOnly="True">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="200"
+                                Binding="{Binding Name}"
+                                Header="Source Name" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Url}"
+                                Header="URL" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding Status}"
+                                Header="Status" />
+                            <DataGridTextColumn
+                                Width="100"
+                                Binding="{Binding FlagCount}"
+                                Header="Flags Count" />
+                            <DataGridTextColumn
+                                Width="150"
+                                Binding="{Binding LastUpdated}"
+                                Header="Last Updated" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+
+                    <StackPanel
+                        Grid.Row="2"
+                        Margin="0,10,0,0"
+                        Orientation="Horizontal">
+                        <ui:Button
+                            x:Name="RefreshDataSourcesButton"
+                            Margin="0,0,10,0"
+                            Click="RefreshDataSourcesButton_Click"
+                            Content="Refresh All Sources" />
+                        <TextBlock
+                            x:Name="TotalFlagsCount"
+                            VerticalAlignment="Center"
+                            Text="Total flags: 0" />
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+            -->
+        </TabControl>
+
+        <!--  Footer Buttons  -->
+        <StackPanel
+            Grid.Row="3"
+            Margin="20,10,20,20"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <ui:Button
+                x:Name="CloseButton"
+                Width="80"
+                Click="CloseButton_Click"
+                Content="Close" />
+        </StackPanel>
+    </Grid>
+</base:WpfUiWindow>

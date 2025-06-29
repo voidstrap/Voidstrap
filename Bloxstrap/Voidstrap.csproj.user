@@ -4,7 +4,7 @@
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup>
-    <ActiveDebugProfile>Voidstrap (Launch)</ActiveDebugProfile>
+    <ActiveDebugProfile>Voidstrap (Menu)</ActiveDebugProfile>
     <_LastSelectedProfileId>C:\Users\Hiile\Desktop\HEll\Voidstrap-main\Voidstrap-main\Bloxstrap\Properties\PublishProfiles\Publish-x64.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

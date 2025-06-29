@@ -7,17 +7,29 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.4.5</Version>
-		<FileVersion>1.0.4.5</FileVersion>
+		<Version>1.0.4.6</Version>
+		<FileVersion>1.0.4.6</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-		<Product>$(AssemblyName)</Product>
 		<RootNamespace>Voidstrap</RootNamespace>
-		<PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-		<PackageReadmeFile>README.md</PackageReadmeFile>
-		<PackageIcon>Voidstrap.png</PackageIcon>
-		<RepositoryUrl>https://github.com/voidstrap/Voidstrap</RepositoryUrl>
+
+		<!-- Single File Publishing -->
+		<PublishSingleFile>true</PublishSingleFile>
+		<SelfContained>true</SelfContained>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+		<IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+
+		<!-- Disable satellite assemblies -->
+		<SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+		<InvariantGlobalization>false</InvariantGlobalization>
+
+		<!-- Optimization -->
+		<PublishTrimmed>false</PublishTrimmed>
+		<PublishReadyToRun>false</PublishReadyToRun>
+		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<DebugType>None</DebugType>
+		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

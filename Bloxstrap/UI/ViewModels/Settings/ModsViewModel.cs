@@ -14,6 +14,9 @@ using Voidstrap.Models.SettingTasks;
 using Voidstrap.AppData;
 using Voidstrap.Enums.FlagPresets;
 using System.Drawing;
+using Voidstrap.Enums;
+using Voidstrap.Models;
+using Voidstrap.UI.Elements.Dialogs;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
@@ -28,13 +31,13 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public ICommand ManageCustomFontCommand => new RelayCommand(ManageCustomFont);
         public ICommand OpenCompatSettingsCommand => new RelayCommand(OpenCompatSettings);
+        public ICommand PreviewCursorCommand => new RelayCommand(PreviewCursor);
 
         public Visibility ChooseCustomFontVisibility =>
             string.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Visible : Visibility.Collapsed;
 
         public Visibility DeleteCustomFontVisibility =>
             string.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Collapsed : Visibility.Visible;
-
 
         public ModPresetTask OldDeathSoundTask { get; } = new("OldDeathSound", "content\\sounds\\ouch.ogg", "Sounds.OldDeath.ogg");
         public ModPresetTask OldAvatarBackgroundTask { get; } = new("OldAvatarBackground", "ExtraContent\\places\\Mobile.rbxl", "OldAvatarBackground.rbxl");
@@ -96,7 +99,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             }}
         });
 
-
         private void ManageCustomFont()
         {
             if (!string.IsNullOrEmpty(TextFontTask.NewState))
@@ -125,7 +127,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             OnPropertyChanged(nameof(DeleteCustomFontVisibility));
         }
 
-
         private void OpenCompatSettings()
         {
             string path = new RobloxPlayerData().ExecutablePath;
@@ -134,6 +135,24 @@ namespace Voidstrap.UI.ViewModels.Settings
                 PInvoke.SHObjectProperties(HWND.Null, SHOP_TYPE.SHOP_FILEPATH, path, "Compatibility");
             else
                 Frontend.ShowMessageBox(Strings.Common_RobloxNotInstalled, MessageBoxImage.Error);
+        }
+
+        private void PreviewCursor()
+        {
+            var previewDialog = new CursorPreviewDialog();
+            if (previewDialog.ShowDialog() == true && previewDialog.SelectedCursor.HasValue)
+            {
+                SelectedCursor = previewDialog.SelectedCursor.Value;
+                OnPropertyChanged(nameof(SelectedCursor));
+            }
+        }
+
+        public string CustomFontLocation => App.Settings.Prop.CustomFontLocation;
+
+        public Enums.CursorType SelectedCursor
+        {
+            get => App.Settings.Prop.CursorType;
+            set => App.Settings.Prop.CursorType = value;
         }
     }
 }

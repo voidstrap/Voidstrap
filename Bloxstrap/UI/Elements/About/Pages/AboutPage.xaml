@@ -129,10 +129,10 @@
                     VerticalAlignment="Top"
                     Text="{Binding BuildTimestamp, Mode=OneTime}" />
                 <TextBlock
+                    Margin="290,6,500,0"
                     VerticalAlignment="Top"
                     FontSize="12"
-                    Margin="290,6,500,0"
-                    Text="{Binding Version, Mode=OneTime}"/>
+                    Text="{Binding Version, Mode=OneTime}" />
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="0"
@@ -208,6 +208,7 @@
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
                     <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Luc6i](https://github.com/Luc6i)" />
                 </StackPanel>
             </controls:Expander>
 

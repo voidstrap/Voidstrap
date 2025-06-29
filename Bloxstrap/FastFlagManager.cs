@@ -18,12 +18,13 @@ namespace Voidstrap
         public static IReadOnlyDictionary<string, string> PresetFlags = new Dictionary<string, string>
         {
             // Activity watcher
-            { "FpsFix.Log", "FFlagTaskSchedulerLimitTargetFpsTo2402" },
             { "Players.LogLevel", "FStringDebugLuaLogLevel" },
             { "Players.LogPattern", "FStringDebugLuaLogPattern" },
+            { "Instances.WndCheck", "FLogWndProcessCheck" },
 
             // Hyper Threading
             { "Hyper.Threading1", "FFlagDebugCheckRenderThreading" },
+            { "Hyper.Threading2", "FFlagRenderDebugCheckThreading2" },
 
             // Memory Probing
             { "Memory.Probe", "DFFlagPerformanceControlEnableMemoryProbing3" },
@@ -78,9 +79,9 @@ namespace Voidstrap
             { "Rendering.BrighterVisual", "FFlagRenderFixFog" },
 
             // Remove Grass
-            { "Rendering.Nograss1", "FIntFRMMinGrassDistance" },
-            { "Rendering.Nograss2", "FIntFRMMaxGrassDistance" },
-            { "Rendering.Nograss3", "FIntRenderGrassDetailStrands" },
+            { "Rendering.RemoveGrass1", "FIntFRMMinGrassDistance" },
+            { "Rendering.RemoveGrass2", "FIntFRMMaxGrassDistance" },
+            { "Rendering.RemoveGrass3", "FIntRenderGrassDetailStrands" },
 
             // Text Size option
             { "UI.TextSize1", "FFlagEnablePreferredTextSizeScale"},
@@ -154,8 +155,8 @@ namespace Voidstrap
             { "UI.Chatbubble", "FFlagEnableBubbleChatFromChatService" },
 
             // Light Cullings
-            { "Rendering.GpuCulling", "FFlagFastGPULightCulling3" },
-            { "Rendering.CpuCulling", "FFlagDebugForceFSMCPULightCulling" },           
+            { "System.GpuCulling", "FFlagFastGPULightCulling3" },
+            { "System.CpuCulling", "FFlagDebugForceFSMCPULightCulling" },          
 
             // Unlimited Camera Distance
             { "Rendering.Camerazoom","FIntCameraMaxZoomDistance" },
@@ -191,7 +192,7 @@ namespace Voidstrap
             { "Rendering.Lighting.Voxel", "DFFlagDebugRenderForceTechnologyVoxel" },
             { "Rendering.Lighting.ShadowMap", "FFlagDebugForceFutureIsBrightPhase2" },
             { "Rendering.Lighting.Future", "FFlagDebugForceFutureIsBrightPhase3" },
-            { "Rendering.Lighting.Unified", "FFlagRenderUnifiedLighting13"},
+            { "Rendering.Lighting.Unified", "FFlagRenderUnifiedLighting14"},
 
             // Worser Particles
             { "Rendering.WorserParticles1", "FFlagFixOutdatedParticles2" },
@@ -311,13 +312,11 @@ namespace Voidstrap
             { "Network.RCore6", "DFIntSignalRCoreHubMaxBackoffMs"},
 
             // Enable Large Replicator
-            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled6"},
+            { "Network.EnableLargeReplicator", "FFlagLargeReplicatorEnabled7"},
             { "Network.LargeReplicatorWrite", "FFlagLargeReplicatorWrite5"},
             { "Network.LargeReplicatorRead", "FFlagLargeReplicatorRead5"},
-            { "Network.EngineModule1", "FFlagGlobalSettingsEngineModule3"},
-            { "Network.EngineModule2", "DFFlagLargeReplicatorEngineModule"},
-            { "Network.SerializeRead", "FFlagLargeReplicatorSerializeRead2"},
-            { "Network.SerializeWrite", "FFlagLargeReplicatorSerializeWrite2"},
+            { "Network.SerializeRead", "FFlagLargeReplicatorSerializeRead3"},
+            { "Network.SerializeWrite", "FFlagLargeReplicatorSerializeWrite3"},
 
 
             // Turn Off Ads
