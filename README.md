@@ -109,7 +109,7 @@
 
 ## 🤝 Community & Support
 
-- 💬 **Join our Discord:** [Voidstrap Server](https://discord.gg/PE8ZeNSdS2) for help, news, and chat.
+- 💬 **Join our Discord:** [Voidstrap Server](https://discord.gg/JkUPqtS7QR) for help, news, and chat.
 - 🐞 **Found a bug or have an idea?** Use our [Issues tab](https://github.com/midaskira/Voidstrap/issues).
 - ⭐ **Star the repo:** Show your support!
 
