@@ -1,7 +1,3 @@
-Discord
-
-# https://discord.gg/wdmYT9WKTX
-
 # 🌌 Voidstrap: A Next-Gen Bloxstrap Fork
 
 **Voidstrap** is a modern and feature-rich fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to elevate your **Roblox** experience. With a refined interface, enhanced stability, and powerful features, Voidstrap gives you full control over how you play.
@@ -29,7 +25,7 @@ Discord
   <a href="https://github.com/midaskira/Voidstrap/stargazers">
     <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars">
   </a>
-  <a href="https://discord.gg/PE8ZeNSdS2">
+  <a href="https://discord.gg/wdmYT9WKTX">
     <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
   </a>
   <a href="https://www.virustotal.com/gui/file/a19d94eaed61dfa779610f1271a9379f2dae45d876e45564cd324b69c07e9a29">
