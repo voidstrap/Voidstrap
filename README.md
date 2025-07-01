@@ -1,3 +1,7 @@
+Discord
+
+# https://discord.gg/wdmYT9WKTX
+
 # 🌌 Voidstrap: A Next-Gen Bloxstrap Fork
 
 **Voidstrap** is a modern and feature-rich fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to elevate your **Roblox** experience. With a refined interface, enhanced stability, and powerful features, Voidstrap gives you full control over how you play.
