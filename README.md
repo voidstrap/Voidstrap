@@ -3,7 +3,7 @@
 **Voidstrap** is a modern and feature-rich fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to elevate your **Roblox** experience. With a refined interface, enhanced stability, and powerful features, Voidstrap gives you full control over how you play.
 
 <p align="center">
-  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Images/Untitled-1.png" alt="Voidstrap Logo">
+  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Images/Voidstrap.png" alt="Voidstrap Logo">
 </p>
 
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>

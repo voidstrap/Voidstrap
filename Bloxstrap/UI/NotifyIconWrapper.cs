@@ -1,135 +1,156 @@
-﻿using Voidstrap.Integrations;
+using Voidstrap.Integrations;
 using Voidstrap.UI.Elements.About;
 using Voidstrap.UI.Elements.ContextMenu;
+using System;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Windows.Threading;
 
 namespace Voidstrap.UI
 {
     public class NotifyIconWrapper : IDisposable
     {
-        // lol who needs properly structured mvvm and xaml when you have the absolute catastrophe that this is
+        private bool _disposed;
 
-        private bool _disposing = false;
-
-        private readonly System.Windows.Forms.NotifyIcon _notifyIcon;
-        
+        private readonly NotifyIcon _notifyIcon;
         private readonly MenuContainer _menuContainer;
-        
         private readonly Watcher _watcher;
 
-        private ActivityWatcher? _activityWatcher => _watcher.ActivityWatcher;
+        private ActivityWatcher? ActivityWatcher => _watcher.ActivityWatcher;
 
-        EventHandler? _alertClickHandler;
+        private EventHandler? _alertClickHandler;
 
         public NotifyIconWrapper(Watcher watcher)
         {
             App.Logger.WriteLine("NotifyIconWrapper::NotifyIconWrapper", "Initializing notification area icon");
 
-            _watcher = watcher;
+            _watcher = watcher ?? throw new ArgumentNullException(nameof(watcher));
 
-            _notifyIcon = new(new System.ComponentModel.Container())
+            _notifyIcon = new NotifyIcon(new System.ComponentModel.Container())
             {
                 Icon = Properties.Resources.IconVoidstrap,
                 Text = "Voidstrap",
                 Visible = true
             };
+            _notifyIcon.MouseClick += NotifyIcon_MouseClick;
 
-            _notifyIcon.MouseClick += MouseClickEventHandler;
+            if (ActivityWatcher != null && App.Settings.Prop.ShowServerDetails)
+                ActivityWatcher.OnGameJoin += async (s, e) => await OnGameJoinAsync(s, e);
 
-            if (_activityWatcher is not null && App.Settings.Prop.ShowServerDetails)
-                _activityWatcher.OnGameJoin += OnGameJoin;
-
-            _menuContainer = new(_watcher);
+            _menuContainer = new MenuContainer(_watcher);
             _menuContainer.Show();
         }
 
-        #region Context menu
-        public void MouseClickEventHandler(object? sender, System.Windows.Forms.MouseEventArgs e)
+        private void NotifyIcon_MouseClick(object? sender, MouseEventArgs e)
         {
-            if (e.Button != System.Windows.Forms.MouseButtons.Right)
+            if (e.Button != MouseButtons.Right)
                 return;
 
-            _menuContainer.Activate();
-            _menuContainer.ContextMenu.IsOpen = true;
+            _menuContainer.Dispatcher.Invoke(() =>
+            {
+                _menuContainer.Activate();
+                _menuContainer.ContextMenu.IsOpen = true;
+            });
         }
-        #endregion
 
-        #region Activity handlers
-        public async void OnGameJoin(object? sender, EventArgs e)
+        public async Task OnGameJoinAsync(object? sender, EventArgs e)
         {
-            if (_activityWatcher is null)
+            if (ActivityWatcher == null)
                 return;
-            
-            string? serverLocation = await _activityWatcher.Data.QueryServerLocation();
+
+            string? serverLocation = await ActivityWatcher.Data.QueryServerLocation();
 
             if (string.IsNullOrEmpty(serverLocation))
                 return;
 
-            string title = _activityWatcher.Data.ServerType switch
+            string title = ActivityWatcher.Data.ServerType switch
             {
                 ServerType.Public => Strings.ContextMenu_ServerInformation_Notification_Title_Public,
                 ServerType.Private => Strings.ContextMenu_ServerInformation_Notification_Title_Private,
                 ServerType.Reserved => Strings.ContextMenu_ServerInformation_Notification_Title_Reserved,
-                _ => ""
+                _ => string.Empty
             };
 
             ShowAlert(
                 title,
-                String.Format(Strings.ContextMenu_ServerInformation_Notification_Text, serverLocation),
+                string.Format(Strings.ContextMenu_ServerInformation_Notification_Text, serverLocation),
                 10,
-                (_, _) => _menuContainer.ShowServerInformationWindow()
+                (_, _) => _menuContainer.Dispatcher.Invoke(() => _menuContainer.ShowServerInformationWindow())
             );
         }
-        #endregion
 
-        // we may need to create our own handler for this, because this sorta sucks
-        public void ShowAlert(string caption, string message, int duration, EventHandler? clickHandler)
+        public void ShowAlert(string caption, string message, int durationSeconds, EventHandler? clickHandler)
         {
-            string id = Guid.NewGuid().ToString()[..8];
+            string id = Guid.NewGuid().ToString("N").Substring(0, 8);
+            string logIdent = $"NotifyIconWrapper::ShowAlert.{id}";
 
-            string LOG_IDENT = $"NotifyIconWrapper::ShowAlert.{id}";
+            App.Logger.WriteLine(logIdent, $"Showing alert for {durationSeconds}s (clickHandler set: {clickHandler != null})");
+            App.Logger.WriteLine(logIdent, $"{caption}: {message.Replace("\n", "\\n")}");
 
-            App.Logger.WriteLine(LOG_IDENT, $"Showing alert for {duration} seconds (clickHandler={clickHandler is not null})");
-            App.Logger.WriteLine(LOG_IDENT, $"{caption}: {message.Replace("\n", "\\n")}");
+            if (_alertClickHandler != null)
+            {
+                App.Logger.WriteLine(logIdent, "Previous alert present, removing old click handler");
+                _notifyIcon.BalloonTipClicked -= _alertClickHandler;
+                _alertClickHandler = null;
+            }
 
             _notifyIcon.BalloonTipTitle = caption;
             _notifyIcon.BalloonTipText = message;
 
-            if (_alertClickHandler is not null)
+            if (clickHandler != null)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Previous alert still present, erasing click handler");
-                _notifyIcon.BalloonTipClicked -= _alertClickHandler;
+                _alertClickHandler = clickHandler;
+                _notifyIcon.BalloonTipClicked += _alertClickHandler;
             }
 
-            _alertClickHandler = clickHandler;
-            _notifyIcon.BalloonTipClicked += clickHandler;
+            _notifyIcon.ShowBalloonTip(durationSeconds);
 
-            _notifyIcon.ShowBalloonTip(duration);
-
-            Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
-                await Task.Delay(duration * 1000);
-             
-                _notifyIcon.BalloonTipClicked -= clickHandler;
+                await Task.Delay(durationSeconds * 1000);
 
-                App.Logger.WriteLine(LOG_IDENT, "Duration over, erasing current click handler");
+                if (clickHandler != null)
+                {
+                    _notifyIcon.BalloonTipClicked -= clickHandler;
 
-                if (_alertClickHandler == clickHandler)
-                    _alertClickHandler = null;
-                else
-                    App.Logger.WriteLine(LOG_IDENT, "Click handler has been overridden by another alert");
+                    App.Logger.WriteLine(logIdent, "Alert duration ended, removed click handler");
+
+                    if (_alertClickHandler == clickHandler)
+                    {
+                        _alertClickHandler = null;
+                    }
+                    else
+                    {
+                        App.Logger.WriteLine(logIdent, "Click handler was overridden by another alert");
+                    }
+                }
             });
         }
 
         public void Dispose()
         {
-            if (_disposing)
+            if (_disposed)
                 return;
 
-            _disposing = true;
+            _disposed = true;
 
             App.Logger.WriteLine("NotifyIconWrapper::Dispose", "Disposing NotifyIcon");
 
-            _menuContainer.Dispatcher.Invoke(_menuContainer.Close);
+            try
+            {
+                _menuContainer.Dispatcher.Invoke(() => _menuContainer.Close());
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("NotifyIconWrapper::Dispose", $"Failed close menu container: {ex}");
+            }
+
+            if (_alertClickHandler != null)
+            {
+                _notifyIcon.BalloonTipClicked -= _alertClickHandler;
+                _alertClickHandler = null;
+            }
+
             _notifyIcon.Dispose();
 
             GC.SuppressFinalize(this);
