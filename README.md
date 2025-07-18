@@ -8,9 +8,13 @@
 
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
 
-> [!CAUTION]
-> The only official places to download Voidstrap are this GitHub repository and [Voidstrap Website](https://voidstrapweb.netlify.app). Any other websites offering downloads or claiming to be us are not controlled by us.
-> 
+> ⚠️ **CAUTION**  
+> Voidstrap is now discontinued.  
+> My team and I have been working on a replacement for the past 3 months — **Plexity**,  
+> a non-Bloxstrap fork.  
+>  
+> Check it out here: [Plexity on GitHub](https://github.com/KloBraticc/Plexity)
+
 ---
 
 ## 🚀 Quick Links
