@@ -76,8 +76,6 @@
 - **Voidstrap Discord RPC** – Shows that you're using Voidstrap on Discord (can be disabled)
 - **Cross Game Teleport** - (Fixes Error 773)
 - **App CPU Limiter** - Limits the amount of CPU cores that Voidstrap Uses
-- **Windows (7) and Up Support**
-
 
 ### ⚙️ Fast Flags
 - **Settings Backup** – Save and restore your custom config.
