@@ -117,8 +117,6 @@
 
 ### 💡 Inspirations
 - [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap)
-- [](https://github.com//)
-
 ---
 
 *Thanks for choosing Voidstrap. Happy gaming! 🎮*
