@@ -12,7 +12,7 @@
 > Voidstrap is now discontinued.  
 > My team and I have been working on a replacement for the past 3 months — **Plexity**,  
 > a non-Bloxstrap fork.  
->  
+>  Secret Bratic message Voidstrap update soon??
 > Check it out here: [Plexity on GitHub](https://github.com/KloBraticc/Plexity)
 
 ---
