@@ -25,9 +25,6 @@
   </a>
 </p>
 
-
----
-
 ## ✨ Why Use Voidstrap?
 
 - ⚡ **Faster & Lighter** – Slimmed-down, tuned-up, and blazing fast.
