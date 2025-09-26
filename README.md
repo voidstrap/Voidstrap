@@ -29,11 +29,8 @@
   <a href="https://github.com/midaskira/Voidstrap/stargazers">
     <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars">
   </a>
-  <a href="https://discord.gg/wdmYT9WKTX">
+  <a href="https://discord.gg/plexity">
     <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
-  </a>
-  <a href="https://www.virustotal.com/gui/file/a19d94eaed61dfa779610f1271a9379f2dae45d876e45564cd324b69c07e9a29">
-    <img src="https://img.shields.io/badge/Virus%20Free-✔️-00B140" alt="Virus Free">
   </a>
 </p>
 
