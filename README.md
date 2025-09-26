@@ -20,7 +20,7 @@
   <a href="https://github.com/midaskira/Voidstrap/stargazers">
     <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars Badge">
   </a>
-  <a href="https://discord.gg/plexity">
+  <a href="https://discord.gg/z5cnNPEEyv">
     <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Discord Badge">
   </a>
 </p>
@@ -97,7 +97,7 @@
 
 ## 🤝 Community & Support
 
-- 💬 **Join our Discord:** [Voidstrap Server](https://discord.gg/plexity) for help, news, and chat.
+- 💬 **Join our Discord:** [Voidstrap Server](https://discord.gg/z5cnNPEEyv) for help, news, and chat.
 - 🐞 **Found a bug or have an idea?** Use our [Issues tab](https://github.com/midaskira/Voidstrap/issues).
 - ⭐ **Star the repo:** Show your support!
 
