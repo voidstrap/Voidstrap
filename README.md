@@ -21,18 +21,19 @@
 
 <p align="center">
   <a href="https://github.com/midaskira/Voidstrap/releases">
-    <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads" alt="Downloads">
+    <img src="https://img.shields.io/github/downloads/midaskira/Voidstrap/total?color=981bfe&label=Downloads" alt="Downloads Badge">
   </a>
-  <a href="https://github.com/midaskira/Voidstrap/releases">
-    <img src="https://img.shields.io/github/v/release/midaskira/Voidstrap?color=7a39fb&label=Latest" alt="Latest Release">
+  <a href="https://github.com/midaskira/Voidstrap/releases/latest">
+    <img src="https://img.shields.io/github/v/release/midaskira/Voidstrap?color=7a39fb&label=Latest" alt="Latest Release Badge">
   </a>
   <a href="https://github.com/midaskira/Voidstrap/stargazers">
-    <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars">
+    <img src="https://img.shields.io/github/stars/midaskira/Voidstrap?color=FFD700&label=Stars" alt="Stars Badge">
   </a>
   <a href="https://discord.gg/plexity">
-    <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Join Discord">
+    <img src="https://img.shields.io/discord/1368499843084845076?logo=discord&logoColor=white&label=Discord&color=4d3dff" alt="Discord Badge">
   </a>
 </p>
+
 
 ---
 
