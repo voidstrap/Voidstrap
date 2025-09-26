@@ -7,7 +7,6 @@
 </p>
 
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
----
 
 ## 🚀 Quick Links
 
