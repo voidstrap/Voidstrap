@@ -7,14 +7,6 @@
 </p>
 
 <p align="center"><strong>⭐ Like Voidstrap? Star the repo and help it grow!</strong></p>
-
-> ⚠️ **CAUTION**  
-> Voidstrap is now discontinued.  
-> My team and I have been working on a replacement for the past 3 months — **Plexity**, Secret Bratic message Voidstrap update soon??  
-> a non-Bloxstrap fork.  
-> 
-> Check it out here: [Plexity on GitHub](https://github.com/KloBraticc/Plexity)
-
 ---
 
 ## 🚀 Quick Links
