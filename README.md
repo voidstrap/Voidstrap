@@ -33,8 +33,8 @@
          alt="Stars Badge"
          style="border-radius: 12px; box-shadow: 0 0 12px #FFD700;">
   </a>
-  <a href="https://discord.gg/tZ9ampkhWU" target="_blank">
-    <img src="https://img.shields.io/discord/1368499843084845076?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=4d3dff"
+  <a href="https://discord.gg/Vhmxr9KXQs" target="_blank">
+    <img src="https://img.shields.io/discord/1388222191937523762?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=4d3dff"
          alt="Discord Badge"
          style="border-radius: 12px; box-shadow: 0 0 12px #4d3dff;">
   </a>
