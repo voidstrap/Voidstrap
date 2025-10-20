@@ -1,21 +1,25 @@
-MIT License
+Copyright (c) 2025 Bratic
 
-Copyright (c) 2023 pizzaboxer
+All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Grant of License:
+Subject to the terms below, the copyright owner grants you a non-exclusive, non-transferable, revocable license to download, install, and use one copy of the Software for internal, personal, or commercial use on your devices, solely as distributed by the copyright owner (the "License").
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Restrictions:
+You may NOT:
+ - redistribute, publish, sublicense, sell, rent, lease, or otherwise transfer the Software (source or compiled);
+ - copy, fork, mirror, or create derivative works of the source code;
+ - reverse engineer, decompile, or disassemble the Software except where applicable law expressly permits;
+ - remove or modify copyright or license notices.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Termination:
+Any breach of these restrictions terminates this license automatically. Upon termination you must cease all use and destroy all copies.
+
+Disclaimer of Warranty:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTIES OF ANY KIND.
+
+Limitation of Liability:
+IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY.
+
+Contact:
+For licensing requests (redistribution, commercial redistribution, or source access), contact: <Free.waysbratic@gmail.com>
