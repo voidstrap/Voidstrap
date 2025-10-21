@@ -23,6 +23,11 @@
          alt="Downloads Badge"
          style="border-radius: 12px; box-shadow: 0 0 12px #981bfe;">
   </a>
+   <a href="https://github.com/voidstrap/Voidstrap/releases/latest" target="_blank">
+    <img src="https://img.shields.io/github/downloads/voidstrap/Voidstrap/latest/total?style=for-the-badge&color=ba55ff&label=Downloads%20(Latest)"
+         alt="Latest Downloads Badge"
+         style="border-radius: 12px; box-shadow: 0 0 12px #ba55ff;">
+  </a>
   <a href="https://github.com/voidstrap/Voidstrap/releases/latest" target="_blank">
     <img src="https://img.shields.io/github/v/release/voidstrap/Voidstrap?style=for-the-badge&color=7a39fb&label=Latest%20Release"
          alt="Latest Release Badge"
