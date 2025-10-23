@@ -40,7 +40,7 @@
   </a>
 <a href="https://discord.com/invite/tVkFwCQRGY" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord server">
   <img
-    src="https://img.shields.io/discord/1388222191937523762?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=4d3dff"
+    src="https://img.shields.io/discord/1430730259115937854?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=4d3dff"
     alt="Discord Badge"
     style="border-radius: 12px; box-shadow: 0 0 12px #4d3dff;"
   >
