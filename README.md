@@ -7,6 +7,8 @@
 </p>
 
 <p align="center"><strong>⭐ If you like Voidstrap, please star the repo and help it grow!</strong></p>
+<p align="center"><strong>❌ No we dont update the source code anymore due to reasons!</strong></p>
+<p align="center"><strong>We may in the future....</strong></p>
 
 ---
 
