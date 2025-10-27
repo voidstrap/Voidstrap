@@ -3,28 +3,29 @@
     "columns": 3,
     "supporters": [
       {
-        "name": "Bratic"
+        "name": "Bratic",
+        "imageAsset": "https://avatars.githubusercontent.com/u/195697851?v=4"
       },
       {
-        "name": "Stoof"
+        "name": "Stoof",
       },
       {
-        "name": "midas_kira"
+        "name": "midas_kira",
       },
       {
-        "name": "Kravory"
+        "name": "Kravory",
       },
       {
-        "name": "Estesonly"
+        "name": "Estesonly",
       },
       {
-        "name": "Supermfmfan"
+        "name": "Supermfmfan",
       },
       {
-        "name": "5070"
+        "name": "5070",
       },
       {
-        "name": "Flemish"
+        "name": "Flemish",
       }
     ]
   }
