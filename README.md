@@ -7,6 +7,8 @@
 </p>
 
 <p align="center"><strong>⭐ If you like Voidstrap, please star the repo and help it grow!</strong></p>
+<p align="center"><strong>Working on a HUGE update for 1 year fully!</strong></p>
+<p align="center"><strong>so this does mean that no more updates for 1 year...</strong></p>
 
 ---
 
