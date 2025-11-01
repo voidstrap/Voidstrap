@@ -81,9 +81,9 @@
 - **Cross-Game Teleport** – Fixes Error 773 when switching games.  
 - **App CPU Limiter** – Limit CPU cores used by Roblox or Voidstrap.  
 - **Memory / GPU Optimizer (BETA)** – “Optimize Roblox” & “Trim Roblox Memory” improve performance.  
-- **Custom RPC Editor** – Design your own Discord Rich Presence for Voidstrap. 🆕  
-- **Music Player with Browser** – Built-in browser and music player. 🆕  
-- **Plugins Page (EARLY ACCESS)** – Manage experimental plugins. 🆕  
+- **Custom RPC Editor** – Design your own Discord Rich Presence for Voidstrap.
+- **Music Player with Browser** – Built-in browser and music player. 
+- **Plugins Page (EARLY ACCESS)** – Manage experimental plugins.
 
 ### ⚙️ FastFlags & Config  
 - **Settings Backup/Restore** – Save and reload configs or flags.  
@@ -104,24 +104,24 @@
 - **Robust Error Management** – Improved logging and stack tracing.  
 - **Persistent Uninstall Settings** – Keep data when reinstalling.  
 - **Installation Speed Improvements** – Faster setup & upgrades.  
-- **UI Fully Reworked** – New design in v1.0.6.0. 🆕  
-- **CPU Overclock Feature** – Optional advanced CPU performance tweak. 🆕  
-- **BetterBLOX Datacenters Tab** – Displays BetterBLOX server info. 🆕  
+- **UI Fully Reworked** – New design in v1.0.6.0.
+- **CPU Overclock Feature** – Optional advanced CPU performance tweak.
+- **BetterBLOX Datacenters Tab** – Displays BetterBLOX server info. 
 
 ### 🎨 UI, Theming & Modding  
 - **Live Theme Switching** – No restart required.  maybe....
 - **10+ Built-in Themes** – Including custom cursors & icons.  
 - **Mod Manager** – Built-in mod support (e.g. Potato Graphics).  
 - **Hub for Themes & Mods** – Download directly from launcher.  
-- **Custom Backgrounds & GIFs** – Personalize the UI. 🆕  
+- **Custom Backgrounds & GIFs** – Personalize the UI.
 
 ### 🧠 Smart Utilities & Performance  
 - **Session Memory** – Resume where you left off.  
 - **Log Cleaner** – Auto-delete old log files.  
 - **Optimize Roblox (BETA)** – Optimize GPU/CPU/RAM usage.  
 - **Crash Monitor** – Detects flag-related issues.  
-- **Gamepass Info in Taskbar Menu** – View your passes quickly. 🆕  
-- **BetterBLOX Uptime Tracking** – Shows datacenter uptime. 🆕  
+- **Gamepass Info in Taskbar Menu** – View your passes quickly.
+- **BetterBLOX Uptime Tracking** – Shows datacenter uptime.
 
 ---
 
