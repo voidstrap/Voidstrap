@@ -5,9 +5,6 @@ using System.Windows;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    /// <summary>
-    /// Interaction logic for AppearancePage.xaml
-    /// </summary>
     public partial class AppearancePage
     {
         public AppearancePage()

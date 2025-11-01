@@ -1,41 +1,45 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Windows;
-using System.Xml.Linq;
 
 namespace Voidstrap
 {
     public class JsonManager<T> where T : class, new()
     {
         public T OriginalProp { get; set; } = new();
-
         public T Prop { get; set; } = new();
 
         public virtual string ClassName => typeof(T).Name;
         public string? LastFileHash { get; private set; }
 
-        public virtual string BackupsLocation => Path.Combine(Paths.Base, $"Backup.json");
-
+        public virtual string BackupsLocation => Path.Combine(Paths.Base, "Backup.json");
         public virtual string FileLocation => Path.Combine(Paths.Base, $"{ClassName}.json");
-
         public virtual string LOG_IDENT_CLASS => $"JsonManager<{ClassName}>";
-
-
 
         public virtual void Load(bool alertFailure = true)
         {
-            
             string LOG_IDENT = $"{LOG_IDENT_CLASS}::Load";
-
             App.Logger.WriteLine(LOG_IDENT, $"Loading from {FileLocation}...");
 
             try
             {
-                T? settings = JsonSerializer.Deserialize<T>(File.ReadAllText(FileLocation));
+                if (!File.Exists(FileLocation))
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "File does not exist, saving defaults.");
+                    Save();
+                    return;
+                }
+
+                string json = File.ReadAllText(FileLocation);
+                T? settings = JsonSerializer.Deserialize<T>(json);
 
                 if (settings is null)
-                    throw new ArgumentNullException("Deserialization returned null");
+                    throw new InvalidOperationException("Deserialization returned null.");
 
                 Prop = settings;
+                LastFileHash = MD5Hash.FromFile(FileLocation);
 
                 App.Logger.WriteLine(LOG_IDENT, "Loaded successfully!");
             }
@@ -46,20 +50,13 @@ namespace Voidstrap
 
                 if (alertFailure)
                 {
-                    string message = "";
-
-                    if (ClassName == nameof(Models.Persistable.AppSettings))
-                        message = Strings.JsonManager_SettingsLoadFailed;
-                    else if (ClassName == nameof(Voidstrap.FastFlagManager))
-                        message = Strings.JsonManager_FastFlagsLoadFailed;
-
-                    if (!String.IsNullOrEmpty(message))
-                        Frontend.ShowMessageBox($"{message}\n\n{ex.Message}", System.Windows.MessageBoxImage.Warning);
+                    Frontend.ShowMessageBox($"Failed to load settings:\n\n{ex.Message}", MessageBoxImage.Warning);
 
                     try
                     {
-                        // Create a backup of loaded file
-                        File.Copy(FileLocation, FileLocation + ".bak", true);
+                        string backupPath = FileLocation + ".bak";
+                        File.Copy(FileLocation, backupPath, true);
+                        App.Logger.WriteLine(LOG_IDENT, $"Created backup file: {backupPath}");
                     }
                     catch (Exception copyEx)
                     {
@@ -75,14 +72,17 @@ namespace Voidstrap
         public virtual void Save()
         {
             string LOG_IDENT = $"{LOG_IDENT_CLASS}::Save";
-            
             App.Logger.WriteLine(LOG_IDENT, $"Saving to {FileLocation}...");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(FileLocation)!);
 
             try
             {
-                File.WriteAllText(FileLocation, JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true }));
+                Directory.CreateDirectory(Path.GetDirectoryName(FileLocation)!);
+
+                string json = JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FileLocation, json);
+
+                LastFileHash = MD5Hash.FromFile(FileLocation);
+                App.Logger.WriteLine(LOG_IDENT, "Save complete!");
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -90,106 +90,88 @@ namespace Voidstrap
                 App.Logger.WriteException(LOG_IDENT, ex);
 
                 string errorMessage = string.Format(Resources.Strings.Bootstrapper_JsonManagerSaveFailed, ClassName, ex.Message);
-                Frontend.ShowMessageBox(errorMessage, System.Windows.MessageBoxImage.Warning);
-
-                return;
+                Frontend.ShowMessageBox(errorMessage, MessageBoxImage.Warning);
             }
-
-            App.Logger.WriteLine(LOG_IDENT, "Save complete!");
         }
 
         public bool HasFileOnDiskChanged()
         {
-            return LastFileHash != MD5Hash.FromFile(FileLocation);
+            try
+            {
+                string currentHash = MD5Hash.FromFile(FileLocation);
+                return LastFileHash != currentHash;
+            }
+            catch
+            {
+                return true; // Assume changed if hash can't be computed
+            }
         }
 
         public void SaveBackup(string name)
         {
-            string LOGGER_STRING = "SaveBackup::Backups";
+            const string LOGGER_STRING = "SaveBackup::Backups";
+            string baseDir = Paths.SavedBackups;
 
-            string BaseDir = Paths.SavedBackups;
             try
             {
-                string FileDirectory = Path.Combine(BaseDir, name);
-
-                if (string.IsNullOrEmpty(name))
+                if (string.IsNullOrWhiteSpace(name))
                     return;
 
-                if (!Directory.Exists(BaseDir))
-                    Directory.CreateDirectory(BaseDir);
+                Directory.CreateDirectory(baseDir);
 
-                App.Logger.WriteLine(LOGGER_STRING, $"Writing flag backup {name}");
+                string filePath = Path.Combine(baseDir, name);
+                string json = JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(filePath, json);
 
-                if (!File.Exists(FileDirectory))
-                    File.Create(FileDirectory).Dispose();
-
-                string FastFlagsJson = JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true });
-
-                File.WriteAllText(FileDirectory, FastFlagsJson);
+                App.Logger.WriteLine(LOGGER_STRING, $"Backup '{name}' saved successfully.");
             }
             catch (Exception ex)
             {
-                Frontend.ShowMessageBox(ex.Message, MessageBoxImage.Error);
+                Frontend.ShowMessageBox($"Failed to save backup:\n{ex.Message}", MessageBoxImage.Error);
             }
         }
 
         public void LoadBackup(string? name, bool? clearFlags)
         {
-            string LOGGER_STRING = "LoadBackup::Backups";
-
-            string BaseDir = Paths.SavedBackups;
-
-            if (string.IsNullOrEmpty(name))
-                return;
-
+            const string LOGGER_STRING = "LoadBackup::Backups";
+            string baseDir = Paths.SavedBackups;
 
             try
             {
-                if (!Directory.Exists(BaseDir))
-                    Directory.CreateDirectory(BaseDir);
+                if (string.IsNullOrWhiteSpace(name))
+                    return;
 
-                string[] Files = Directory.GetFiles(BaseDir);
+                string filePath = Path.Combine(baseDir, name);
 
-                string FoundFile = string.Empty;
+                if (!File.Exists(filePath))
+                    throw new FileNotFoundException($"Backup file '{name}' not found.");
 
-                foreach (var file in Files)
-                {
-                    if (Path.GetFileName(file) == name)
-                    {
-                        FoundFile = file;
-                        break;
-                    }
-                }
-
-                string SavedClientSettings = File.ReadAllText(FoundFile);
-
-                App.Logger.WriteLine(LOGGER_STRING, $"Loading {SavedClientSettings}");
-
-                T? settings = JsonSerializer.Deserialize<T>(SavedClientSettings);
+                string json = File.ReadAllText(filePath);
+                T? settings = JsonSerializer.Deserialize<T>(json);
 
                 if (settings is null)
-                    throw new ArgumentNullException("Deserialization returned null");
+                    throw new InvalidOperationException("Deserialization returned null.");
 
                 if (clearFlags == true)
                 {
                     Prop = settings;
                 }
-                else
+                else if (settings is IDictionary<string, object> settingsDict && Prop is IDictionary<string, object> propDict)
                 {
-                    if (settings is IDictionary<string, object> settingsDict && Prop is IDictionary<string, object> propDict)
+                    foreach (var kvp in settingsDict)
                     {
-                        foreach (var kvp in settingsDict)
-                        {
-                            if (kvp.Value != null)
-                                propDict[kvp.Key] = kvp.Value;
-                        }
+                        if (kvp.Value != null)
+                            propDict[kvp.Key] = kvp.Value;
                     }
                 }
 
+                App.Logger.WriteLine(LOGGER_STRING, $"Backup '{name}' loaded successfully.");
                 App.FastFlags.Save();
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
-                Frontend.ShowMessageBox(ex.Message,MessageBoxImage.Error);
+                App.Logger.WriteException(LOGGER_STRING, ex);
+                Frontend.ShowMessageBox($"Failed to load backup:\n{ex.Message}", MessageBoxImage.Error);
             }
         }
     }

@@ -11,34 +11,36 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="BehaviourPage"
     d:DataContext="{d:DesignInstance Type=models:BehaviourViewModel}"
-    d:DesignHeight="600"
+    d:DesignHeight="1500"
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
 
-    <!--  Main content container  -->
     <StackPanel Margin="0,0,14,14">
-        <!--  Description text  -->
+
+        <!-- Description -->
         <TextBlock
             Margin="0,0,0,8"
             FontSize="14"
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
             Text="{x:Static resources:Strings.Menu_Behaviour_Description}" />
 
-        <!--  Confirm Launches Option  -->
-        <controls:OptionControl Description="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Description}" Header="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Title}">
+        <controls:OptionControl 
+            x:Name="ConfirmLaunchOption"
+            Header="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Title}" 
+            Description="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Description}">
             <ui:ToggleSwitch IsChecked="{Binding ConfirmLaunches, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <!--  Force Roblox Language Option  -->
+        <!-- Force Roblox Language -->
         <controls:OptionControl
-            Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
             Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Title}"
+            Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
             HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
             <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <!--  Informational Banner  -->
+        <!-- Informational Banner -->
         <ui:InfoBar
             x:Name="AnselBanner"
             Margin="0,5,0,-5"
@@ -48,36 +50,83 @@
             Message="{x:Static resources:Strings.Menu_Behaviour_AnselBanner}"
             Severity="Informational" />
 
-        <!--  Multi-Instances Option  -->
-        <controls:OptionControl Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}" Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}">
+        <!-- Multi-instance Option -->
+        <controls:OptionControl 
+            x:Name="AllowMultipleInstancesOption"
+            Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}" 
+            Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}">
             <ui:ToggleSwitch IsChecked="{Binding MultiInstanceLaunchingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
+        <controls:OptionControl 
+            Header="Disable RobloxCrashHandler" 
+            Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
+            <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!-- Cross-game Teleport -->
         <controls:OptionControl
-            Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
             Header="Allow cross-game teleportation"
+            Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
             <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <ui:CardExpander Grid.Row="1" Margin="0,8,0,0" IsExpanded="False">
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14" Text="Cleaner" />
-                        <TextBlock Margin="0,2,0,0" FontSize="12" Text="Voidstrap will remove old data to save on space" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                    </StackPanel>
-                </Grid>
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Optimizations" />
+                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="Roblox optimization features" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
             </ui:CardExpander.Header>
-
             <StackPanel>
-                <controls:OptionControl 
-Header="When should the files get deleted" 
-Description="Files older than the set amount will be deleted.">
+                <controls:OptionControl
+    Header="Set CPU cores for Roblox"
+    Description="{Binding CpuSummary}">
+                    <ComboBox Grid.Column="1"
+              Margin="8,0,8,0"
+              Padding="10,5,10,5"
+              Width="200"
+              ItemsSource="{Binding CpuOptions}"
+              SelectedItem="{Binding SelectedCpuPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </controls:OptionControl>
+                <controls:OptionControl Header="Trim Roblox Memory" Description="Cuts Roblox's memory in half to help with RAM usage. Useful for multi-account use.">
+                    <ui:ToggleSwitch IsChecked="{Binding MultiAccount, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl Header="DX12 Features" Description="DX12-like features for Roblox (simulated, not actual DX12).">
+                    <ui:ToggleSwitch IsChecked="{Binding DX12Likely, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl Header="Optimize Roblox" Description="Optimizes Roblox based on your current CPU, GPU, and memory.">
+                    <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Safe Overclock GPU" 
+                        Description="Overclock GPU based on Roblox’s status.">
+                    <ui:ToggleSwitch IsChecked="{Binding OverClockGPU, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Safe Overclock CPU" 
+                        Description="Overclock CPU based on Roblox’s status.">
+                    <ui:ToggleSwitch IsChecked="{Binding OverClockCPU, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl Header="Help Roblox Connect to Better Servers" 
+                        Description="Helps Roblox run networking smoother. Doesn’t choose the best server, just improves connection.">
+                    <ui:ToggleSwitch IsChecked="{Binding IsBetterServersEnabled, Mode=TwoWay}" />
+                </controls:OptionControl>
+            </StackPanel>
+        </ui:CardExpander>
+
+        <!-- Cleaner Expander -->
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Cleaner" />
+                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="Voidstrap will remove old data to save on space" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel>
+                <controls:OptionControl Header="When should the files get deleted" Description="Files older than the set amount will be deleted.">
                     <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding CleanerOptions, Mode=OneTime}" Text="{Binding CleanerOption, Mode=TwoWay}">
                         <ComboBox.ItemTemplate>
                             <DataTemplate>
@@ -86,23 +135,16 @@ Description="Files older than the set amount will be deleted.">
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </controls:OptionControl>
-                <controls:OptionControl 
-Header="Cache" 
-Description="When should the set amount be deleted.">
+                <controls:OptionControl Header="Cache" Description="When should the set amount be deleted.">
                     <ui:ToggleSwitch IsChecked="{Binding CleanerCache, Mode=TwoWay}" />
                 </controls:OptionControl>
-                <controls:OptionControl 
-Header="Logs" 
-Description="Old log files will be deleted.">
+                <controls:OptionControl Header="Logs" Description="Old log files will be deleted.">
                     <ui:ToggleSwitch IsChecked="{Binding CleanerLogs, Mode=TwoWay}" />
                 </controls:OptionControl>
-                <controls:OptionControl 
-Header="Voidstrap logs"
-Description="Voidstrap logs will be deleted.">
+                <controls:OptionControl Header="Voidstrap logs" Description="Voidstrap logs will be deleted.">
                     <ui:ToggleSwitch IsChecked="{Binding CleanerVoidstrap, Mode=TwoWay}" />
                 </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
-
     </StackPanel>
 </ui:UiPage>

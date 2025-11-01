@@ -226,7 +226,11 @@ namespace Voidstrap
                 App.Terminate(ErrorCode.ERROR_FILE_NOT_FOUND);
             }
 
-            if (App.Settings.Prop.ConfirmLaunches && Mutex.TryOpenExisting("ROBLOX_singletonMutex", out var _) && !App.Settings.Prop.MultiInstanceLaunching)
+            // Only show confirm launch if not launching a specific game via URL
+            if (App.Settings.Prop.ConfirmLaunches
+                && Mutex.TryOpenExisting("ROBLOX_singletonMutex", out var _)
+                && !App.Settings.Prop.MultiInstanceLaunching
+                && !(App.Settings.Prop.IsGameEnabled && !string.IsNullOrWhiteSpace(App.Settings.Prop.LaunchGameID)))
             {
                 // this currently doesn't work very well since it relies on checking the existence of the singleton mutex
                 // which often hangs around for a few seconds after the window closes

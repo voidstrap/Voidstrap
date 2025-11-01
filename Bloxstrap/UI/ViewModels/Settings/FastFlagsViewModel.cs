@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using DiscordRPC.Logging;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Input;
 using Voidstrap.Enums.FlagPresets;
 
 
@@ -88,6 +89,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
+        public bool EnableFastFlagBypass
+        {
+            get => App.Settings.Prop.FastFlagBypass;
+            set => App.Settings.Prop.FastFlagBypass = value;
+        }
+
         public bool GoogleToggle
         {
             get => string.Equals(App.FastFlags.GetPreset("VoiceChat.VoiceChat1"), "False", StringComparison.OrdinalIgnoreCase);
@@ -122,6 +129,76 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.FastFlags.GetPreset("UI.RainbowText") == "True";
             set => App.FastFlags.SetPreset("UI.RainbowText", value ? "True" : null);
+        }
+
+        private static readonly string[] LODLevels = { "L0", "L12", "L23", "L34" };
+
+        public bool FRMQualityOverrideEnabled
+        {
+            get => App.FastFlags.GetPreset("Rendering.FRMQualityOverride") != null;
+            set
+            {
+                if (value)
+                    FRMQualityOverride = 21;
+                else
+                    App.FastFlags.SetPreset("Rendering.FRMQualityOverride", null);
+
+                OnPropertyChanged(nameof(FRMQualityOverride));
+                OnPropertyChanged(nameof(FRMQualityOverrideEnabled));
+            }
+        }
+
+        public int FRMQualityOverride
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("Rendering.FRMQualityOverride"), out var x) ? x : 21;
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.FRMQualityOverride", value);
+
+                OnPropertyChanged(nameof(FRMQualityOverride));
+            }
+        }
+
+        public int MeshQuality
+        {
+            get => int.TryParse(App.FastFlags.GetPreset("Geometry.MeshLOD.Static"), out var x) ? x : 0;
+            set
+            {
+                int clamped = Math.Clamp(value, 0, LODLevels.Length - 1);
+
+                for (int i = 0; i < LODLevels.Length; i++)
+                {
+                    int lodValue = Math.Clamp(clamped - i, 0, 3);
+                    string lodLevel = LODLevels[i];
+
+                    App.FastFlags.SetPreset($"Geometry.MeshLOD.{lodLevel}", lodValue);
+                }
+
+                App.FastFlags.SetPreset("Geometry.MeshLOD.Static", clamped);
+                OnPropertyChanged(nameof(MeshQuality));
+                OnPropertyChanged(nameof(MeshQualityEnabled));
+            }
+        }
+
+        public bool MeshQualityEnabled
+        {
+            get => App.FastFlags.GetPreset("Geometry.MeshLOD.Static") != null;
+            set
+            {
+                if (value)
+                {
+                    MeshQuality = 3;
+                }
+                else
+                {
+                    foreach (string level in LODLevels)
+                        App.FastFlags.SetPreset($"Geometry.MeshLOD.{level}", null);
+
+                    App.FastFlags.SetPreset("Geometry.MeshLOD.Static", null);
+                }
+
+                OnPropertyChanged(nameof(MeshQualityEnabled));
+            }
         }
 
         public bool MemoryProbing
@@ -372,11 +449,11 @@ namespace Voidstrap.UI.ViewModels.Settings
                         MessageBoxImage.Warning,
                         MessageBoxButton.OK
                     );
-                    App.FastFlags.SetPreset("FpsFix.Log", "False");
+                    App.FastFlags.SetPreset("Rendering.LimitFramerate", "False");
                 }
                 else
                 {
-                    App.FastFlags.SetPreset("FpsFix.Log", null);
+                    App.FastFlags.SetPreset("Rendering.LimitFramerate", null);
                 }
             }
         }

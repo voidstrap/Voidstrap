@@ -12,7 +12,8 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
-    <ui:CardControl Margin="0,8,0,0" Content="{Binding InnerContent, ElementName=Control}">
+
+    <ui:CardControl Margin="0,8,0,0">
         <ui:CardControl.Header>
             <StackPanel>
                 <Grid>
@@ -20,10 +21,12 @@
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
+
                     <TextBlock
                         Grid.Column="0"
                         FontSize="14"
                         Text="{Binding Header, ElementName=Control}" />
+
                     <TextBlock Grid.Column="1" Margin="4,0,0,0">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -39,29 +42,11 @@
                             CommandParameter="{Binding HelpLink, ElementName=Control}"
                             TextDecorations="None"
                             ToolTip="{x:Static resources:Strings.Menu_MoreInfo}">
-                            <ui:SymbolIcon Margin="0,1,0,0" Symbol="QuestionCircle48">
-                                <ui:SymbolIcon.Style>
-                                    <Style BasedOn="{StaticResource {x:Type ui:SymbolIcon}}" TargetType="ui:SymbolIcon">
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Foreground">
-                                                    <Setter.Value>
-                                                        <SolidColorBrush Color="{DynamicResource SystemAccentColorTertiary}" />
-                                                    </Setter.Value>
-                                                </Setter>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                        <Setter Property="Foreground">
-                                            <Setter.Value>
-                                                <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </ui:SymbolIcon.Style>
-                            </ui:SymbolIcon>
+                            <ui:SymbolIcon Margin="0,1,0,0" Symbol="QuestionCircle48" />
                         </Hyperlink>
                     </TextBlock>
                 </Grid>
+
                 <local:MarkdownTextBlock
                     Margin="0,2,0,0"
                     FontSize="12"
@@ -80,5 +65,9 @@
                 </local:MarkdownTextBlock>
             </StackPanel>
         </ui:CardControl.Header>
+
+        <ui:CardControl.Content>
+            <ContentPresenter Content="{Binding InnerContent, ElementName=Control}" />
+        </ui:CardControl.Content>
     </ui:CardControl>
 </UserControl>

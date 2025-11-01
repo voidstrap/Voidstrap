@@ -26,14 +26,25 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         private readonly ObservableCollection<FastFlag> _fastFlagList = new();
         private readonly ObservableCollection<FlagHistoryEntry> _flagHistory = new();
         private Dictionary<string, DateTime> flagTimeAdded = new Dictionary<string, DateTime>();
-
-
-
         private bool _showPresets = true;
         private string _searchFilter = string.Empty;
         private string _lastSearch = string.Empty;
         private DateTime _lastSearchTime = DateTime.MinValue;
         private const int _debounceDelay = 70;
+
+        private readonly HttpClient _httpClient = new();
+        private readonly HashSet<string> _knownFlagNames = new();
+        private readonly List<string> _flagSourceUrls = new()
+        {
+    "https://raw.githubusercontent.com/DynamicFastFlag/DynamicFastFlag/refs/heads/main/FvaribleV2.json",
+    "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCClientBootstrapper.json",
+    "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCStudioApp.json",
+    "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCDesktopClient",
+    "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/refs/heads/roblox/FVariables.txt",
+    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/PCDesktopClient.json",
+    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/FVariablesV2.json",
+    "https://clientsettings.roblox.com/v2/settings/application/PCDesktopClient"
+        };
 
         public FastFlagEditorPage()
         {
@@ -41,6 +52,56 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             SetDefaultStates();
             HistoryListBox.ItemsSource = _flagHistory;
         }
+        private async Task LoadKnownFlagsAsync()
+        {
+            if (_knownFlagNames.Count > 0)
+                return;
+            var fetchTasks = _flagSourceUrls.Select(async url =>
+            {
+                try
+                {
+                    using var responseStream = await _httpClient.GetStreamAsync(url).ConfigureAwait(false);
+
+                    if (url.EndsWith(".json") || url.Contains("clientsettings.roblox.com"))
+                    {
+                        using var doc = await JsonDocument.ParseAsync(responseStream).ConfigureAwait(false);
+
+                        if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                        {
+                            foreach (var prop in doc.RootElement.EnumerateObject())
+                                _knownFlagNames.Add(prop.Name);
+                        }
+                    }
+                    else
+                    {
+                        using var reader = new StreamReader(responseStream);
+                        string? line;
+                        while ((line = await reader.ReadLineAsync().ConfigureAwait(false)) != null)
+                        {
+                            int eq = line.IndexOf('=');
+                            if (eq > 0)
+                            {
+                                string name = line[..eq].Trim();
+                                if (!string.IsNullOrEmpty(name))
+                                    _knownFlagNames.Add(name);
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                }
+            });
+
+            await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+        }
+
+        private void UpdateExistsColumn()
+        {
+            foreach (var flag in _fastFlagList)
+                flag.Index = _knownFlagNames.Contains(flag.Name);
+        }
+
 
         private void SetDefaultStates()
         {
@@ -77,8 +138,22 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 DataGrid.ItemsSource = _fastFlagList;
 
             UpdateTotalFlagsCount();
+            UpdateCrashRate();
         }
 
+        private void UpdateCrashRate()
+        {
+            int itemCount = DataGrid.Items.Count;
+            double crashRatePerItem = 3.0 / 15.0;
+            double crashRate = itemCount * crashRatePerItem;
+            crashRate = Math.Min(crashRate, 100);
+
+            string formattedCrashRate = crashRate % 1 == 0
+                ? crashRate.ToString("0")
+                : crashRate.ToString("0.##");
+
+            CrashRateTextBlock.Text = $"Crash: {formattedCrashRate}%";
+        }
 
         public class FlagHistoryEntry
         {
@@ -107,20 +182,20 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             _flagHistory.Add(historyEntry);
         }
 
-
-
         private void UpdateTotalFlagsCount()
         {
             TotalFlagsTextBlock.Text = $"Total flags: {_fastFlagList.Count}";
         }
 
-        private void ClearSearch(bool refresh = true)
+        private async void ClearSearch(bool refresh = true)
         {
             SearchTextBox.Text = "";
             _searchFilter = "";
 
             if (refresh)
                 ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
         }
 
         private void ShowAddDialog()
@@ -137,7 +212,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 ImportJSON(dialog.JsonTextBox.Text);
         }
 
-        private void ShowProfilesDialog()
+        private async void ShowProfilesDialog()
         {
             var dialog = new FlagProfilesDialog();
             dialog.ShowDialog();
@@ -156,19 +231,21 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             Thread.Sleep(1000);
             ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
         }
 
         private async void ShowFFlagSearchDialog()
         {
-            var dialog = new FFlagSearchDialog();  // This is the NEW comprehensive dialog
+            var dialog = new FFlagSearchDialog(); 
             dialog.ShowDialog();
-
-            // Optionally reload the list after the dialog closes
             await Task.Delay(1000);
             ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
         }
 
-        private void AddSingle(string name, string value)
+        private async void AddSingle(string name, string value)
         {
             FastFlag? entry;
 
@@ -207,6 +284,8 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
                 if (refresh)
                     ReloadList();
+                await LoadKnownFlagsAsync();
+                UpdateExistsColumn();
 
                 entry = _fastFlagList.FirstOrDefault(x => x.Name == name);
             }
@@ -214,6 +293,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             DataGrid.SelectedItem = entry;
             DataGrid.ScrollIntoView(entry);
             UpdateTotalFlagsCount();
+            UpdateCrashRate();
         }
 
         private void ImportJSON(string json)
@@ -221,8 +301,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             Dictionary<string, object>? list = null;
 
             json = json.Trim();
-
-            // autocorrect where possible
             if (!json.StartsWith('{'))
                 json = '{' + json;
 
@@ -301,7 +379,12 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             ClearSearch();
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e) => ReloadList();
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
+        }
 
         private void DataGrid_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
@@ -378,9 +461,8 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
 
             UpdateTotalFlagsCount();
+            UpdateCrashRate();
         }
-
-
 
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -409,9 +491,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
 
             UpdateTotalFlagsCount();
+            UpdateCrashRate();
         }
 
-        private void ToggleButton_Click(object sender, RoutedEventArgs e)
+        private async void ToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not ToggleButton button)
                 return;
@@ -420,6 +503,9 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             _showPresets = button.IsChecked ?? true;
             ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
+            UpdateExistsColumn();
         }
 
         private void ExportJSONButton_Click(object sender, RoutedEventArgs e)
@@ -606,9 +692,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
         }
 
-        private void ReloadUI()
+        private async void ReloadUI()
         {
             ReloadList();
+            await LoadKnownFlagsAsync();
+            UpdateExistsColumn();
         }
 
         private void ShowInfoMessage(string message)
@@ -660,6 +748,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 Dispatcher.Invoke(() =>
                 {
                     ReloadList();
+                    UpdateExistsColumn();
                     ShowSearchSuggestion(newSearch);
                 });
             }
@@ -667,7 +756,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             {
             }
         }
-
 
         private void ShowSearchSuggestion(string searchFilter)
         {

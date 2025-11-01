@@ -25,10 +25,11 @@
             <ColumnDefinition Width="213*"/>
         </Grid.ColumnDefinitions>
         <Grid.Background>
-            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.90" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.05" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                <GradientStop Offset="1.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
             </LinearGradientBrush>
         </Grid.Background>
         <Grid.RowDefinitions>

@@ -13,5 +13,6 @@
 
         [JsonPropertyName("reset")]
         public bool Reset { get; set; } = false;
+        public string? CustomKey { get; set; }
     }
 }

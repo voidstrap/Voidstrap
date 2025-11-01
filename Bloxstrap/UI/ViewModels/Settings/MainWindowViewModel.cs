@@ -1,14 +1,16 @@
-﻿using System.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Windows;
 using System.Windows.Input;
 using Voidstrap.UI.Elements.About;
-using CommunityToolkit.Mvvm.Input;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
     public class MainWindowViewModel : NotifyPropertyChangedViewModel
     {
+
         public ICommand OpenAboutCommand => new RelayCommand(OpenAbout);
 
         public ICommand SaveSettingsCommand => new RelayCommand(SaveSettings);
@@ -78,7 +80,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             LaunchHandler.LaunchRoblox(LaunchMode.Player);
         }
 
-        // ✅ Fix #2: make propertyName nullable
         protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string? propertyName = null)
         {
             if (EqualityComparer<T>.Default.Equals(field, newValue))
@@ -87,8 +88,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
 
             field = newValue;
-
-            // ✅ Optional: throw if propertyName is null (defensive)
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName ?? throw new ArgumentNullException(nameof(propertyName))));
 
             return true;

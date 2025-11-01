@@ -12,9 +12,9 @@
     d:DataContext="{d:DesignInstance Type=models:ServerInformationViewModel}"
     mc:Ignorable="d"
     Title="{x:Static resources:Strings.ContextMenu_ServerInformation_Title}"
-    MinWidth="420"
-    MinHeight="0"
-    Width="420"
+    MinWidth="625"
+    MinHeight="350"
+    Width="505"
     SizeToContent="Height"
     ResizeMode="NoResize"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
@@ -29,6 +29,7 @@
                 <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}"/>
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
@@ -48,87 +49,93 @@
             KeyboardNavigation.TabNavigation="None" 
             Icon="pack://application:,,,/Voidstrap.ico" />
 
-        <!-- Main Content -->
+        <!-- Content Grid -->
         <Grid Grid.Row="1" Margin="16,8,16,16">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <!-- Username -->
                 <RowDefinition Height="Auto" />
+                <!-- Type -->
                 <RowDefinition Height="Auto" />
+                <!-- Server Location -->
                 <RowDefinition Height="Auto" />
+                <!-- Instance ID -->
+                <RowDefinition Height="Auto" />
+                <!-- Players -->
+                <RowDefinition Height="Auto" />
+                <!-- Players In Game -->
+                <RowDefinition Height="Auto" />
+                <!-- Distance -->
+                <RowDefinition Height="Auto" />
+                <!-- Connected Server -->
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
+            <!-- Username -->
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="0,0,16,12" VerticalAlignment="Center" Text="Username:" />
+            <TextBlock Grid.Row="0" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding Username, Mode=OneWay}" />
+
             <!-- Server Type -->
-            <TextBlock 
-        Grid.Row="0" 
-        Grid.Column="0" 
-        Margin="0,0,16,12" 
-        VerticalAlignment="Center" 
-        Text="Type:" />
-            <TextBlock 
-        Grid.Row="0" 
-        Grid.Column="1" 
-        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-        Text="{Binding ServerType, Mode=OneWay}" />
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="0,0,16,12" VerticalAlignment="Center" Text="Type:" />
+            <TextBlock Grid.Row="1" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding ServerType, Mode=OneWay}" />
 
             <!-- Server Location -->
-            <TextBlock 
-        Grid.Row="1" 
-        Grid.Column="0" 
-        Margin="0,0,16,12" 
-        VerticalAlignment="Center" 
-        Text="Server Location:" 
-        Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
-            <TextBlock 
-        Grid.Row="1" 
-        Grid.Column="1" 
-        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-        Text="{Binding ServerLocation, Mode=OneWay}" 
-        Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
+            <TextBlock Grid.Row="2" Grid.Column="0" Margin="0,0,16,12" VerticalAlignment="Center" Text="Server Location:" Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
+            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding ServerLocation, Mode=OneWay}" Visibility="{Binding ServerLocationVisibility, Mode=OneTime}" />
 
             <!-- Instance ID -->
+            <TextBlock Grid.Row="4" Grid.Column="0" Margin="0,0,16,12" VerticalAlignment="Center" Text="Instance ID:" />
+            <TextBlock Grid.Row="4" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding InstanceId, Mode=OneWay}" />
+
+            <!-- Player Count -->
+            <TextBlock Grid.Row="5" Grid.Column="0" Margin="0,0,16,12" VerticalAlignment="Center" Text="Players:" />
+            <TextBlock Grid.Row="5" Grid.Column="1" Foreground="{DynamicResource TextFillColorTertiaryBrush}" Text="{Binding PlayerCount, Mode=OneWay}" />
+
             <TextBlock 
-        Grid.Row="2" 
-        Grid.Column="0" 
-        Margin="0,0,16,12" 
-        VerticalAlignment="Center" 
-        Text="Instance ID:" />
+    Grid.Row="6" 
+    Grid.Column="0" 
+    Margin="0,0,16,12" 
+    VerticalAlignment="Center" 
+    Text="Players In Game:" />
+            <TextBox 
+    Grid.Row="6" 
+    Grid.Column="1" 
+    Text="{Binding PlayersInGame, Mode=OneWay}" 
+    IsReadOnly="True" 
+    Background="Transparent" 
+    BorderThickness="0"
+    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+    TextWrapping="Wrap"/>
+
             <TextBlock 
-        Grid.Row="2" 
-        Grid.Column="1" 
-        Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
-        Text="{Binding InstanceId, Mode=OneWay}" />
+    Grid.Row="3" 
+    Grid.Column="0" 
+    Margin="0,0,16,12" 
+    VerticalAlignment="Center" 
+    Text="Server Uptime:" Visibility="{Binding ServerUptimeVisibility, Mode=OneTime}"/>
+            <TextBlock
+    Grid.Row="3" 
+    Grid.Column="1"  Visibility="{Binding ServerUptimeVisibility, Mode=OneTime}"
+    Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+    Text="{Binding ConnectedServerId, Mode=OneWay}" />
         </Grid>
 
+        <Border Grid.Row="2" Padding="15" Background="{DynamicResource PrimaryBackgroundColor}">
+            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+                <Button MinWidth="100" Width="148"
+                Content="{x:Static resources:Strings.ContextMenu_ServerInformation_CopyInstanceId}"
+                Command="{Binding CopyInstanceIdCommand, Mode=OneTime}"
+                ToolTip="Copy the Instance ID"
+                AutomationProperties.Name="Copy Instance ID Button" />
 
-
-
-        <!-- Footer Buttons -->
-        <Border 
-            Grid.Row="2" 
-            Padding="15" 
-            Background="{DynamicResource PrimaryBackgroundColor}">
-            <StackPanel 
-                Orientation="Horizontal" 
-                FlowDirection="LeftToRight" 
-                HorizontalAlignment="Right">
-                <Button 
-                    MinWidth="100" 
-                    Width="148" 
-                    Content="{x:Static resources:Strings.ContextMenu_ServerInformation_CopyInstanceId}" 
-                    Command="{Binding CopyInstanceIdCommand, Mode=OneTime}" 
-                    ToolTip="Copy the Instance ID" 
-                    AutomationProperties.Name="Copy Instance ID Button" />
-                <Button 
-                    MinWidth="100" 
-                    Margin="12,0,0,0" 
-                    Content="{x:Static resources:Strings.Common_Close}" 
-                    IsCancel="True" 
-                    ToolTip="Close this window" 
-                    AutomationProperties.Name="Close Button" />
+                <Button MinWidth="100" Margin="12,0,0,0"
+                Content="{x:Static resources:Strings.Common_Close}"
+                IsCancel="True"
+                ToolTip="Close this window"
+                AutomationProperties.Name="Close Button" />
             </StackPanel>
         </Border>
     </Grid>

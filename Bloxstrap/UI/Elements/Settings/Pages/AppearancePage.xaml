@@ -127,6 +127,41 @@
                 </TextBlock>
             </Grid>
         </ui:CardExpander>
+        
+        <controls:OptionControl 
+    Header="Launcher Background" 
+    Description="Choose a custom Bootstrapper Background.">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+                <ui:Button 
+            Content="Import" 
+            HorizontalAlignment="Stretch" 
+            Command="{Binding ImportBackgroundCommand}" 
+            Margin="0,0,5,0" />
+                <ui:Button 
+            Content="Remove"
+            Background="#ff3334"
+            HorizontalAlignment="Stretch" 
+            Command="{Binding RemoveBackgroundCommand}" />
+            </StackPanel>
+        </controls:OptionControl>
+
+        <controls:OptionControl 
+    Header="Launcher Startup Audio" 
+    Description="Choose a custom Startup Sound.">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+                <ui:Button 
+            Content="Import" 
+            HorizontalAlignment="Stretch" 
+            Command="{Binding ImportStartupAudioCommand}" 
+            Margin="0,0,5,0" />
+                <ui:Button 
+            Content="Remove"
+            Background="#ff3334"
+            HorizontalAlignment="Stretch" 
+            Command="{Binding RemoveStartupAudioCommand}" />
+            </StackPanel>
+        </controls:OptionControl>
+
 
         <controls:OptionControl 
             x:Name="IconSelector"

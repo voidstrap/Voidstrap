@@ -24,46 +24,46 @@
             <!-- FastFlag Issues -->
             <controls:Expander Grid.Column="0" Margin="0,0,4,0" HeaderIcon="ErrorCircle24" HeaderText="Common FFlag Issues" IsExpanded="True">
                 <StackPanel>
-                    <controls:MarkdownTextBlock MarkdownText="Gray Avatars" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Blurry Icons Textures" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Laggy Animation" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Frame Stutters" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Lighting Problems" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Gray Sky" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Black Textures" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Rainbow Ui Textures" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Loadding Issues" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="FPS Capped When Uncapped" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Quality Level Not Changing" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="BlackSky" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Roblox Crashing" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="White Sky And White Screen" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Crash on fast camera turn" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Gray Avatars](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Blurry Icons Textures](https://www.reddit.com/r/RobloxHelp/comments/1hxmcdi/roblox_textures_are_blurry_and_the_staff_do/)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Laggy Animation](https://devforum.roblox.com/t/roblox-settings-ui-quality-is-affected-by-game-graphics-bar-slider/3064536)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Frame Stutters](https://devforum.roblox.com/t/everything-loads-extremely-slow/3789261)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Lighting Problems](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Gray Sky](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Black Textures](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Rainbow UI Textures](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Loading Issues](https://devforum.roblox.com/t/everything-loads-extremely-slow/3789261)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[FPS Capped When Uncapped](https://github.com/bloxstraplabs/bloxstrap/issues/2447)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Quality Level Not Changing](https://devforum.roblox.com/t/roblox-settings-ui-quality-is-affected-by-game-graphics-bar-slider/3064536)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Black Sky](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Roblox Crashing](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[White Sky and White Screen](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Crash on Fast Camera Turn](https://devforum.roblox.com/t/roblox-settings-ui-quality-is-affected-by-game-graphics-bar-slider/3064536)" Margin="0,0,0,4" />
                 </StackPanel>
             </controls:Expander>
 
             <!-- Bootstrapper Issues -->
             <controls:Expander Grid.Column="2" Margin="4,0,0,0" HeaderIcon="AppsAddIn28" HeaderText="Bootstrapper Issues" IsExpanded="True">
                 <StackPanel>
-                    <controls:MarkdownTextBlock MarkdownText="Discord Rich-Presence Not Working" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Setup Failed" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Connectivity Issue" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Discord Rich-Presence Not Working](https://github.com/pizzaboxer/bloxstrap/issues/2972)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Setup Failed](https://bloxstrape.com/bloxstrap-error-and-fixes-in-2025/)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Connectivity Issue](https://devforum.roblox.com/t/texture-slow-loading-not-loading-at-all-and-result-in-grey-blank-character-constantly/2338035)" Margin="0,0,0,4" />
                 </StackPanel>
             </controls:Expander>
 
             <!-- Guide for Fast Flags -->
             <controls:Expander HeaderIcon="ErrorCircle24" HeaderText="Features" IsExpanded="True" Grid.Column="1" Margin="4,0,4,0"  >
                 <StackPanel>
-                    <controls:MarkdownTextBlock MarkdownText="Recommended Buffering" Margin="0,0,0,4"/>
-                    <controls:MarkdownTextBlock MarkdownText="Rendering Modes" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Override Graphic Quality" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Texture Skipping" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Disable Full-Screen TitleBar" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Telemetry" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="ReduceLagSpikes" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="LargeReplicator" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="RCore" Margin="0,0,0,4" />
-                    <controls:MarkdownTextBlock MarkdownText="Payload Limit" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Recommended Buffering](https://github.com/1x4z/1#recommended-buffering)" Margin="0,0,0,4"/>
+                    <controls:MarkdownTextBlock MarkdownText="[Rendering Modes](https://github.com/1x4z/1#rendering-modes)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Override Graphic Quality](https://github.com/1x4z/1#override-graphic-quality)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Texture Skipping](https://github.com/1x4z/1#texture-skipping)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Disable Full-Screen TitleBar](https://github.com/1x4z/1#disable-full-screen-titlebar)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Telemetry](https://github.com/1x4z/1#telemetry)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[ReduceLagSpikes](https://github.com/1x4z/1#reducelagspikes)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[LargeReplicator](https://github.com/1x4z/1#largereplicator)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[RCore](https://github.com/1x4z/1#rcore)" Margin="0,0,0,4" />
+                    <controls:MarkdownTextBlock MarkdownText="[Payload Limit](https://github.com/1x4z/1#payload-limit)" Margin="0,0,0,4" />
                 </StackPanel>
             </controls:Expander>
 

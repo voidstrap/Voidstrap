@@ -1,6 +1,12 @@
-using System.Windows;
-using Voidstrap.Models.RobloxApi;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using DiscordRPC;
+using Voidstrap.Models.RobloxApi;
+using Voidstrap.Models.VoidstrapRPC;
 
 namespace Voidstrap.Integrations
 {
@@ -8,60 +14,68 @@ namespace Voidstrap.Integrations
     {
         private readonly DiscordRpcClient _rpcClient = new("1005469189907173486");
         private readonly ActivityWatcher _activityWatcher;
-        private readonly Queue<Message> _messageQueue = new();
+        private readonly ConcurrentQueue<Message> _messageQueue = new();
+        private readonly SemaphoreSlim _updateLock = new(1, 1);
 
         private DiscordRPC.RichPresence? _currentPresence;
         private DiscordRPC.RichPresence? _originalPresence;
 
         private bool _visible = true;
+        private long? _previousPlaceId;
+
+        private DateTime _lastPresenceUpdate = DateTime.MinValue;
+        private readonly TimeSpan _updateCooldown = TimeSpan.FromSeconds(5);
 
         public DiscordRichPresence(ActivityWatcher activityWatcher)
         {
             const string LOG_IDENT = "DiscordRichPresence";
-
             _activityWatcher = activityWatcher;
-
-            _activityWatcher.OnGameJoin += (_, _) => Task.Run(() => SetCurrentGame());
-            _activityWatcher.OnGameLeave += (_, _) => Task.Run(() => SetCurrentGame());
+            _activityWatcher.OnGameJoin += async (_, _) => await SetCurrentGameAsync();
+            _activityWatcher.OnGameLeave += async (_, _) => await SetCurrentGameAsync();
             _activityWatcher.OnRPCMessage += (_, message) => ProcessRPCMessage(message);
 
             _rpcClient.OnReady += (_, e) =>
-                App.Logger.WriteLine(LOG_IDENT, $"Received ready from user {e.User} ({e.User.ID})");
+                App.Logger.WriteLine(LOG_IDENT, $"Ready: {e.User} ({e.User.ID})");
 
-            _rpcClient.OnPresenceUpdate += (_, e) =>
+            _rpcClient.OnPresenceUpdate += (_, _) =>
                 App.Logger.WriteLine(LOG_IDENT, "Presence updated");
 
             _rpcClient.OnError += (_, e) =>
-                App.Logger.WriteLine(LOG_IDENT, $"An RPC error occurred - {e.Message}");
+                App.Logger.WriteLine(LOG_IDENT, $"RPC Error: {e.Message}");
 
-            _rpcClient.OnConnectionEstablished += (_, e) =>
-                App.Logger.WriteLine(LOG_IDENT, "Established connection with Discord RPC");
-
-            //spams log as it tries to connect every ~15 sec when discord is closed so not now
-            //_rpcClient.OnConnectionFailed += (_, e) =>
-            //    App.Logger.WriteLine(LOG_IDENT, "Failed to establish connection with Discord RPC");
+            _rpcClient.OnConnectionEstablished += (_, _) =>
+                App.Logger.WriteLine(LOG_IDENT, "Connected to Discord RPC");
 
             _rpcClient.OnClose += (_, e) =>
-                App.Logger.WriteLine(LOG_IDENT, $"Lost connection to Discord RPC - {e.Reason} ({e.Code})");
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Connection closed: {e.Reason} ({e.Code})");
+                Task.Run(async () =>
+                {
+                    await Task.Delay(3000);
+                    try
+                    {
+                        _rpcClient.Initialize();
+                        App.Logger.WriteLine(LOG_IDENT, "Reinitialized Discord RPC after closure.");
+                    }
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"Failed to reinitialize RPC: {ex.Message}");
+                    }
+                });
+            };
 
             _rpcClient.Initialize();
         }
 
         public void ProcessRPCMessage(Message message, bool implicitUpdate = true)
         {
-            const string LOG_IDENT = "DiscordRichPresence::ProcessRPCMessage";
-
-            if (message.Command != "SetRichPresence" && message.Command != "SetLaunchData")
-                return;
+            if (message.Command != "SetRichPresence" && message.Command != "SetLaunchData") return;
 
             if (_currentPresence is null || _originalPresence is null)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Presence is not set, enqueuing message");
                 _messageQueue.Enqueue(message);
                 return;
             }
-
-            // a lot of repeated code here, could this somehow be cleaned up?
 
             if (message.Command == "SetLaunchData")
             {
@@ -69,247 +83,297 @@ namespace Voidstrap.Integrations
             }
             else if (message.Command == "SetRichPresence")
             {
-                Models.VoidstrapRPC.RichPresence? presenceData;
-
-                try
-                {
-                    presenceData = message.Data.Deserialize<Models.VoidstrapRPC.RichPresence>();
-                }
-                catch (Exception)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "Failed to parse message! (JSON deserialization threw an exception)");
+                if (!TryDeserializePresence(message.Data, out Voidstrap.Models.VoidstrapRPC.RichPresence? presenceData))
                     return;
-                }
 
-                if (presenceData is null)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "Failed to parse message! (JSON deserialization returned null)");
-                    return;
-                }
+                _currentPresence.Details = UpdateField(_currentPresence.Details, presenceData.Details, _originalPresence.Details, 128);
+                _currentPresence.State = UpdateField(_currentPresence.State, presenceData.State, _originalPresence.State, 128);
 
-                if (presenceData.Details is not null)
-                {
-                    if (presenceData.Details.Length > 128)
-                        App.Logger.WriteLine(LOG_IDENT, $"Details cannot be longer than 128 characters");
-                    else if (presenceData.Details == "<reset>")
-                        _currentPresence.Details = _originalPresence.Details;
-                    else
-                        _currentPresence.Details = presenceData.Details;
-                }
+                presenceData.TimestampStart = _currentPresence.Timestamps.StartUnixMilliseconds.HasValue
+                    ? (ulong?)_currentPresence.Timestamps.StartUnixMilliseconds.Value
+                    : null;
 
-                if (presenceData.State is not null)
-                {
-                    if (presenceData.State.Length > 128)
-                        App.Logger.WriteLine(LOG_IDENT, $"State cannot be longer than 128 characters");
-                    else if (presenceData.State == "<reset>")
-                        _currentPresence.State = _originalPresence.State;
-                    else
-                        _currentPresence.State = presenceData.State;
-                }
+                presenceData.TimestampEnd = _currentPresence.Timestamps.EndUnixMilliseconds.HasValue
+                    ? (ulong?)_currentPresence.Timestamps.EndUnixMilliseconds.Value
+                    : null;
 
-                if (presenceData.TimestampStart == 0)
-                    _currentPresence.Timestamps.Start = null;
-                else if (presenceData.TimestampStart is not null)
-                    _currentPresence.Timestamps.StartUnixMilliseconds = presenceData.TimestampStart * 1000;
-
-                if (presenceData.TimestampEnd == 0)
-                    _currentPresence.Timestamps.End = null;
-                else if (presenceData.TimestampEnd is not null)
-                    _currentPresence.Timestamps.EndUnixMilliseconds = presenceData.TimestampEnd * 1000;
-
-                if (presenceData.SmallImage is not null)
-                {
-                    if (presenceData.SmallImage.Clear)
-                    {
-                        _currentPresence.Assets.SmallImageKey = "";
-                    }
-                    else if (presenceData.SmallImage.Reset)
-                    {
-                        _currentPresence.Assets.SmallImageText = _originalPresence.Assets.SmallImageText;
-                        _currentPresence.Assets.SmallImageKey = _originalPresence.Assets.SmallImageKey;
-                    }
-                    else
-                    {
-                        if (presenceData.SmallImage.AssetId is not null)
-                            _currentPresence.Assets.SmallImageKey = $"https://assetdelivery.roblox.com/v1/asset/?id={presenceData.SmallImage.AssetId}";
-
-                        if (presenceData.SmallImage.HoverText is not null)
-                            _currentPresence.Assets.SmallImageText = presenceData.SmallImage.HoverText;
-                    }
-                }
-
-                if (presenceData.LargeImage is not null)
-                {
-                    if (presenceData.LargeImage.Clear)
-                    {
-                        _currentPresence.Assets.LargeImageKey = "";
-                    }
-                    else if (presenceData.LargeImage.Reset)
-                    {
-                        _currentPresence.Assets.LargeImageText = _originalPresence.Assets.LargeImageText;
-                        _currentPresence.Assets.LargeImageKey = _originalPresence.Assets.LargeImageKey;
-                    }
-                    else
-                    {
-                        if (presenceData.LargeImage.AssetId is not null)
-                            _currentPresence.Assets.LargeImageKey = $"https://assetdelivery.roblox.com/v1/asset/?id={presenceData.LargeImage.AssetId}";
-
-                        if (presenceData.LargeImage.HoverText is not null)
-                            _currentPresence.Assets.LargeImageText = presenceData.LargeImage.HoverText;
-                    }
-                }
+                UpdateAssets(_currentPresence.Assets, _originalPresence.Assets, presenceData.SmallImage, true);
+                UpdateAssets(_currentPresence.Assets, _originalPresence.Assets, presenceData.LargeImage, false);
             }
 
             if (implicitUpdate)
                 UpdatePresence();
         }
 
+        private static bool TryDeserializePresence(JsonElement data, out Voidstrap.Models.VoidstrapRPC.RichPresence? presence)
+        {
+            try
+            {
+                presence = data.Deserialize<Voidstrap.Models.VoidstrapRPC.RichPresence>();
+                return presence != null;
+            }
+            catch
+            {
+                presence = null;
+                return false;
+            }
+        }
+
+        private static string? UpdateField(string? current, string? newValue, string? original, int maxLength)
+        {
+            if (string.IsNullOrEmpty(newValue)) return current;
+            if (newValue == "<reset>") return original;
+            if (newValue.Length > maxLength) return current;
+            return newValue;
+        }
+
+        private void UpdateAssets(Assets current, Assets original, RichPresenceImage? data, bool small)
+        {
+            if (data == null) return;
+
+            if (data.Clear)
+            {
+                if (small)
+                    current.SmallImageKey = "";
+                else
+                    current.LargeImageKey = "";
+                return;
+            }
+
+            if (data.Reset)
+            {
+                if (small)
+                {
+                    current.SmallImageKey = original.SmallImageKey;
+                    current.SmallImageText = original.SmallImageText;
+                }
+                else
+                {
+                    current.LargeImageKey = original.LargeImageKey;
+                    current.LargeImageText = original.LargeImageText;
+                }
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(data.CustomKey))
+            {
+                if (small)
+                    current.SmallImageKey = data.CustomKey;
+                else
+                    current.LargeImageKey = data.CustomKey;
+                return;
+            }
+
+            if (data.AssetId.HasValue)
+            {
+                var url = $"https://assetdelivery.roblox.com/v1/asset/?id={data.AssetId.Value}";
+                if (small)
+                    current.SmallImageKey = url;
+                else
+                    current.LargeImageKey = url;
+            }
+
+            if (!string.IsNullOrEmpty(data.HoverText))
+            {
+                if (small)
+                    current.SmallImageText = data.HoverText;
+                else
+                    current.LargeImageText = data.HoverText;
+            }
+        }
+
         public void SetVisibility(bool visible)
         {
-            App.Logger.WriteLine("DiscordRichPresence::SetVisibility", $"Setting presence visibility ({visible})");
-
             _visible = visible;
-
             if (_visible)
                 UpdatePresence();
             else
                 _rpcClient.ClearPresence();
         }
 
+        private async Task SetCurrentGameAsync()
+        {
+            if (!await _updateLock.WaitAsync(0)) return;
+            try
+            {
+                await SetCurrentGame();
+            }
+            finally
+            {
+                _updateLock.Release();
+            }
+        }
+
         public async Task<bool> SetCurrentGame()
         {
-            const string LOG_IDENT = "DiscordRichPresence::SetCurrentGame";
-            
+            const string LOG_IDENT = "DiscordRichPresence";
+
             if (!_activityWatcher.InGame)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Not in game, clearing presence");
-
-                _currentPresence = _originalPresence =  null;
+                _currentPresence = _originalPresence = null;
                 _messageQueue.Clear();
-
+                _previousPlaceId = null;
                 UpdatePresence();
+                App.Logger.WriteLine(LOG_IDENT, "Not in game, cleared presence.");
                 return true;
             }
 
-            string icon = "roblox";
-            string smallImageText = "Roblox";
-            string smallImage = "roblox";
-            
-
             var activity = _activityWatcher.Data;
-            long placeId = activity.PlaceId;
+            var timeStarted = activity.RootActivity?.TimeJoined ?? activity.TimeJoined;
+            var placeId = activity.PlaceId;
 
-            App.Logger.WriteLine(LOG_IDENT, $"Setting presence for Place ID {placeId}");
-
-            // preserve time spent playing if we're teleporting between places in the same universe
-            var timeStarted = activity.TimeJoined;
-
-            if (activity.RootActivity is not null)
-                timeStarted = activity.RootActivity.TimeJoined;
+            bool teleported = _previousPlaceId.HasValue && _previousPlaceId.Value != placeId;
+            _previousPlaceId = placeId;
 
             if (activity.UniverseDetails is null)
             {
                 try
                 {
                     await UniverseDetails.FetchSingle(activity.UniverseId);
+                    activity.UniverseDetails = UniverseDetails.LoadFromCache(activity.UniverseId);
+                    App.Logger.WriteLine(LOG_IDENT, $"Fetched universe details for {activity.UniverseId}");
                 }
                 catch (Exception ex)
                 {
-                    App.Logger.WriteException(LOG_IDENT, ex);
-                    Frontend.ShowMessageBox($"{Strings.ActivityWatcher_RichPresenceLoadFailed}\n\n{ex.Message}", MessageBoxImage.Warning);
+                    App.Logger.WriteLine(LOG_IDENT, $"Failed to fetch universe details: {ex.Message}");
                     return false;
                 }
-
-                activity.UniverseDetails = UniverseDetails.LoadFromCache(activity.UniverseId);
             }
 
-            var universeDetails = activity.UniverseDetails!;
+            var universe = activity.UniverseDetails!;
+            var (smallImage, smallText) = await GetSmallImageAsync(activity);
 
-            icon = universeDetails.Thumbnail.ImageUrl;
-
-            if (App.Settings.Prop.ShowAccountOnRichPresence)
+            if (!_activityWatcher.InGame || placeId != _activityWatcher.Data.PlaceId)
             {
-                var userDetails = await UserDetails.Fetch(activity.UserId);
-
-                smallImage = userDetails.Thumbnail.ImageUrl;
-                smallImageText = $"Playing on {userDetails.Data.DisplayName} (@{userDetails.Data.Name})"; // i.e. "axell (@Axelan_se)"
-            }
-
-            if (!_activityWatcher.InGame || placeId != activity.PlaceId)
-            {
-                App.Logger.WriteLine(LOG_IDENT, "Aborting presence set because game activity has changed");
+                App.Logger.WriteLine(LOG_IDENT, "Player left the game during setup.");
                 return false;
             }
 
-            string status = _activityWatcher.Data.ServerType switch
+            string serverPrivacy = activity.ServerType switch
             {
-                ServerType.Private => "In a private server",
-                ServerType.Reserved => "In a reserved server",
-                _ => $"by {universeDetails.Data.Creator.Name}" + (universeDetails.Data.Creator.HasVerifiedBadge ? " ☑️" : ""),
+                ServerType.Private => "Private Server",
+                ServerType.Reserved => "Reserved Server",
+                _ => "Public Server"
             };
 
-            string universeName = universeDetails.Data.Name;
+            App.Logger.WriteLine(LOG_IDENT, $"Server type detected: {serverPrivacy}");
 
-            if (universeName.Length < 2)
-                universeName = $"{universeName}\x2800\x2800\x2800";
+            string universeName;
+            if (!string.IsNullOrWhiteSpace(App.Settings.Prop.CustomGameName))
+            {
+                universeName = App.Settings.Prop.CustomGameName!;
+                App.Logger.WriteLine(LOG_IDENT, $"Using custom game name: {universeName}");
+            }
+            else
+            {
+                universeName = universe.Data.Name.Length < 2
+                    ? universe.Data.Name + "\x2800\x2800\x2800"
+                    : universe.Data.Name;
+            }
+
+            if (teleported)
+            {
+                universeName = $"Teleported to {universeName}";
+                App.Logger.WriteLine(LOG_IDENT, "Player teleported to a new place.");
+            }
+
+            string serverLocation = string.Empty;
+            if (App.Settings.Prop.ServerLocationGame)
+            {
+                try
+                {
+                    serverLocation = await activity.QueryServerLocation();
+                }
+                catch
+                {
+                    serverLocation = "Unknown Location";
+                }
+            }
+
+            var detailsParts = new List<string>();
+            if (App.Settings.Prop.GameNameChecked)
+                detailsParts.Add(universeName);
+            if (App.Settings.Prop.GameStatusChecked)
+                detailsParts.Add(serverPrivacy);
+            if (App.Settings.Prop.ServerLocationGame)
+                detailsParts.Add(serverLocation);
+
+            string details = string.Join(" • ", detailsParts);
+
+            string state = App.Settings.Prop.GameCreatorChecked
+                ? $"by {universe.Data.Creator.Name}{(universe.Data.Creator.HasVerifiedBadge ? " ☑️" : "")}"
+                : "";
+            string largeImageKey = !string.IsNullOrWhiteSpace(App.Settings.Prop.UseCustomIcon)
+                ? App.Settings.Prop.UseCustomIcon
+                : (App.Settings.Prop.GameIconChecked ? universe.Thumbnail.ImageUrl : "");
+
+            string largeImageText = !string.IsNullOrWhiteSpace(App.Settings.Prop.UseCustomIcon)
+                ? ""
+                : (App.Settings.Prop.GameIconChecked && App.Settings.Prop.GameNameChecked ? universe.Data.Name : "");
 
             _currentPresence = new DiscordRPC.RichPresence
             {
-                Details = universeName,
-                State = status,
+                Details = details,
+                State = state,
                 Timestamps = new Timestamps { Start = timeStarted.ToUniversalTime() },
                 Buttons = GetButtons(),
                 Assets = new Assets
                 {
-                    LargeImageKey = icon,
-                    LargeImageText = universeDetails.Data.Name,
+                    LargeImageKey = largeImageKey,
+                    LargeImageText = largeImageText,
                     SmallImageKey = smallImage,
-                    SmallImageText = smallImageText
+                    SmallImageText = smallText
                 }
             };
 
-            // this is used for configuration from VoidstrapRPC
-            _originalPresence = _currentPresence.Clone();
+            _originalPresence = _currentPresence;
 
-            if (_messageQueue.Any())
-            {
-                App.Logger.WriteLine(LOG_IDENT, "Processing queued messages");
-                ProcessRPCMessage(_messageQueue.Dequeue(), false);
-            }
-            
+            while (_messageQueue.TryDequeue(out var msg))
+                ProcessRPCMessage(msg, false);
+
             UpdatePresence();
-
+            App.Logger.WriteLine(LOG_IDENT, $"Updated presence for {details}");
             return true;
+        }
+
+        private async Task<(string key, string text)> GetSmallImageAsync(ActivityData activity)
+        {
+            if (!App.Settings.Prop.ShowAccountOnRichPresence)
+                return ("roblox", "Roblox");
+
+            try
+            {
+                var user = await UserDetails.Fetch(activity.UserId);
+                return (user.Thumbnail.ImageUrl, $"{user.Data.DisplayName} (@{user.Data.Name})");
+            }
+            catch
+            {
+                return ("roblox", "Roblox");
+            }
         }
 
         public Button[] GetButtons()
         {
-            var buttons = new List<Button>();
-
             var data = _activityWatcher.Data;
+            var buttons = new List<Button>();
 
             if (!App.Settings.Prop.HideRPCButtons)
             {
-                bool show = false;
+                string? inviteUrl = null;
 
-                if (data.ServerType == ServerType.Public)
-                    show = true;
-                else if (data.ServerType == ServerType.Reserved && !String.IsNullOrEmpty(data.RPCLaunchData))
-                    show = true;
-
-                if (show)
+                if (data.ServerType == ServerType.Public ||
+                    (data.ServerType == ServerType.Reserved && !string.IsNullOrEmpty(data.RPCLaunchData)))
                 {
-                    buttons.Add(new Button
-                    {
-                        Label = "Join server",
-                        Url = data.GetInviteDeeplink()
-                    });
+                    inviteUrl = data.GetInviteDeeplink();
                 }
+
+                if (!string.IsNullOrEmpty(inviteUrl))
+                    buttons.Add(new Button { Label = "Join server", Url = inviteUrl });
             }
 
             buttons.Add(new Button
             {
-                Label = "See Game Page",
+                Label = "Game Page",
                 Url = $"https://www.roblox.com/games/{data.PlaceId}"
             });
 
@@ -318,24 +382,21 @@ namespace Voidstrap.Integrations
 
         public void UpdatePresence()
         {
-            const string LOG_IDENT = "DiscordRichPresence::UpdatePresence";
-            
             if (_currentPresence is null)
             {
-                App.Logger.WriteLine(LOG_IDENT, $"Presence is empty, clearing");
                 _rpcClient.ClearPresence();
                 return;
             }
 
-            App.Logger.WriteLine(LOG_IDENT, $"Updating presence");
+            if (!_visible) return;
+            if ((DateTime.UtcNow - _lastPresenceUpdate) < _updateCooldown) return;
 
-            if (_visible)
-                _rpcClient.SetPresence(_currentPresence);
+            _lastPresenceUpdate = DateTime.UtcNow;
+            _rpcClient.SetPresence(_currentPresence);
         }
 
         public void Dispose()
         {
-            App.Logger.WriteLine("DiscordRichPresence::Dispose", "Cleaning up Discord RPC and Presence");
             _rpcClient.ClearPresence();
             _rpcClient.Dispose();
             GC.SuppressFinalize(this);

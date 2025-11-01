@@ -9,344 +9,283 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using Wpf.Ui.Interop;
 
-namespace Wpf.Ui.Appearance;
-
-/// <summary>
-/// Lets you apply background effects to <see cref="Window"/> or <c>hWnd</c> by its <see cref="IntPtr"/>.
-/// </summary>
-public static class Background
+namespace Wpf.Ui.Appearance
 {
     /// <summary>
-    /// Checks if the current <see cref="Windows"/> supports selected <see cref="BackgroundType"/>.
+    /// Lets you apply background effects to <see cref="Window"/> or <c>hWnd</c> by its <see cref="IntPtr"/>.
     /// </summary>
-    /// <param name="type">Background type to check.</param>
-    /// <returns><see langword="true"/> if <see cref="BackgroundType"/> is supported.</returns>
-    public static bool IsSupported(BackgroundType type)
+    public static class Background
     {
-        return type switch
+        /// <summary>
+        /// Checks if the current <see cref="Windows"/> supports selected <see cref="BackgroundType"/>.
+        /// Modified: allows Aero/glass fallback even on Windows 10.
+        /// </summary>
+        public static bool IsSupported(BackgroundType type)
         {
-            BackgroundType.Auto => Win32.Utilities.IsOSWindows11Insider1OrNewer, // Insider with new API
-            BackgroundType.Tabbed => Win32.Utilities.IsOSWindows11Insider1OrNewer,
-            BackgroundType.Mica => Win32.Utilities.IsOSWindows11OrNewer,
-            BackgroundType.Acrylic => Win32.Utilities.IsOSWindows7OrNewer,
-            BackgroundType.Aero => Win32.Utilities.IsOSWindows7OrNewer,
-            BackgroundType.Unknown => true,
-            BackgroundType.None => true,
-            BackgroundType.Disable => false, // dont run the apply code
-            _ => false
-        };
-    }
-
-    /// <summary>
-    /// Applies selected background effect to <see cref="Window"/> when is rendered.
-    /// </summary>
-    /// <param name="window">Window to apply effect.</param>
-    /// <param name="type">Background type.</param>
-    public static bool Apply(Window window, BackgroundType type)
-        => Apply(window, type, false);
-
-    /// <summary>
-    /// Applies selected background effect to <see cref="Window"/> when is rendered.
-    /// </summary>
-    /// <param name="window">Window to apply effect.</param>
-    /// <param name="type">Background type.</param>
-    /// <param name="force">Skip the compatibility check.</param>
-    public static bool Apply(Window window, BackgroundType type, bool force)
-    {
-        if (!force && !IsSupported(type))
-            return false;
-
-        if (window.IsLoaded)
-        {
-            var windowHandle = new WindowInteropHelper(window).Handle;
-
-            if (windowHandle == IntPtr.Zero)
-                return false;
-
-            // Remove currently set background of the window and it's composition area
-            RemoveContentBackground(window);
-
-            return Apply(windowHandle, type, force);
+            return type switch
+            {
+                BackgroundType.Auto => Win32.Utilities.IsOSWindows7OrNewer,
+                BackgroundType.Tabbed => Win32.Utilities.IsOSWindows11Insider1OrNewer,
+                BackgroundType.Mica => Win32.Utilities.IsOSWindows7OrNewer,
+                BackgroundType.Acrylic => Win32.Utilities.IsOSWindows7OrNewer,
+                BackgroundType.Aero => Win32.Utilities.IsOSWindows7OrNewer,
+                BackgroundType.Unknown => true,
+                BackgroundType.None => true,
+                BackgroundType.Disable => false,
+                _ => false
+            };
         }
 
-        window.Loaded += (sender, _) =>
+        public static bool Apply(Window window, BackgroundType type)
+            => Apply(window, type, false);
+
+        public static bool Apply(Window window, BackgroundType type, bool force)
         {
-            var windowHandle = new WindowInteropHelper(sender as Window).Handle;
+            if (!force && !IsSupported(type))
+                return false;
 
-            if (windowHandle == IntPtr.Zero)
-                return;
+            if (window.IsLoaded)
+            {
+                var windowHandle = new WindowInteropHelper(window).Handle;
+                if (windowHandle == IntPtr.Zero)
+                    return false;
 
-            // Remove currently set background of the window and it's composition area
-            RemoveContentBackground(sender as Window);
+                RemoveContentBackground(window);
+                return Apply(windowHandle, type, force);
+            }
 
-            Apply(windowHandle, type, force);
-        };
+            window.Loaded += (sender, _) =>
+            {
+                var windowHandle = new WindowInteropHelper(sender as Window).Handle;
+                if (windowHandle == IntPtr.Zero)
+                    return;
 
-        return true;
-    }
-
-    /// <summary>
-    /// Applies selected background effect to <c>hWnd</c> by it's pointer.
-    /// </summary>
-    /// <param name="handle">Pointer to the window handle.</param>
-    /// <param name="type">Background type.</param>
-    public static bool Apply(IntPtr handle, BackgroundType type)
-        => Apply(handle, type, false);
-
-    /// <summary>
-    /// Applies selected background effect to <c>hWnd</c> by it's pointer.
-    /// </summary>
-    /// <param name="handle">Pointer to the window handle.</param>
-    /// <param name="type">Background type.</param>
-    /// <param name="force">Skip the compatibility check.</param>
-    public static bool Apply(IntPtr handle, BackgroundType type, bool force)
-    {
-        if (!force && !IsSupported(type))
-            return false;
-
-        if (!force && !UnsafeNativeMethods.IsCompositionEnabled())
-            return false;
-
-        if (handle == IntPtr.Zero)
-            return false;
-
-        if (type == BackgroundType.Unknown || type == BackgroundType.None)
-        {
-            Remove(handle);
+                RemoveContentBackground(sender as Window);
+                Apply(windowHandle, type, force);
+            };
 
             return true;
         }
 
-        //if (!UnsafeNativeMethods.RemoveWindowTitlebar(handle))
-        //    return false;
+        public static bool Apply(IntPtr handle, BackgroundType type)
+            => Apply(handle, type, false);
 
-        if (Theme.GetAppTheme() == ThemeType.Dark)
-            UnsafeNativeMethods.ApplyWindowDarkMode(handle);
-        else
-            UnsafeNativeMethods.RemoveWindowDarkMode(handle);
-
-
-        // Caption of the window should be removed, does not respect dark theme
-        UnsafeNativeMethods.RemoveWindowCaption(handle);
-
-        AppearanceData.AddHandle(handle);
-
-        if (type == BackgroundType.Aero)
-            return UnsafeNativeMethods.ApplyWindowAeroEffect(handle);
-
-        // First release of Windows 11
-        if (!Win32.Utilities.IsOSWindows11Insider1OrNewer)
+        public static bool Apply(IntPtr handle, BackgroundType type, bool force)
         {
-            if (type == BackgroundType.Mica || type == BackgroundType.Auto)
-                return UnsafeNativeMethods.ApplyWindowLegacyMicaEffect(handle);
+            if (!force && !IsSupported(type))
+                return false;
 
-            if (type == BackgroundType.Acrylic)
-                return UnsafeNativeMethods.ApplyWindowLegacyAcrylicEffect(handle);
+            if (!force && !UnsafeNativeMethods.IsCompositionEnabled())
+                return false;
 
-            return false;
+            if (handle == IntPtr.Zero)
+                return false;
+
+            if (type == BackgroundType.Unknown || type == BackgroundType.None)
+            {
+                Remove(handle);
+                return true;
+            }
+
+            if (Theme.GetAppTheme() == ThemeType.Dark)
+                UnsafeNativeMethods.ApplyWindowDarkMode(handle);
+            else
+                UnsafeNativeMethods.RemoveWindowDarkMode(handle);
+
+            // Remove caption color/titlebar background for consistency
+            UnsafeNativeMethods.RemoveWindowCaption(handle);
+
+            AppearanceData.AddHandle(handle);
+
+            // Always allow Aero effect fallback
+            if (type == BackgroundType.Aero)
+                return UnsafeNativeMethods.ApplyWindowAeroEffect(handle);
+
+            // ---- MODIFIED SECTION ----
+            // First release of Windows 11
+            if (!Win32.Utilities.IsOSWindows11Insider1OrNewer)
+            {
+                // Windows 10 & older fallback
+                if (type == BackgroundType.Mica || type == BackgroundType.Auto)
+                {
+                    // Prefer legacy mica if implemented, else Aero glass
+                    if (!UnsafeNativeMethods.ApplyWindowLegacyMicaEffect(handle))
+                        return UnsafeNativeMethods.ApplyWindowAeroEffect(handle);
+                    return true;
+                }
+
+                if (type == BackgroundType.Acrylic)
+                {
+                    // Try legacy acrylic, fallback to Aero
+                    if (!UnsafeNativeMethods.ApplyWindowLegacyAcrylicEffect(handle))
+                        return UnsafeNativeMethods.ApplyWindowAeroEffect(handle);
+                    return true;
+                }
+
+                // Force glass fallback on anything else
+                return UnsafeNativeMethods.ApplyWindowAeroEffect(handle);
+            }
+
+            // Newer Windows 11 versions
+            return UnsafeNativeMethods.ApplyWindowBackdrop(handle, type);
         }
 
-        // Newer Windows 11 versions
-        return UnsafeNativeMethods.ApplyWindowBackdrop(handle, type);
-    }
-
-    /// <summary>
-    /// Tries to remove background effects if they have been applied to the <see cref="Window"/>.
-    /// </summary>
-    /// <param name="window">The window from which the effect should be removed.</param>
-    public static bool Remove(Window window)
-    {
-        if (window == null)
-            return false;
-
-        var windowHandle = new WindowInteropHelper(window).Handle;
-
-        RestoreContentBackground(window);
-
-        if (windowHandle == IntPtr.Zero)
-            return false;
-
-        UnsafeNativeMethods.RemoveWindowBackdrop(windowHandle);
-
-        if (AppearanceData.HasHandle(windowHandle))
-            AppearanceData.RemoveHandle(windowHandle);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to remove all effects if they have been applied to the <c>hWnd</c>.
-    /// </summary>
-    /// <param name="handle">Pointer to the window handle.</param>
-    public static bool Remove(IntPtr handle)
-    {
-        if (handle == IntPtr.Zero)
-            return false;
-
-        RestoreContentBackground(handle);
-
-        UnsafeNativeMethods.RemoveWindowBackdrop(handle);
-
-        if (AppearanceData.HasHandle(handle))
-            AppearanceData.RemoveHandle(handle);
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to remove background from <see cref="Window"/> and it's composition area.
-    /// </summary>
-    /// <param name="window">Window to manipulate.</param>
-    /// <returns><see langword="true"/> if operation was successful.</returns>
-    public static bool RemoveContentBackground(Window window)
-    {
-        if (window == null)
-            return false;
-
-        // Remove background from visual root
-        window.Background = Brushes.Transparent;
-
-        var windowHandle = new WindowInteropHelper(window).Handle;
-
-        if (windowHandle == IntPtr.Zero)
-            return false;
-
-        var windowSource = HwndSource.FromHwnd(windowHandle);
-
-        // Remove background from client area
-        if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
-            windowSource.CompositionTarget.BackgroundColor = Colors.Transparent;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to restore default background for <see cref="Window"/> and it's composition target.
-    /// </summary>
-    /// <param name="window">Window to manipulate.</param>
-    /// <returns><see langword="true"/> if operation was successful.</returns>
-    public static bool RestoreContentBackground(Window window)
-    {
-        if (window == null)
-            return false;
-
-        // Global resources
-        var backgroundBrush = Application.Current.Resources["ApplicationBackgroundBrush"];
-
-        // Local resources
-        if (backgroundBrush is not SolidColorBrush)
-            backgroundBrush = window.Resources["ApplicationBackgroundBrush"];
-
-        // Manual fallback
-        if (backgroundBrush is not SolidColorBrush)
-            backgroundBrush = Theme.GetAppTheme() == ThemeType.Dark
-                ? new SolidColorBrush(Color.FromArgb(0xFF, 0x20, 0x20, 0x20))
-                : new SolidColorBrush(Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA));
-
-        window.Background = (SolidColorBrush)backgroundBrush;
-
-        var windowHandle = new WindowInteropHelper(window).Handle;
-
-        if (windowHandle == IntPtr.Zero)
-            return false;
-
-        var windowSource = HwndSource.FromHwnd(windowHandle);
-
-        Appearance.Background.Remove(windowHandle);
-
-        // Restore client area
-        if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
-            windowSource.CompositionTarget.BackgroundColor = SystemColors.WindowColor;
-
-        return true;
-    }
-
-    /// <summary>
-    /// Tries to restore default background for <see cref="Window"/> composition target, based on it's handle.
-    /// </summary>
-    /// <param name="hWnd">Window handle.</param>
-    /// <returns><see langword="true"/> if operation was successful.</returns>
-    public static bool RestoreContentBackground(IntPtr hWnd)
-    {
-        if (hWnd == IntPtr.Zero)
-            return false;
-
-        if (!UnsafeNativeMethods.IsValidWindow(hWnd))
-            return false;
-
-        var windowSource = HwndSource.FromHwnd(hWnd);
-
-        // Restore client area
-        if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
-            windowSource.CompositionTarget.BackgroundColor = SystemColors.WindowColor;
-
-        if (windowSource?.RootVisual is Window window)
+        public static bool Remove(Window window)
         {
-            var backgroundBrush = window.Resources["ApplicationBackgroundBrush"];
+            if (window == null)
+                return false;
 
-            // Manual fallback
+            var windowHandle = new WindowInteropHelper(window).Handle;
+            RestoreContentBackground(window);
+
+            if (windowHandle == IntPtr.Zero)
+                return false;
+
+            UnsafeNativeMethods.RemoveWindowBackdrop(windowHandle);
+
+            if (AppearanceData.HasHandle(windowHandle))
+                AppearanceData.RemoveHandle(windowHandle);
+
+            return true;
+        }
+
+        public static bool Remove(IntPtr handle)
+        {
+            if (handle == IntPtr.Zero)
+                return false;
+
+            RestoreContentBackground(handle);
+            UnsafeNativeMethods.RemoveWindowBackdrop(handle);
+
+            if (AppearanceData.HasHandle(handle))
+                AppearanceData.RemoveHandle(handle);
+
+            return true;
+        }
+
+        public static bool RemoveContentBackground(Window window)
+        {
+            if (window == null)
+                return false;
+
+            window.Background = Brushes.Transparent;
+            var windowHandle = new WindowInteropHelper(window).Handle;
+            if (windowHandle == IntPtr.Zero)
+                return false;
+
+            var windowSource = HwndSource.FromHwnd(windowHandle);
+            if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
+                windowSource.CompositionTarget.BackgroundColor = Colors.Transparent;
+
+            return true;
+        }
+
+        public static bool RestoreContentBackground(Window window)
+        {
+            if (window == null)
+                return false;
+
+            var backgroundBrush = Application.Current.Resources["ApplicationBackgroundBrush"];
+            if (backgroundBrush is not SolidColorBrush)
+                backgroundBrush = window.Resources["ApplicationBackgroundBrush"];
+
             if (backgroundBrush is not SolidColorBrush)
                 backgroundBrush = Theme.GetAppTheme() == ThemeType.Dark
                     ? new SolidColorBrush(Color.FromArgb(0xFF, 0x20, 0x20, 0x20))
                     : new SolidColorBrush(Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA));
 
             window.Background = (SolidColorBrush)backgroundBrush;
+
+            var windowHandle = new WindowInteropHelper(window).Handle;
+            if (windowHandle == IntPtr.Zero)
+                return false;
+
+            var windowSource = HwndSource.FromHwnd(windowHandle);
+            Appearance.Background.Remove(windowHandle);
+
+            if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
+                windowSource.CompositionTarget.BackgroundColor = SystemColors.WindowColor;
+
+            return true;
         }
 
-        return true;
-    }
-
-    internal static void RemoveAll()
-    {
-        var handles = AppearanceData.ModifiedBackgroundHandles;
-
-        foreach (var singleHandle in handles)
+        public static bool RestoreContentBackground(IntPtr hWnd)
         {
-            if (!UnsafeNativeMethods.IsValidWindow(singleHandle))
-                continue;
+            if (hWnd == IntPtr.Zero)
+                return false;
 
-            Remove(singleHandle);
+            if (!UnsafeNativeMethods.IsValidWindow(hWnd))
+                return false;
 
-            AppearanceData.RemoveHandle(singleHandle);
+            var windowSource = HwndSource.FromHwnd(hWnd);
+            if (windowSource?.Handle != IntPtr.Zero && windowSource?.CompositionTarget != null)
+                windowSource.CompositionTarget.BackgroundColor = SystemColors.WindowColor;
+
+            if (windowSource?.RootVisual is Window window)
+            {
+                var backgroundBrush = window.Resources["ApplicationBackgroundBrush"];
+                if (backgroundBrush is not SolidColorBrush)
+                    backgroundBrush = Theme.GetAppTheme() == ThemeType.Dark
+                        ? new SolidColorBrush(Color.FromArgb(0xFF, 0x20, 0x20, 0x20))
+                        : new SolidColorBrush(Color.FromArgb(0xFF, 0xFA, 0xFA, 0xFA));
+
+                window.Background = (SolidColorBrush)backgroundBrush;
+            }
+
+            return true;
         }
-    }
 
-    internal static void UpdateAll(ThemeType themeType,
-        BackgroundType backdropType = BackgroundType.Unknown)
-    {
-        var handles = AppearanceData.ModifiedBackgroundHandles;
-
-        foreach (var singleHandle in handles)
+        internal static void RemoveAll()
         {
-            if (!UnsafeNativeMethods.IsValidWindow(singleHandle))
-                continue;
-
-            if (themeType == ThemeType.Dark)
-                UnsafeNativeMethods.ApplyWindowDarkMode(singleHandle);
-            else
-                UnsafeNativeMethods.RemoveWindowDarkMode(singleHandle);
-
-            if (Win32.Utilities.IsOSWindows11Insider1OrNewer)
+            var handles = AppearanceData.ModifiedBackgroundHandles;
+            foreach (var singleHandle in handles)
             {
-                if (!UnsafeNativeMethods.IsWindowHasBackdrop(singleHandle, backdropType))
-                    UnsafeNativeMethods.ApplyWindowBackdrop(singleHandle, backdropType);
+                if (!UnsafeNativeMethods.IsValidWindow(singleHandle))
+                    continue;
 
-                continue;
+                Remove(singleHandle);
+                AppearanceData.RemoveHandle(singleHandle);
             }
+        }
 
-            if (backdropType == BackgroundType.Mica)
+        internal static void UpdateAll(ThemeType themeType, BackgroundType backdropType = BackgroundType.Unknown)
+        {
+            var handles = AppearanceData.ModifiedBackgroundHandles;
+
+            foreach (var singleHandle in handles)
             {
-                if (!UnsafeNativeMethods.IsWindowHasLegacyMica(singleHandle))
-                    UnsafeNativeMethods.ApplyWindowLegacyMicaEffect(singleHandle);
+                if (!UnsafeNativeMethods.IsValidWindow(singleHandle))
+                    continue;
+
+                if (themeType == ThemeType.Dark)
+                    UnsafeNativeMethods.ApplyWindowDarkMode(singleHandle);
+                else
+                    UnsafeNativeMethods.RemoveWindowDarkMode(singleHandle);
+
+                if (Win32.Utilities.IsOSWindows11Insider1OrNewer)
+                {
+                    if (!UnsafeNativeMethods.IsWindowHasBackdrop(singleHandle, backdropType))
+                        UnsafeNativeMethods.ApplyWindowBackdrop(singleHandle, backdropType);
+
+                    continue;
+                }
+
+                if (backdropType == BackgroundType.Mica)
+                {
+                    if (!UnsafeNativeMethods.IsWindowHasLegacyMica(singleHandle))
+                        UnsafeNativeMethods.ApplyWindowLegacyMicaEffect(singleHandle);
+                }
+                else if (backdropType == BackgroundType.Acrylic)
+                {
+                    // Just reapply legacy acrylic if possible (safe even if already applied)
+                    UnsafeNativeMethods.ApplyWindowLegacyAcrylicEffect(singleHandle);
+                }
+                else
+                {
+                    // Always allow fallback Aero blur
+                    UnsafeNativeMethods.ApplyWindowAeroEffect(singleHandle);
+                }
             }
-
-            // TODO: Legacy acrylic effect and aero too
-
-            //if (backdropType == BackgroundType.Acrylic)
-            //{
-            //    if (!UnsafeNativeMethods.IsWindowHasLegacyAcrylic(singleHandle))
-            //        UnsafeNativeMethods.ApplyWindowLegacyAcrylicEffect(singleHandle);
-            //}
         }
     }
 }

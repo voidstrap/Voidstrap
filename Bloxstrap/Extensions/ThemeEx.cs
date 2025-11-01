@@ -25,11 +25,14 @@ namespace Voidstrap.Extensions
             Theme.Dark,
             Theme.Light,
             Theme.Voidstrap,
+            Theme.UltraGray,
             Theme.Blue,
             Theme.Cyan,
             Theme.Green,
             Theme.Orange,
             Theme.Pink,
+            Theme.Purple,
+            Theme.Berry,
             Theme.Red,
             Theme.Yellow
         };

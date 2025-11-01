@@ -12,120 +12,191 @@
                   d:DataContext="{d:DesignInstance Type=models:ServerHistoryViewModel}"
                   mc:Ignorable="d"
                   Title="{x:Static resources:Strings.ContextMenu_GameHistory_Title}"
-                  MinWidth="480"
-                  MinHeight="480"
-                  Width="620"
-                  Height="480"
+                  MinWidth="600"
+                  MinHeight="500"
+                  Width="800"
+                  Height="600"
                   Background="{ui:ThemeResource ApplicationBackgroundBrush}"
                   ExtendsContentIntoTitleBar="True"
                   WindowStartupLocation="CenterScreen">
 
     <Grid>
+        <!-- Background Gradient -->
         <Grid.Background>
-            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.5" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Title Bar -->
-        <ui:TitleBar Grid.Row="0" Grid.ColumnSpan="2" Padding="10" x:Name="RootTitleBar" 
-                     Title="{x:Static resources:Strings.ContextMenu_GameHistory_Title}" 
-                     ShowMinimize="False" ShowMaximize="False" CanMaximize="False" 
-                     KeyboardNavigation.TabNavigation="None" 
-                     Icon="pack://application:,,,/Voidstrap.ico" 
+        <ui:TitleBar x:Name="RootTitleBar"
+                     Grid.Row="0"
+                     Padding="12,8"
+                     Title="{x:Static resources:Strings.ContextMenu_GameHistory_Title}"
+                     ShowMinimize="False"
+                     ShowMaximize="False"
+                     CanMaximize="False"
+                     Icon="pack://application:,,,/Voidstrap.ico"
                      Background="{DynamicResource WindowTitleBarBackgroundBrush}" />
 
-        <!-- Description -->
-        <TextBlock Grid.Row="1" Margin="16,8,16,0" 
-                   Text="{x:Static resources:Strings.ContextMenu_GameHistory_Description}" 
-                   TextWrapping="Wrap" FontSize="14" />
+        <TextBlock Grid.Row="1"
+                   Margin="20,8,20,4"
+                   FontSize="15"
+                   Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+                   Text="{x:Static resources:Strings.ContextMenu_GameHistory_Description}"
+                   TextWrapping="Wrap" />
 
-        <!-- Error Message -->
-        <TextBlock Grid.Row="2" Margin="16,8,16,0" 
-                   Text="{Binding Error, Mode=OneWay}" 
-                   TextWrapping="Wrap">
+        <TextBlock Grid.Row="2"
+                   Margin="20,8"
+                   Text="{Binding Error}"
+                   TextWrapping="Wrap"
+                   Foreground="{DynamicResource ErrorTextBrush}">
             <TextBlock.Style>
                 <Style TargetType="TextBlock">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding LoadState, Mode=OneWay}" Value="{x:Static enums:GenericTriState.Failed}">
-                            <Setter Property="Visibility" Value="Visible" />
+                        <DataTrigger Binding="{Binding LoadState}" Value="{x:Static enums:GenericTriState.Failed}">
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
-                    <Setter Property="Visibility" Value="Collapsed" />
                 </Style>
             </TextBlock.Style>
         </TextBlock>
-
-        <!-- Loading Indicator -->
-        <Border Grid.Row="2">
-            <Border.Style>
-                <Style TargetType="Border">
+        
+        <ui:ProgressRing Grid.Row="2"
+                         Margin="0,20"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Top"
+                         IsIndeterminate="True"
+                         Foreground="{DynamicResource ProgressRingForegroundBrush}">
+            <ui:ProgressRing.Style>
+                <Style TargetType="ui:ProgressRing">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding LoadState, Mode=OneWay}" Value="{x:Static enums:GenericTriState.Unknown}">
-                            <Setter Property="Visibility" Value="Visible" />
+                        <DataTrigger Binding="{Binding LoadState}" Value="{x:Static enums:GenericTriState.Unknown}">
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
-                    <Setter Property="Visibility" Value="Collapsed" />
                 </Style>
-            </Border.Style>
-            <ui:ProgressRing Grid.Row="1" IsIndeterminate="True" 
-                            Foreground="{DynamicResource ProgressRingForegroundBrush}" />
-        </Border>
+            </ui:ProgressRing.Style>
+        </ui:ProgressRing>
 
-        <!-- Game History List -->
-        <ListView Grid.Row="2" ItemsSource="{Binding GameHistory, Mode=OneWay}" Margin="8" 
-                  Background="{DynamicResource ListViewBackgroundBrush}">
+        <ListView Grid.Row="2"
+                  Margin="12"
+                  ItemsSource="{Binding GameHistory}"
+                  Background="{DynamicResource ListViewBackgroundBrush}"
+                  BorderThickness="0"
+                  ScrollViewer.VerticalScrollBarVisibility="Auto">
             <ListView.Style>
-                <Style TargetType="ListView" BasedOn="{StaticResource {x:Type ListView}}">
+                <Style TargetType="ListView">
+                    <Setter Property="Visibility" Value="Collapsed"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding LoadState, Mode=OneWay}" Value="{x:Static enums:GenericTriState.Successful}">
-                            <Setter Property="Visibility" Value="Visible" />
+                        <DataTrigger Binding="{Binding LoadState}" Value="{x:Static enums:GenericTriState.Successful}">
+                            <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
                     </Style.Triggers>
-                    <Setter Property="Visibility" Value="Collapsed" />
                 </Style>
             </ListView.Style>
 
-            <!-- ListView Item Style -->
             <ListView.ItemContainerStyle>
-                <Style TargetType="{x:Type ListViewItem}" BasedOn="{StaticResource {x:Type ListViewItem}}">
-                    <Setter Property="Focusable" Value="False" />
+                <Style TargetType="ListViewItem">
+                    <Setter Property="Margin" Value="0,4"/>
+                    <Setter Property="Focusable" Value="False"/>
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="ListViewItem">
+                                <Border Background="{TemplateBinding Background}"
+                                        CornerRadius="6"
+                                        Padding="4"
+                                        SnapsToDevicePixels="True">
+                                    <ContentPresenter/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource ListViewItemHoverBrush}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
                 </Style>
             </ListView.ItemContainerStyle>
-
-            <!-- Item Template -->
             <ListView.ItemTemplate>
                 <DataTemplate>
-                    <ui:Card Padding="0" Margin="8" BorderBrush="{DynamicResource CardBorderBrush}" BorderThickness="1">
-                        <Grid VerticalAlignment="Center" Background="{DynamicResource CardBackgroundBrush}">
+                    <ui:Card Margin="4"
+                             Padding="10"
+                             BorderThickness="1"
+                             BorderBrush="{DynamicResource CardBorderBrush}"
+                             Background="{DynamicResource CardBackgroundBrush}">
+                        <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="140"/>
+                                <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <!-- Thumbnail -->
-                            <Border Grid.Column="0" Width="107" Height="107" CornerRadius="4">
+                            <Border Grid.Column="0" 
+        Width="130"
+        Height="130"
+        CornerRadius="12"
+        BorderThickness="1"
+        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                    Margin="4">
                                 <Border.Background>
-                                    <ImageBrush ImageSource="{Binding UniverseDetails.Thumbnail.ImageUrl, IsAsync=True}" />
+                                    <ImageBrush ImageSource="{Binding UniverseDetails.Thumbnail.ImageUrl, IsAsync=True}"
+                                                Stretch="UniformToFill" />
                                 </Border.Background>
                             </Border>
+                            <StackPanel Grid.Column="1" Margin="16,8,8,8" VerticalAlignment="Center">
+                                <TextBlock Text="{Binding UniverseDetails.Data.Name}"
+                                           FontSize="18"
+                                           FontWeight="SemiBold"
+                                           Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
 
-                            <!-- Game Details -->
-                            <StackPanel Grid.Column="1" Margin="16,12,12,12" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding UniverseDetails.Data.Name}" FontSize="18" FontWeight="Medium" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
-                                <TextBlock Text="{Binding GameHistoryDescription}" Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
-                                <ui:Button Margin="0,8,0,0" Content="{x:Static resources:Strings.ContextMenu_GameHistory_Rejoin}" 
-                                           Command="{Binding RejoinServerCommand}" 
-                                           Appearance="Success" Foreground="White" 
-                                           Icon="Play28" IconFilled="True" IconForeground="White" />
+                                <TextBlock Text="{Binding GameHistoryDescription}"
+                                           Margin="0,4,0,8"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                                <UniformGrid Columns="3" Rows="1" Margin="0,0,0,8">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Joined: " Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{Binding DisplayTimeJoined}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Left: " Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{Binding DisplayTimeLeft}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Status: " Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                        <TextBlock Text="{Binding ServerStatus}" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                                    </StackPanel>
+                                </UniformGrid>
+
+                                <StackPanel Orientation="Horizontal">
+                                    <ui:Button Content="{x:Static resources:Strings.ContextMenu_GameHistory_Rejoin}"
+                                               Command="{Binding DataContext.LaunchDeeplinkCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Appearance="Success"
+                                               Icon="Play28"
+                                               IconFilled="True"
+                                               Foreground="White" />
+
+                                    <ui:Button Margin="8,0,0,0"
+                                               Content="Copy Deeplink"
+                                               Command="{Binding DataContext.CopyDeeplinkCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Appearance="Secondary"
+                                               Foreground="White" />
+                                </StackPanel>
                             </StackPanel>
                         </Grid>
                     </ui:Card>

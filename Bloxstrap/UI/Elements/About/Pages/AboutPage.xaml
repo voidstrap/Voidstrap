@@ -93,7 +93,7 @@
                 Click="Anchor_Click"
                 Content="{x:Static resources:Strings.Menu_About_DiscordServer}"
                 Icon="Chat48"
-                NavigateUri="https://discord.com/invite/voidstrap" />
+                NavigateUri="https://discord.gg/Gnu7ZuVh3z" />
         </WrapPanel>
 
         <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
@@ -103,44 +103,77 @@
                 FontSize="20"
                 Text="Build Information" />
 
-            <Grid Margin="0,8,0,0" Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+            <Grid Margin="0,4,0,4">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
+                    <!-- Label column -->
                     <ColumnDefinition Width="*" />
+                    <!-- Value column -->
                 </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <!-- Updated row -->
+                    <RowDefinition Height="Auto" />
+                    <!-- Version row -->
+                    <RowDefinition Height="Auto" />
+                    <!-- Commit hash row -->
+                </Grid.RowDefinitions>
 
+                <!-- Updated Label -->
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Margin="0,4,16,4"
-                    FontSize="14"
-                    FontWeight="Medium"
-                    Text="Updated:" />
+        Grid.Row="0"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Updated:"
+        VerticalAlignment="Center"
+        Margin="0,0,8,0" />
+
+                <!-- Build Timestamp -->
                 <TextBlock
-                    Grid.Row="0"
-                    Grid.ColumnSpan="2"
-                    Margin="65,6,0,0"
-                    VerticalAlignment="Top"
-                    Text="{Binding BuildTimestamp, Mode=OneTime}" />
+        Grid.Row="0"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding BuildTimestamp, Mode=OneTime}"
+        VerticalAlignment="Center" />
+
+                <!-- Version Label -->
                 <TextBlock
-                    Margin="290,6,500,0"
-                    VerticalAlignment="Top"
-                    FontSize="12"
-                    Text="{Binding Version, Mode=OneTime}" />
+        Grid.Row="1"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Version:"
+        VerticalAlignment="Center"
+        Margin="0,4,8,0" />
+
+                <!-- Version Value -->
                 <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Margin="0,4,16,4"
-                    FontSize="14"
-                    FontWeight="Medium"
-                    Text="Commit Hash"
-                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+        Grid.Row="1"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding Version, Mode=OneTime}"
+        VerticalAlignment="Center" />
+
+                <!-- Commit Hash Label -->
+                <TextBlock
+        Grid.Row="2"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Commit Hash:"
+        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
+        VerticalAlignment="Center"
+        Margin="0,4,8,0" />
+
+                <!-- Commit Hash Value (optional if you want to show it) -->
+                <TextBlock
+        Grid.Row="2"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding CommitHash, Mode=OneTime}"
+        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
+        VerticalAlignment="Center" />
                 <TextBlock
                     Grid.Row="2"
                     Grid.Column="1"
@@ -206,9 +239,28 @@
                     <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
                     <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Bratic](https://guns.lol/braticishim)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Bratic](https://www.youtube.com/@ThisBratic)" />
                     <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
                     <controls:MarkdownTextBlock MarkdownText="[Luc6i](https://github.com/Luc6i)" />
+                    <controls:MarkdownTextBlock MarkdownText="[return_request](https://github.com/returnrqt)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Alexa](https://github.com/GoingCrazyDude/)" />
+                    <controls:MarkdownTextBlock MarkdownText="[pizzaboxer](https://github.com/pizzaboxer)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
+                    <controls:MarkdownTextBlock MarkdownText="[GSczbfXn](https://github.com/ZFkQSZ3GxWFy6bthZ)" />
+                    <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
+                    <controls:MarkdownTextBlock MarkdownText="[1011025m](https://github.com/1011025m)" />
+                    <controls:MarkdownTextBlock MarkdownText="[EasternBloxxer](https://github.com/EasternBloxxer)" />
+                    <controls:MarkdownTextBlock MarkdownText="[sitiom](https://github.com/sitiom)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Extravi](https://github.com/Extravi)" />
+                    <controls:MarkdownTextBlock MarkdownText="[EpixScripts](https://github.com/EpixScripts)" />
+                    <controls:MarkdownTextBlock MarkdownText="[swatTurret](https://github.com/swatTurret)" />
+                    <controls:MarkdownTextBlock MarkdownText="[fxeP1](https://github.com/fxeP1)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Redusofficial](https://github.com/Redusofficial)" />
+                    <controls:MarkdownTextBlock MarkdownText="[srthMD](https://github.com/srthMD)" />
+                    <controls:MarkdownTextBlock MarkdownText="[axellse](https://github.com/axellse)" />
+                    <controls:MarkdownTextBlock MarkdownText="[ZFkQSZ3GxWFy6bthZ](https://github.com/ZFkQSZ3GxWFy6bthZ)" />
+                    <controls:MarkdownTextBlock MarkdownText="[BlueOutside](https://github.com/BlueOutside)" />
+                    <controls:MarkdownTextBlock MarkdownText="[MikeyUsersREC](https://github.com/MikeyUsersREC)" />
                 </StackPanel>
             </controls:Expander>
 
@@ -228,6 +280,37 @@
                     <controls:MarkdownTextBlock MarkdownText="[Slut](https://www.discord.com/users/1211640594082832404)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bren](https://www.discord.com/users/1211640594082832404)" />
                     <controls:MarkdownTextBlock MarkdownText="[NazoCD](https://www.discord.com/users/1094216231415984140)" />
+                    <controls:MarkdownTextBlock MarkdownText="[kezcn](https://www.roblox.com/users/4401881748/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[bloodraven](https://github.com/bloodrvn)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Skylan](https://github.com/Skylan031/)" />
+                    <controls:MarkdownTextBlock MarkdownText="[cam1494](https://github.com/cam1494)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Encythe](https://github.com/Encythe)" />
+                    <controls:MarkdownTextBlock MarkdownText="[he3als](https://github.com/he3als)" />
+                    <controls:MarkdownTextBlock MarkdownText="[NikSavchenk0](https://github.com/NikSavchenk0)" />
+                    <controls:MarkdownTextBlock MarkdownText="[carter0nline](https://github.com/carter0nline)" />
+                    <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
+                    <controls:MarkdownTextBlock MarkdownText="[MehKako](https://github.com/MehKako)" />
+                    <controls:MarkdownTextBlock MarkdownText="[EpixScripts](https://github.com/EpixScripts)" />
+                    <controls:MarkdownTextBlock MarkdownText="[knivesofeylis](https://github.com/knivesofeylis)" />
+                    <controls:MarkdownTextBlock MarkdownText="[sha4owz](https://github.com/sha4owz)" />
+                    <controls:MarkdownTextBlock MarkdownText="[DaMlgNoodle](https://github.com/DaMlgNoodle)" />
+                    <controls:MarkdownTextBlock MarkdownText="[nakoyasha](https://github.com/nakoyasha)" />
+                    <controls:MarkdownTextBlock MarkdownText="[exurd](https://github.com/exurd)" />
+                    <controls:MarkdownTextBlock MarkdownText="[0xFE0F](https://github.com/0xFE0F)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Alexa](https://github.com/GoingCrazyDude)" />
+                    <controls:MarkdownTextBlock MarkdownText="[CfwSky](https://www.roblox.com/users/129425241/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[ruubloo](https://www.roblox.com/users/158082266/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[toyoda165](https://www.roblox.com/users/923416649/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[ShadowCodeX](https://github.com/ShadowCodeX-debug)" />
+                    <controls:MarkdownTextBlock MarkdownText="[cub-has-injected](https://github.com/cub-has-injected)" />
+                    <controls:MarkdownTextBlock MarkdownText="[AskaLangly](https://github.com/AskaLangly)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Encythe](https://github.com/Encythe)" />
+                    <controls:MarkdownTextBlock MarkdownText="[hugo9655](https://github.com/hugo9655)" />
+                    <controls:MarkdownTextBlock MarkdownText="[CubesterYT](https://github.com/CubesterYT)" />
+                    <controls:MarkdownTextBlock MarkdownText="[lachine](https://github.com/lachine1)" />
+                    <controls:MarkdownTextBlock MarkdownText="[TheRealSpriteMan1337](https://github.com/TheRealSpriteMan1337)" />
+                    <controls:MarkdownTextBlock MarkdownText="[ms-gitblox](https://github.com/ms-gitblox)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Luximoz](https://github.com/Luximoz)" />
                 </StackPanel>
             </controls:Expander>
 
@@ -242,6 +325,17 @@
                     <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />
                     <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/BloxstrapLabs)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Multako](https://www.roblox.com/users/2485612194/profile)" />
+                    <controls:MarkdownTextBlock MarkdownText="[axstin](https://github.com/axstin)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Mantaraix](https://github.com/Mantaraix)" />
+                    <controls:MarkdownTextBlock MarkdownText="[apprehensions](https://github.com/apprehensions)" />
+                    <controls:MarkdownTextBlock MarkdownText="[axellse](https://github.com/axellse)" />
+                    <controls:MarkdownTextBlock MarkdownText="[NetSoftworks](https://github.com/netsoftwork)" />
+                    <controls:MarkdownTextBlock MarkdownText="[BlueOutside](https://github.com/BlueOutside)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Naveandice](https://github.com/Naveandice)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Skylan](https://github.com/Skylan031)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Xaurchark](https://github.com/nicolasfp1)" />
+                    <controls:MarkdownTextBlock MarkdownText="[c_llie](https://discord.com/users/1053052072779583488)" />
                 </StackPanel>
             </controls:Expander>
         </Grid>

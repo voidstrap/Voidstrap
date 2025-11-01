@@ -1,0 +1,176 @@
+﻿<base:WpfUiWindow
+    x:Class="Voidstrap.UI.Elements.Dialogs.ChannelListsDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Voidstrap.UI.Elements.Dialogs"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    Title="Available Channels"
+    Width="760"
+    Height="560"
+    MinHeight="380"
+    Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+    ExtendsContentIntoTitleBar="True"
+    ResizeMode="CanResize"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <Grid>
+        <!-- 🌈 Subtle background gradient -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.3" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.7" Color="{DynamicResource WindowBackgroundColorThird}" />
+                <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <!-- 🧭 Layout Rows -->
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- 🧩 Title Bar -->
+        <ui:TitleBar
+            Title="Available Channels"
+            Grid.Row="0"
+            Padding="8,6"
+            Icon="pack://application:,,,/Voidstrap.ico"
+            CanMaximize="True"
+            ShowMaximize="True"
+            ShowMinimize="True" />
+
+        <!-- 💬 Description -->
+        <TextBlock
+            Grid.Row="1"
+            Margin="16,8,16,6"
+            FontSize="13"
+            FontWeight="Medium"
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+            Text="Browse and select from all currently available deployment channels."
+            TextWrapping="Wrap" />
+
+        <!-- 📋 Data Area -->
+        <Grid Grid.Row="2" Margin="16,0,16,8">
+            <!-- Loader overlay -->
+            <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Border Background="{DynamicResource ControlFillColorDefaultBrush}" Opacity="0.6" CornerRadius="6" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ProgressBar Width="200" Height="8" IsIndeterminate="True"/>
+                    <TextBlock Text="Loading channels..."
+                               FontSize="13"
+                               Margin="0,12,0,0"
+                               Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                               HorizontalAlignment="Center"/>
+                </StackPanel>
+            </Grid>
+
+            <!-- Data Grid -->
+            <DataGrid
+                ItemsSource="{Binding Channels}"
+                Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
+                AutoGenerateColumns="False"
+                IsReadOnly="True"
+                HeadersVisibility="Column"
+                CanUserResizeRows="False"
+                CanUserResizeColumns="True"
+                SelectionMode="Single"
+                GridLinesVisibility="Horizontal"
+                Margin="0"
+                RowBackground="{x:Null}"
+                AlternatingRowBackground="#08000000"
+                BorderThickness="0"
+                Background="Transparent"
+                HorizontalGridLinesBrush="#19000000"
+                VerticalGridLinesBrush="Transparent"
+                PreviewKeyDown="ChannelDataGrid_PreviewKeyDown">
+
+                <!-- Header Style -->
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
+                        <Setter Property="Height" Value="34" />
+                        <Setter Property="Padding" Value="10,0,10,0" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0,0,0,1" />
+                        <Setter Property="FontWeight" Value="SemiBold" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+
+                <!-- Cell Style -->
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="8,0,8,0" />
+                        <Setter Property="Background" Value="Transparent" />
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border Background="{TemplateBinding Background}"
+                                            Padding="{TemplateBinding Padding}"
+                                            CornerRadius="4">
+                                        <ContentPresenter VerticalAlignment="Center" HorizontalAlignment="Left" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="#15007ACC" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="#45007ACC" />
+                                <Setter Property="Foreground" Value="#FFFFFF" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <!-- Columns -->
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Channel Name" Binding="{Binding ChannelName}" Width="180"/>
+                    <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="*"/>
+                    <DataGridTextColumn Header="Version GUID" Binding="{Binding VersionGuid}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- ⚙️ Footer Buttons -->
+        <Border Grid.Row="3"
+                Margin="0,8,0,0"
+                Padding="16,12"
+                Background="{DynamicResource ControlFillColorTertiaryBrush}"
+                BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+                BorderThickness="1,0,0,0">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center">
+                <ui:Button Appearance="Primary"
+                           Width="120"
+                           Content="Refresh"
+                           Command="{Binding RefreshCommand}"
+                           Icon="ArrowSync24"
+                           Margin="0,0,10,0" />
+                <ui:Button Appearance="Secondary"
+                           Content="Close"
+                           Click="Close_Click"
+                           IsCancel="True" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</base:WpfUiWindow>

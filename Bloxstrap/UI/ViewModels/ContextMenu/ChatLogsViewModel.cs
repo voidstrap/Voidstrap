@@ -1,6 +1,8 @@
-﻿using System.Windows.Input;
-using Voidstrap.Integrations;
+﻿using System;
+using System.Collections.Generic;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
+using Voidstrap.Integrations;
 using Voidstrap.UI.ViewModels;
 
 namespace Voidstrap.UI.ViewModels.ContextMenu
@@ -15,15 +17,17 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
 
         public GenericTriState LoadState { get; private set; } = GenericTriState.Unknown;
 
-        public string Error { get; private set; } = String.Empty;
+        public string Error { get; private set; } = string.Empty;
 
-        public ICommand CloseWindowCommand => new RelayCommand(RequestClose);
+        public ICommand CloseWindowCommand { get; }
 
-        public EventHandler? RequestCloseEvent;
+        public event EventHandler? RequestCloseEvent;
 
         public ChatLogsViewModel(ActivityWatcher activityWatcher)
         {
-            _activityWatcher = activityWatcher;
+            _activityWatcher = activityWatcher ?? throw new ArgumentNullException(nameof(activityWatcher));
+
+            CloseWindowCommand = new RelayCommand(RequestClose);
 
             _activityWatcher.OnNewMessageRequest += (_, _) => LoadData();
 
@@ -32,15 +36,28 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
 
         private void LoadData()
         {
-            LoadState = GenericTriState.Unknown;
-            OnPropertyChanged(nameof(LoadState));
+            try
+            {
+                LoadState = GenericTriState.Unknown;
+                OnPropertyChanged(nameof(LoadState));
 
-            MessageLogs = new Dictionary<int, ActivityData.UserMessage>(_activityWatcher.MessageLogs);
+                MessageLogs = new Dictionary<int, ActivityData.UserMessage>(_activityWatcher.MessageLogs);
 
-            OnPropertyChanged(nameof(MessageLogsCollection));
+                OnPropertyChanged(nameof(MessageLogs));
+                OnPropertyChanged(nameof(MessageLogsCollection));
 
-            LoadState = GenericTriState.Successful;
-            OnPropertyChanged(nameof(LoadState));
+                LoadState = GenericTriState.Successful;
+            }
+            catch (Exception ex)
+            {
+                Error = ex.Message;
+                LoadState = GenericTriState.Failed;
+                OnPropertyChanged(nameof(Error));
+            }
+            finally
+            {
+                OnPropertyChanged(nameof(LoadState));
+            }
         }
 
         private void RequestClose() => RequestCloseEvent?.Invoke(this, EventArgs.Empty);

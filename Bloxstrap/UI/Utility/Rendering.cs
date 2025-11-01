@@ -7,16 +7,18 @@ namespace Voidstrap.UI.Utility
 {
     public static class Rendering
     {
-        private static double? _cachedDpi = null;
-
+        private static double? _cachedDpi;
         public static double GetTextWidth(TextBlock textBlock)
         {
-            if (textBlock == null || string.IsNullOrEmpty(textBlock.Text))
+            if (textBlock is null)
                 return 0;
-            if (_cachedDpi == null)
-                _cachedDpi = VisualTreeHelper.GetDpi(textBlock).PixelsPerDip;
 
-            TextOptions.SetTextFormattingMode(textBlock, TextFormattingMode.Ideal);
+            string text = textBlock.Text;
+            if (string.IsNullOrEmpty(text))
+                return 0;
+
+            _cachedDpi ??= VisualTreeHelper.GetDpi(textBlock).PixelsPerDip;
+            TextOptions.SetTextFormattingMode(textBlock, TextFormattingMode.Display);
 
             var typeface = new Typeface(
                 textBlock.FontFamily,
@@ -26,20 +28,18 @@ namespace Voidstrap.UI.Utility
             );
 
             var formattedText = new FormattedText(
-                textBlock.Text,
+                text,
                 CultureInfo.CurrentUICulture,
                 textBlock.FlowDirection,
                 typeface,
                 textBlock.FontSize,
-                Brushes.Black,
-                new NumberSubstitution(),
+                Brushes.Transparent,
                 _cachedDpi.Value
             )
             {
                 TextAlignment = TextAlignment.Left,
                 Trimming = TextTrimming.None
             };
-
             return formattedText.WidthIncludingTrailingWhitespace;
         }
     }

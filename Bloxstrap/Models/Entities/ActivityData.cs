@@ -15,13 +15,7 @@ namespace Voidstrap.Models.Entities
     public class ActivityData
     {
         private long _universeId = 0;
-
-        /// <summary>
-        /// If the current activity stems from an in-universe teleport, then this will be
-        /// set to the activity that corresponds to the initial game join
-        /// </summary>
         public ActivityData? RootActivity;
-
         public long UniverseId
         {
             get => _universeId;
@@ -31,7 +25,23 @@ namespace Voidstrap.Models.Entities
                 UniverseDetails.LoadFromCache(value);
             }
         }
+        #region Display Properties
+        public string DisplayTimeJoined { get; private set; } = "Unknown";
+        public string DisplayTimeLeft { get; private set; } = "Unknown";
+        public string ServerStatus { get; private set; } = "Offline";
+        public void ComputeDisplayTimes()
+        {
+            DisplayTimeJoined = TimeJoined != default
+                ? TimeJoined.ToString("yyyy-MM-dd HH:mm:ss")
+                : "Unknown";
 
+            bool online = !TimeLeft.HasValue || (DateTime.Now - TimeLeft.Value).TotalHours < 24;
+            DisplayTimeLeft = TimeLeft.HasValue
+                ? TimeLeft.Value.ToString("yyyy-MM-dd HH:mm:ss")
+                : "Still Online";
+            ServerStatus = online ? "Online" : "Offline";
+        }
+        #endregion
         public class UserLog
         {
             public string UserId { get; set; } = "Unknown";
@@ -39,39 +49,24 @@ namespace Voidstrap.Models.Entities
             public string Type { get; set; } = "Unknown";
             public DateTime Time { get; set; } = DateTime.Now;
         }
-
         public class UserMessage
         {
             public string Message { get; set; } = "Unknown";
             public DateTime Time { get; set; } = DateTime.Now;
         }
-
         public long PlaceId { get; set; } = 0;
         public string JobId { get; set; } = string.Empty;
-
-        /// <summary>
-        /// This will be empty unless the server joined is a private server
-        /// </summary>
         public string AccessCode { get; set; } = string.Empty;
-
         public long UserId { get; set; } = 0;
         public string MachineAddress { get; set; } = string.Empty;
-
         public bool MachineAddressValid =>
             !string.IsNullOrEmpty(MachineAddress) && !MachineAddress.StartsWith("10.");
-
         public bool IsTeleport { get; set; } = false;
         public ServerType ServerType { get; set; } = ServerType.Public;
         public DateTime TimeJoined { get; set; }
         public DateTime? TimeLeft { get; set; }
-
-        /// <summary>
-        /// This is intended only for other people to use, i.e. context menu invite link, rich presence joining
-        /// </summary>
         public string RPCLaunchData { get; set; } = string.Empty;
-
         public UniverseDetails? UniverseDetails { get; set; }
-
         public string GameHistoryDescription
         {
             get
@@ -90,18 +85,13 @@ namespace Voidstrap.Models.Entities
                 return desc;
             }
         }
-
         public ICommand RejoinServerCommand => new RelayCommand(RejoinServer);
-
         public Dictionary<int, UserLog> PlayerLogs { get; internal set; } = new();
         public Dictionary<int, UserMessage> MessageLogs { get; internal set; } = new();
-
         private SemaphoreSlim serverQuerySemaphore = new(1, 1);
-
         public string GetInviteDeeplink(bool launchData = true)
         {
             string deeplink = $"https://www.roblox.com/games/start?placeId={PlaceId}";
-
             if (ServerType == ServerType.Private)
                 deeplink += "&accessCode=" + AccessCode;
             else
@@ -112,34 +102,36 @@ namespace Voidstrap.Models.Entities
 
             return deeplink;
         }
-
         public async Task<string?> QueryServerLocation()
         {
             const string LOG_IDENT = "ActivityData::QueryServerLocation";
 
             if (!MachineAddressValid)
                 throw new InvalidOperationException($"Machine address is invalid ({MachineAddress})");
-
             await serverQuerySemaphore.WaitAsync();
-
             if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out string? cachedLocation))
             {
                 serverQuerySemaphore.Release();
                 return cachedLocation;
             }
-
             string? location = null;
-
             try
             {
                 var ipInfo = await Http.GetJson<IPInfoResponse>($"https://ipinfo.io/{MachineAddress}/json");
-
-                if (string.IsNullOrEmpty(ipInfo.City))
-                    throw new InvalidHTTPResponseException("Reported city was blank");
-
-                location = ipInfo.City == ipInfo.Region
-                    ? $"{ipInfo.Region}, {ipInfo.Country}"
-                    : $"{ipInfo.City}, {ipInfo.Region}, {ipInfo.Country}";
+                if (string.IsNullOrEmpty(ipInfo.Country))
+                    throw new InvalidHTTPResponseException("Reported country was blank");
+                string flag = CountryCodeToFlagEmoji(ipInfo.Country);
+                if (!string.IsNullOrEmpty(ipInfo.City))
+                {
+                    if (ipInfo.City == ipInfo.Region)
+                        location = $"{ipInfo.Region}, {flag}";
+                    else
+                        location = $"{ipInfo.City}, {ipInfo.Region}, {flag}";
+                }
+                else
+                {
+                    location = $"{ipInfo.Country} {flag}";
+                }
 
                 GlobalCache.ServerLocation[MachineAddress] = location;
             }
@@ -147,9 +139,7 @@ namespace Voidstrap.Models.Entities
             {
                 App.Logger.WriteLine(LOG_IDENT, $"Failed to get server location for {MachineAddress}");
                 App.Logger.WriteException(LOG_IDENT, ex);
-
                 GlobalCache.ServerLocation[MachineAddress] = location;
-
                 Frontend.ShowConnectivityDialog(
                     string.Format(Strings.Dialog_Connectivity_UnableToConnect, "ipinfo.io"),
                     Strings.ActivityWatcher_LocationQueryFailed,
@@ -164,9 +154,17 @@ namespace Voidstrap.Models.Entities
 
             return location;
         }
-
+        private static string CountryCodeToFlagEmoji(string countryCode)
+        {
+            if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2)
+                return string.Empty;
+            int offset = 0x1F1E6 - 'A';
+            var emoji = string.Concat(
+                countryCode.ToUpper().Select(c => char.ConvertFromUtf32(c + offset))
+            );
+            return emoji;
+        }
         public override string ToString() => $"{PlaceId}/{JobId}";
-
         private void RejoinServer()
         {
             string playerPath = new RobloxPlayerData().ExecutablePath;
@@ -174,3 +172,4 @@ namespace Voidstrap.Models.Entities
         }
     }
 }
+

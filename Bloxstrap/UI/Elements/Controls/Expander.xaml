@@ -10,25 +10,34 @@
     d:DesignHeight="450"
     d:DesignWidth="800"
     mc:Ignorable="d">
+
     <Expander
         VerticalAlignment="Top"
+        Padding="8"
         Content="{Binding InnerContent, ElementName=Control}"
         IsExpanded="{Binding IsExpanded, ElementName=Control}">
+
         <Expander.Header>
-            <Grid>
+            <Grid VerticalAlignment="Center" Margin="0,0,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
+
+                <!-- Icon with proper margin and alignment -->
                 <ui:SymbolIcon
                     Grid.Column="0"
-                    Margin="0,0,8,0"
                     VerticalAlignment="Center"
+                    Margin="0,0,8,0"
                     Symbol="{Binding HeaderIcon, ElementName=Control}" />
+
+                <!-- TextBlock with text wrapping support -->
                 <TextBlock
                     Grid.Column="1"
                     VerticalAlignment="Center"
-                    Text="{Binding HeaderText, ElementName=Control}" />
+                    Text="{Binding HeaderText, ElementName=Control}"
+                    FontWeight="SemiBold"
+                    TextWrapping="Wrap" />
             </Grid>
         </Expander.Header>
     </Expander>

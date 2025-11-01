@@ -19,10 +19,6 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool CanContinue { get; set; } = true;
 
-        public ICommand GoBackCommand => new RelayCommand(GoBack);
-
-        public ICommand ContinueCommand => new RelayCommand(Continue);
-
         public FastFlagEditorWarningViewModel(Page page)
         {
             _page = page;

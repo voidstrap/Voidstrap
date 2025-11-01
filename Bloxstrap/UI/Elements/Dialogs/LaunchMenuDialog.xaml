@@ -23,12 +23,13 @@
     mc:Ignorable="d">
 
     <Grid>
-        <!--  Main layout definition  -->
+        <!-- Main layout definition -->
         <Grid.Background>
-            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" SpreadMethod="Pad">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.65" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
         <Grid.RowDefinitions>
@@ -48,7 +49,6 @@
             ShowMaximize="False"
             ShowMinimize="True" />
 
-        <!--  Main Content Layout  -->
         <Grid x:Name="grid" Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="280" />
@@ -79,7 +79,7 @@
 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                     <ui:Hyperlink Icon="QuestionCircle48" Content="{x:Static resources:Strings.About_Title}" Command="{Binding LaunchAboutCommand, Mode=OneTime}" />
-                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/8gWTr5KKh8" HorizontalAlignment="Center" />
+                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/bsR6EbZmvX" HorizontalAlignment="Center" />
                 </StackPanel>
 
 
@@ -114,9 +114,6 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-
-
-                    <!--  Settings Button  -->
                     <ui:CardAction
                         Grid.Column="1"
                         Width="148"
@@ -138,16 +135,13 @@
                         </StackPanel>
                     </ui:CardAction>
 
-
-                    <!--  Roblox Studio Button  -->
                     <ui:CardAction
                         Grid.Column="0"
                         Width="130"
                         Margin="162,8,10,0"
                         VerticalAlignment="Top"
                         Command="{Binding LaunchRobloxStudioCommand, Mode=OneTime}"
-
-                        Icon="TextBulletListSquareToolbox20"
+                        Icon="WindowDevTools24"
                         IconFilled="False"
                         TabIndex="2">
                         <StackPanel HorizontalAlignment="Center">
@@ -160,12 +154,7 @@
                     </ui:CardAction>
                 </Grid>
 
-
-
-                <!--  Separator  -->
                 <Border Margin="12" />
-
-                <!--  Wiki Button  -->
                 <ui:CardAction
                     Width="285"
                     Margin="0,10,0,0"

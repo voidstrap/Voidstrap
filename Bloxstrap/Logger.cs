@@ -1,88 +1,79 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Voidstrap;
 
 namespace Voidstrap
 {
     public class Logger : IDisposable
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private FileStream? _filestream;
+        private FileStream? _fileStream;
 
-        public readonly List<string> History = new();
-        public bool Initialized { get; private set; } = false;
-        public bool NoWriteMode { get; private set; } = false;
+        private const int MaxHistoryEntries = 150;
+
+        public List<string> History { get; } = new();
+        public bool Initialized { get; private set; }
+        public bool NoWriteMode { get; private set; }
         public string? FileLocation { get; private set; }
 
         public string AsDocument => string.Join('\n', History);
-
-        private const int MaxHistoryEntries = 150;
 
         public void Initialize(bool useTempDir = false)
         {
             const string LOG_IDENT = "Logger::Initialize";
 
+            if (Initialized)
+            {
+                WriteLine(LOG_IDENT, "Logger is already initialized");
+                return;
+            }
+
             string directory = useTempDir ? Path.Combine(Paths.TempLogs) : Path.Combine(Paths.Base, "Logs");
+            Directory.CreateDirectory(directory);
+
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd'T'HHmmss'Z'");
             string filename = $"{App.ProjectName}_{timestamp}.log";
             string location = Path.Combine(directory, filename);
 
-            WriteLine(LOG_IDENT, $"Initializing at {location}");
-
-            if (Initialized)
-            {
-                WriteLine(LOG_IDENT, "Failed to initialize because logger is already initialized");
-                return;
-            }
-
-            Directory.CreateDirectory(directory);
+            FileLocation = location;
 
             try
             {
-                _filestream = new FileStream(location, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
-            }
-            catch (IOException)
-            {
-                WriteLine(LOG_IDENT, "Failed to initialize due to IO exception");
-                return;
+                _fileStream = new FileStream(location, FileMode.Create, FileAccess.Write, FileShare.Read, 4096, useAsync: true);
+                Initialized = true;
+
+                // Flush existing history to the file
+                if (History.Count > 0)
+                    _ = WriteToLogAsync(string.Join("\r\n", History));
+
+                WriteLine(LOG_IDENT, $"Logger initialized at {location}");
+                CleanupOldLogs(directory);
             }
             catch (UnauthorizedAccessException)
             {
                 if (NoWriteMode) return;
 
                 WriteLine(LOG_IDENT, $"No write access to {directory}");
-
                 Frontend.ShowMessageBox(
                     string.Format(Strings.Logger_NoWriteMode, directory),
                     System.Windows.MessageBoxImage.Warning,
                     System.Windows.MessageBoxButton.OK
                 );
-
                 NoWriteMode = true;
-                return;
             }
-
-            Initialized = true;
-            FileLocation = location;
-
-            if (History.Count > 0)
-                _ = WriteToLogAsync(string.Join("\r\n", History));
-
-            WriteLine(LOG_IDENT, "Finished initializing!");
-
-            CleanupOldLogs(directory);
+            catch (IOException ex)
+            {
+                WriteLine(LOG_IDENT, $"Failed to initialize due to IO exception: {ex.Message}");
+            }
         }
 
         private void CleanupOldLogs(string directory)
         {
-            if (!Paths.Initialized || !Directory.Exists(directory))
-                return;
+            if (!Paths.Initialized || !Directory.Exists(directory)) return;
 
             foreach (FileInfo log in new DirectoryInfo(directory).GetFiles())
             {
@@ -96,7 +87,7 @@ namespace Voidstrap
                 }
                 catch (Exception ex)
                 {
-                    WriteLine("Logger::Cleanup", "Failed to delete log!");
+                    WriteLine("Logger::Cleanup", $"Failed to delete log '{log.Name}'");
                     WriteException("Logger::Cleanup", ex);
                 }
             }
@@ -105,43 +96,41 @@ namespace Voidstrap
         private void WriteLine(string message)
         {
             string timestamp = DateTime.UtcNow.ToString("s") + "Z";
-            string outCon = $"{timestamp} {message}";
-            string outLog = outCon.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
+            string sanitizedMessage = message.Replace(Paths.UserProfile, "%UserProfile%", StringComparison.InvariantCultureIgnoreCase);
+            string output = $"{timestamp} {sanitizedMessage}";
 
-            Debug.WriteLine(outCon);
-            _ = WriteToLogAsync(outLog);
+            Debug.WriteLine(output);
+            History.Add(output);
 
-            History.Add(outLog);
             if (History.Count > MaxHistoryEntries)
                 History.RemoveAt(0);
+
+            _ = WriteToLogAsync(output);
         }
 
         public void WriteLine(string identifier, string message) => WriteLine($"[{identifier}] {message}");
 
         public void WriteException(string identifier, Exception ex)
         {
-            string hresult = "0x" + ex.HResult.ToString("X8");
-            string formatted = $"[{identifier}] ({hresult}) {ex}";
-
-            WriteLine(formatted);
+            string hresult = $"0x{ex.HResult:X8}";
+            WriteLine($"[{identifier}] ({hresult}) {ex}");
         }
 
         private async Task WriteToLogAsync(string message)
         {
-            if (!Initialized || _filestream == null)
-                return;
+            if (!Initialized || _fileStream == null) return;
+
+            byte[] buffer = Encoding.UTF8.GetBytes(message + "\r\n");
 
             try
             {
                 await _semaphore.WaitAsync().ConfigureAwait(false);
-
-                byte[] buffer = Encoding.UTF8.GetBytes($"{message}\r\n");
-                await _filestream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
-                await _filestream.FlushAsync().ConfigureAwait(false);
+                await _fileStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+                await _fileStream.FlushAsync().ConfigureAwait(false);
             }
             catch (ObjectDisposedException)
             {
-                // Stream might be closed on shutdown
+                // Stream might be disposed during shutdown
             }
             finally
             {
@@ -151,8 +140,8 @@ namespace Voidstrap
 
         public void Dispose()
         {
-            _filestream?.Dispose();
-            _semaphore?.Dispose();
+            _fileStream?.Dispose();
+            _semaphore.Dispose();
         }
     }
 }

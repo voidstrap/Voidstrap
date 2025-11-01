@@ -2,16 +2,17 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net6.0-windows</TargetFramework>
+		<TargetFramework>net8.0-windows7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.4.6</Version>
-		<FileVersion>1.0.4.6</FileVersion>
+		<Version>1.0.6.9</Version>
+		<FileVersion>1.0.6.9</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
+		
 
 		<!-- Single File Publishing -->
 		<PublishSingleFile>true</PublishSingleFile>
@@ -39,67 +40,36 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <WarningLevel>4</WarningLevel>
 	</PropertyGroup>
+	
 
 	<ItemGroup>
-		<None Remove="ThemeImages\5070.png" />
-		<None Remove="ThemeImages\AnimationEffects.png" />
-		<None Remove="ThemeImages\Balanced.png" />
-		<None Remove="ThemeImages\BloxstrapTheme.png" />
-		<None Remove="ThemeImages\BlueLockTheme.png" />
-		<None Remove="ThemeImages\BraticFF.png" />
-		<None Remove="ThemeImages\CLBB.png" />
-		<None Remove="ThemeImages\CmdBB.png" />
 		<None Remove="ThemeImages\GalaxyBackground.jpg" />
 		<None Remove="ThemeImages\GalaxyBB.jpeg" />
 		<None Remove="ThemeImages\GalaxyBB.jpg" />
-		<None Remove="ThemeImages\GWBB.png" />
-		<None Remove="ThemeImages\klikos-mod-thumbnail.png" />
 		<None Remove="ThemeImages\PureFF.jpg" />
-		<None Remove="ThemeImages\RobloxBB.png" />
-		<None Remove="UI\Elements\Bootstrapper\Purple.png" />
-		<None Remove="UI\Elements\Settings\Pages\1748136310649.png" />
-		<None Remove="UI\Elements\Settings\Pages\5070.png" />
 		<None Remove="UI\Elements\Settings\Pages\AnimationEffects.png" />
-		<None Remove="UI\Elements\Settings\Pages\Balanced.png" />
 		<None Remove="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
 		<None Remove="UI\Elements\Settings\Pages\BlueLockTheme.png" />
 		<None Remove="UI\Elements\Settings\Pages\BraticFF.png" />
-		<None Remove="UI\Elements\Settings\Pages\CLBB.png" />
 		<None Remove="UI\Elements\Settings\Pages\CmdBB.png" />
 		<None Remove="UI\Elements\Settings\Pages\GWBB.png" />
+		<None Remove="UI\Elements\Settings\Pages\Icon %281%29.png" />
 		<None Remove="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
-		<None Remove="UI\Elements\Settings\Pages\PureFF.jpg" />
 		<None Remove="UI\Elements\Settings\Pages\RobloxBB.png" />
 		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="ThemeImages\5070.png" />
-		<Resource Include="ThemeImages\AnimationEffects.png" />
-		<Resource Include="ThemeImages\Balanced.png" />
-		<Resource Include="ThemeImages\BloxstrapTheme.png" />
-		<Resource Include="ThemeImages\BlueLockTheme.png" />
-		<Resource Include="ThemeImages\BraticFF.png" />
-		<Resource Include="ThemeImages\CLBB.png" />
-		<Resource Include="ThemeImages\CmdBB.png" />
 		<Resource Include="ThemeImages\GalaxyBB.jpeg" />
-		<Resource Include="ThemeImages\GWBB.png" />
-		<Resource Include="ThemeImages\klikos-mod-thumbnail.png" />
 		<Resource Include="ThemeImages\PureFF.jpg" />
-		<Resource Include="ThemeImages\RobloxBB.png" />
-		<Resource Include="UI\Elements\Bootstrapper\Purple.png" />
-		<Resource Include="UI\Elements\Settings\Pages\1748136310649.png" />
-		<Resource Include="UI\Elements\Settings\Pages\5070.png" />
 		<Resource Include="UI\Elements\Settings\Pages\AnimationEffects.png" />
-		<Resource Include="UI\Elements\Settings\Pages\Balanced.png" />
 		<Resource Include="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
 		<Resource Include="UI\Elements\Settings\Pages\BlueLockTheme.png" />
 		<Resource Include="UI\Elements\Settings\Pages\BraticFF.png" />
-		<Resource Include="UI\Elements\Settings\Pages\CLBB.png" />
 		<Resource Include="UI\Elements\Settings\Pages\CmdBB.png" />
 		<Resource Include="UI\Elements\Settings\Pages\GWBB.png" />
+		<Resource Include="UI\Elements\Settings\Pages\Icon (1).png" />
 		<Resource Include="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
-		<Resource Include="UI\Elements\Settings\Pages\PureFF.jpg" />
 		<Resource Include="UI\Elements\Settings\Pages\RobloxBB.png" />
 		<Resource Include="Voidstrap.ico" />
 		<Resource Include="Resources\Checkmark.ico" />
@@ -113,6 +83,8 @@
 		<Resource Include="Resources\MessageBox\Information.png" />
 		<Resource Include="Resources\MessageBox\Question.png" />
 		<Resource Include="Resources\MessageBox\Warning.png" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Berry.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-UltraGray.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Voidstrap.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Blue.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Red.xshd" />
@@ -122,6 +94,7 @@
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Orange.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Green.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Pink.xshd" />
+		<EmbeddedResource Include="UI\Style\Editor-Theme-Purple.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Yellow.xshd" />
 	</ItemGroup>
 
@@ -173,18 +146,27 @@
 	<ItemGroup>
 		<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-		<PackageReference Include="DiscordRichPresence" Version="1.3.0.28" />
-		<PackageReference Include="Markdig" Version="0.41.2" />
-		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.183">
+		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
+		<PackageReference Include="Dropbox.Api" Version="7.0.0" />
+		<PackageReference Include="Markdig" Version="0.42.0" />
+		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3537.50" />
+		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.205">
 			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
+		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="System.Management" Version="9.0.9" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />
-		<PackageReference Include="XamlAnimatedGif" Version="2.3.0" />
+		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.10" />
+		<PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
+		<PackageReference Include="XamlAnimatedGif" Version="2.3.1" />
+		<PackageReference Include="YoutubeExplode" Version="6.5.5" />
+		<PackageReference Include="YoutubeExplode.Converter" Version="6.5.5" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -222,13 +204,13 @@
 		</ItemGroup>
 	</Target>
 
+
 	<ItemGroup>
 	  <Resource Include="Voidstrap.png">
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </Resource>
 	</ItemGroup>
-
 
 
 	<ItemGroup>
@@ -240,6 +222,7 @@
 	    <Pack>True</Pack>
 	    <PackagePath>\</PackagePath>
 	  </None>
+	  <None Include="Utility\DarkTexturesMod.cs" />
 	</ItemGroup>
 
 

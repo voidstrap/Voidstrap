@@ -1,0 +1,135 @@
+﻿<base:WpfUiWindow x:Class="Voidstrap.UI.Elements.ContextMenu.RPCWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:local="clr-namespace:Voidstrap.UI.Elements.ContextMenu"
+                  xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                  xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.ContextMenu"
+                  mc:Ignorable="d"
+                  MinWidth="580"
+                  MinHeight="480"
+                  Width="720"
+                  Height="520"
+                  Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+                  ExtendsContentIntoTitleBar="True"
+                  WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <!-- Gradient background -->
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Title Bar -->
+        <ui:TitleBar Grid.Row="0"
+                     Padding="10"
+                     Title="Discord RPC Customizer"
+                     ShowMinimize="True"
+                     ShowMaximize="True"
+                     Icon="pack://application:,,,/Voidstrap.ico"/>
+
+        <!-- Main content -->
+        <ScrollViewer Grid.Row="1" Margin="12" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="2">
+                <TextBlock Text="Rich Presence Settings" FontSize="16" FontWeight="SemiBold"/>
+                <TextBlock Text="Configure your Discord Presence below." Margin="0,2,0,10"/>
+
+                <!-- General -->
+                <ui:Card Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Application ID"/>
+                        <TextBox Text="{Binding ApplicationId, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Text="App Name" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding AppName, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Text="Details" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding Details, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Text="State" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding State, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Images -->
+                <ui:Card Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Images (keys from Developer Portal)" FontWeight="SemiBold"/>
+                        <TextBlock Text="Large Image Key" Margin="0,6,0,0"/>
+                        <TextBox Text="{Binding LargeImageKey, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <TextBlock Text="Small Image Key" Margin="0,10,0,0"/>
+                        <TextBox Text="{Binding SmallImageKey, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </ui:Card>
+
+                <!-- Buttons -->
+                <ui:Card Margin="0,0,0,10">
+                    <StackPanel Margin="10">
+                        <TextBlock Text="Buttons (up to 2)" FontWeight="SemiBold"/>
+
+                        <!-- Button 1 -->
+                        <CheckBox Content="Enable Button 1" IsChecked="{Binding Button1Enabled}"/>
+                        <TextBlock Text="Label" Margin="0,6,0,0"/>
+                        <TextBox Text="{Binding Button1Label, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="URL" Margin="0,6,0,0"/>
+                        <TextBox Text="{Binding Button1Url, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        <Separator Margin="0,10,0,10"/>
+
+                        <!-- Button 2 -->
+                        <CheckBox Content="Enable Button 2" IsChecked="{Binding Button2Enabled}"/>
+                        <TextBlock Text="Label" Margin="0,6,0,0"/>
+                        <TextBox Text="{Binding Button2Label, UpdateSourceTrigger=PropertyChanged}"/>
+                        <TextBlock Text="URL" Margin="0,6,0,0"/>
+                        <TextBox Text="{Binding Button2Url, UpdateSourceTrigger=PropertyChanged}"/>
+                    </StackPanel>
+                </ui:Card>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- Footer -->
+        <Grid Grid.Row="2" Margin="12,0,12,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Status -->
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="{Binding StatusMessage}"
+                           Foreground="{Binding StatusColor}"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <CheckBox Content="Auto Start RPC" Grid.Column="1"
+                             Margin="12,0,0,0"
+          IsChecked="{Binding AutoStartRpc, Mode=TwoWay}" />
+
+
+            <!-- Control buttons -->
+            <ui:Button Grid.Column="2" Margin="12,0,0,0" Appearance="Primary"
+                       Content="Start / Update RPC" Command="{Binding StartRpcCommand}"/>
+            <ui:Button Grid.Column="3" Margin="8,0,0,0" Appearance="Danger"
+                       Content="Stop RPC" Command="{Binding StopRpcCommand}"/>
+            <ui:Button Grid.Column="4" Margin="8,0,0,0" Appearance="Secondary"
+                       Content="Close" Command="{Binding CloseCommand}"/>
+        </Grid>
+    </Grid>
+</base:WpfUiWindow>

@@ -60,6 +60,7 @@ namespace Voidstrap.UI
 
             string? serverLocation = await ActivityWatcher.Data.QueryServerLocation();
 
+
             if (string.IsNullOrEmpty(serverLocation))
                 return;
 

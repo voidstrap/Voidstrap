@@ -1,15 +1,17 @@
-using System.Reflection;
-using System.Security.Cryptography;
-using System.Windows;
-using System.Windows.Shell;
-using System.Windows.Threading;
-using Microsoft.Win32;
 using DiscordRPC;
 using DiscordRPC.Logging;
-using Wpf.Ui.Hardware;
-using System.Windows.Media.Animation;
+using Microsoft.Win32;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
+using System.Windows.Shell;
+using System.Windows.Threading;
+using Voidstrap.Integrations;
+using Voidstrap.UI.ViewModels.ContextMenu;
+using Wpf.Ui.Hardware;
 
 namespace Voidstrap
 {
@@ -31,8 +33,6 @@ namespace Voidstrap
 
         public const string RobloxPlayerAppName = "RobloxPlayerBeta";
         public const string RobloxStudioAppName = "RobloxStudioBeta";
-
-        // simple shorthand for extremely frequently used and long string - this goes under HKCU
         public const string UninstallKey = $@"Software\Microsoft\Windows\CurrentVersion\Uninstall\{ProjectName}";
 
         public const string ApisKey = $"Software\\{ProjectName}";
@@ -68,9 +68,9 @@ namespace Voidstrap
         public static readonly JsonManager<RobloxState> RobloxState = new();
 
         public static readonly FastFlagManager FastFlags = new();
-        private static readonly MD5 mD5 = MD5.Create();
 
-        // IDisposable fields to dispose on exit
+        public static readonly GBSEditor GlobalSettings = new();
+        private static readonly MD5 mD5 = MD5.Create();
         private static MD5? _md5Provider = mD5;
 
         private static HttpClient? _httpClient;
@@ -133,7 +133,7 @@ namespace Voidstrap
             if (Bootstrapper?.Dialog != null)
             {
                 if (Bootstrapper.Dialog.TaskbarProgressValue == 0)
-                    Bootstrapper.Dialog.TaskbarProgressValue = 1; // make sure it's visible
+                    Bootstrapper.Dialog.TaskbarProgressValue = 1;
 
                 Bootstrapper.Dialog.TaskbarProgressState = TaskbarItemProgressState.Error;
             }
@@ -191,31 +191,6 @@ namespace Voidstrap
                 Terminate(ErrorCode.ERROR_INVALID_FUNCTION);
             }
         }
-        private void InitializeDiscordRPC()
-        {
-            const string discordAppId = "1375529225230094507";
-
-            DiscordClient = new DiscordRpcClient(discordAppId)
-            {
-                Logger = new ConsoleLogger() { Level = LogLevel.Warning }
-            };
-
-            if (Settings.Prop.VoidstrapRPCReal)
-            {
-                DiscordClient.Initialize();
-
-                // Set presence only after initialization
-                DiscordClient.SetPresence(new DiscordRPC.RichPresence()
-                {
-                    State = "Using Voidstrap",
-                    Assets = new DiscordRPC.Assets()
-                    {
-                        LargeImageKey = "large_image",
-                        LargeImageText = "Voidstrap"
-                    }
-                });
-            }
-        }
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -223,10 +198,7 @@ namespace Voidstrap
 
             Locale.Initialize();
             base.OnStartup(e);
-
-
-
-        Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
+            Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
 
             string userAgent = $"{ProjectName}/{Version}";
 
@@ -349,8 +321,16 @@ namespace Voidstrap
                 State.Load();
                 RobloxState.Load();
                 FastFlags.Load();
-
                 Settings.Load();
+
+                var rpcVm = new RPCCustomizerViewModel();
+                if (rpcVm.AutoStartRpc && !string.IsNullOrWhiteSpace(rpcVm.ApplicationId))
+                {
+                    rpcVm.GetType()
+                         .GetMethod("SafeStartRpc", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                         .Invoke(rpcVm, null);
+                }
+                Current.Resources["RPCCustomizerVM"] = rpcVm;
 
                 if (Settings?.Prop?.WPFSoftwareRender == true)
                 {
@@ -359,11 +339,6 @@ namespace Voidstrap
                     HardwareAcceleration.OptimizeVisualRendering();
                     HardwareAcceleration.DisableTransparencyEffects();
                     HardwareAcceleration.MinimizeMemoryFootprint();
-                }
-
-                if (Settings?.Prop?.VoidstrapRPCReal == true)
-                {
-                    InitializeDiscordRPC();
                 }
 
                 if (!Locale.SupportedLocales.ContainsKey(Settings.Prop.Locale))
@@ -384,13 +359,28 @@ namespace Voidstrap
             }
         }
 
-            // you must *explicitly* call terminate when everything is done, it won't be called implicitly
-
-
         protected override void OnExit(ExitEventArgs e)
         {
-            DiscordClient?.Dispose();
-            DiscordClient = null;
+            try
+            {
+                if (Current.MainWindow?.DataContext is RPCCustomizerViewModel rpcVm)
+                {
+                    rpcVm?.GetType()
+                          .GetMethod("SafeStopRpc", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)?
+                          .Invoke(rpcVm, null);
+                }
+
+                DiscordClient?.Dispose();
+                DiscordClient = null;
+                if (Current.MainWindow?.DataContext is MusicPlayerViewModel musicVm)
+                {
+                    musicVm.Dispose();
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[OnExit] Cleanup error: {ex.Message}");
+            }
 
             base.OnExit(e);
         }

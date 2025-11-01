@@ -21,6 +21,20 @@ namespace Voidstrap
             { "Players.LogLevel", "FStringDebugLuaLogLevel" },
             { "Players.LogPattern", "FStringDebugLuaLogPattern" },
             { "Instances.WndCheck", "FLogWndProcessCheck" },
+            { "Rendering.FRMQualityOverride", "DFIntDebugFRMQualityLevelOverride" },
+
+            // Geometry
+            { "Geometry.MeshLOD.Static", "DFIntCSGLevelOfDetailSwitchingDistanceStatic" },
+            { "Geometry.MeshLOD.L0", "DFIntCSGLevelOfDetailSwitchingDistance" },
+            { "Geometry.MeshLOD.L12", "DFIntCSGLevelOfDetailSwitchingDistanceL12" },
+            { "Geometry.MeshLOD.L23", "DFIntCSGLevelOfDetailSwitchingDistanceL23" },
+            { "Geometry.MeshLOD.L34", "DFIntCSGLevelOfDetailSwitchingDistanceL34" },
+
+            // Mesh Distance (Render Distance)
+            { "Geometry.MeshDistance.L0", "DFIntCSGLevelOfDetailSwitchingDistance" },
+            { "Geometry.MeshDistance.L12", "DFIntCSGLevelOfDetailSwitchingDistanceL12" },
+            { "Geometry.MeshDistance.L23", "DFIntCSGLevelOfDetailSwitchingDistanceL23" },
+            { "Geometry.MeshDistance.L34", "DFIntCSGLevelOfDetailSwitchingDistanceL34" },
 
             // Hyper Threading
             { "Hyper.Threading1", "FFlagDebugCheckRenderThreading" },
@@ -177,7 +191,6 @@ namespace Voidstrap
             // Rendering engines
             { "Rendering.Mode.DisableD3D11", "FFlagDebugGraphicsDisableDirect3D11" },
             { "Rendering.Mode.D3D11", "FFlagDebugGraphicsPreferD3D11" },
-            { "Rendering.Mode.Metal", "FFlagDebugGraphicsPreferMetal" },
             { "Rendering.Mode.Vulkan", "FFlagDebugGraphicsPreferVulkan" },
             { "Rendering.Mode.OpenGL", "FFlagDebugGraphicsPreferOpenGL" },
             { "Rendering.Mode.D3D10", "FFlagDebugGraphicsPreferD3D11FL10" },
@@ -435,7 +448,6 @@ namespace Voidstrap
             { RenderingMode.Default, "None" },
             { RenderingMode.D3D11, "D3D11" },
             { RenderingMode.D3D10, "D3D10" },
-            { RenderingMode.Metal, "Metal" },
             { RenderingMode.Vulkan, "Vulkan" },
             { RenderingMode.OpenGL, "OpenGL" },
 
@@ -461,7 +473,6 @@ namespace Voidstrap
         public static IReadOnlyDictionary<MSAAMode, string?> MSAAModes => new Dictionary<MSAAMode, string?>
         {
             { MSAAMode.Default, null },
-            { MSAAMode.x0, "0" },
             { MSAAMode.x1, "1" },
             { MSAAMode.x2, "2" },
             { MSAAMode.x4, "4" },
@@ -504,6 +515,7 @@ namespace Voidstrap
         public static IReadOnlyDictionary<DynamicResolution, string?> DynamicResolutions => new Dictionary<DynamicResolution, string?>
         {
             { DynamicResolution.Default, null },
+            { DynamicResolution.Resolution1, "30" },
             { DynamicResolution.Resolution2, "77" },
             { DynamicResolution.Resolution3, "230" },
             { DynamicResolution.Resolution4, "410" },
@@ -759,7 +771,6 @@ public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dict
             { "FFlagHandleAltEnterFullscreenManually", "False" },
         }
             ;
-
                 foreach (var (key, value) in presets)
                 {
                     if (!Prop.ContainsKey(key))

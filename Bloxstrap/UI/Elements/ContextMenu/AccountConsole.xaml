@@ -1,0 +1,142 @@
+﻿<base:WpfUiWindow x:Class="Voidstrap.UI.Elements.ContextMenu.AccountManagerWindow"
+                  xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                  xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                  xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                  xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+                  xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+                  xmlns:viewmodels="clr-namespace:Voidstrap.UI.ViewModels"
+                  d:DataContext="{d:DesignInstance Type=viewmodels:AccountBackupsViewModel}"
+                  mc:Ignorable="d"
+                  Title="Roblox Account Manager"
+                  Width="980"
+                  Height="650"
+                  Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+                  ExtendsContentIntoTitleBar="True"
+                  WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                <GradientStop Offset="1.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        
+        <ui:TitleBar Grid.Row="0"
+                     x:Name="RootTitleBar"
+                     Title="Roblox Account Manager"
+                     ShowMinimize="True"
+                     ShowMaximize="True"
+                     Icon="pack://application:,,,/Voidstrap.ico"
+                     Background="{DynamicResource WindowTitleBarBackgroundBrush}" />
+
+        <TabControl Grid.Row="1" Margin="12" Background="Transparent">
+            <TabItem Header="Account Backups">
+                <Grid Margin="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBlock Text="Roblox cookie file:" Visibility="Collapsed" Margin="0,0,4,0" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CookiePath}" Visibility="Collapsed" FontStyle="Italic" Opacity="0.7" VerticalAlignment="Center"/>
+                        <TextBlock Text=" | " Margin="6,0" Visibility="Collapsed" VerticalAlignment="Center"/>
+                        <TextBlock Text="{Binding CookieDetected, StringFormat=Detected: {0}}" Visibility="Collapsed" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                        <TextBox Width="260"
+                                 Height="32"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding NewBackupLabel, UpdateSourceTrigger=PropertyChanged}"
+                                 ToolTip="Optional label for your backup"/>
+                        <ui:Button Content="Create Backup"
+                                   Icon="Save24"
+                                   Appearance="Primary"
+                                   Margin="8,0,0,0"
+                                   Command="{Binding CreateBackupCommand}"/>
+                        <ui:Button Content="Refresh"
+                                   Icon="ArrowClockwise24"
+                                   Margin="8,0,0,0"
+                                   Command="{Binding RefreshCommand}"
+                                   Appearance="Secondary"/>
+                        <ui:Button Content="Logout"
+                                   Icon="SignOut24"
+                                   Margin="8,0,0,0"
+                                   Appearance="Danger"
+                                   Command="{Binding LogoutCommand}"
+                                   ToolTip="Delete the active Roblox cookie and log out"/>
+                        <ui:Button Content="Backup Folder"
+                                   Icon="Folder24"
+                                   Margin="8,0,0,0"
+                                   Command="{Binding OpenBackupsFolderCommand}"
+                                   Appearance="Secondary"/>
+                    </StackPanel>
+                    <ListView Grid.Row="1"
+                              ItemsSource="{Binding Backups}"
+                              SelectedItem="{Binding Selected, Mode=TwoWay}"
+                              BorderThickness="0">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Border CornerRadius="6"
+                                        Padding="10"
+                                        Margin="0,5"
+                                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                        BorderThickness="1">
+                                    <DockPanel>
+                                        <StackPanel Orientation="Vertical" DockPanel.Dock="Left">
+                                            <TextBlock Text="{Binding FileName}"
+                                                       FontWeight="SemiBold"
+                                                       FontSize="13"/>
+                                            <TextBlock Text="{Binding CreatedUtc, StringFormat=Created: {0:g}}"
+                                                       FontSize="11"
+                                                       Opacity="0.7"/>
+                                        </StackPanel>
+
+                                        <StackPanel Orientation="Horizontal"
+                                                    DockPanel.Dock="Right"
+                                                    HorizontalAlignment="Right">
+                                            <ui:Button Content="Switch"
+                                                       Icon="ArrowSwap24"
+                                                       Margin="6,0,0,0"
+                                                       Appearance="Primary"
+                                                       Command="{Binding DataContext.RestoreBackupCommand,
+                                                                         RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                       CommandParameter="{Binding}"/>
+                                            <ui:Button Content="Delete"
+                                                       Icon="Delete24"
+                                                       Margin="6,0,0,0"
+                                                       Appearance="Danger"
+                                                       Command="{Binding DataContext.DeleteBackupCommand,
+                                                                         RelativeSource={RelativeSource AncestorType=ListView}}"
+                                                       CommandParameter="{Binding}"/>
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <DockPanel Grid.Row="2" Margin="12,0,12,12">
+            <TextBlock Text="{Binding Status}" FontSize="12"/>
+            <TextBlock DockPanel.Dock="Right"
+                       Text="{Binding Backups.Count, StringFormat=Backups: {0}}"
+                       FontSize="12"
+                       Opacity="0.8"/>
+        </DockPanel>
+    </Grid>
+</base:WpfUiWindow>

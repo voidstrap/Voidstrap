@@ -1,18 +1,22 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.Input;
+using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.Win32;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
-using CommunityToolkit.Mvvm.Input;
-using ICSharpCode.SharpZipLib.Zip;
-
-using Microsoft.Win32;
-
-using Voidstrap.UI.Elements.Settings;
-using Voidstrap.UI.Elements.Editor;
-using Voidstrap.UI.Elements.Dialogs;
-using Voidstrap.UI.ViewModels;
+using System.Windows.Media;
 using Voidstrap;
+using Voidstrap.UI.Elements.Bootstrapper;
+using Voidstrap.UI.Elements.Dialogs;
+using Voidstrap.UI.Elements.Editor;
+using Voidstrap.UI.Elements.Settings;
+using Voidstrap.UI.ViewModels;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
@@ -22,42 +26,35 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public ICommand PreviewBootstrapperCommand => new RelayCommand(PreviewBootstrapper);
         public ICommand BrowseCustomIconLocationCommand => new RelayCommand(BrowseCustomIconLocation);
-
         public ICommand AddCustomThemeCommand => new RelayCommand(AddCustomTheme);
         public ICommand DeleteCustomThemeCommand => new RelayCommand(DeleteCustomTheme);
         public ICommand RenameCustomThemeCommand => new RelayCommand(RenameCustomTheme);
         public ICommand EditCustomThemeCommand => new RelayCommand(EditCustomTheme);
         public ICommand ExportCustomThemeCommand => new RelayCommand(ExportCustomTheme);
+        public ICommand ImportBackgroundCommand { get; }
+        public ICommand RemoveBackgroundCommand { get; }
 
-        private void PreviewBootstrapper()
+        public ICommand ImportStartupAudioCommand { get; }
+        public ICommand RemoveStartupAudioCommand { get; }
+
+        private readonly MediaPlayer _audioPlayer = new();
+
+        public static class AudioEvents
         {
-            IBootstrapperDialog dialog = App.Settings.Prop.BootstrapperStyle.GetNew();
+            public static event Action<string?>? StartupAudioChanged;
 
-            if (App.Settings.Prop.BootstrapperStyle == BootstrapperStyle.ByfronDialog)
-                dialog.Message = Strings.Bootstrapper_StylePreview_ImageCancel;
-            else
-                dialog.Message = Strings.Bootstrapper_StylePreview_TextCancel;
-
-            dialog.CancelEnabled = true;
-            dialog.ShowBootstrapper();
-        }
-
-        private void BrowseCustomIconLocation()
-        {
-            var dialog = new OpenFileDialog
+            public static void RaiseStartupAudioChanged(string? path)
             {
-                Filter = $"{Strings.Menu_IconFiles}|*.ico"
-            };
-
-            if (dialog.ShowDialog() != true)
-                return;
-
-            CustomIconLocation = dialog.FileName;
-            OnPropertyChanged(nameof(CustomIconLocation));
+                StartupAudioChanged?.Invoke(path);
+            }
         }
 
         public AppearanceViewModel(Page page)
         {
+            ImportBackgroundCommand = new RelayCommand(ImportBackground);
+            RemoveBackgroundCommand = new RelayCommand(RemoveBackground);
+            ImportStartupAudioCommand = new RelayCommand(ImportStartupAudio);
+            RemoveStartupAudioCommand = new RelayCommand(RemoveStartupAudio);
             _page = page;
 
             foreach (var entry in BootstrapperIconEx.Selections)
@@ -65,6 +62,8 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             PopulateCustomThemes();
         }
+
+        #region Properties
 
         public IEnumerable<Theme> Themes { get; } = Enum.GetValues(typeof(Theme)).Cast<Theme>();
 
@@ -94,7 +93,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             set
             {
                 App.Settings.Prop.BootstrapperStyle = value;
-                OnPropertyChanged(nameof(CustomThemesExpanded)); // TODO: only fire when needed
+                OnPropertyChanged(nameof(CustomThemesExpanded));
             }
         }
 
@@ -119,7 +118,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             get => App.Settings.Prop.BootstrapperIconCustomLocation;
             set
             {
-                if (String.IsNullOrEmpty(value))
+                if (string.IsNullOrEmpty(value))
                 {
                     if (App.Settings.Prop.BootstrapperIcon == BootstrapperIcon.IconCustom)
                         App.Settings.Prop.BootstrapperIcon = BootstrapperIcon.IconVoidstrap;
@@ -136,17 +135,60 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        private void DeleteCustomThemeStructure(string name)
+        public string? SelectedCustomTheme
         {
-            string dir = Path.Combine(Paths.CustomThemes, name);
-            Directory.Delete(dir, true);
+            get => App.Settings.Prop.SelectedCustomTheme;
+            set
+            {
+                App.Settings.Prop.SelectedCustomTheme = value;
+                OnPropertyChanged(nameof(IsCustomThemeSelected));
+            }
         }
 
-        private void RenameCustomThemeStructure(string oldName, string newName)
+        public string SelectedCustomThemeName { get; set; } = "";
+
+        public int SelectedCustomThemeIndex { get; set; }
+
+        public ObservableCollection<string> CustomThemes { get; set; } = new();
+
+        public bool IsCustomThemeSelected => SelectedCustomTheme is not null;
+
+        #endregion
+
+        #region Commands
+
+        private void PreviewBootstrapper()
         {
-            string oldDir = Path.Combine(Paths.CustomThemes, oldName);
-            string newDir = Path.Combine(Paths.CustomThemes, newName);
-            Directory.Move(oldDir, newDir);
+            IBootstrapperDialog dialog = App.Settings.Prop.BootstrapperStyle.GetNew();
+
+            dialog.Message = App.Settings.Prop.BootstrapperStyle == BootstrapperStyle.ByfronDialog
+                ? Strings.Bootstrapper_StylePreview_ImageCancel
+                : Strings.Bootstrapper_StylePreview_TextCancel;
+
+            dialog.CancelEnabled = true;
+            AudioPlayerHelper.PlayStartupAudio();
+            if (dialog is Window window)
+            {
+                window.Closed += (s, e) =>
+                {
+                    Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.StopAudio();
+                };
+            }
+
+            dialog.ShowBootstrapper();
+        }
+
+        private void BrowseCustomIconLocation()
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = $"{Strings.Menu_IconFiles}|*.ico"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                CustomIconLocation = dialog.FileName;
+            }
         }
 
         private void AddCustomTheme()
@@ -161,11 +203,65 @@ namespace Voidstrap.UI.ViewModels.Settings
 
                 OnPropertyChanged(nameof(SelectedCustomThemeIndex));
                 OnPropertyChanged(nameof(IsCustomThemeSelected));
-
                 if (dialog.OpenEditor)
                     EditCustomTheme();
             }
         }
+
+        #region Startup Audio Handling
+        private void ImportStartupAudio()
+        {
+            var openDialog = new OpenFileDialog
+            {
+                Title = "Select a Startup Sound",
+                Filter = "Audio Files|*.mp3;*.wav;*.ogg;*.flac;*.wma",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic)
+            };
+
+            if (openDialog.ShowDialog() != true)
+                return;
+
+            string selectedPath = openDialog.FileName;
+            if (!File.Exists(selectedPath))
+                return;
+
+            try
+            {
+                Directory.CreateDirectory(Paths.Base);
+                foreach (var old in Directory.GetFiles(Paths.Base, "startup_audio.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+                string newFileName = "startup_audio" + Path.GetExtension(selectedPath);
+                string newPath = Path.Combine(Paths.Base, newFileName);
+                File.Copy(selectedPath, newPath, overwrite: true);
+                AudioEvents.RaiseStartupAudioChanged(newPath);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("AppearanceViewModel::ImportStartupAudio", ex);
+            }
+        }
+
+        private void RemoveStartupAudio()
+        {
+            try
+            {
+                foreach (var old in Directory.GetFiles(Paths.Base, "startup_audio.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+
+                AudioEvents.RaiseStartupAudioChanged(null);
+                _audioPlayer.Stop();
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("AppearanceViewModel::RemoveStartupAudio", ex);
+            }
+        }
+
+        #endregion
 
         private void DeleteCustomTheme()
         {
@@ -179,7 +275,10 @@ namespace Voidstrap.UI.ViewModels.Settings
             catch (Exception ex)
             {
                 App.Logger.WriteException("AppearanceViewModel::DeleteCustomTheme", ex);
-                Frontend.ShowMessageBox(string.Format(Strings.Menu_Appearance_CustomThemes_DeleteFailed, SelectedCustomTheme, ex.Message), MessageBoxImage.Error);
+                Frontend.ShowMessageBox(
+                    string.Format(Strings.Menu_Appearance_CustomThemes_DeleteFailed, SelectedCustomTheme, ex.Message),
+                    MessageBoxImage.Error
+                );
                 return;
             }
 
@@ -191,15 +290,12 @@ namespace Voidstrap.UI.ViewModels.Settings
                 OnPropertyChanged(nameof(SelectedCustomThemeIndex));
             }
 
-            OnPropertyChanged(nameof(IsCustomThemeSelected));
+            SelectedCustomTheme = null;
         }
 
         private void RenameCustomTheme()
         {
-            if (SelectedCustomTheme is null)
-                return;
-
-            if (SelectedCustomTheme == SelectedCustomThemeName)
+            if (SelectedCustomTheme is null || SelectedCustomTheme == SelectedCustomThemeName)
                 return;
 
             try
@@ -209,7 +305,10 @@ namespace Voidstrap.UI.ViewModels.Settings
             catch (Exception ex)
             {
                 App.Logger.WriteException("AppearanceViewModel::RenameCustomTheme", ex);
-                Frontend.ShowMessageBox(string.Format(Strings.Menu_Appearance_CustomThemes_RenameFailed, SelectedCustomTheme, ex.Message), MessageBoxImage.Error);
+                Frontend.ShowMessageBox(
+                    string.Format(Strings.Menu_Appearance_CustomThemes_RenameFailed, SelectedCustomTheme, ex.Message),
+                    MessageBoxImage.Error
+                );
                 return;
             }
 
@@ -224,7 +323,6 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             if (SelectedCustomTheme is null)
                 return;
-
             new BootstrapperEditorWindow(SelectedCustomTheme).ShowDialog();
         }
 
@@ -245,29 +343,92 @@ namespace Voidstrap.UI.ViewModels.Settings
             string themeDir = Path.Combine(Paths.CustomThemes, SelectedCustomTheme);
 
             using var memStream = new MemoryStream();
-            using var zipStream = new ZipOutputStream(memStream);
+            using var zipStream = new ZipOutputStream(memStream) { IsStreamOwner = false };
 
             foreach (var filePath in Directory.EnumerateFiles(themeDir, "*.*", SearchOption.AllDirectories))
             {
-                string relativePath = filePath[(themeDir.Length + 1)..];
-
-                var entry = new ZipEntry(relativePath);
-                entry.DateTime = DateTime.Now;
-
+                string relativePath = Path.GetRelativePath(themeDir, filePath);
+                var entry = new ZipEntry(relativePath) { DateTime = DateTime.Now };
                 zipStream.PutNextEntry(entry);
 
                 using var fileStream = File.OpenRead(filePath);
                 fileStream.CopyTo(zipStream);
             }
 
-            zipStream.CloseEntry();
             zipStream.Finish();
             memStream.Position = 0;
 
             using var outputStream = File.OpenWrite(dialog.FileName);
             memStream.CopyTo(outputStream);
 
-            Process.Start("explorer.exe", $"/select,\"{dialog.FileName}\"");
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "explorer.exe",
+                Arguments = $"/select,\"{dialog.FileName}\"",
+                UseShellExecute = true
+            });
+        }
+
+        #endregion
+        private void ImportBackground()
+        {
+            var openDialog = new OpenFileDialog
+            {
+                Title = "Select a Background Image",
+                Filter = "Image Files|*.png;*.jpg;*.jpeg;*.bmp;*.gif",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
+            };
+
+            if (openDialog.ShowDialog() != true)
+                return;
+
+            string selectedPath = openDialog.FileName;
+            if (!File.Exists(selectedPath))
+                return;
+            try
+            {
+                Directory.CreateDirectory(Paths.Base);
+                foreach (var old in Directory.GetFiles(Paths.Base, "bootstrapper_bg.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+                string newFileName = "bootstrapper_bg" + Path.GetExtension(selectedPath);
+                string newPath = Path.Combine(Paths.Base, newFileName);
+                File.Copy(selectedPath, newPath, overwrite: true);
+                BackgroundEvents.RaiseBackgroundChanged(newPath);
+            }
+            catch (Exception)
+            {
+            }
+        }
+        #region Custom Theme Helpers
+
+        private void DeleteCustomThemeStructure(string name)
+        {
+            string dir = Path.Combine(Paths.CustomThemes, name);
+            Directory.Delete(dir, true);
+        }
+
+        private void RemoveBackground()
+        {
+            try
+            {
+                foreach (var old in Directory.GetFiles(Paths.Base, "bootstrapper_bg.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+                BackgroundEvents.RaiseBackgroundChanged(null);
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        private void RenameCustomThemeStructure(string oldName, string newName)
+        {
+            string oldDir = Path.Combine(Paths.CustomThemes, oldName);
+            string newDir = Path.Combine(Paths.CustomThemes, newName);
+            Directory.Move(oldDir, newDir);
         }
 
         private void PopulateCustomThemes()
@@ -279,7 +440,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             foreach (string directory in Directory.GetDirectories(Paths.CustomThemes))
             {
                 if (!File.Exists(Path.Combine(directory, "Theme.xml")))
-                    continue; // missing the main theme file, ignore
+                    continue;
 
                 string name = Path.GetFileName(directory);
                 CustomThemes.Add(name);
@@ -288,7 +449,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (selected != null)
             {
                 int idx = CustomThemes.IndexOf(selected);
-
                 if (idx != -1)
                 {
                     SelectedCustomThemeIndex = idx;
@@ -301,17 +461,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public string? SelectedCustomTheme
-        {
-            get => App.Settings.Prop.SelectedCustomTheme;
-            set => App.Settings.Prop.SelectedCustomTheme = value;
-        }
-
-        public string SelectedCustomThemeName { get; set; } = "";
-
-        public int SelectedCustomThemeIndex { get; set; }
-
-        public ObservableCollection<string> CustomThemes { get; set; } = new();
-        public bool IsCustomThemeSelected => SelectedCustomTheme is not null;
+        #endregion
     }
 }

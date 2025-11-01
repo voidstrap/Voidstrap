@@ -1,7 +1,11 @@
-﻿using System.ComponentModel;
+﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using Voidstrap;
 
 namespace Voidstrap.RobloxInterfaces
@@ -10,7 +14,7 @@ namespace Voidstrap.RobloxInterfaces
     {
         private readonly string _applicationName;
         private readonly string _channelName;
-        private bool _initialised = false;
+        private bool _initialised;
         private Dictionary<string, string>? _flags;
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -20,8 +24,7 @@ namespace Voidstrap.RobloxInterfaces
             _applicationName = applicationName;
             _channelName = channelName;
         }
-
-        private async Task FetchAsync()
+       private async Task FetchAsync()
         {
             if (_initialised)
                 return;
@@ -32,39 +35,72 @@ namespace Voidstrap.RobloxInterfaces
                 if (_initialised)
                     return;
 
-                string logIndent = $"ApplicationSettings::Fetch.{_applicationName}.{_channelName}";
-                App.Logger.WriteLine(logIndent, "Fetching fast flags");
+                string logIdent = $"ApplicationSettings::Fetch.{_applicationName}.{_channelName}";
+                App.Logger.WriteLine(logIdent, "Fetching fast flags...");
 
                 string path = $"/v2/settings/application/{_applicationName}";
-                if (_channelName != Deployment.DefaultChannel.ToLowerInvariant())
+                if (!string.Equals(_channelName, Deployment.DefaultChannel, StringComparison.OrdinalIgnoreCase))
                     path += $"/bucket/{_channelName}";
 
-                HttpResponseMessage response;
-
-                try
+                HttpResponseMessage? response = null;
+                string[] baseUrls =
                 {
-                    response = await App.HttpClient.GetAsync("https://clientsettingscdn.roblox.com" + path).ConfigureAwait(false);
-                }
-                catch (Exception ex)
-                {
-                    App.Logger.WriteLine(logIndent, "Failed to contact clientsettingscdn! Falling back to clientsettings...");
-                    App.Logger.WriteException(logIndent, ex);
+                    "https://clientsettingscdn.roblox.com",
+                    "https://clientsettings.roblox.com",
+                    "https://setup.rbxcdn.com"
+                };
 
-                    response = await App.HttpClient.GetAsync("https://clientsettings.roblox.com" + path).ConfigureAwait(false);
+                Exception? lastError = null;
+                foreach (var baseUrl in baseUrls)
+                {
+                    string url = baseUrl + path;
+
+                    try
+                    {
+                        App.Logger.WriteLine(logIdent, $"Trying {url}");
+                        response = await App.HttpClient.GetAsync(url).ConfigureAwait(false);
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest ||
+                            response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        {
+                            string raw = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            if (raw.Contains("bucket name is invalid", StringComparison.OrdinalIgnoreCase))
+                            {
+                                App.Logger.WriteLine(logIdent, $"Invalid bucket '{_channelName}'. Falling back to default channel...");
+                                path = $"/v2/settings/application/{_applicationName}";
+                                continue;
+                            }
+                        }
+
+                        response.EnsureSuccessStatusCode();
+                        break;
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        lastError = ex;
+                        App.Logger.WriteLine(logIdent, $"Error contacting {baseUrl}: {ex.Message}");
+                    }
                 }
+
+                if (response == null)
+                    throw new Exception("All configuration sources failed.", lastError);
 
                 using (response)
                 {
-                    response.EnsureSuccessStatusCode();
                     string rawResponse = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                    if (string.IsNullOrWhiteSpace(rawResponse))
+                        throw new Exception("Empty response from configuration endpoint.");
 
                     var clientSettings = JsonSerializer.Deserialize<ClientFlagSettings>(rawResponse);
 
                     if (clientSettings?.ApplicationSettings == null)
-                        throw new Exception("Deserialized application settings is null!");
+                        throw new Exception("Deserialized ApplicationSettings is null!");
 
                     _flags = clientSettings.ApplicationSettings;
                     _initialised = true;
+
+                    App.Logger.WriteLine(logIdent, $"Fetched {_flags.Count} fast flags successfully.");
                 }
             }
             finally
@@ -84,9 +120,7 @@ namespace Voidstrap.RobloxInterfaces
             {
                 var converter = TypeDescriptor.GetConverter(typeof(T));
                 if (converter != null && converter.CanConvertFrom(typeof(string)))
-                {
                     return (T?)converter.ConvertFromInvariantString(value);
-                }
             }
             catch (Exception ex)
             {
@@ -96,9 +130,8 @@ namespace Voidstrap.RobloxInterfaces
             return default;
         }
 
-        // Remove sync-over-async: Get<T>() is discouraged
-        // If absolutely needed, use responsibly (e.g., test app startup)
-        public T? Get<T>(string name) => GetAsync<T>(name).ConfigureAwait(false).GetAwaiter().GetResult();
+        public T? Get<T>(string name) =>
+            GetAsync<T>(name).ConfigureAwait(false).GetAwaiter().GetResult();
 
         private static readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Lazy<ApplicationSettings>>> _cache = new();
 

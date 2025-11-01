@@ -1,0 +1,272 @@
+﻿<ui:UiPage x:Class="Voidstrap.UI.Elements.Settings.Pages.GBSEditorPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
+      xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+      xmlns:resources="clr-namespace:Voidstrap.Resources"
+      xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+      xmlns:sys="clr-namespace:System;assembly=mscorlib"
+      mc:Ignorable="d"
+      d:DesignHeight="2000" d:DesignWidth="900"
+      Title="GBSEditor"
+      Scrollable="True">
+
+    <StackPanel Margin="0,0,14,14">
+        <TextBlock Text="Customize Roblox Game Settings"
+                   FontSize="14"/>
+
+        <!-- ========================================================= -->
+        <!-- USER INTERFACE -->
+        <!-- ========================================================= -->
+        <TextBlock Margin="0,8,0,0" Text="User Interface"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="UI Transparency"
+                                Description="Set your preferred interface transparency.">
+            <Slider Minimum="0" Maximum="1" TickFrequency="0.05"
+                    IsSnapToTickEnabled="True"
+                    Value="{Binding UITransparency, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Text Size"
+                                Description="Controls the overall UI text size.">
+            <ComboBox SelectedValue="{Binding PreferredTextSize, Mode=TwoWay}"
+                      SelectedValuePath="Tag"
+                      Width="200">
+                <ComboBoxItem Content="Small">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>0</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="Normal">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>1</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="Large">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>2</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+            </ComboBox>
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Reduced Motion"
+                                Description="Disable UI animations for accessibility.">
+            <ui:ToggleSwitch IsChecked="{Binding ReducedMotion, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="HUD Visibility"
+                                Description="Toggle HUD (heads-up display) on/off.">
+            <ui:ToggleSwitch IsChecked="{Binding HudVisible, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Chat Visibility"
+                                Description="Toggle Chat Visibility on/off.">
+            <ui:ToggleSwitch IsChecked="{Binding ChatVisible, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Player Names Visible" Description="Show other player names.">
+            <ui:ToggleSwitch IsChecked="{Binding PlayerNamesEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+        
+        <controls:OptionControl Header="Badge Visible" Description="Show badges earned in-game.">
+            <ui:ToggleSwitch IsChecked="{Binding BadgeVisible, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <TextBlock Margin="0,8,0,0" Text="Graphics and Rendering"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Framerate Cap"
+                                Description="Limit maximum FPS.">
+            <ui:TextBox Width="100"
+                        Text="{Binding FramerateCap, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Graphics Quality"
+                                Description="Set manual or automatic graphics level (1–10).">
+            <ComboBox SelectedValue="{Binding GraphicsQuality, Mode=TwoWay}"
+                      SelectedValuePath="Tag"
+                      Width="200">
+                <ComboBoxItem Content="Automatic">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>0</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="1">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>1</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="2">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>2</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="3">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>3</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="4">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>4</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="5">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>5</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="6">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>6</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="7">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>7</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="8">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>8</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="9">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>9</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="10">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>10</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+            </ComboBox>
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Fullscreen"
+                                Description="Toggle fullscreen mode.">
+            <ui:ToggleSwitch IsChecked="{Binding Fullscreen, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="VSync"
+                                Description="Synchronize frames with monitor refresh rate.">
+            <ui:ToggleSwitch IsChecked="{Binding VSyncEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <TextBlock Margin="0,8,0,0" Text="Audio"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Master Volume"
+                                Description="Overall game volume (0–1).">
+            <Slider Minimum="0" Maximum="1" TickFrequency="0.05"
+                    Value="{Binding MasterVolume, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Voice Chat Volume"
+                                Description="Volume for voice communication.">
+            <Slider Minimum="0" Maximum="1" TickFrequency="0.05"
+                    Value="{Binding VoiceChatVolume, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <!-- ========================================================= -->
+        <!-- INPUT -->
+        <!-- ========================================================= -->
+        <TextBlock Margin="0,8,0,0" Text="Input and Controls"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Mouse Sensitivity"
+                                Description="Adjust mouse sensitivity.">
+            <ui:TextBox Width="100"
+                        Text="{Binding MouseSensitivity, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Invert Y-Axis"
+                                Description="Reverse camera Y direction.">
+            <ui:ToggleSwitch IsChecked="{Binding CameraYInverted, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Gamepad Sensitivity"
+                                Description="Adjust joystick sensitivity.">
+            <Slider Minimum="0.1" Maximum="2.0" TickFrequency="0.1"
+                    Value="{Binding GamepadSensitivity, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Enable Controller Vibration"
+                                Description="Toggle haptic feedback on controllers.">
+            <ui:ToggleSwitch IsChecked="{Binding ControllerVibration, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <TextBlock Margin="0,8,0,0" Text="Virtual Reality"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Enable VR"
+                                Description="Toggle virtual reality mode.">
+            <ui:ToggleSwitch IsChecked="{Binding VREnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="VR Comfort Setting"
+                                Description="Controls camera movement in VR.">
+            <ComboBox SelectedValue="{Binding VRComfortSetting, Mode=TwoWay}"
+                      SelectedValuePath="Tag"
+                      Width="150">
+                <ComboBoxItem Content="Comfort">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>1</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="Normal">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>2</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+                <ComboBoxItem Content="Intense">
+                    <ComboBoxItem.Tag>
+                        <sys:Int32>3</sys:Int32>
+                    </ComboBoxItem.Tag>
+                </ComboBoxItem>
+            </ComboBox>
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Vignette in VR"
+                                Description="Enable vignette for motion sickness reduction.">
+            <ui:ToggleSwitch IsChecked="{Binding VignetteEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <TextBlock Margin="0,8,0,0" Text="Network and Connectivity"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Network Debug Stats"
+                                Description="Show network ping and packet stats.">
+            <ui:ToggleSwitch IsChecked="{Binding NetworkStatsVisible, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Chat Translation"
+                                Description="Enable chat auto-translation.">
+            <ui:ToggleSwitch IsChecked="{Binding ChatTranslationEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+        
+        <TextBlock Margin="0,8,0,0" Text="Advanced and Developer"
+                   FontSize="16" FontWeight="Medium"/>
+
+        <controls:OptionControl Header="Micro Profiler"
+                                Description="Enable Roblox microprofiler server.">
+            <ui:ToggleSwitch IsChecked="{Binding MicroProfilerWebServerEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="On-Screen Profiler"
+                                Description="Show FPS and performance overlay.">
+            <ui:ToggleSwitch IsChecked="{Binding OnScreenProfilerEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl Header="Reset to Default Settings"
+                                Description="Restore all preferences to default.">
+            <Button Content="Reset" Command="{Binding ResetToDefaultsCommand}" Width="120" />
+        </controls:OptionControl>
+
+    </StackPanel>
+</ui:UiPage>

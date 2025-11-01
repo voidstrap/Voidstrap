@@ -1,19 +1,23 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-
+using System.Windows.Input;
+using Voidstrap.Integrations;
 using Voidstrap.UI.ViewModels.Settings;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    /// <summary>
-    /// Interaction logic for IntegrationsPage.xaml
-    /// </summary>
     public partial class IntegrationsPage
     {
         public IntegrationsPage()
         {
-            DataContext = new IntegrationsViewModel();
             InitializeComponent();
+            ActivityWatcher watcher = new ActivityWatcher();
+            DataContext = new IntegrationsViewModel(watcher);
+        }
+
+        private void ValidateUInt32(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !uint.TryParse(e.Text, out _);
         }
 
         public void CustomIntegrationSelection(object sender, SelectionChangedEventArgs e)
@@ -27,11 +31,5 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
 
         }
-
-        private void ActivityTrackingOption_Loaded()
-        {
-
-        }
     }
 }
-

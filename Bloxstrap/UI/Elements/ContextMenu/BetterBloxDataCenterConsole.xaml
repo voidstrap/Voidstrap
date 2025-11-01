@@ -1,0 +1,140 @@
+﻿<base:WpfUiWindow x:Class="Voidstrap.UI.Elements.ContextMenu.BetterBloxDataCenterConsole"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Voidstrap.UI.Elements.ContextMenu"
+        xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.ContextMenu"
+        xmlns:resources="clr-namespace:Voidstrap.Resources"
+        xmlns:enums="clr-namespace:Voidstrap.Enums"
+        d:DataContext="{d:DesignInstance Type=models:BetterBloxDataCenterConsoleViewModel}"
+        mc:Ignorable="d"
+        Title="BetterBlox Datacenters"
+        MinWidth="550"
+        MinHeight="420"
+        Width="850"
+        Height="520"
+        Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+        ExtendsContentIntoTitleBar="True"
+        WindowStartupLocation="CenterScreen">
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}" />
+            </LinearGradientBrush>
+        </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0"
+                     Padding="8"
+                     x:Name="RootTitleBar"
+                     Title="BetterBlox Datacenters"
+                     ShowMinimize="True"
+                     ShowMaximize="False"
+                     CanMaximize="False"
+                     KeyboardNavigation.TabNavigation="None"
+                     Icon="pack://application:,,,/Voidstrap.ico" />
+
+        <TextBlock Grid.Row="1"
+                   Margin="16,8,16,0"
+                   Text="Displays all active Roblox datacenters from BetterBlox API."
+                   TextWrapping="Wrap" />
+
+        <TextBlock Grid.Row="2"
+                   Margin="16,8,16,0"
+                   Text="{Binding ErrorMessage, Mode=OneWay}"
+                   Foreground="Red"
+                   TextWrapping="Wrap">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding LoadState, Mode=OneWay}" 
+                                     Value="{x:Static enums:GenericTriState.Failed}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <Border Grid.Row="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding LoadState, Mode=OneWay}" 
+                                     Value="{x:Static enums:GenericTriState.Unknown}">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </Border.Style>
+            <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48"/>
+        </Border>
+
+        <DataGrid x:Name="DatacentersDataGrid"
+                  Grid.Row="2"
+                  HeadersVisibility="Column"
+                  GridLinesVisibility="Horizontal"
+                  AutoGenerateColumns="False"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  IsReadOnly="True"
+                  ItemsSource="{Binding DatacenterCollection}"
+                  Margin="8">
+
+            <DataGrid.Style>
+                <Style TargetType="DataGrid" BasedOn="{StaticResource {x:Type DataGrid}}">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="BorderThickness" Value="0"/>
+                </Style>
+            </DataGrid.Style>
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}"/>
+                    <Setter Property="Height" Value="32"/>
+                    <Setter Property="Padding" Value="8,0,8,0"/>
+                    <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}"/>
+                    <Setter Property="BorderThickness" Value="1"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.CellStyle>
+                <Style TargetType="DataGridCell">
+                    <Setter Property="Height" Value="64"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="DataGridCell">
+                                <Border Background="{TemplateBinding Background}" Padding="6,4">
+                                    <ContentPresenter VerticalAlignment="Center"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.CellStyle>
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="Auto"/>
+                <DataGridTextColumn Header="Datacenter" Binding="{Binding Datacenter}" Width="2*"/>
+                <DataGridTextColumn Header="City" Binding="{Binding City}" Width="*"/>
+                <DataGridTextColumn Header="Region" Binding="{Binding Region}" Width="*"/>
+                <DataGridTextColumn Header="Country" Binding="{Binding Country}" Width="*"/>
+                <DataGridTextColumn Header="Organization" Binding="{Binding Organization}" Width="2*"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</base:WpfUiWindow>

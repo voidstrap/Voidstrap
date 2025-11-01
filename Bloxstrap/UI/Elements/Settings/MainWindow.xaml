@@ -10,17 +10,16 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.Menu_Title}"
-    Width="1000"
-    Height="610"
-    MinWidth="1000"
-    MinHeight="610"
-    d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel,
-                                     IsDesignTimeCreatable=True}"
+    Width="1185"
+    Height="720"
+    MinWidth="1185"
+    MinHeight="720"
+    d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel, IsDesignTimeCreatable=True}"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
     Closed="WpfUiWindow_Closed"
     Closing="WpfUiWindow_Closing"
     ExtendsContentIntoTitleBar="True"
-    WindowBackdropType="Mica"
+    WindowBackdropType="Auto"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
@@ -30,74 +29,69 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
+        <!-- Background -->
         <Grid.Background>
-            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
             </LinearGradientBrush>
         </Grid.Background>
 
-        <!--  Snackbars  -->
-        <ui:Snackbar
-            x:Name="AlreadyRunningSnackbar"
-            Title="{x:Static resources:Strings.Menu_AlreadyRunning_Title}"
-            Grid.RowSpan="10"
-            Margin="200,0,200,20"
-            Panel.ZIndex="10"
-            Icon="Info20"
-            Message="{x:Static resources:Strings.Menu_AlreadyRunning_Caption}"
-            Timeout="10000" >
+        <!-- Snackbars -->
+        <ui:Snackbar x:Name="AlreadyRunningSnackbar"
+                     Title="{x:Static resources:Strings.Menu_AlreadyRunning_Title}"
+                     Grid.RowSpan="10"
+                     Margin="200,0,200,20"
+                     Panel.ZIndex="10"
+                     Icon="Info20"
+                     Message="{x:Static resources:Strings.Menu_AlreadyRunning_Caption}"
+                     Timeout="10000">
             <ui:Snackbar.Background>
                 <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                    <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                    <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                    <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+                    <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                    <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                    <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}" />
                 </LinearGradientBrush>
             </ui:Snackbar.Background>
         </ui:Snackbar>
 
-        <ui:Snackbar
-            x:Name="SettingsSavedSnackbar"
-            Title="{x:Static resources:Strings.Menu_SettingsSaved_Title}"
-            Grid.RowSpan="10"
-            Margin="200,0,200,20"
-            Panel.ZIndex="9"
-            Appearance="Success"
-            Icon="CheckboxChecked24"
-            Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
-            Timeout="2000" />
+        <ui:Snackbar x:Name="SettingsSavedSnackbar"
+                     Title="{x:Static resources:Strings.Menu_SettingsSaved_Title}"
+                     Grid.RowSpan="10"
+                     Margin="200,0,200,20"
+                     Panel.ZIndex="9"
+                     Appearance="Dark"
+                     Icon="CheckboxChecked24"
+                     Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
+                     Timeout="2100" />
 
-        <ui:Snackbar
-            x:Name="SettingsSavedLaunchSnackbar"
-            Title="Voidstrap Saved And Launched Roblox!"
-            Grid.RowSpan="10"
-            Margin="150,0,150,20"
-            Panel.ZIndex="10"
-            Appearance="Success"
-            Icon="CheckboxChecked24"
-            Message="Changes have been saved."
-            Timeout="2000" />
+        <ui:Snackbar x:Name="SettingsSavedLaunchSnackbar"
+                     Title="Voidstrap Saved And Launched Roblox!"
+                     Grid.RowSpan="10"
+                     Margin="150,0,150,20"
+                     Panel.ZIndex="10"
+                     Appearance="Dark"
+                     Icon="CheckboxChecked24"
+                     Message="Changes have been saved."
+                     Timeout="2000" />
 
-        <!--  Title Bar  -->
-        <ui:TitleBar
-            x:Name="RootTitleBar"
-            Title="{x:Static resources:Strings.Menu_Title}"
-            Grid.Row="0"
-            Padding="8"
-            ForceShutdown="False"
-            Icon="pack://application:,,,/Voidstrap.ico"
-            MinimizeToTray="False"
-            UseSnapLayout="True" >
-        </ui:TitleBar>
-        
+        <!-- Title Bar -->
+        <ui:TitleBar Padding="8"
+                     x:Name="RootTitleBar"
+                     Grid.Row="0"
+                     ForceShutdown="False"
+                     MinimizeToTray="False"
+                     UseSnapLayout="True"
+                     Title="{x:Static resources:Strings.Menu_Title}"
+                     Icon="pack://application:,,,/Voidstrap.ico" />
 
-
-        <!--  Main Content Grid  -->
-        <Grid
-            x:Name="RootGrid"
-            Grid.Row="1"
-            Margin="8,12,0,0">
+        <!-- Main Content -->
+        <Grid x:Name="RootGrid"
+              Grid.Row="1"
+              Margin="8,12,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
@@ -107,260 +101,125 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Navigation Menu  -->
-            <ui:NavigationFluent
-                x:Name="RootNavigation"
-                Grid.Row="1"
-                Grid.Column="0"
-                Margin="0,0,9,0"
-                Frame="{Binding ElementName=RootFrame}"
-                SelectedPageIndex="0">
+            <!-- Navigation -->
+            <ui:NavigationFluent x:Name="RootNavigation"
+                                 Grid.Row="1"
+                                 Grid.Column="0"
+                                 Margin="0,0,5,0"
+                                 Frame="{Binding ElementName=RootFrame}"
+                                 SelectedPageIndex="0">
+                <!-- Items -->
                 <ui:NavigationFluent.Items>
-                    
-                    
-
-
-                    <!--  Menu Items  -->
-                    <ui:NavigationItem
-                        Content="{x:Static resources:Strings.Menu_Integrations_Title}"
-                        Icon="Add12"
-                        PageType="{x:Type pages:IntegrationsPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-
-                    <!--  Deployment Menu Item  -->
-                    <ui:NavigationItem
-                        Content="Deployment"
-                        Icon="PlaySettings20"
-                        PageType="{x:Type pages:BehaviourPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-
-                    <!--  Modification Menu Item  -->
-                    <ui:NavigationItem
-                        Content="Modifications"
-                        Icon="WrenchScrewdriver20"
-                        PageType="{x:Type pages:ModsPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-                    <!--  Fast Flag Editor Menu Item  -->
-                    <ui:NavigationItem
-                        Content="FastFlag Editor"
-                        Icon="Flag28"
-                        PageType="{x:Type pages:FastFlagEditorPage}"
-                        Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-
-                    <!--  Fast Flag Settings Menu Item  -->
-                    <ui:NavigationItem
-                        Content="FastFlag Settings"
-                        Icon="Settings28"
-                        PageType="{x:Type pages:FastFlagsPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-
-
-                    <!--  Appreance Menu Item  -->
-                    <ui:NavigationItem
-                        Content="Appearance"
-                        Icon="PaintBucket24"
-                        PageType="{x:Type pages:AppearancePage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-
-                    <!--  Shortcuts Menu Item  -->
-                    <ui:NavigationItem
-                        Click="NavigationItem_Click_1"
-                        Content="{x:Static resources:Strings.Common_Shortcuts}"
-                        Icon="Apps32"
-                        PageType="{x:Type pages:ShortcutsPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                                <GradientStop Offset="0.847" Color="#FFD6D6D6" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-
-                    <!--  Shortcuts Menu Item  -->
-                    <ui:NavigationItem
-                        Click="NavigationItem_Click_1"
-                        Content="Ai Chat"
-                        Icon="Chat28"
-                        PageType="{x:Type pages:AIChatPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                                <GradientStop Offset="0.847" Color="#FFD6D6D6" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
+                    <ui:NavigationItem Content="Voidstrap News" Icon="News16" PageType="{x:Type pages:NewsPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" PageType="{x:Type pages:IntegrationsPage}" />
+                    <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" PageType="{x:Type pages:BehaviourPage}" />
+                    <ui:NavigationItem Content="Modifications" Icon="WrenchScrewdriver20" PageType="{x:Type pages:ModsPage}" />
+                    <ui:NavigationItem Content="FastFlag Editor"
+                                       Icon="Flag28"
+                                       PageType="{x:Type pages:FastFlagEditorPage}"
+                                       Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" PageType="{x:Type pages:FastFlagsPage}" />
+                    <ui:NavigationItem Content="Global Settings" Icon="GlobeLocation24" PageType="{x:Type pages:GBSEditorPage}" />
+                    <ui:NavigationItem Content="Appearance" Icon="PaintBucket24" PageType="{x:Type pages:AppearancePage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}" Icon="Apps32" PageType="{x:Type pages:ShortcutsPage}" />
+                    <ui:NavigationItem Content="Help" Icon="ChatHelp20" PageType="{x:Type pages:HelpPage}" />
                 </ui:NavigationFluent.Items>
 
-                
-                <!--  Footer Items  -->
+                <!-- Footer -->
                 <ui:NavigationFluent.Footer>
-                    <ui:NavigationItem
-                        Click="NavigationItem_Click_1"
-                        Content="Hub"
-                        Icon="CloudWords16"
-                        PageType="{x:Type pages:HubPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                                <GradientStop Offset="0.847" Color="#FFD6D6D6" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-                    <ui:NavigationItem
-                        Click="NavigationItem_Click"
-                        Content="Settings"
-                        Icon="Settings20"
-                        PageType="{x:Type pages:ChannelPage}">
-                        <ui:NavigationItem.BorderBrush>
-                            <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                                <GradientStop Color="Black" />
-                                <GradientStop Offset="1" Color="White" />
-                            </LinearGradientBrush>
-                        </ui:NavigationItem.BorderBrush>
-                    </ui:NavigationItem>
-                    <ui:NavigationItem
-                        Margin="0,0,0,12"
-                        Command="{Binding OpenAboutCommand, Mode=OneTime}"
-                        Content="{x:Static resources:Strings.Menu_About_Title}"
-                        Icon="QuestionCircle48" />
+                    <ui:NavigationItem Content="Hub" Icon="Cloud16" PageType="{x:Type pages:HubPage}" />
+                    <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
+                                       Icon="QuestionCircle48"
+                                       Command="{Binding OpenAboutCommand, Mode=OneTime}" />
                 </ui:NavigationFluent.Footer>
             </ui:NavigationFluent>
 
-            <!--  Content Area  -->
-            <Grid
-                Grid.Row="0"
-                Grid.RowSpan="2"
-                Grid.Column="1">
+            <!-- Page Content -->
+            <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <ui:Breadcrumb
-                    Grid.Row="0"
-                    Margin="0,0,0,5"
-                    Navigation="{Binding ElementName=RootNavigation}" />
+                <ui:Breadcrumb Grid.Row="0"
+                               Margin="0,0,0,5"
+                               Navigation="{Binding ElementName=RootNavigation}" />
                 <Frame x:Name="RootFrame" Grid.Row="1" />
             </Grid>
         </Grid>
-        
-        
 
-        <!--  Status Bar  -->
-        <StatusBar x:Name="RootStatusBar" Grid.Row="2" Padding="14,10" BorderThickness="0,1,0,0">
-            <StatusBar.Background>
-                <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="0" />
-            </StatusBar.Background>
-            <StatusBar.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                    </Grid>
-                </ItemsPanelTemplate>
-            </StatusBar.ItemsPanel>
-            
+        <!-- Status Bar -->
+        <Border Grid.Row="2"
+                VerticalAlignment="Bottom"
+                Height="52"
+                Background="{ui:ThemeResource ControlFillColorDefaultBrush}"
+                CornerRadius="12,12,0,0"
+                Padding="16,0">
 
+            <StatusBar x:Name="RootStatusBar"
+                       Padding="14,10"
+                       BorderThickness="0,1,0,0">
+                <StatusBar.Background>
+                    <SolidColorBrush Color="{ui:ThemeResource ApplicationBackgroundColor}" Opacity="0" />
+                </StatusBar.Background>
 
-            <!--  Test Mode Toggle  -->
-            <StatusBarItem Grid.Column="0" Margin="0,0,4,0">
-                <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                    <ui:ToggleSwitch
-                        Background="{DynamicResource SystemAccentBrush}"
-                        Foreground="{DynamicResource SystemAccentBrush}"
-                        IsChecked="{Binding TestModeEnabled, Mode=TwoWay}" />
-                    <TextBlock
-                        Padding="10,0,0,0"
-                        VerticalAlignment="Center"
-                        FontSize="14"
-                        Text="{x:Static resources:Strings.Menu_TestMode}" />
-                </StackPanel>
-            </StatusBarItem>
+                <StatusBar.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                        </Grid>
+                    </ItemsPanelTemplate>
+                </StatusBar.ItemsPanel>
 
-            <!--  Launch And Save Button  -->
-            <StatusBarItem Grid.Column="2" Padding="0,0,8,0">
-                <ui:Button
-                    Width="130"
-                    HorizontalAlignment="Center"
-                    Appearance="Primary"
-                    Background="{DynamicResource SystemAccentBrush}"
-                    Click="Button_Click"
-                    Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}"
-                    Content="Save And Launch"/>
-            </StatusBarItem>
+                <!-- Test Mode Toggle -->
+                <StatusBarItem Grid.Column="0" Margin="0,0,4,0">
+                    <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                        <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}"
+                                         Foreground="{DynamicResource SystemAccentBrush}"
+                                         IsChecked="{Binding TestModeEnabled, Mode=TwoWay}" />
+                        <TextBlock Padding="10,0,0,0"
+                                   VerticalAlignment="Center"
+                                   FontSize="14"
+                                   Text="{x:Static resources:Strings.Menu_TestMode}" />
+                    </StackPanel>
+                </StatusBarItem>
 
-            <!--  Save Button  -->
-            <StatusBarItem Grid.Column="3" Padding="0,0,9,0">
-                <ui:Button
-                    Width="56.587"
-                    Appearance="Primary"
-                    Background="{DynamicResource SystemAccentBrush}"
-                    Click="Button_Click_1"
-                    Command="{Binding SaveSettingsCommand, Mode=OneWay}"
-                    Content="{x:Static resources:Strings.Menu_Save}" />
-            </StatusBarItem>
+                <!-- Launch And Save Button -->
+                <StatusBarItem Grid.Column="2" Padding="0,0,8,0">
+                    <ui:Button x:Name="InstallLaunchButton"
+                               HorizontalAlignment="Center"
+                               Appearance="Primary"
+                               Background="{DynamicResource SystemAccentBrush}"
+                               Click="Button_Click"
+                               Command="{Binding SaveAndLaunchSettingsCommand, Mode=OneWay}"
+                               Content="Install" />
+                </StatusBarItem>
 
-            <!--  Close Button  -->
-            <StatusBarItem Grid.Column="4" Padding="0,0,8,0">
-                <ui:Button
-                    Width="56.587"
-                    HorizontalAlignment="Center"
-                    Appearance="Secondary"
-                    Command="{Binding CloseWindowCommand, Mode=OneTime}"
-                    Content="{x:Static resources:Strings.Common_Close}" Click="Button_Click_2" />
-            </StatusBarItem>
-        </StatusBar>
-        
-        
+                <StatusBarItem Grid.Column="3" Padding="0,0,9,0">
+                    <ui:Button Width="56.587"
+                               Appearance="Primary"
+                               Background="{DynamicResource SystemAccentBrush}"
+                               Click="Button_Click_1"
+                               Command="{Binding SaveSettingsCommand, Mode=OneWay}"
+                               Content="{x:Static resources:Strings.Menu_Save}" />
+                </StatusBarItem>
+
+                <!-- Close Button -->
+                <StatusBarItem Grid.Column="4" Padding="0,0,8,0">
+                    <ui:Button Width="56.587"
+                               HorizontalAlignment="Center"
+                               Appearance="Secondary"
+                               Command="{Binding CloseWindowCommand, Mode=OneTime}"
+                               Click="Button_Click_2"
+                               Content="{x:Static resources:Strings.Common_Close}" />
+                </StatusBarItem>
+            </StatusBar>
+        </Border>
     </Grid>
 </base:WpfUiWindow>

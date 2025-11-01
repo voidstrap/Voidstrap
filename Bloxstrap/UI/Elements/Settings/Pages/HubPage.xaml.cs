@@ -5,9 +5,6 @@ using Voidstrap.UI.ViewModels.Settings;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    /// <summary>
-    /// Interaction logic for HubPage.xaml
-    /// </summary>
     public partial class HubPage
     {
         public HubPage()
@@ -1401,6 +1398,23 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 }
 ";
             Clipboard.SetText(jsonText);
+        }
+
+        private void InstallButton_Click10000(object sender, RoutedEventArgs e)
+        {
+            string url = "https://plexity.netlify.app";
+            try
+            {
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open URL: {ex.Message}");
+            }
         }
     }
 }

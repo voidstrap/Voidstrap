@@ -6,17 +6,10 @@ using Wpf.Ui.Hardware;
 
 namespace Wpf.Ui.Animations
 {
-    /// <summary>
-    /// Provides transition effects for <see cref="FrameworkElement"/>.
-    /// </summary>
     public static class Transitions
     {
-        private const int MaxDuration = 800;
-        private const int MinDuration = 50;
-
-        /// <summary>
-        /// Applies a transition animation to the specified element.
-        /// </summary>
+        private const int MaxDuration = 1400;
+        private const int MinDuration = 150;
         public static bool ApplyTransition(object element, TransitionType type, int duration)
         {
             if (type == TransitionType.None ||
@@ -26,9 +19,10 @@ namespace Wpf.Ui.Animations
             {
                 return false;
             }
-
-            duration = Math.Clamp(duration, 200, MaxDuration); // Clamp to ensure smooth speed
+            duration = Math.Clamp(duration, 400, MaxDuration);
             var animationDuration = new Duration(TimeSpan.FromMilliseconds(duration));
+
+            RenderOptions.SetBitmapScalingMode(frameworkElement, BitmapScalingMode.Fant);
 
             switch (type)
             {
@@ -37,19 +31,19 @@ namespace Wpf.Ui.Animations
                     break;
 
                 case TransitionType.FadeInWithSlide:
-                    ApplySlide(frameworkElement, animationDuration, 0, 30, fade: true);
+                    ApplySlide(frameworkElement, animationDuration, 0, 60, fade: true);
                     break;
 
                 case TransitionType.SlideBottom:
-                    ApplySlide(frameworkElement, animationDuration, 0, 30);
+                    ApplySlide(frameworkElement, animationDuration, 0, 60);
                     break;
 
                 case TransitionType.SlideRight:
-                    ApplySlide(frameworkElement, animationDuration, 50, 0);
+                    ApplySlide(frameworkElement, animationDuration, 80, 0);
                     break;
 
                 case TransitionType.SlideLeft:
-                    ApplySlide(frameworkElement, animationDuration, -50, 0);
+                    ApplySlide(frameworkElement, animationDuration, -80, 0);
                     break;
 
                 default:
@@ -59,33 +53,29 @@ namespace Wpf.Ui.Animations
             return true;
         }
 
-        /// <summary>
-        /// Fades in the element.
-        /// </summary>
         private static void ApplyFade(FrameworkElement element, Duration duration)
         {
+            element.Opacity = 0;
             var fadeIn = new DoubleAnimation
             {
                 From = 0.0,
                 To = 1.0,
                 Duration = duration,
-                EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+                EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut }
             };
 
             element.BeginAnimation(UIElement.OpacityProperty, fadeIn);
         }
 
-        /// <summary>
-        /// Applies a slide (and optional fade) animation.
-        /// </summary>
         private static void ApplySlide(FrameworkElement element, Duration duration, double offsetX, double offsetY, bool fade = false)
         {
             if (element.RenderTransform is not TranslateTransform)
                 element.RenderTransform = new TranslateTransform();
 
             element.RenderTransformOrigin = new Point(0.5, 0.5);
+            var easing = new QuinticEase { EasingMode = EasingMode.EaseOut };
 
-            var easing = new SineEase { EasingMode = EasingMode.EaseInOut };
+            var storyboard = new Storyboard();
 
             if (offsetX != 0)
             {
@@ -96,8 +86,9 @@ namespace Wpf.Ui.Animations
                     Duration = duration,
                     EasingFunction = easing
                 };
-
-                element.RenderTransform.BeginAnimation(TranslateTransform.XProperty, animX);
+                Storyboard.SetTarget(animX, element);
+                Storyboard.SetTargetProperty(animX, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+                storyboard.Children.Add(animX);
             }
 
             if (offsetY != 0)
@@ -109,22 +100,27 @@ namespace Wpf.Ui.Animations
                     Duration = duration,
                     EasingFunction = easing
                 };
-
-                element.RenderTransform.BeginAnimation(TranslateTransform.YProperty, animY);
+                Storyboard.SetTarget(animY, element);
+                Storyboard.SetTargetProperty(animY, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                storyboard.Children.Add(animY);
             }
 
             if (fade)
             {
+                element.Opacity = 0;
                 var fadeIn = new DoubleAnimation
                 {
                     From = 0.0,
                     To = 1.0,
                     Duration = duration,
-                    EasingFunction = easing
+                    EasingFunction = new QuinticEase { EasingMode = EasingMode.EaseOut }
                 };
-
-                element.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+                Storyboard.SetTarget(fadeIn, element);
+                Storyboard.SetTargetProperty(fadeIn, new PropertyPath("Opacity"));
+                storyboard.Children.Add(fadeIn);
             }
+
+            storyboard.Begin();
         }
     }
 }

@@ -11,19 +11,35 @@
 #warning "Automatic updater debugging is enabled"
 #endif
 
+using ICSharpCode.SharpZipLib.Zip;
+using Microsoft.VisualBasic.Devices;
+using Microsoft.Win32;
+using Newtonsoft.Json.Linq;
+using System.Net;
+using System;
+using System.Buffers;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
+using System.IO;
+using System.Management;
+using System.Net.Http;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using System.Windows.Media.Animation;
 using System.Windows.Shell;
-
-using Microsoft.Win32;
-
-using ICSharpCode.SharpZipLib.Zip;
 using Voidstrap.AppData;
+using Voidstrap.Integrations;
 using Voidstrap.RobloxInterfaces;
 using Voidstrap.UI.Elements.Bootstrapper.Base;
-using Voidstrap;
+
 
 namespace Voidstrap
 {
@@ -47,7 +63,7 @@ namespace Voidstrap
 
         private readonly IAppData AppData;
         private readonly LaunchMode _launchMode;
-
+        private AggressivePerformanceManager? _gpuPerfManager;
         private string _launchCommandLine = App.LaunchSettings.RobloxLaunchArgs;
         private string _latestVersionGuid = null!;
         private string _latestVersionDirectory = null!;
@@ -58,6 +74,9 @@ namespace Voidstrap
         private double _taskbarProgressIncrement;
         private double _taskbarProgressMaximum;
         private long _totalDownloadedBytes = 0;
+        private CancellationTokenSource? _optimizationCts;
+        private Thread _monitorThread;
+        private bool _running = false;
 
         private bool _mustUpgrade => String.IsNullOrEmpty(AppData.State.VersionGuid) || !File.Exists(AppData.ExecutablePath);
         private bool _noConnection = false;
@@ -88,6 +107,15 @@ namespace Voidstrap
             Deployment.BinaryType = AppData.BinaryType;
         }
 
+        private Process? _robloxProcess;
+        private System.Threading.Timer? _gcTimer;
+        private System.Threading.Timer? _processOptimizerTimer;
+        private System.Diagnostics.Stopwatch? _downloadStopwatch;
+
+
+        [DllImport("kernel32.dll")]
+        private static extern bool SetProcessWorkingSetSize(IntPtr procHandle, int min, int max);
+
         private void SetStatus(string message)
         {
             App.Logger.WriteLine("Bootstrapper::SetStatus", message);
@@ -102,84 +130,113 @@ namespace Voidstrap
         {
             if (Dialog is null)
                 return;
-
-            // UI progress
+            if (_totalDownloadedBytes <= 0 || _progressIncrement <= 0)
+            {
+                Dialog.ProgressValue = 0;
+                Dialog.TaskbarProgressValue = 0;
+                return;
+            }
             int progressValue = (int)Math.Floor(_progressIncrement * _totalDownloadedBytes);
-
-            // bugcheck: if we're restoring a file from a package, it'll incorrectly increment the progress beyond 100
-            // too lazy to fix properly so lol
             progressValue = Math.Clamp(progressValue, 0, ProgressBarMaximum);
-
             Dialog.ProgressValue = progressValue;
-
-            // taskbar progress
             double taskbarProgressValue = _taskbarProgressIncrement * _totalDownloadedBytes;
-            taskbarProgressValue = Math.Clamp(taskbarProgressValue, 0, _taskbarProgressMaximum);
-
+            taskbarProgressValue = Math.Clamp(taskbarProgressValue, 0.0, _taskbarProgressMaximum);
             Dialog.TaskbarProgressValue = taskbarProgressValue;
         }
 
-        private void HandleConnectionError(Exception exception)
+        private async Task HandleConnectionError(Exception exception)
         {
             const string LOG_IDENT = "Bootstrapper::HandleConnectionError";
+            if (exception == null)
+                return;
+            if (exception is AggregateException aggEx)
+                exception = aggEx.InnerException ?? aggEx;
 
             _noConnection = true;
-
-            App.Logger.WriteLine(LOG_IDENT, "Connectivity check failed");
             App.Logger.WriteException(LOG_IDENT, exception);
 
-            string message = Strings.Dialog_Connectivity_BadConnection;
+            if (_isInstalling)
+            {
+                App.Logger.WriteLine(LOG_IDENT, "Already upgrading; skipping retry.");
+                return;
+            }
 
-            if (exception is AggregateException)
-                exception = exception.InnerException!;
+            string message = "A network or server issue occurred while checking for updates.";
 
-            // https://gist.github.com/pizzaboxer/4b58303589ee5b14cc64397460a8f386
-            if (exception is HttpRequestException && exception.InnerException is null)
-                message = String.Format(Strings.Dialog_Connectivity_RobloxDown, "[status.roblox.com](https://status.roblox.com)");
+            if (exception is HttpRequestException httpEx)
+            {
+                switch (httpEx.StatusCode)
+                {
+                    case HttpStatusCode.Forbidden:
+                        App.Logger.WriteLine(LOG_IDENT, "403 Forbidden: switching to default channel.");
+                        Deployment.Channel = Deployment.DefaultChannel;
+                        _noConnection = false;
+                        return;
+                    case HttpStatusCode.NotFound:
+                        message = "Update file not found on the server.";
+                        break;
+                }
+            }
 
-            if (_mustUpgrade)
-                message += $"\n\n{Strings.Dialog_Connectivity_RobloxUpgradeNeeded}\n\n{Strings.Dialog_Connectivity_TryAgainLater}";
-            else
-                message += $"\n\n{Strings.Dialog_Connectivity_RobloxUpgradeSkip}";
-
-            Frontend.ShowConnectivityDialog(
-                String.Format(Strings.Dialog_Connectivity_UnableToConnect, "Roblox"),
-                message,
-                _mustUpgrade ? MessageBoxImage.Error : MessageBoxImage.Warning,
-                exception);
-
-            if (_mustUpgrade)
-                App.Terminate(ErrorCode.ERROR_CANCELLED);
+            Frontend.ShowMessageBox($"{message}\n\nYou can retry later or continue offline.",
+                MessageBoxImage.Warning, MessageBoxButton.OK);
         }
 
         public async Task Run()
         {
             const string LOG_IDENT = "Bootstrapper::Run";
-
             App.Logger.WriteLine(LOG_IDENT, "Running bootstrapper");
 
-            // this is now always enabled as of v1.0.3.6
             if (Dialog is not null)
                 Dialog.CancelEnabled = true;
 
             SetStatus(Strings.Bootstrapper_Status_Connecting);
 
             var connectionResult = await Deployment.InitializeConnectivity();
-
             App.Logger.WriteLine(LOG_IDENT, "Connectivity check finished");
 
             if (connectionResult is not null)
-                HandleConnectionError(connectionResult);
+                await HandleConnectionError(connectionResult);
 
 #if (!DEBUG || DEBUG_UPDATER) && !QA_BUILD
             if (App.Settings.Prop.CheckForUpdates && !App.LaunchSettings.UpgradeFlag.Active)
             {
-                bool updatePresent = await CheckForUpdates();
+                var latestTag = await GithubUpdater.GetLatestVersionTagAsync();
+                if (!string.IsNullOrEmpty(latestTag))
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Latest GitHub release tag: {latestTag}");
+                    string normalizedTag = latestTag.TrimStart('v', 'V');
+                    string localVersion = string.IsNullOrWhiteSpace(AppData.State.VersionGuid)
+                        ? "0.0.0"
+                        : AppData.State.VersionGuid.Trim();
 
-                if (updatePresent)
-                    return;
+                    App.Version = localVersion;
+
+                    if (IsNewerVersion(localVersion, normalizedTag))
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"New version detected! Local: {localVersion}, Remote: {normalizedTag}");
+                        SetStatus($"Updating to v{normalizedTag}...");
+
+                        bool success = await GithubUpdater.DownloadAndInstallUpdate(latestTag);
+                        if (success)
+                        {
+                            App.Logger.WriteLine(LOG_IDENT, "Update installed successfully — restarting Voidstrap...");
+                            RestartApplication();
+                            return;
+                        }
+                        else
+                        {
+                            App.Logger.WriteLine(LOG_IDENT, "Update failed — continuing without updating.");
+                        }
+                    }
+                    else
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, "Already up to date.");
+                    }
+                }
             }
 #endif
+
             bool mutexExists = false;
 
             try
@@ -191,28 +248,22 @@ namespace Voidstrap
                     mutexExists = true;
                 }
             }
-            catch (WaitHandleCannotBeOpenedException)
-            {
-                // No mutex exists yet
-            }
+            catch (WaitHandleCannotBeOpenedException) { }
             catch (Exception ex)
             {
                 App.Logger.WriteLine(LOG_IDENT, $"Unexpected error checking mutex: {ex}");
             }
 
-            // Create and acquire the mutex
             await using var mutex = new AsyncMutex(false, "Voidstrap-Bootstrapper");
             await mutex.AcquireAsync(_cancelTokenSource.Token);
             _mutex = mutex;
 
-            // Reload configs if waiting for other instances
             if (mutexExists)
             {
                 App.Settings.Load();
                 App.State.Load();
             }
 
-            // Your existing logic
             if (!_noConnection)
             {
                 try
@@ -221,7 +272,7 @@ namespace Voidstrap
                 }
                 catch (Exception ex)
                 {
-                    HandleConnectionError(ex);
+                    await HandleConnectionError(ex);
                 }
             }
 
@@ -241,343 +292,1127 @@ namespace Voidstrap
             else
                 WindowsRegistry.RegisterPlayer();
 
-            // Release the mutex only once, here
             await mutex.ReleaseAsync();
 
             if (!App.LaunchSettings.NoLaunchFlag.Active && !_cancelTokenSource.IsCancellationRequested)
-                StartRoblox();
+                await StartRoblox();
 
             Dialog?.CloseBootstrapper();
         }
 
-        /// <summary>
-        /// Will throw whatever HttpClient can throw
-        /// </summary>
-        /// <returns></returns>
+        private void RestartApplication()
+        {
+            try
+            {
+                string exePath = Environment.ProcessPath!;
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = exePath,
+                    UseShellExecute = true
+                });
+                Environment.Exit(0);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("Bootstrapper::Restart", $"Failed to restart: {ex}");
+            }
+        }
+
+        private static bool IsNewerVersion(string _, string latestVersion)
+        {
+            if (App.Settings.Prop.CheckForUpdates == false)
+                return false;
+            string localVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString();
+            Console.WriteLine("Current app version: " + localVersion);
+            latestVersion = latestVersion.TrimStart('v', 'V');
+            App.Logger.WriteLine("IsNewerVersion", $"Local: '{localVersion}', GitHub tag: '{latestVersion}'");
+            if (Version.TryParse(localVersion, out var localVer) &&
+                Version.TryParse(latestVersion, out var latestVer))
+            {
+                App.Logger.WriteLine("IsNewerVersion", $"Parsed Local: {localVer}, Latest: {latestVer}");
+                return latestVer > localVer;
+            }
+            return string.Compare(latestVersion, localVersion, StringComparison.OrdinalIgnoreCase) > 0;
+        }
+
         private async Task GetLatestVersionInfo()
         {
             const string LOG_IDENT = "Bootstrapper::GetLatestVersionInfo";
 
-            // before we do anything, we need to query our channel
-            // if it's set in the launch uri, we need to use it and set the registry key for it
-            // else, check if the registry key for it exists, and use it
-
-            using var key = Registry.CurrentUser.CreateSubKey($"SOFTWARE\\ROBLOX Corporation\\Environments\\{AppData.RegistryName}\\Channel");
-
-            var match = Regex.Match(
-                App.LaunchSettings.RobloxLaunchArgs,
-                "channel:([a-zA-Z0-9-_]+)",
-                RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
-            );
-
-            // CHANNEL CHANGE MODE
-
-            void EnrollChannel()
-            {
-                if (match.Groups.Count == 2)
-                {
-                    Deployment.Channel = match.Groups[1].Value.ToLowerInvariant();
-                }
-                else if (key.GetValue("www.roblox.com") is string value && !String.IsNullOrEmpty(value))
-                {
-                    Deployment.Channel = value.ToLowerInvariant();
-                }
-            }
-
-            switch (App.Settings.Prop.ChannelChangeMode)
-            {
-                case ChannelChangeMode.Automatic:
-                    App.Logger.WriteLine(LOG_IDENT, "Enrolling into channel");
-
-                    EnrollChannel();
-                    break;
-                case ChannelChangeMode.Prompt:
-                    App.Logger.WriteLine(LOG_IDENT, "Prompting channel enrollment");
-
-                    if (
-                        (!match.Success || match.Groups.Count != 2)
-                        &&
-                        match.Groups[2].Value != App.Settings.Prop.Channel
-                        )
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, "Channel is either equal or incorrectly formatted");
-                        break;
-                    }
-
-                    string DisplayChannel = !String.IsNullOrEmpty(match.Groups[1].Value) ? match.Groups[1].Value : Deployment.DefaultChannel;
-
-                    var Result = Frontend.ShowMessageBox(
-                    String.Format(Strings.Bootstrapper_Bootstrapper_Dialog_PromptChannelChange,
-                    DisplayChannel, App.Settings.Prop.Channel),
-                    MessageBoxImage.Question,
-                    MessageBoxButton.YesNo
-                    );
-
-                    if (Result == MessageBoxResult.Yes)
-                        EnrollChannel();
-                    break;
-                case ChannelChangeMode.Ignore:
-                    App.Logger.WriteLine(LOG_IDENT, "Ignoring channel enrollment");
-                    break;
-            }
-
-            if (String.IsNullOrEmpty(Deployment.Channel))
-                Deployment.Channel = Deployment.DefaultChannel;
-
-            App.Logger.WriteLine(LOG_IDENT, $"Got channel as {Deployment.DefaultChannel}");
-
-            ClientVersion clientVersion;
+            App.Logger.WriteLine(LOG_IDENT, "Initializing GetLatestVersionInfo...");
 
             try
             {
-                clientVersion = await Deployment.GetInfo(Deployment.Channel);
-            }
-            catch (InvalidChannelException ex)
-            {
-                // copied from v2.5.4
-                // we are keeping similar logic just updated for newer apis
+                App.Logger.WriteLine(LOG_IDENT, $"Fetching client version info for channel: {Deployment.Channel}");
+                ClientVersion clientVersion;
 
-                // If channel does not exist
-                if (ex.StatusCode == HttpStatusCode.NotFound)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Reverting enrolled channel to {Deployment.DefaultChannel} because a WindowsPlayer build does not exist for {App.Settings.Prop.Channel}");
-                }
-                // If channel is not available to the user (private/internal release channel)
-                else if (ex.StatusCode == HttpStatusCode.Unauthorized)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Reverting enrolled channel to {Deployment.DefaultChannel} because {App.Settings.Prop.Channel} is restricted for public use.");
+                string jsonText;
 
-                    // Only prompt if user has channel switching mode set to something other than Automatic.
-                    if (App.Settings.Prop.ChannelChangeMode != ChannelChangeMode.Automatic)
+                try
+                {
+                    jsonText = await App.HttpClient.GetStringAsync(Deployment.GetInfoUrl(Deployment.Channel));
+                    if (jsonText.TrimStart().StartsWith("<"))
                     {
-                        Frontend.ShowMessageBox(
-                            String.Format(
-                                Strings.Boostrapper_Dialog_UnauthorizedChannel,
-                                Deployment.Channel,
-                                Deployment.DefaultChannel
-                            ),
-                            MessageBoxImage.Information
-                        );
+                        App.Logger.WriteLine(LOG_IDENT, "❌ Got HTML instead of JSON — likely 403 or 404 error.");
+                        throw new Exception("Invalid JSON: Received HTML from server");
                     }
+                    clientVersion = JsonSerializer.Deserialize<ClientVersion>(jsonText)
+                        ?? throw new Exception("ClientVersion JSON was null.");
                 }
-                else
+                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
                 {
+                    App.Logger.WriteLine(LOG_IDENT, $"403 on {Deployment.Channel} — switching to default channel.");
+                    Deployment.Channel = Deployment.DefaultChannel;
+                    clientVersion = await Deployment.GetInfo(Deployment.Channel);
+                }
+                catch (JsonException ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Invalid JSON during GetInfo(): {ex.Message}");
                     throw;
                 }
 
-                Deployment.Channel = Deployment.DefaultChannel;
-                clientVersion = await Deployment.GetInfo(Deployment.Channel);
+                _latestVersionGuid = clientVersion.VersionGuid;
+                _latestVersionDirectory = Path.Combine(Paths.Versions, _latestVersionGuid);
+                string pkgManifestUrl = $"https://setup.rbxcdn.com/{_latestVersionGuid}-rbxPkgManifest.txt";
+                App.Logger.WriteLine(LOG_IDENT, $"Downloading manifest from {pkgManifestUrl}");
 
-                App.Settings.Prop.Channel = Deployment.DefaultChannel;
-                App.Settings.Save();
-            }
+                var pkgManifestData = await App.HttpClient.GetStringAsync(pkgManifestUrl);
 
-            if (clientVersion.IsBehindDefaultChannel)
-            {
-                MessageBoxResult action = App.Settings.Prop.ChannelChangeMode switch
+                if (pkgManifestData.TrimStart().StartsWith("<"))
                 {
-                    ChannelChangeMode.Prompt => Frontend.ShowMessageBox(
-                        String.Format(Strings.Bootstrapper_Dialog_ChannelOutOfDate, Deployment.Channel, Deployment.DefaultChannel),
-                        MessageBoxImage.Warning,
-                        MessageBoxButton.YesNo
-                    ),
-                    ChannelChangeMode.Automatic => MessageBoxResult.Yes,
-                    ChannelChangeMode.Ignore => MessageBoxResult.No,
-                    _ => MessageBoxResult.None
-                };
-
-                if (action == MessageBoxResult.Yes)
-                {
-                    App.Logger.WriteLine("Bootstrapper::CheckLatestVersion", $"Changed Roblox channel from {App.Settings.Prop.Channel} to {Deployment.DefaultChannel}");
-
-                    App.Settings.Prop.Channel = Deployment.DefaultChannel;
-                    clientVersion = await Deployment.GetInfo(Deployment.Channel);
+                    App.Logger.WriteLine(LOG_IDENT, "❌ Manifest returned HTML — skipping manifest parse.");
+                    _versionPackageManifest = new("");
+                    return;
                 }
 
-                Deployment.Channel = Deployment.DefaultChannel;
-                clientVersion = await Deployment.GetInfo();
+                _versionPackageManifest = new(pkgManifestData);
+                App.Logger.WriteLine(LOG_IDENT, $"Manifest successfully downloaded with {_versionPackageManifest.Count} entries.");
             }
-
-            key.SetValueSafe("www.roblox.com", Deployment.IsDefaultChannel ? "" : Deployment.Channel);
-
-            _latestVersionGuid = clientVersion.VersionGuid;
-            _latestVersionDirectory = Path.Combine(Paths.Versions, _latestVersionGuid);
-
-            string pkgManifestUrl = Deployment.GetLocation($"/{_latestVersionGuid}-rbxPkgManifest.txt");
-            var pkgManifestData = await App.HttpClient.GetStringAsync(pkgManifestUrl);
-
-            _versionPackageManifest = new(pkgManifestData);
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Critical failure in GetLatestVersionInfo: {ex}");
+                _versionPackageManifest = new("");
+            }
         }
 
-        private void StartRoblox()
+        private void StartMemoryAndProcessOptimizer()
+        {
+            _gcTimer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    GC.Collect();
+                    GC.WaitForPendingFinalizers();
+                    GC.Collect();
+                    App.Logger.WriteLine("MemoryCleaner", $"GC ran at {DateTime.Now}");
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine("MemoryCleaner", $"Error during GC: {ex}");
+                }
+            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
+
+            _processOptimizerTimer = new System.Threading.Timer(_ =>
+            {
+                try
+                {
+                    if (_robloxProcess != null && !_robloxProcess.HasExited)
+                    {
+                        _robloxProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
+                        SetProcessWorkingSetSize(_robloxProcess.Handle, -1, -1);
+                        _robloxProcess.Refresh();
+                        App.Logger.WriteLine("ProcessOptimizer", $"Optimized Roblox PID {_robloxProcess.Id} at {DateTime.Now}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine("ProcessOptimizer", $"Error optimizing Roblox: {ex}");
+                }
+            }, null, TimeSpan.FromSeconds(3), TimeSpan.FromSeconds(3));
+        }
+
+        private void StopMemoryAndProcessOptimizer()
+        {
+            _gcTimer?.Dispose();
+            _gcTimer = null;
+
+            _processOptimizerTimer?.Dispose();
+            _processOptimizerTimer = null;
+        }
+
+        private async Task StartRoblox(CancellationToken ct = default)
         {
             const string LOG_IDENT = "Bootstrapper::StartRoblox";
-
             SetStatus(Strings.Bootstrapper_Status_Starting);
-
-            // Check if we are launching the player and language override is enabled
-            if (_launchMode == LaunchMode.Player && App.Settings.Prop.ForceRobloxLanguage)
-            {
-                // Attempt to extract the game locale from the launch command line
-                var match = Regex.Match(_launchCommandLine, @"gameLocale:([a-z_]+)", RegexOptions.CultureInvariant);
-
-                if (match.Success && match.Groups.Count > 1)
-                {
-                    string detectedLocale = match.Groups[1].Value;
-
-                    // Replace the hardcoded locale with the detected one
-                    _launchCommandLine = Regex.Replace(
-                        _launchCommandLine,
-                        @"robloxLocale:[a-z_]+",
-                        $"robloxLocale:{detectedLocale}",
-                        RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
-                }
-            }
-
-        var startInfo = new ProcessStartInfo()
-            {
-                FileName = AppData.ExecutablePath,
-                Arguments = _launchCommandLine,
-                WorkingDirectory = AppData.Directory
-            };
-
-            if (_launchMode == LaunchMode.Player && ShouldRunAsAdmin())
-            {
-                startInfo.Verb = "runas";
-                startInfo.UseShellExecute = true;
-            }
-            else if (_launchMode == LaunchMode.StudioAuth)
-            {
-                Process.Start(startInfo);
-                return;
-            }
-
-            string? logFileName = null;
-
-            string rbxDir = Path.Combine(Paths.LocalAppData, "Roblox");
-            if (!Directory.Exists(rbxDir))
-                Directory.CreateDirectory(rbxDir);
-
-            string rbxLogDir = Path.Combine(rbxDir, "logs");
-            if (!Directory.Exists(rbxLogDir))
-                Directory.CreateDirectory(rbxLogDir);
-
-            var logWatcher = new FileSystemWatcher()
-            {
-                Path = rbxLogDir,
-                Filter = "*.log",
-                EnableRaisingEvents = true
-            };
-
-            var logCreatedEvent = new AutoResetEvent(false);
-
-            logWatcher.Created += (_, e) =>
-            {
-                logWatcher.EnableRaisingEvents = false;
-                logFileName = e.FullPath;
-                logCreatedEvent.Set();
-            };
-
-            // v2.2.0 - byfron will trip if we keep a process handle open for over a minute, so we're doing this now
             try
             {
-                using var process = Process.Start(startInfo)!;
-                _appPid = process.Id;
-            }
-            catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
-            {
-                // 1223 = ERROR_CANCELLED, gets thrown if a UAC prompt is cancelled
-                return;
-            }
-            catch (Exception)
-            {
-                // attempt a reinstall on next launch
-                File.Delete(AppData.ExecutablePath);
-                throw;
-            }
-
-            App.Logger.WriteLine(LOG_IDENT, $"Started Roblox (PID {_appPid}), waiting for log file");
-
-            logCreatedEvent.WaitOne(TimeSpan.FromSeconds(15));
-
-            if (String.IsNullOrEmpty(logFileName))
-            {
-                App.Logger.WriteLine(LOG_IDENT, "Unable to identify log file");
-                Frontend.ShowPlayerErrorDialog();
-                return;
-            }
-            else
-            {
-                App.Logger.WriteLine(LOG_IDENT, $"Got log file as {logFileName}");
-            }
-
-            _mutex?.ReleaseAsync();
-
-            if (IsStudioLaunch)
-                return;
-
-            var autoclosePids = new List<int>();
-
-            // launch custom integrations now
-            foreach (var integration in App.Settings.Prop.CustomIntegrations)
-            {
-                if (!integration.SpecifyGame)
+                StartMemoryAndProcessOptimizer();
+                if (_launchMode == LaunchMode.Player && App.Settings.Prop?.ForceRobloxLanguage == true)
                 {
-                    App.Logger.WriteLine(LOG_IDENT, $"Launching custom integration '{integration.Name}' ({integration.Location} {integration.LaunchArgs} - autoclose is {integration.AutoClose})");
+                    var match = Regex.Match(_launchCommandLine ?? string.Empty,
+                                            @"gameLocale:([a-zA-Z_-]+)",
+                                            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-
-                    int pid = 0;
-
-                    try
-
-
+                    if (match.Success && match.Groups.Count > 1)
                     {
-                        var process = Process.Start(new ProcessStartInfo
+                        string detectedLocale = match.Groups[1].Value;
+                        _launchCommandLine = Regex.Replace(
+                            _launchCommandLine ?? string.Empty,
+                            @"robloxLocale:[a-zA-Z_-]+",
+                            $"robloxLocale:{detectedLocale}",
+                            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant
+                        );
+                    }
+                }
+
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = AppData.ExecutablePath,
+                    Arguments = _launchCommandLine ?? string.Empty,
+                    WorkingDirectory = AppData.Directory,
+                    UseShellExecute = false
+                };
+
+                if (_launchMode == LaunchMode.Player && ShouldRunAsAdmin())
+                {
+                    startInfo.Verb = "runas";
+                    startInfo.UseShellExecute = true;
+                }
+
+                if (_launchMode == LaunchMode.StudioAuth)
+                {
+                    _ = Process.Start(startInfo);
+                    return;
+                }
+                string rbxDir = Path.Combine(Paths.LocalAppData, "Roblox");
+                string rbxLogDir = Path.Combine(rbxDir, "logs");
+
+                Directory.CreateDirectory(rbxLogDir);
+
+                using var logCreatedEvent = new AutoResetEvent(false);
+                using var ctsWatcher = CancellationTokenSource.CreateLinkedTokenSource(ct);
+
+                string? logFileName = null;
+
+                using var logWatcher = new FileSystemWatcher(rbxLogDir, "*.log")
+                {
+                    NotifyFilter = NotifyFilters.FileName | NotifyFilters.CreationTime | NotifyFilters.Size,
+                    IncludeSubdirectories = false,
+                    EnableRaisingEvents = true
+                };
+
+                FileSystemEventHandler onCreated = (_, e) =>
+                {
+                    Task.Run(async () =>
+                    {
+                        for (int i = 0; i < 10; i++)
+                        {
+                            try
+                            {
+                                if (File.Exists(e.FullPath))
+                                {
+                                    logFileName = e.FullPath;
+                                    logCreatedEvent.Set();
+                                    break;
+                                }
+                            }
+                            catch {}
+                            await Task.Delay(100, ctsWatcher.Token).ConfigureAwait(false);
+                        }
+                    }, ctsWatcher.Token);
+                };
+
+                RenamedEventHandler onRenamed = (_, e) =>
+                {
+                    if (Path.GetExtension(e.FullPath).Equals(".log", StringComparison.OrdinalIgnoreCase))
+                    {
+                        logFileName = e.FullPath;
+                        logCreatedEvent.Set();
+                    }
+                };
+
+                ErrorEventHandler onError = (_, err) =>
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Log watcher error: {err.GetException().Message}");
+                    logCreatedEvent.Set();
+                };
+
+                logWatcher.Created += onCreated;
+                logWatcher.Renamed += onRenamed;
+                logWatcher.Error += onError;
+                try
+                {
+                    _robloxProcess = Process.Start(startInfo)
+                        ?? throw new InvalidOperationException("Failed to start Roblox process. Please retry.");
+
+                    _appPid = _robloxProcess.Id;
+                    _ = Task.Run(() => TryApplyPriorityAsync(_robloxProcess, LOG_IDENT, ct), ct);
+                    try
+                    {
+                        _robloxProcess.WaitForInputIdle(1000);
+                    }
+                    catch { }
+
+                    if (App.Settings.Prop?.SelectedCpuPriority is not null &&
+                        !App.Settings.Prop.SelectedCpuPriority.Equals("Automatic", StringComparison.OrdinalIgnoreCase))
+                    {
+                        StartCpuLimitWatcher();
+                    }
+
+                    if (App.Settings.Prop?.OptimizeRoblox == true)
+                    {
+                        ApplyRuntimeOptimizations(_robloxProcess);
+                        StartContinuousRobloxOptimization();
+                    }
+
+                    if (App.Settings.Prop?.OverClockGPU == true)
+                    {
+                        StartAggressiveGpuPerf(LOG_IDENT);
+                    }
+
+                    if (App.Settings.Prop?.IsBetterServersEnabled == true)
+                        ApplyOptimizations(_robloxProcess);
+
+                    if (App.Settings.Prop?.OverClockCPU == true)
+                        ApplyOverclock(_robloxProcess);
+
+                    if (App.Settings.Prop?.DX12Like == true)
+                    {
+                        var options = new RobloxDX12Optimizer.RobloxDx12Optimizer.OptimizerOptions
+                        {
+                            EnableHighResTimer = true,
+                            HighResMillis = 1,
+                            OverrideAffinity = true,
+                            AffinityMask = 0xFFFFFFFFFFFFFFFFUL,
+                            PriorityClass = ProcessPriorityClass.High,
+                            WorkingSetMinMB = 128,
+                            WorkingSetMaxMB = 2048,
+                            BoostThreads = true,
+                            ProbeVendorAndDx = true,
+                            SafeMode = false
+                        };
+                        RobloxDX12Optimizer.RobloxDx12Optimizer.Start(intervalMs: 2000, options: options);
+                    }
+
+                    if (App.Settings.Prop?.MultiAccount == true)
+                        RobloxMemoryCleaner.CleanAllRobloxMemory();
+                }
+                catch (Win32Exception ex) when (ex.NativeErrorCode == 1223)
+                {
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Roblox start failed: {ex}");
+                    throw;
+                }
+
+                App.Logger.WriteLine(LOG_IDENT, $"Started Roblox (PID {_appPid}), waiting for log file");
+                using (var delayCts = CancellationTokenSource.CreateLinkedTokenSource(ct))
+                {
+                    var signaled = await Task.Run(() => logCreatedEvent.WaitOne(TimeSpan.FromSeconds(35)), delayCts.Token);
+                    if (!signaled || string.IsNullOrEmpty(logFileName))
+                    {
+                        try
+                        {
+                            logFileName = Directory.EnumerateFiles(rbxLogDir, "*.log")
+                                                   .OrderByDescending(File.GetLastWriteTimeUtc)
+                                                   .FirstOrDefault();
+                        }
+                        catch (Exception ex)
+                        {
+                            App.Logger.WriteLine(LOG_IDENT, $"Log enumeration failed: {ex.Message}");
+                        }
+                    }
+                }
+                logWatcher.EnableRaisingEvents = false;
+                ctsWatcher.Cancel();
+                logWatcher.Created -= onCreated;
+                logWatcher.Renamed -= onRenamed;
+                logWatcher.Error -= onError;
+
+                if (string.IsNullOrEmpty(logFileName))
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Unable to identify log file");
+                    Frontend.ShowPlayerErrorDialog();
+                    return;
+                }
+
+                App.Logger.WriteLine(LOG_IDENT, $"Got log file as {logFileName}");
+                _ = _mutex?.ReleaseAsync();
+
+                if (IsStudioLaunch)
+                    return;
+
+                var autoclosePids = new System.Collections.Generic.List<int>();
+                var integrations = App.Settings.Prop?.CustomIntegrations ?? Enumerable.Empty<CustomIntegration>();
+
+                foreach (var integration in integrations.Where(i => !i.SpecifyGame))
+                {
+                    try
+                    {
+                        if (string.IsNullOrWhiteSpace(integration.Location) || !File.Exists(integration.Location))
+                        {
+                            App.Logger.WriteLine(LOG_IDENT, $"Integration missing: '{integration.Name}' ({integration.Location})");
+                            continue;
+                        }
+
+                        App.Logger.WriteLine(LOG_IDENT, $"Launching integration '{integration.Name}' ({integration.Location})");
+
+                        var ip = Process.Start(new ProcessStartInfo
                         {
                             FileName = integration.Location,
-                            Arguments = integration.LaunchArgs.Replace("\r\n", " "),
-                            WorkingDirectory = Path.GetDirectoryName(integration.Location),
+                            Arguments = (integration.LaunchArgs ?? string.Empty).Replace("\r\n", " "),
+                            WorkingDirectory = Path.GetDirectoryName(integration.Location)!,
                             UseShellExecute = true
-                        })!;
+                        });
 
-                        pid = process.Id;
+                        if (ip != null && integration.AutoClose) autoclosePids.Add(ip.Id);
                     }
                     catch (Exception ex)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, $"Failed to launch integration '{integration.Name}'!");
-                        App.Logger.WriteLine(LOG_IDENT, ex.Message);
+                        App.Logger.WriteLine(LOG_IDENT, $"Failed to launch '{integration.Name}': {ex.Message}");
                     }
+                }
 
-                    if (integration.AutoClose && pid != 0)
-                        autoclosePids.Add(pid);
+                if (App.Settings.Prop.DisableCrash == true)
+                {
+                    await Task.Delay(800, ct).ConfigureAwait(false);
+
+                    try
+                    {
+                        var handlers = Process.GetProcessesByName("RobloxCrashHandler");
+                        if (handlers.Length == 0)
+                        {
+                            App.Logger.WriteLine(LOG_IDENT, "No CrashHandler processes found — nothing to disable.");
+                        }
+
+                        foreach (var handler in handlers)
+                        {
+                            try
+                            {
+                                if (handler.HasExited) continue;
+                                App.Logger.WriteLine(LOG_IDENT,
+                                    $"Disabling RobloxCrashHandler PID={handler.Id}, Path={handler.MainModule?.FileName}");
+                                try
+                                {
+                                    handler.CloseMainWindow();
+                                    if (handler.WaitForExit(1000))
+                                    {
+                                        App.Logger.WriteLine(LOG_IDENT, $"CrashHandler {handler.Id} closed gracefully.");
+                                        continue;
+                                    }
+                                }
+                                catch {}
+                                try
+                                {
+                                    handler.Kill(entireProcessTree: true);
+                                    handler.WaitForExit(2000);
+                                    App.Logger.WriteLine(LOG_IDENT, $"CrashHandler {handler.Id} terminated.");
+                                }
+                                catch (Win32Exception ex)
+                                {
+                                    App.Logger.WriteLine(LOG_IDENT, $"Access denied killing CrashHandler {handler.Id}: {ex.Message}");
+                                }
+                                catch (InvalidOperationException)
+                                {
+                                }
+                                catch (Exception kex)
+                                {
+                                    App.Logger.WriteLine(LOG_IDENT, $"Unexpected kill error for CrashHandler {handler.Id}: {kex.Message}");
+                                }
+                            }
+                            finally
+                            {
+                                try { handler.Dispose(); } catch { }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"CrashHandler disable routine failed: {ex.Message}");
+                    }
+                }
+
+                if ((App.Settings?.Prop.EnableActivityTracking ?? false) ||
+                    App.LaunchSettings.TestModeFlag?.Active == true ||
+                    autoclosePids.Any())
+                {
+                    using var ipl = new InterProcessLock("Watcher", TimeSpan.FromSeconds(5));
+
+                    var watcherData = new WatcherData
+                    {
+                        ProcessId = _appPid,
+                        LogFile = logFileName!,
+                        AutoclosePids = autoclosePids
+                    };
+
+                    string watcherDataArg = Convert.ToBase64String(
+                        Encoding.UTF8.GetBytes(JsonSerializer.Serialize(watcherData)));
+
+                    var args = new StringBuilder().Append("-watcher \"").Append(watcherDataArg).Append('"');
+                    if (App.LaunchSettings.TestModeFlag?.Active == true) args.Append(" -testmode");
+
+                    if (ipl.IsAcquired)
+                        _ = Process.Start(Paths.Process, args.ToString());
+                }
+                await Task.Delay(2500, ct).ConfigureAwait(false);
+
+                if (_robloxProcess != null)
+                {
+                    _robloxProcess.EnableRaisingEvents = true;
+                    _robloxProcess.Exited += (_, __) =>
+                    {
+                        try { StopContinuousRobloxOptimization(); } catch { }
+                    };
                 }
             }
-            
-
-            if (App.Settings.Prop.EnableActivityTracking || App.LaunchSettings.TestModeFlag.Active || autoclosePids.Any())
+            catch (Exception ex)
             {
-                using var ipl = new InterProcessLock("Watcher", TimeSpan.FromSeconds(5));
+                App.Logger.WriteLine(LOG_IDENT, $"Unexpected error in StartRoblox: {ex}");
+                Frontend.ShowPlayerErrorDialog();
+            }
+            finally
+            {
+                try { StopMemoryAndProcessOptimizer(); } catch {}
+            }
+        }
 
-                var watcherData = new WatcherData
+        private CancellationTokenSource _cpuWatcherCts;
+        private void StartCpuLimitWatcher()
+        {
+            _cpuWatcherCts?.Cancel();
+            _cpuWatcherCts = new CancellationTokenSource();
+            var token = _cpuWatcherCts.Token;
+
+            Task.Run(async () =>
+            {
+                var seenPids = new HashSet<int>();
+
+                try
                 {
-                    ProcessId = _appPid,
-                    LogFile = logFileName,
-                    AutoclosePids = autoclosePids
+                    while (!token.IsCancellationRequested)
+                    {
+                        try
+                        {
+                            var parts = App.Settings.Prop.SelectedCpuPriority.Split(' ');
+                            if (!int.TryParse(parts[0], out int coreCount) || coreCount <= 0)
+                            {
+                                await Task.Delay(5000, token);
+                                continue;
+                            }
+
+                            int total = Environment.ProcessorCount;
+                            coreCount = Math.Clamp(coreCount, 1, total);
+                            long mask = (1L << coreCount) - 1;
+
+                            var procs = Process.GetProcessesByName("RobloxPlayerBeta");
+                            foreach (var proc in procs)
+                            {
+                                try
+                                {
+                                    if (seenPids.Contains(proc.Id))
+                                        continue;
+
+                                    if (!proc.HasExited)
+                                    {
+                                        proc.ProcessorAffinity = (IntPtr)mask;
+                                        App.Logger.WriteLine("Bootstrapper::CPUWatcher",
+                                            $"Applied CPU limit to Roblox PID={proc.Id}: {coreCount}/{total} cores (mask 0x{mask:X})");
+                                        seenPids.Add(proc.Id);
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    App.Logger.WriteLine("Bootstrapper::CPUWatcher",
+                                        $"Failed to apply CPU limit to Roblox PID={proc.Id}: {ex.Message}");
+                                }
+                                finally
+                                {
+                                    proc.Dispose();
+                                }
+                            }
+                            seenPids.RemoveWhere(pid =>
+                            {
+                                try { Process.GetProcessById(pid); return false; }
+                                catch { return true; }
+                            });
+                        }
+                        catch (TaskCanceledException)
+                        {
+                            break;
+                        }
+                        catch (Exception ex)
+                        {
+                            App.Logger.WriteLine("Bootstrapper::CPUWatcher", $"Watcher error: {ex.Message}");
+                        }
+
+                        await Task.Delay(5000, token);
+                    }
+                }
+                finally
+                {
+                    _cpuWatcherCts?.Dispose();
+                    _cpuWatcherCts = null;
+                }
+
+            }, token);
+        }
+
+        private static async Task TryApplyPriorityAsync(Process proc, string logIdent, CancellationToken ct)
+        {
+            try
+            {
+                await Task.Delay(1100, ct).ConfigureAwait(false);
+                proc.Refresh();
+                if (proc.HasExited) { App.Logger.WriteLine(logIdent, "Roblox exited before priority could be set."); return; }
+
+                string priority = App.Settings.Prop?.PriorityLimit ?? "Normal";
+                var newPriority = priority switch
+                {
+                    "Realtime" => ProcessPriorityClass.RealTime,
+                    "High" => ProcessPriorityClass.High,
+                    "Above Normal" => ProcessPriorityClass.AboveNormal,
+                    "Below Normal" => ProcessPriorityClass.BelowNormal,
+                    "Low" => ProcessPriorityClass.Idle,
+                    _ => ProcessPriorityClass.Normal
                 };
 
-                string watcherDataArg = Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(watcherData)));
+                try
+                {
+                    proc.PriorityClass = newPriority;
+                    App.Logger.WriteLine(logIdent, $"Applied Roblox CPU priority: {priority}");
+                }
+                catch (Win32Exception ex)
+                {
+                    App.Logger.WriteLine(logIdent, $"Access denied while setting {priority} priority: {ex.Message}");
+                }
+                catch (InvalidOperationException ex)
+                {
+                    App.Logger.WriteLine(logIdent, $"Roblox process invalid: {ex.Message}");
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(logIdent, $"Failed to set Roblox process priority: {ex.Message}");
+                }
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(logIdent, $"Priority worker crashed: {ex}");
+            }
+        }
 
-                string args = $"-watcher \"{watcherDataArg}\"";
+        private void StartAggressiveGpuPerf(string logIdent)
+        {
+            try
+            {
+                _gpuPerfManager = new AggressivePerformanceManager
+                {
+                    MonitorInterval = TimeSpan.FromSeconds(2),
+                    CpuThresholdPercent = 40,
+                    GpuThresholdPercent = 50,
+                    MinModeHoldTime = TimeSpan.FromSeconds(10),
+                    RaiseProcessPriority = true,
+                    SetAffinityToAllLogicalProcessors = true,
+                    IncreaseTimerResolution = true,
+                    UseGpuStress = true,
+                    GpuStressThreadsPerDispatch = 256,
+                    GpuStressWorkMultiplier = 16
+                };
+                _gpuPerfManager.OnLog += msg => App.Logger.WriteLine("AggressivePerf", msg);
+                _gpuPerfManager.OnModeChanged += isHigh =>
+                    App.Logger.WriteLine("AggressivePerf", $"Performance mode: {(isHigh ? "High" : "Balanced")}");
+                _gpuPerfManager.Start();
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(logIdent, $"GPU perf manager failed to start: {ex.Message}");
+            }
+        }
 
-                if (App.LaunchSettings.TestModeFlag.Active)
-                    args += " -testmode";
+        public void ApplyOverclock(Process targetProcess)
+        {
+            if (targetProcess == null || targetProcess.HasExited)
+                return;
 
-                if (ipl.IsAcquired)
-                    Process.Start(Paths.Process, args);
+            try
+            {
+                targetProcess.PriorityClass = ProcessPriorityClass.High;
+                targetProcess.PriorityBoostEnabled = true;
+                TrySetRealtimePriority(targetProcess);
+                PinThreadsToCores(targetProcess);
+                _running = true;
+                _monitorThread = new Thread(() => CpuLoadBalancer(targetProcess))
+                {
+                    IsBackground = true
+                };
+                _monitorThread.Start();
+
+                Debug.WriteLine($"[CPU Tuner] Performance boost applied to {targetProcess.ProcessName} (PID {targetProcess.Id}).");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"[CPU Tuner] Error: {ex.Message}");
+            }
+        }
+
+        private void TrySetRealtimePriority(Process process)
+        {
+            try
+            {
+                process.PriorityClass = ProcessPriorityClass.RealTime;
+            }
+            catch
+            {
+                process.PriorityClass = ProcessPriorityClass.High;
+            }
+        }
+
+        private void PinThreadsToCores(Process process)
+        {
+            int coreCount = Environment.ProcessorCount;
+            int coreIndex = 0;
+
+            foreach (ProcessThread thread in process.Threads.Cast<ProcessThread>())
+            {
+                try
+                {
+                    int mask = 1 << coreIndex;
+                    thread.ProcessorAffinity = (IntPtr)mask;
+                    thread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
+                    coreIndex = (coreIndex + 1) % coreCount;
+                }
+                catch
+                {
+                }
+            }
+        }
+
+        private void CpuLoadBalancer(Process process)
+        {
+            while (_running && !process.HasExited)
+            {
+                try
+                {
+                    Thread.Sleep(100);
+                }
+                catch { break; }
+            }
+        }
+
+        private IntPtr _originalAffinity;
+        private ProcessPriorityClass _originalPriority;
+
+        public void ApplyOptimizations(Process robloxProcess)
+        {
+            if (robloxProcess == null || robloxProcess.HasExited) return;
+            if (!App.Settings.Prop.IsBetterServersEnabled)
+            {
+                RevertOptimizations(robloxProcess);
+                return;
             }
 
-            // allow for window to show, since the log is created pretty far beforehand
-            Thread.Sleep(1000);
+            try
+            {
+                App.Logger.WriteLine("BetterServers", $"Applying optimizations for PID {robloxProcess.Id}");
+                _originalPriority = robloxProcess.PriorityClass;
+                _originalAffinity = robloxProcess.ProcessorAffinity;
+                int cores = Math.Min(Environment.ProcessorCount, 64);
+                ulong affinityMask = 0;
+                for (int i = 0; i < cores; i++)
+                {
+                    unchecked { affinityMask |= 1UL << i; }
+                }
+                robloxProcess.ProcessorAffinity = (IntPtr)affinityMask;
+                robloxProcess.PriorityClass = ProcessPriorityClass.High;
+
+                robloxProcess.MinWorkingSet = new IntPtr(128L * 1024 * 1024);
+                robloxProcess.MaxWorkingSet = new IntPtr(1024L * 1024 * 1024);
+                LowerBackgroundProcessesPriority();
+                OptimizeNetworkForRoblox(robloxProcess);
+
+                App.Logger.WriteLine("Servers", "Optimizations applied successfully.");
+                robloxProcess.EnableRaisingEvents = true;
+                robloxProcess.Exited += (_, __) => RevertOptimizations(robloxProcess);
+                Task.Run(() => MonitorRoblox(robloxProcess));
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("Servers", $"Failed to apply optimizations: {ex.Message}");
+            }
+        }
+
+        private void MonitorRoblox(Process robloxProcess)
+        {
+            while (!robloxProcess.HasExited)
+            {
+                Thread.Sleep(3000);
+
+                if (!App.Settings.Prop.IsBetterServersEnabled)
+                {
+                    RevertOptimizations(robloxProcess);
+                    return;
+                }
+
+                try
+                {
+                    int cores = Math.Min(Environment.ProcessorCount, 64);
+                    ulong affinityMask = 0;
+                    for (int i = 0; i < cores; i++) unchecked { affinityMask |= 1UL << i; }
+                    robloxProcess.ProcessorAffinity = (IntPtr)affinityMask;
+                    robloxProcess.PriorityClass = ProcessPriorityClass.High;
+                    robloxProcess.MinWorkingSet = new IntPtr(128L * 1024 * 1024);
+                    robloxProcess.MaxWorkingSet = new IntPtr(1024L * 1024 * 1024);
+                    OptimizeNetworkForRoblox(robloxProcess);
+                }
+                catch { }
+            }
+        }
+
+        public void RevertOptimizations(Process robloxProcess)
+        {
+            if (robloxProcess == null || robloxProcess.HasExited) return;
+
+            try
+            {
+                App.Logger.WriteLine("Servers", $"Reverting optimizations for PID {robloxProcess.Id}");
+
+                robloxProcess.ProcessorAffinity = _originalAffinity;
+                robloxProcess.PriorityClass = _originalPriority;
+
+                robloxProcess.MinWorkingSet = IntPtr.Zero;
+                robloxProcess.MaxWorkingSet = IntPtr.Zero;
+
+                RevertNetworkSettings(robloxProcess);
+
+                App.Logger.WriteLine("Servers", "All optimizations reverted.");
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("Servers", $"Failed to revert optimizations: {ex.Message}");
+            }
+        }
+
+        #region Network Optimizations
+
+        private void OptimizeNetworkForRoblox(Process robloxProcess)
+        {
+            try
+            {
+                var sockets = GetRobloxSockets(robloxProcess);
+                foreach (var sock in sockets)
+                {
+                    try
+                    {
+                        sock.NoDelay = true;
+                        sock.SendBufferSize = 65536;
+                        sock.ReceiveBufferSize = 65536;
+                    }
+                    catch { }
+                }
+
+                App.Logger.WriteLine("Servers", $"Optimized {sockets.Length} network connections for Roblox.");
+            }
+            catch { }
+        }
+
+        private void RevertNetworkSettings(Process robloxProcess)
+        {
+            try
+            {
+                var sockets = GetRobloxSockets(robloxProcess);
+                foreach (var sock in sockets)
+                {
+                    try
+                    {
+                        sock.NoDelay = false;
+                        sock.SendBufferSize = 8192;
+                        sock.ReceiveBufferSize = 8192;
+                    }
+                    catch { }
+                }
+            }
+            catch { }
+        }
+
+        private Socket[] GetRobloxSockets(Process robloxProcess)
+        {
+            try
+            {
+                var tcpConnections = TcpHelper.GetTcpConnections();
+                var robloxConns = tcpConnections
+                    .Where(c => c.pid == robloxProcess.Id)
+                    .Select(c =>
+                    {
+                        var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        return s;
+                    })
+                    .ToArray();
+
+                return robloxConns;
+            }
+            catch { return Array.Empty<Socket>(); }
+        }
+
+        #endregion
+
+        #region Background Process Management
+
+        private void LowerBackgroundProcessesPriority()
+        {
+            foreach (var proc in Process.GetProcesses().Where(p => p.Id != Process.GetCurrentProcess().Id && p.ProcessName != "RobloxPlayerBeta"))
+            {
+                try
+                {
+                    if (proc.PriorityClass > ProcessPriorityClass.Normal)
+                        proc.PriorityClass = ProcessPriorityClass.Normal;
+                }
+                catch { }
+            }
+        }
+
+        private void ApplyRuntimeOptimizations(Process process)
+        {
+            void SafeAction(Action action, string description)
+            {
+                try { action(); }
+                catch (Exception ex) { App.Logger.WriteLine("Optimizer", $"Failed to {description}: {ex.Message}"); }
+            }
+
+            App.Logger.WriteLine("Optimizer", $"Applying extreme max optimizations to {process.ProcessName} (PID {process.Id})");
+
+            int logicalCores = Environment.ProcessorCount;
+            long affinityMask = logicalCores >= 64 ? -1L : (1L << logicalCores) - 1;
+            SafeAction(() => process.ProcessorAffinity = (IntPtr)affinityMask, "set CPU affinity");
+            process.PriorityClass = logicalCores >= 4 ? ProcessPriorityClass.RealTime : ProcessPriorityClass.High;
+            ulong totalMemory = new ComputerInfo().TotalPhysicalMemory;
+            long maxWorkingSet = totalMemory switch
+            {
+                var t when t > 64L * 1024 * 1024 * 1024 => 32L * 1024 * 1024 * 1024,
+                var t when t > 32L * 1024 * 1024 * 1024 => 16L * 1024 * 1024 * 1024,
+                var t when t > 16L * 1024 * 1024 * 1024 => 8L * 1024 * 1024 * 1024,
+                var t when t > 8L * 1024 * 1024 * 1024 => 4L * 1024 * 1024 * 1024,
+                _ => 2L * 1024 * 1024 * 1024
+            };
+            SafeAction(() =>
+            {
+                process.MaxWorkingSet = new IntPtr(Math.Min(maxWorkingSet, (long)IntPtr.MaxValue));
+                process.MinWorkingSet = new IntPtr(50 * 1024 * 1024);
+            }, "set working set");
+
+            SafeAction(() =>
+            {
+                using var searcher = new ManagementObjectSearcher("SELECT Name, AdapterRAM FROM Win32_VideoController");
+                foreach (var obj in searcher.Get())
+                {
+                    string gpuName = obj["Name"]?.ToString() ?? "Unknown GPU";
+                    ulong gpuMemory = (ulong)(obj["AdapterRAM"] ?? 0);
+                    App.Logger.WriteLine("Optimizer", $"Detected GPU: {gpuName}, VRAM: {gpuMemory / (1024 * 1024)} MB");
+                }
+            }, "read GPU info");
+
+            SafeAction(() =>
+            {
+                int targetThreads = logicalCores * 6;
+                App.Logger.WriteLine("Optimizer", $"Spawning {targetThreads} worker threads for extreme max CPU utilization.");
+
+                for (int i = 0; i < targetThreads; i++)
+                {
+                    Thread t = new Thread(() =>
+                    {
+                        Random rnd = new Random();
+                        while (!process.HasExited)
+                        {
+                            double dummy = Math.Sqrt(rnd.NextDouble()) * Math.Sqrt(rnd.NextDouble());
+                            double cpuUsage = GetCpuUsage(process);
+                            if (cpuUsage > 90) Thread.Sleep(1);
+                            else if (cpuUsage < 50) Thread.SpinWait(100);
+                        }
+                    })
+                    {
+                        IsBackground = true,
+                        Priority = ThreadPriority.Highest
+                    };
+                    t.Start();
+                }
+            }, "spawn extreme worker threads");
+
+            App.Logger.WriteLine("Optimizer", $"Extreme max optimization complete for {process.ProcessName}.");
+        }
+        private double GetCpuUsage(Process process)
+        {
+            try
+            {
+                var startTime = DateTime.UtcNow;
+                var startCpuUsage = process.TotalProcessorTime;
+                Thread.Sleep(50);
+                var endTime = DateTime.UtcNow;
+                var endCpuUsage = process.TotalProcessorTime;
+
+                double cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
+                double totalMsPassed = (endTime - startTime).TotalMilliseconds;
+
+                int logicalCores = Environment.ProcessorCount;
+                return (cpuUsedMs / (totalMsPassed * logicalCores)) * 100;
+            }
+            catch
+            {
+                return 0;
+            }
+        }
+
+        private void StartContinuousRobloxOptimization()
+        {
+            _optimizationCts?.Cancel();
+            _optimizationCts = new CancellationTokenSource();
+
+            Task.Run(() => ContinuousRobloxOptimizationLoop(_optimizationCts.Token));
+        }
+
+        private async Task ContinuousRobloxOptimizationLoop(CancellationToken token)
+        {
+            var processNames = new[] { "Roblox", "RobloxPlayerBeta", "Roblox Game Client" };
+            var optimizedProcesses = new HashSet<int>();
+            var cpuCounters = new Dictionary<int, PerformanceCounter>();
+
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    var robloxProcesses = processNames
+                        .SelectMany(name => Process.GetProcessesByName(name))
+                        .Where(p => !p.HasExited)
+                        .GroupBy(p => p.Id)
+                        .Select(g => g.First())
+                        .ToList();
+
+                    if (robloxProcesses.Count == 0)
+                    {
+                        await Task.Delay(5000, token);
+                        continue;
+                    }
+
+                    foreach (var process in robloxProcesses)
+                    {
+                        try
+                        {
+                            if (!optimizedProcesses.Contains(process.Id))
+                            {
+                                ApplyRuntimeOptimizations(process);
+                                optimizedProcesses.Add(process.Id);
+
+                                App.Logger.WriteLine("Optimizer",
+                                    $"Optimizations applied to {process.ProcessName} (PID {process.Id}) at {DateTime.Now:T}");
+                            }
+
+                            await MonitorProcessPerformance(process, cpuCounters);
+                        }
+                        catch (Exception ex)
+                        {
+                            App.Logger.WriteLine("Optimizer",
+                                $"[Error] {process.ProcessName} (PID {process.Id}): {ex.Message}");
+                        }
+                    }
+
+                    optimizedProcesses.RemoveWhere(pid => robloxProcesses.All(p => p.Id != pid));
+                    foreach (var pid in cpuCounters.Keys.Except(robloxProcesses.Select(p => p.Id)).ToList())
+                    {
+                        cpuCounters[pid].Dispose();
+                        cpuCounters.Remove(pid);
+                    }
+
+                    await Task.Delay(2000, token);
+                }
+                catch (TaskCanceledException) { break; }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine("Optimizer",
+                        $"[Loop Error] {ex.Message} @ {DateTime.Now:T}");
+                }
+            }
+
+            App.Logger.WriteLine("Optimizer", "Continuous Roblox optimization stopped.");
+        }
+
+        private static readonly float CpuHighThreshold = 80f;
+        private static readonly float CpuLowThreshold = 20f;
+        private static readonly float MemoryHighThreshold = 0.7f;
+        private static readonly int MinWorkingSetMB = 50;
+
+        private async Task MonitorProcessPerformance(Process process, Dictionary<int, PerformanceCounter> cpuCounters)
+        {
+            try
+            {
+                process.Refresh();
+
+                if (!cpuCounters.ContainsKey(process.Id))
+                {
+                    var counter = new PerformanceCounter("Process", "% Processor Time", process.ProcessName, true);
+                    counter.NextValue();
+                    cpuCounters[process.Id] = counter;
+                }
+
+                await Task.Delay(300);
+
+                float cpuUsage = cpuCounters[process.Id].NextValue() / Environment.ProcessorCount;
+                if (cpuUsage > CpuHighThreshold)
+                    process.PriorityClass = ProcessPriorityClass.AboveNormal;
+                else if (cpuUsage < CpuLowThreshold)
+                    process.PriorityClass = ProcessPriorityClass.High;
+
+                ulong totalMemory = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory;
+                long memoryUsage = process.WorkingSet64;
+
+                if (memoryUsage > totalMemory * MemoryHighThreshold)
+                {
+                    try
+                    {
+                        process.MinWorkingSet = (IntPtr)(MinWorkingSetMB * 1024 * 1024);
+                        process.MaxWorkingSet = (IntPtr)Math.Min(memoryUsage, (long)IntPtr.MaxValue);
+                    }
+                    catch { }
+                }
+
+                try
+                {
+                    process.PriorityBoostEnabled = true;
+                    NativeMethods.SetProcessPriority(process.Handle, NativeMethods.PriorityClass.PROCESS_MODE_BACKGROUND_END);
+                }
+                catch { }
+                try
+                {
+                    using var searcher = new ManagementObjectSearcher("SELECT CurrentUsage FROM Win32_VideoController");
+                    foreach (var obj in searcher.Get())
+                    {
+                        uint gpuLoad = (uint)(obj["CurrentUsage"] ?? 0);
+                        if (gpuLoad > 85)
+                            process.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    }
+                }
+                catch { }
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("Optimizer", $"[Monitor Error] {process.ProcessName} (PID {process.Id}): {ex.Message}");
+            }
+        }
+
+        internal static class NativeMethods
+        {
+            [DllImport("kernel32.dll")]
+            internal static extern bool SetProcessPriority(IntPtr handle, PriorityClass priorityClass);
+
+            internal enum PriorityClass : uint
+            {
+                PROCESS_MODE_BACKGROUND_BEGIN = 0x00100000,
+                PROCESS_MODE_BACKGROUND_END = 0x00200000
+            }
+        }
+
+        private void StopContinuousRobloxOptimization()
+        {
+            _optimizationCts?.Cancel();
+            _optimizationCts = null;
         }
 
         private bool ShouldRunAsAdmin()
@@ -616,7 +1451,6 @@ namespace Voidstrap
             {
                 try
                 {
-                    // clean up install
                     if (Directory.Exists(_latestVersionDirectory))
                         Directory.Delete(_latestVersionDirectory, true);
                 }
@@ -642,133 +1476,6 @@ namespace Voidstrap
         }
         #endregion
 
-        #region App Install
-        private async Task<bool> CheckForUpdates()
-        {
-            const string LOG_IDENT = "Bootstrapper::CheckForUpdates";
-
-            // Ensure no other instance is running
-            if (Process.GetProcessesByName(App.ProjectName).Length > 1)
-            {
-                App.Logger.WriteLine(LOG_IDENT, $"More than one Voidstrap instance running, aborting update check");
-                return false;
-            }
-
-            App.Logger.WriteLine(LOG_IDENT, "Checking for updates...");
-
-#if !DEBUG_UPDATER
-			var releaseInfo = await App.GetLatestRelease();
-
-			if (releaseInfo is null)
-			{
-				App.Logger.WriteLine(LOG_IDENT, "Failed to fetch release information.");
-				return false;
-			}
-
-			// Strip leading 'V' or 'v' from versions before comparing
-			string currentVersion = App.Version.TrimStart('V', 'v');
-			string latestVersion = releaseInfo.TagName.TrimStart('V', 'v');
-
-			var versionComparison = Utilities.CompareVersions(currentVersion, latestVersion);
-
-			// Skip update if current version is equal or newer
-			if (App.IsProductionBuild &&
-				(versionComparison == VersionComparison.Equal || versionComparison == VersionComparison.GreaterThan))
-			{
-				App.Logger.WriteLine(LOG_IDENT, "No updates found. Current version is up-to-date.");
-				return false;
-			}
-
-			if (Dialog is not null)
-				Dialog.CancelEnabled = false;
-
-			string version = releaseInfo.TagName;
-
-#else
-    string version = App.Version;
-#endif
-
-			SetStatus(Strings.Bootstrapper_Status_UpgradingVoidstrap);
-
-			try
-			{
-#if DEBUG_UPDATER
-        string downloadLocation = Path.Combine(Paths.TempUpdates, "Voidstrap.exe");
-
-        Directory.CreateDirectory(Paths.TempUpdates);
-
-        File.Copy(Paths.Process, downloadLocation, true);
-#else
-                var asset = releaseInfo.Assets?.FirstOrDefault();
-                if (asset is null)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "No assets found in the release information.");
-                    return false;
-                }
-
-                string downloadLocation = Path.Combine(Paths.TempUpdates, asset.Name);
-
-                Directory.CreateDirectory(Paths.TempUpdates);
-
-                App.Logger.WriteLine(LOG_IDENT, $"Downloading {releaseInfo.TagName}...");
-
-                if (!File.Exists(downloadLocation))
-                {
-                    var response = await App.HttpClient.GetAsync(asset.BrowserDownloadUrl);
-
-                    if (!response.IsSuccessStatusCode)
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, $"Failed to download update: {response.StatusCode}");
-                        return false;
-                    }
-
-                    await using var fileStream = new FileStream(downloadLocation, FileMode.Create, FileAccess.Write);
-                    await response.Content.CopyToAsync(fileStream);
-                }
-#endif
-
-                App.Logger.WriteLine(LOG_IDENT, $"Starting {version}...");
-
-                ProcessStartInfo startInfo = new()
-                {
-                    FileName = downloadLocation,
-                };
-
-                startInfo.ArgumentList.Add("-upgrade");
-
-                foreach (string arg in App.LaunchSettings.Args)
-                    startInfo.ArgumentList.Add(arg);
-
-                if (_launchMode == LaunchMode.Player && !startInfo.ArgumentList.Contains("-player"))
-                    startInfo.ArgumentList.Add("-player");
-                else if (_launchMode == LaunchMode.Studio && !startInfo.ArgumentList.Contains("-studio"))
-                    startInfo.ArgumentList.Add("-studio");
-
-                App.Settings.Save();
-
-                new InterProcessLock("AutoUpdater");
-
-                Process.Start(startInfo);
-
-                return true;
-            }
-            catch (Exception ex)
-            {
-                App.Logger.WriteLine(LOG_IDENT, "An exception occurred when running the auto-updater");
-                App.Logger.WriteException(LOG_IDENT, ex);
-
-                Frontend.ShowMessageBox(
-                    string.Format(Strings.Bootstrapper_AutoUpdateFailed, version),
-                    MessageBoxImage.Information
-                );
-
-                Utilities.ShellExecute(App.ProjectDownloadLink);
-            }
-
-            return false;
-        }
-        #endregion
-
         #region Roblox Install
         private void MigrateCompatibilityFlags()
         {
@@ -776,8 +1483,6 @@ namespace Voidstrap
 
             string oldClientLocation = Path.Combine(Paths.Versions, AppData.State.VersionGuid, AppData.ExecutableName);
             string newClientLocation = Path.Combine(_latestVersionDirectory, AppData.ExecutableName);
-
-            // move old compatibility flags for the old location
             using RegistryKey appFlagsKey = Registry.CurrentUser.CreateSubKey($"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\AppCompatFlags\\Layers");
             string? appFlags = appFlagsKey.GetValue(oldClientLocation) as string;
 
@@ -842,210 +1547,421 @@ namespace Voidstrap
                 App.Logger.WriteException(LOG_IDENT, ex);
             }
         }
+        private static async Task WithRetryAsync(
+            Func<Task> action,
+            string context,
+            int maxAttempts = 5,
+            int baseDelayMs = 750,
+            Func<Exception, bool>? isTransient = null,
+            CancellationToken ct = default)
+        {
+            isTransient ??= static ex =>
+                ex is TaskCanceledException ||
+                ex is HttpRequestException ||
+                ex is IOException ||
+                ex is SocketException;
 
+            var rng = new Random();
+            for (int attempt = 1; attempt <= maxAttempts; attempt++)
+            {
+                ct.ThrowIfCancellationRequested();
+                try
+                {
+                    await action().ConfigureAwait(false);
+                    return;
+                }
+                catch (Exception ex) when (isTransient(ex) && attempt < maxAttempts)
+                {
+                    int delay = baseDelayMs * (1 << (attempt - 1));
+                    int jitter = (int)(delay * (0.15 * (rng.NextDouble() * 2 - 1)));
+                    delay = Math.Clamp(delay + jitter, 250, 10_000);
 
+                    App.Logger.WriteLine(context, $"Transient error on attempt {attempt}/{maxAttempts}: {ex.Message}. Retrying in {delay}ms...");
+                    await Task.Delay(delay, ct).ConfigureAwait(false);
+                }
+            }
+        }
+        private static async Task SafeDeleteDirectoryAsync(string path, string context, CancellationToken ct)
+        {
+            if (!Directory.Exists(path)) return;
+
+            await WithRetryAsync(
+                action: async () =>
+                {
+                    foreach (var file in Directory.EnumerateFiles(path, "*", SearchOption.AllDirectories))
+                    {
+                        try { File.SetAttributes(file, FileAttributes.Normal); } catch { }
+                    }
+                    Directory.Delete(path, recursive: true);
+                    await Task.CompletedTask;
+                },
+                context: $"{context}::SafeDeleteDirectory({path})",
+                maxAttempts: 5,
+                baseDelayMs: 600,
+                isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                ct: ct
+            ).ConfigureAwait(false);
+        }
 
         private async Task UpgradeRoblox()
         {
             const string LOG_IDENT = "Bootstrapper::UpgradeRoblox";
-
-            bool cancelUpgrade = !App.Settings.Prop.UpdateRoblox;
-
-            if (cancelUpgrade)
-            {
-                SetStatus(Strings.Bootstrapper_Status_CancelUpgrade);
-                App.Logger.WriteLine(LOG_IDENT, "Upgrading disabled, cancelling the upgrade.");
-                Thread.Sleep(250);
-
-                if (!Directory.Exists(_latestVersionDirectory))
-                {
-                    Frontend.ShowMessageBox(Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient, MessageBoxImage.Warning, MessageBoxButton.OK);
-                }
-                return;
-            }
-
-            SetStatus(string.IsNullOrEmpty(AppData.State.VersionGuid)
-                ? Strings.Bootstrapper_Status_Installing
-                : Strings.Bootstrapper_Status_Upgrading);
-
-            Directory.CreateDirectory(Paths.Base);
-            Directory.CreateDirectory(Paths.Downloads);
-            Directory.CreateDirectory(Paths.Versions);
-
-            var cachedPackageHashes = Directory.GetFiles(Paths.Downloads)
-                                               .Select(x => Path.GetFileName(x))
-                                               .ToList();
-
+            var ct = _cancelTokenSource.Token;
+            if (_isInstalling) { App.Logger.WriteLine(LOG_IDENT, "Upgrade already in progress; skipping."); return; }
             _isInstalling = true;
 
-            if (!IsStudioLaunch)
+            try
             {
-                await Task.Run(() => KillRobloxPlayers());
-            }
-            if (Directory.Exists(_latestVersionDirectory))
-            {
-                try
+                if (!App.Settings.Prop.UpdateRoblox)
                 {
-                    Directory.Delete(_latestVersionDirectory, recursive: true);
+                    SetStatus(Strings.Bootstrapper_Status_CancelUpgrade);
+                    App.Logger.WriteLine(LOG_IDENT, "Upgrading disabled, cancelling the upgrade.");
+                    await Task.Delay(250, ct).ConfigureAwait(false);
+
+                    if (!Directory.Exists(_latestVersionDirectory))
+                    {
+                        Frontend.ShowMessageBox(Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient, MessageBoxImage.Warning, MessageBoxButton.OK);
+                    }
+                    return;
                 }
-                catch (Exception ex)
+
+                SetStatus(string.IsNullOrEmpty(AppData.State.VersionGuid)
+                    ? Strings.Bootstrapper_Status_Installing
+                    : Strings.Bootstrapper_Status_Upgrading);
+
+                Directory.CreateDirectory(Paths.Base);
+                Directory.CreateDirectory(Paths.Downloads);
+                Directory.CreateDirectory(Paths.Versions);
+
+                var cachedPackageHashes = Directory.GetFiles(Paths.Downloads).Select(Path.GetFileName).ToList();
+                if (!IsStudioLaunch)
+                    await Task.Run(KillRobloxPlayers, ct).ConfigureAwait(false);
+                if (Directory.Exists(_latestVersionDirectory))
                 {
-                    App.Logger.WriteLine(LOG_IDENT, "Failed to delete the latest version directory");
-                    App.Logger.WriteException(LOG_IDENT, ex);
-                }
-            }
-
-            Directory.CreateDirectory(_latestVersionDirectory);
-            int totalPackedSize = _versionPackageManifest.Sum(p => p.PackedSize);
-            int totalUnpackedSize = _versionPackageManifest.Sum(p => p.Size);
-            int totalSizeRequired = totalPackedSize + totalUnpackedSize;
-
-            if (Filesystem.GetFreeDiskSpace(Paths.Base) < totalSizeRequired)
-            {
-                Frontend.ShowMessageBox(Strings.Bootstrapper_NotEnoughSpace, MessageBoxImage.Error);
-                App.Terminate(ErrorCode.ERROR_INSTALL_FAILURE);
-                return;
-            }
-
-            if (Dialog is not null)
-            {
-                Dialog.ProgressStyle = ProgressBarStyle.Continuous;
-                Dialog.TaskbarProgressState = TaskbarItemProgressState.Normal;
-
-                Dialog.ProgressMaximum = ProgressBarMaximum;
-
-                _progressIncrement = (double)ProgressBarMaximum / totalPackedSize;
-
-                _taskbarProgressMaximum = Dialog is WinFormsDialogBase
-                    ? TaskbarProgressMaximumWinForms
-                    : TaskbarProgressMaximumWpf;
-
-                _taskbarProgressIncrement = _taskbarProgressMaximum / totalPackedSize;
-            }
-
-            var throttler = new SemaphoreSlim(8);
-
-            var downloadTasks = _versionPackageManifest.Select(async package =>
-            {
-                await throttler.WaitAsync();
-                try
-                {
-                    await DownloadPackage(package);
-                }
-                finally
-                {
-                    throttler.Release();
-                }
-            }).ToList();
-
-            await Task.WhenAll(downloadTasks);
-
-            if (_cancelTokenSource.IsCancellationRequested)
-                return;
-
-            var extractionTasks = _versionPackageManifest.Select(async package =>
-            {
-                await throttler.WaitAsync();
-                try
-                {
-                    await Task.Run(() => ExtractPackage(package), _cancelTokenSource.Token);
-                }
-                finally
-                {
-                    throttler.Release();
-                }
-            }).ToList();
-
-            await Task.WhenAll(extractionTasks);
-
-            if (_cancelTokenSource.IsCancellationRequested)
-                return;
-
-            if (Dialog is not null)
-            {
-                Dialog.ProgressStyle = ProgressBarStyle.Marquee;
-                Dialog.TaskbarProgressState = TaskbarItemProgressState.Indeterminate;
-                SetStatus(Strings.Bootstrapper_Status_Configuring);
-            }
-
-            App.Logger.WriteLine(LOG_IDENT, "Writing AppSettings.xml...");
-            await File.WriteAllTextAsync(Path.Combine(_latestVersionDirectory, "AppSettings.xml"), AppSettings);
-
-            if (_cancelTokenSource.IsCancellationRequested)
-                return;
-
-        MigrateCompatibilityFlags();
-
-            AppData.State.VersionGuid = _latestVersionGuid;
-
-            AppData.State.PackageHashes.Clear();
-
-            foreach (var package in _versionPackageManifest)
-                AppData.State.PackageHashes.Add(package.Name, package.Signature);
-
-            CleanupVersionsFolder();
-
-            var allPackageHashes = new List<string>();
-
-            allPackageHashes.AddRange(App.State.Prop.Player.PackageHashes.Values);
-            allPackageHashes.AddRange(App.State.Prop.Studio.PackageHashes.Values);
-
-            foreach (string hash in cachedPackageHashes)
-            {
-                if (!allPackageHashes.Contains(hash))
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Deleting unused package {hash}");
-
                     try
                     {
-                        File.Delete(Path.Combine(Paths.Downloads, hash));
+                        await SafeDeleteDirectoryAsync(_latestVersionDirectory, LOG_IDENT, ct).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, $"Failed to delete {hash}!");
+                        App.Logger.WriteLine(LOG_IDENT, "Failed to delete latest version directory");
                         App.Logger.WriteException(LOG_IDENT, ex);
                     }
                 }
+                Directory.CreateDirectory(_latestVersionDirectory);
+                if (_versionPackageManifest == null || !_versionPackageManifest.Any())
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Warning: _versionPackageManifest is null or empty. Skipping upgrade logic.");
+                    return;
+                }
+
+                long totalPackedSize = _versionPackageManifest.Sum(p => (long)p.PackedSize);
+                long totalUnpackedSize = _versionPackageManifest.Sum(p => (long)p.Size);
+                long totalSizeRequired = totalPackedSize + totalUnpackedSize;
+
+                if (Filesystem.GetFreeDiskSpace(Paths.Base) < totalSizeRequired)
+                {
+                    Frontend.ShowMessageBox(Strings.Bootstrapper_NotEnoughSpace, MessageBoxImage.Error);
+                    App.Terminate(ErrorCode.ERROR_INSTALL_FAILURE);
+                    return;
+                }
+                if (Dialog is not null)
+                {
+                    Dialog.ProgressStyle = ProgressBarStyle.Continuous;
+                    Dialog.TaskbarProgressState = TaskbarItemProgressState.Normal;
+
+                    Dialog.ProgressMaximum = ProgressBarMaximum;
+                    _progressIncrement = (double)ProgressBarMaximum / Math.Max(1, totalPackedSize);
+
+                    _taskbarProgressMaximum = Dialog is WinFormsDialogBase
+                        ? TaskbarProgressMaximumWinForms
+                        : TaskbarProgressMaximumWpf;
+
+                    _taskbarProgressIncrement = _taskbarProgressMaximum / Math.Max(1, totalPackedSize);
+                }
+
+                var totalPackages = _versionPackageManifest.Count;
+                int packagesCompleted = 0;
+
+                long totalBytesToDownload = _versionPackageManifest.Sum(p => (long)p.PackedSize);
+                long totalBytesDownloaded = 0;
+
+                using var throttler = new SemaphoreSlim(8);
+                var swOverall = Stopwatch.StartNew();
+
+                App.Logger.WriteLine(LOG_IDENT, $"Preparing to download {totalPackages} packages ({totalBytesToDownload / 1048576.0:F2} MB total)");
+                var tasks = _versionPackageManifest.Select(async package =>
+                {
+                    await throttler.WaitAsync(ct).ConfigureAwait(false);
+                    try
+                    {
+                        await WithRetryAsync(
+                            async () =>
+                            {
+                                await DownloadPackage(package).ConfigureAwait(false);
+                            },
+                            context: $"{LOG_IDENT}::Download({package.Name})",
+                            maxAttempts: 4,
+                            baseDelayMs: 800,
+                            ct: ct
+                        ).ConfigureAwait(false);
+
+                        Interlocked.Add(ref totalBytesDownloaded, package.PackedSize);
+                        int completed = Interlocked.Increment(ref packagesCompleted);
+                        double elapsedSec = Math.Max(0.5, swOverall.Elapsed.TotalSeconds);
+                        double speedBytesPerSec = totalBytesDownloaded / elapsedSec;
+                        double remainingBytes = totalBytesToDownload - totalBytesDownloaded;
+                        double remainingSec = remainingBytes / Math.Max(speedBytesPerSec, 1);
+                        string eta = TimeSpan.FromSeconds(remainingSec).ToString(@"hh\:mm\:ss");
+                        SetStatus($"Downloading packages... ({completed}/{totalPackages}) | ETA: {eta}");
+                        _totalDownloadedBytes = totalBytesDownloaded;
+                        UpdateProgressBar();
+                        await WithRetryAsync(
+                            async () =>
+                            {
+                                ExtractPackage(package);
+                                await Task.CompletedTask;
+                            },
+                            context: $"{LOG_IDENT}::Extract({package.Name})",
+                            maxAttempts: 4,
+                            baseDelayMs: 800,
+                            isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                            ct: ct
+                        ).ConfigureAwait(false);
+                    }
+                    catch (System.Text.Json.JsonException jex)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"Invalid JSON for package {package.Name}: {jex.Message}");
+                        await HandleConnectionError(jex).ConfigureAwait(false);
+                    }
+                    catch (HttpRequestException httpEx)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"HTTP error downloading {package.Name}: {httpEx.StatusCode} - {httpEx.Message}");
+                        await HandleConnectionError(httpEx).ConfigureAwait(false);
+                    }
+                    catch (TaskCanceledException) {}
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, $"Failed processing package {package.Name}: {ex}");
+                    }
+                    finally
+                    {
+                        throttler.Release();
+                    }
+                }).ToList();
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+                swOverall.Stop();
+
+                if (ct.IsCancellationRequested) return;
+                if (Dialog is not null)
+                {
+                    Dialog.ProgressStyle = ProgressBarStyle.Marquee;
+                    Dialog.TaskbarProgressState = TaskbarItemProgressState.Indeterminate;
+                    SetStatus(Strings.Bootstrapper_Status_Configuring);
+                }
+
+                App.Logger.WriteLine(LOG_IDENT, "Writing AppSettings.xml...");
+                await WithRetryAsync(
+                    async () =>
+                    {
+                        await File.WriteAllTextAsync(Path.Combine(_latestVersionDirectory, "AppSettings.xml"), AppSettings, ct).ConfigureAwait(false);
+                    },
+                    context: $"{LOG_IDENT}::Write(AppSettings.xml)",
+                    maxAttempts: 3,
+                    baseDelayMs: 600,
+                    isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                    ct: ct
+                ).ConfigureAwait(false);
+
+                if (ct.IsCancellationRequested) return;
+                try { MigrateCompatibilityFlags(); }
+                catch (Exception ex) { App.Logger.WriteLine(LOG_IDENT, $"MigrateCompatibilityFlags failed: {ex.Message}"); }
+
+                AppData.State.VersionGuid = _latestVersionGuid;
+                AppData.State.PackageHashes.Clear();
+                foreach (var package in _versionPackageManifest)
+                    AppData.State.PackageHashes.Add(package.Name, package.Signature);
+                try { CleanupVersionsFolder(); } catch (Exception ex) { App.Logger.WriteLine(LOG_IDENT, $"CleanupVersionsFolder failed: {ex.Message}"); }
+                var allPackageHashes = App.State.Prop.Player.PackageHashes.Values
+                    .Concat(App.State.Prop.Studio.PackageHashes.Values)
+                    .ToHashSet();
+
+                var deleteTasks = cachedPackageHashes
+                    .Where(hash => !allPackageHashes.Contains(hash))
+                    .Select(async hash =>
+                    {
+                        string path = Path.Combine(Paths.Downloads, hash);
+                        await WithRetryAsync(
+                            async () =>
+                            {
+                                try { if (File.Exists(path)) File.Delete(path); } catch { }
+                                await Task.CompletedTask;
+                            },
+                            context: $"{LOG_IDENT}::DeleteCache({hash})",
+                            maxAttempts: 3,
+                            baseDelayMs: 500,
+                            isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                            ct: ct
+                        ).ConfigureAwait(false);
+                    });
+
+                await Task.WhenAll(deleteTasks).ConfigureAwait(false);
+                try
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Registering approximate program size...");
+                    int distributionSize = _versionPackageManifest.Sum(x => x.Size + x.PackedSize) / 1024;
+                    AppData.State.Size = distributionSize;
+
+                    int totalSize = App.State.Prop.Player.Size + App.State.Prop.Studio.Size;
+                    using (var uninstallKey = Registry.CurrentUser.CreateSubKey(App.UninstallKey))
+                        uninstallKey?.SetValueSafe("EstimatedSize", totalSize);
+
+                    App.Logger.WriteLine(LOG_IDENT, $"Registered as {totalSize} KB");
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Failed to register size: {ex.Message}");
+                }
+
+                App.State.Save();
             }
-
-            App.Logger.WriteLine(LOG_IDENT, "Registering approximate program size...");
-
-            int distributionSize = _versionPackageManifest.Sum(x => x.Size + x.PackedSize) / 1024;
-
-            AppData.State.Size = distributionSize;
-
-            int totalSize = App.State.Prop.Player.Size + App.State.Prop.Studio.Size;
-
-            using (var uninstallKey = Registry.CurrentUser.CreateSubKey(App.UninstallKey))
+            catch (TaskCanceledException)
             {
-                uninstallKey.SetValueSafe("EstimatedSize", totalSize);
+                App.Logger.WriteLine(LOG_IDENT, "Upgrade was cancelled.");
             }
-
-            App.Logger.WriteLine(LOG_IDENT, $"Registered as {totalSize} KB");
-
-            App.State.Save();
-
-            _isInstalling = false;
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Unexpected upgrade error: {ex}");
+                Frontend.ShowMessageBox($"{Strings.Bootstrapper_Status_Upgrading} failed:\n{ex.Message}", MessageBoxImage.Error);
+            }
+            finally
+            {
+                _isInstalling = false;
+            }
         }
 
         private async Task ApplyModifications()
         {
             const string LOG_IDENT = "Bootstrapper::ApplyModifications";
-
             SetStatus(Strings.Bootstrapper_Status_ApplyingModifications);
+            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string robloxClientSettingsFolder = Path.Combine(localAppData, "Roblox", "ClientSettings");
+            string ixpSettingsPath = Path.Combine(robloxClientSettingsFolder, "IxpSettings.json");
+            bool fastFlagBypass = App.Settings.Prop.FastFlagBypass;
+            var enforcedSettings = new Dictionary<string, string>
+{
+    { "FStringDebugLuaLogLevel", "trace" },
+    { "FStringDebugLuaLogPattern", "ExpChat/mountClientApp" },
+    { "FFlagPlayerLogsEnabled", "True" },
+    { "FFlagEnablePlayerLogging", "True" }
+};
+            var blockedFlags = new HashSet<string>
+{
+    "FFlagEnableCreatorSubtitleNavigation_v2_IXPValue",
+    "FFlagCarouselUseNewUserTileWithPresenceIcon_IXPValue",
+    "FFlagFilterPurchasePromptInputDispatch_IXPValue",
+    "FFlagRemovePermissionsButtons_IXPValue",
+    "FFlagPlayerListReduceRerenders_IXPValue",
+    "FFlagAvatarEditorPromptsNoPromptNoRender_IXPValue",
+    "FFlagPlayerListClosedNoRenderWithTenFoot_IXPValue",
+    "FFlagUseUserProfileStore4_IXPValue",
+    "FFlagPublishAssetPromptNoPromptNoRender_IXPValue",
+    "FFlagUseNewPlayerList3_IXPValue",
+    "FFlagFixLeaderboardCleanup_IXPValue",
+    "FFlagMoveNewPlayerListDividers_IXPValue",
+    "FFlagFixLeaderboardStatSortTypeMismatch_IXPValue",
+    "FFlagFilterNewPlayerListValueStat_IXPValue",
+    "FFlagUnreduxChatTransparencyV2_IXPValue",
+    "FFlagExpChatRemoveMessagesFromAppContainer_IXPValue",
+    "FFlagChatWindowOnlyRenderMessagesOnce_IXPValue",
+    "FFlagUnreduxLastInputTypeChanged_IXPValue",
+    "FFlagChatWindowSemiRoduxMessages_IXPValue",
+    "FFlagInitializeAutocompleteOnlyIfEnabled_IXPValue",
+    "FFlagChatWindowMessageRemoveState_IXPValue",
+    "FFlagExpChatUseVoiceParticipantsStore2_IXPValue",
+    "FFlagExpChatMemoBillboardGui_IXPValue",
+    "FFlagExpChatRemoveBubbleChatAppUserMessagesState_IXPValue",
+    "FFlagEnableLeaveGameUpsellEntrypoint_IXPValue",
+    "FFlagExpChatUseAdorneeStoreV4_IXPValue",
+    "FFlagEnableChatMicPerfBinding_IXPValue",
+    "FFlagChatOptimizeCommandProcessing_IXPValue",
+    "FFlagMemoizeChatReportingMenu_IXPValue",
+    "FFlagMemoizeChatInputApp_IXPValue",
+    "FFlagProfilePlatformEnableClickToCopyUsername_IXPValue",
+    "FFlagAddNavigationToTryOnPageForCurrentlyWearing2_IXPValue",
+    "FFlagAppChatRemoveUserProfileTitles2_IXPValue",
+    "FFlagMacUnifyKeyCodeMapping_IXPValue",
+    "FFlagAddPriceBelowCurrentlyWearing_IXPValue",
+    "FFlagProfilePlatformEnableEditAvatar_IXPValue",
+    "FFlagEnableNotApprovedPageV2_IXPValue",
+    "FFlagEnableNapIxpLayerExposure_IXPValue"
+};
+            try
+            {
+                Directory.CreateDirectory(robloxClientSettingsFolder);
+                Task.Run(() =>
+                {
+                    Console.WriteLine($"{LOG_IDENT} Monitoring {ixpSettingsPath} continuously...");
+                    string lastJson = string.Empty;
 
-            // handle file mods
+                    while (true)
+                    {
+                        try
+                        {
+                            File.SetAttributes(ixpSettingsPath, FileAttributes.Normal);
+
+                            var finalSettings = new Dictionary<string, string>();
+
+                            if (fastFlagBypass)
+                            {
+                                string clientAppSettingsPath = Path.Combine(Paths.Mods, "ClientSettings", "ClientAppSettings.json");
+                                if (File.Exists(clientAppSettingsPath))
+                                {
+                                    string clientAppText = File.ReadAllText(clientAppSettingsPath);
+                                    var clientAppJson = JsonSerializer.Deserialize<Dictionary<string, object>>(clientAppText) ?? new Dictionary<string, object>();
+                                    foreach (var kvp in clientAppJson)
+                                    {
+                                        if (!blockedFlags.Contains(kvp.Key))
+                                            finalSettings[kvp.Key] = kvp.Value?.ToString() ?? "";
+                                    }
+                                }
+                            }
+                            foreach (var kvp in enforcedSettings)
+                                finalSettings[kvp.Key] = kvp.Value;
+                            string updatedJson = JsonSerializer.Serialize(finalSettings, new JsonSerializerOptions { WriteIndented = true });
+
+                            if (updatedJson != lastJson)
+                            {
+                                File.WriteAllText(ixpSettingsPath, updatedJson);
+                                File.SetAttributes(ixpSettingsPath, FileAttributes.ReadOnly);
+                                Console.WriteLine($"{LOG_IDENT} Updated {ixpSettingsPath}");
+                                lastJson = updatedJson;
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"{LOG_IDENT} Error while updating IxpSettings.json: {ex.Message}");
+                        }
+
+                        Thread.Sleep(550);
+                    }
+                });
+
+                Console.WriteLine($"{LOG_IDENT} Program running. Press Ctrl+C to exit.");
+                Console.ReadLine();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{LOG_IDENT} Unexpected error: {ex.Message}");
+            }
+
             App.Logger.WriteLine(LOG_IDENT, "Checking file mods...");
-
-            // manifest has been moved to State.json
             File.Delete(Path.Combine(Paths.Base, "ModManifest.txt"));
 
             List<string> modFolderFiles = new();
 
             Directory.CreateDirectory(Paths.Mods);
-
-            // check custom font mod
-            // instead of replacing the fonts themselves, we'll just alter the font family manifests
 
             string modFontFamiliesFolder = Path.Combine(Paths.Mods, "content\\fonts\\families");
 
@@ -1056,8 +1972,6 @@ namespace Voidstrap
                 Directory.CreateDirectory(modFontFamiliesFolder);
 
                 const string path = "rbxasset://fonts/CustomFont.ttf";
-
-                // lets make sure the content/fonts/families path exists in the version directory
                 string contentFolder = Path.Combine(_latestVersionDirectory, "content");
                 Directory.CreateDirectory(contentFolder);
 
@@ -1233,135 +2147,149 @@ namespace Voidstrap
         private async Task DownloadPackage(Package package)
         {
             string LOG_IDENT = $"Bootstrapper::DownloadPackage.{package.Name}";
+            bool isUpdating = !string.IsNullOrEmpty(AppData.State.VersionGuid);
 
             if (_cancelTokenSource.IsCancellationRequested)
                 return;
 
             Directory.CreateDirectory(Paths.Downloads);
-
             string packageUrl = Deployment.GetLocation($"/{_latestVersionGuid}-{package.Name}");
+            if (!packageUrl.StartsWith("https://setup.rbxcdn.com", StringComparison.OrdinalIgnoreCase))
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"Warning: Deployment.GetLocation() returned unexpected URL '{packageUrl}'. Forcing setup.rbxcdn.com as base.");
+                packageUrl = $"https://setup.rbxcdn.com/{_latestVersionGuid}-{package.Name}";
+            }
             string robloxPackageLocation = Path.Combine(Paths.LocalAppData, "Roblox", "Downloads", package.Signature);
-
             if (File.Exists(package.DownloadPath))
             {
-                var file = new FileInfo(package.DownloadPath);
-
-                string calculatedMD5 = MD5Hash.FromFile(package.DownloadPath);
-
-                if (calculatedMD5 != package.Signature)
+                string localHash = MD5Hash.FromFile(package.DownloadPath);
+                if (localHash == package.Signature)
                 {
-                    App.Logger.WriteLine(LOG_IDENT, $"Package is corrupted ({calculatedMD5} != {package.Signature})! Deleting and re-downloading...");
-                    file.Delete();
+                    App.Logger.WriteLine(LOG_IDENT, "Already downloaded, skipping...");
+                    _totalDownloadedBytes += package.PackedSize;
+                    UpdateProgressBar();
+                    return;
                 }
                 else
                 {
-                    App.Logger.WriteLine(LOG_IDENT, $"Package is already downloaded, skipping...");
-
-                    _totalDownloadedBytes += package.PackedSize;
-                    UpdateProgressBar();
-
-                    return;
+                    App.Logger.WriteLine(LOG_IDENT, "Corrupted file found, deleting...");
+                    File.Delete(package.DownloadPath);
                 }
             }
             else if (File.Exists(robloxPackageLocation))
             {
-                // let's cheat! if the stock bootstrapper already previously downloaded the file,
-                // then we can just copy the one from there
-
-                App.Logger.WriteLine(LOG_IDENT, $"Found existing copy at '{robloxPackageLocation}'! Copying to Downloads folder...");
-                File.Copy(robloxPackageLocation, package.DownloadPath);
-
-                _totalDownloadedBytes += package.PackedSize;
-                UpdateProgressBar();
-
-                return;
+                try
+                {
+                    File.Copy(robloxPackageLocation, package.DownloadPath, true);
+                    _totalDownloadedBytes += package.PackedSize;
+                    UpdateProgressBar();
+                    return;
+                }
+                catch (Exception copyEx)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Failed to copy from Roblox cache: {copyEx.Message}");
+                }
             }
 
-            if (File.Exists(package.DownloadPath))
-                return;
+            const int MaxRetries = 10;
+            const int BufferSize = 1024 * 2048;
+            var tempFile = package.DownloadPath + ".part";
+            if (File.Exists(tempFile))
+                File.Delete(tempFile);
 
-            const int maxTries = 5;
+            App.Logger.WriteLine(LOG_IDENT, $"Starting download from {packageUrl}");
 
-            App.Logger.WriteLine(LOG_IDENT, "Downloading...");
-
-            var buffer = new byte[4096];
-
-            for (int i = 1; i <= maxTries; i++)
+            for (int attempt = 1; attempt <= MaxRetries; attempt++)
             {
                 if (_cancelTokenSource.IsCancellationRequested)
                     return;
 
-                int totalBytesRead = 0;
-
                 try
                 {
-                    var response = await App.HttpClient.GetAsync(packageUrl, HttpCompletionOption.ResponseHeadersRead, _cancelTokenSource.Token);
-                    await using var stream = await response.Content.ReadAsStreamAsync(_cancelTokenSource.Token);
-                    await using var fileStream = new FileStream(package.DownloadPath, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Delete);
+                    using var response = await App.HttpClient.GetAsync(
+                        packageUrl,
+                        HttpCompletionOption.ResponseHeadersRead,
+                        _cancelTokenSource.Token
+                    );
 
-                    while (true)
+                    if (!response.IsSuccessStatusCode)
                     {
-                        if (_cancelTokenSource.IsCancellationRequested)
+                        App.Logger.WriteLine(LOG_IDENT, $"Download failed with HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+                        if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                         {
-                            stream.Close();
-                            fileStream.Close();
-                            return;
+                            App.Logger.WriteLine(LOG_IDENT, "Received 403 Forbidden — using setup.rbxcdn.com fallback.");
+                            packageUrl = $"https://setup.rbxcdn.com/{_latestVersionGuid}-{package.Name}";
+                            continue;
                         }
-
-                        int bytesRead = await stream.ReadAsync(buffer, _cancelTokenSource.Token);
-
-                        if (bytesRead == 0)
-                            break;
-
-                        totalBytesRead += bytesRead;
-
-                        await fileStream.WriteAsync(buffer.AsMemory(0, bytesRead), _cancelTokenSource.Token);
-
-                        _totalDownloadedBytes += bytesRead;
-                        UpdateProgressBar();
+                        response.EnsureSuccessStatusCode();
                     }
 
-                    string hash = MD5Hash.FromStream(fileStream);
+                    await using var networkStream = await response.Content.ReadAsStreamAsync(_cancelTokenSource.Token);
+                    await using var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, useAsync: true);
 
-                    if (hash != package.Signature)
-                        throw new ChecksumFailedException($"Failed to verify download of {packageUrl}\n\nExpected hash: {package.Signature}\nGot hash: {hash}");
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
+                    var sw = Stopwatch.StartNew();
+                    long totalRead = 0;
+                    int read;
 
-                    App.Logger.WriteLine(LOG_IDENT, $"Finished downloading! ({totalBytesRead} bytes total)");
-                    break;
+                    while ((read = await networkStream.ReadAsync(buffer.AsMemory(0, BufferSize), _cancelTokenSource.Token)) > 0)
+                    {
+                        await fileStream.WriteAsync(buffer.AsMemory(0, read), _cancelTokenSource.Token);
+                        totalRead += read;
+                        _totalDownloadedBytes += read;
+
+                        if (sw.ElapsedMilliseconds > 400)
+                        {
+                            if (isUpdating)
+                            {
+                                UpdateProgressBar();
+                            }
+
+                            sw.Restart();
+                        }
+                    }
+
+                    ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
+                    await fileStream.FlushAsync(_cancelTokenSource.Token);
+                    fileStream.Close();
+                    string hash = MD5Hash.FromFile(tempFile);
+                    if (!hash.Equals(package.Signature, StringComparison.OrdinalIgnoreCase))
+                        throw new ChecksumFailedException($"Checksum mismatch for {package.Name}: expected {package.Signature}, got {hash}");
+
+                    File.Move(tempFile, package.DownloadPath, true);
+                    App.Logger.WriteLine(LOG_IDENT, $"Download complete ({totalRead:N0} bytes)");
+                    return;
+                }
+                catch (ChecksumFailedException ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, $"Checksum failed ({attempt}/{MaxRetries}): {ex.Message}");
+                    if (File.Exists(tempFile)) File.Delete(tempFile);
+
+                    Frontend.ShowConnectivityDialog(
+                        Strings.Dialog_Connectivity_UnableToDownload,
+                        Strings.Dialog_Connectivity_UnableToDownloadReason.Replace("[link]", "https://github.com/bloxstraplabs/bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox"),
+                        MessageBoxImage.Error,
+                        ex
+                    );
+
+                    App.Terminate(ErrorCode.ERROR_CANCELLED);
+                }
+                catch (TaskCanceledException)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Download cancelled by user");
+                    if (File.Exists(tempFile)) File.Delete(tempFile);
+                    return;
                 }
                 catch (Exception ex)
                 {
-                    App.Logger.WriteLine(LOG_IDENT, $"An exception occurred after downloading {totalBytesRead} bytes. ({i}/{maxTries})");
-                    App.Logger.WriteException(LOG_IDENT, ex);
+                    App.Logger.WriteLine(LOG_IDENT, $"Download failed ({attempt}/{MaxRetries}): {ex.Message}");
+                    if (File.Exists(tempFile)) File.Delete(tempFile);
 
-                    if (ex.GetType() == typeof(ChecksumFailedException))
-                    {
-                        Frontend.ShowConnectivityDialog(
-                            Strings.Dialog_Connectivity_UnableToDownload,
-                            String.Format(Strings.Dialog_Connectivity_UnableToDownloadReason, "[https://github.com/Bloxstraplabs/Bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox](https://github.com/Bloxstraplabs/Bloxstrap/wiki/Bloxstrap-is-unable-to-download-Roblox)"),
-                            MessageBoxImage.Error,
-                            ex
-                        );
+                    int delay = Math.Min(2000 * attempt, 10000);
+                    await Task.Delay(delay, _cancelTokenSource.Token);
 
-                        App.Terminate(ErrorCode.ERROR_CANCELLED);
-                    }
-                    else if (i >= maxTries)
+                    if (attempt == MaxRetries)
                         throw;
-
-                    if (File.Exists(package.DownloadPath))
-                        File.Delete(package.DownloadPath);
-
-                    _totalDownloadedBytes -= totalBytesRead;
-                    UpdateProgressBar();
-
-                    // attempt download over HTTP
-                    // this isn't actually that unsafe - signatures were fetched earlier over HTTPS
-                    // so we've already established that our signatures are legit, and that there's very likely no MITM anyway
-                    if (ex.GetType() == typeof(IOException) && !packageUrl.StartsWith("http://"))
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, "Retrying download over HTTP...");
-                        packageUrl = packageUrl.Replace("https://", "http://");
-                    }
                 }
             }
         }
@@ -1380,14 +2308,12 @@ namespace Voidstrap
 
             string packageFolder = Path.Combine(_latestVersionDirectory, packageDir);
             string? fileFilter = null;
-
-            // for sharpziplib, each file in the filter needs to be a regex
             if (files is not null)
             {
                 var regexList = new List<string>();
 
                 foreach (string file in files)
-                    regexList.Add("^" + file.Replace("\\", "\\\\") + "$");
+                    regexList.Add("^" + file.Replace("\\", "\\\\").Replace("(", "\\(").Replace(")", "\\)") + "$");
 
                 fileFilter = String.Join(';', regexList);
             }
@@ -1403,3 +2329,4 @@ namespace Voidstrap
         #endregion
     }
 }
+#endregion

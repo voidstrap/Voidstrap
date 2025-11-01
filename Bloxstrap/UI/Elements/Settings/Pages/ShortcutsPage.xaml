@@ -11,14 +11,16 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="ShortcutsPage"
     d:DataContext="{d:DesignInstance dmodels:ShortcutsViewModel, IsDesignTimeCreatable=True}"
-    d:DesignHeight="600"
+    d:DesignHeight="1000"
     d:DesignWidth="820"
     Scrollable="True"
     mc:Ignorable="d">
 
-    <StackPanel Margin="0,0,14,14" >
+    <ui:UiPage.Resources>
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </ui:UiPage.Resources>
 
-        <!-- Description -->
+    <StackPanel Margin="0,0,14,14" >
         <TextBlock
             FontSize="14"
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
@@ -99,6 +101,90 @@
                 <ui:ToggleSwitch IsChecked="{Binding SettingsIconTask.NewState, Mode=TwoWay}" />
             </controls:OptionControl>
         </Grid>
+
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Game Settings" />
+                    <TextBlock Margin="0,2,0,0"
+                       FontSize="12"
+                       Text="Configure and launch your Roblox game"
+                       Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </ui:CardExpander.Header>
+
+            <StackPanel>
+                <TextBlock FontWeight="Medium"
+                   Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                   Text="Manage launch options for Roblox or Voidstrap."
+                   TextWrapping="Wrap" />
+
+                <!-- Game ID -->
+                <StackPanel Margin="0,8,0,0">
+                    <TextBlock Text="Game ID"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:TextBox Margin="0,4,0,0"
+                        PlaceholderText="Enter Game ID (e.g., 1818)"
+                        Text="{Binding GameID, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <!-- Instance ID -->
+                <StackPanel Margin="0,8,0,0">
+                    <TextBlock Text="Instance ID (Optional)"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:TextBox Margin="0,4,0,0"
+                        PlaceholderText="Enter Instance ID"
+                        Text="{Binding GameInstanceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+
+                <StackPanel Margin="0,8,0,0"
+                    Visibility="{Binding IsPrivateServer, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <TextBlock Text="Private Server Access Code"
+                       Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                    <ui:TextBox Margin="0,4,0,0"
+                        PlaceholderText="Enter Private Server Code"
+                        Text="{Binding PrivateServerCode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+                <TextBlock Margin="0,8,0,0"
+           FontSize="14"
+           FontWeight="SemiBold"
+           Text="{Binding DisplayGameName}"
+           Foreground="{DynamicResource TextFillColorPrimaryBrush}"
+           TextTrimming="CharacterEllipsis" />
+
+
+                <Border Margin="0,4,0,0"
+        Width="96"
+        Height="96"
+        CornerRadius="12"
+        BorderThickness="1"
+        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+        HorizontalAlignment="Left"
+        VerticalAlignment="Top"
+        Visibility="{Binding IsIconVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+                    <Border.Background>
+                        <ImageBrush ImageSource="{Binding GameIconUrl, IsAsync=True}"
+                    Stretch="UniformToFill" />
+                    </Border.Background>
+                </Border>
+
+
+                <TextBlock Margin="0,8,0,0"
+                   Text="Launch as Private Server"
+                   Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                <ui:ToggleSwitch Margin="0,4,0,0"
+                         IsChecked="{Binding IsPrivateServer, Mode=TwoWay}" />
+
+                <ui:Button Margin="0,12,0,0"
+                   Content="Launch Game"
+                   Click="BtnLaunchGame_Click" />
+
+                <ui:Button Margin="0,8,0,0"
+           Content="Create Shortcut"
+           Click="BtnCreateShortcut_Click" />
+            </StackPanel>
+        </ui:CardExpander>
+
 
     </StackPanel>
 </ui:UiPage>

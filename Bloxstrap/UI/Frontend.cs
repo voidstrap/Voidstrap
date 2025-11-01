@@ -23,18 +23,12 @@ namespace Voidstrap.UI
             if (App.LaunchSettings.QuietFlag.Active)
                 return;
 
-            string topLine = Strings.Dialog_PlayerError_FailedLaunch;
-
-            if (crash)
-                topLine = Strings.Dialog_PlayerError_Crash;
-
-            string info = String.Format(
-                Strings.Dialog_PlayerError_HelpInformation,
-                $"https://github.com/{App.ProjectRepository}/wiki/Roblox-crashes-or-does-not-launch",
-                $"https://github.com/{App.ProjectRepository}/wiki/Switching-between-Roblox-and-Voidstrap"
-            );
-
-            ShowMessageBox($"{topLine}\n\n{info}", MessageBoxImage.Error);
+            try
+            {
+            }
+            catch
+            {
+            }
         }
 
         public static void ShowExceptionDialog(Exception exception)

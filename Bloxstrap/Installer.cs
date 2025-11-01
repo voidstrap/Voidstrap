@@ -101,9 +101,6 @@ namespace Voidstrap
             App.FastFlags.Load(false);
 
             App.Settings.Prop.EnableAnalytics = EnableAnalytics;
-
-            App.Settings.Prop.VoidstrapRPCReal = VoidstrapRPCReal;
-
             if (App.IsStudioVisible)
                 WindowsRegistry.RegisterStudio();
 

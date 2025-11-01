@@ -53,11 +53,45 @@
                 TextChanged="SearchBox_TextChanged" />
         </Grid>
 
-        <!--  Results  -->
         <StackPanel x:Name="ResultsPanel" Margin="0">
-            <!--  Group Template  -->
+            <GroupBox Margin="0,0,0,14" Header="Plexity">
+                <StackPanel>
+                    <TextBlock>
+                        <Run Foreground="Gray" Text="Credit: Plexity Team | Bratic" />
+                        <LineBreak />
+                        <Run
+                            FontWeight="Bold"
+                            Foreground="DodgerBlue"
+                            Text="Type: App" />
+                    </TextBlock>
+                    <Grid Margin="0,8,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="250" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
 
-            <!--  Duplicate the structure above for other sections  -->
+                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
+                            <ListBox.Background>
+                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/icon (1).png" Stretch="UniformToFill" />
+                            </ListBox.Background>
+                            <Border Width="100" Height="100" />
+                        </ListBox>
+
+                        <ui:Button
+                            Grid.ColumnSpan="2"
+                            Width="370"
+                            Margin="202,186,0,0"
+                            VerticalAlignment="Top"
+                            Click="InstallButton_Click10000"
+                            Content="Website"
+                            Icon="ArrowDownload48" />
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
             <GroupBox Margin="0,0,0,14" Header="Bloxstrap theme">
                 <StackPanel>
                     <TextBlock>
@@ -173,43 +207,6 @@
                 </StackPanel>
             </GroupBox>
 
-            <GroupBox Margin="0" Header="Stoofs FFlags">
-                <StackPanel>
-                    <TextBlock>
-                        <Run Foreground="Gray" Text="Credit: Stoof" />
-                        <LineBreak />
-                        <Run
-                            FontWeight="Bold"
-                            Foreground="DodgerBlue"
-                            Text="Type: FFlags" />
-                    </TextBlock>
-                    <Grid Margin="0,8,0,0">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="250" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <ListBox ItemTemplate="{StaticResource ItemTemplate}" Style="{StaticResource ThemeListBoxStyle}">
-                            <ListBox.Background>
-                                <ImageBrush ImageSource="/UI/Elements/Settings/Pages/Balanced.png" Stretch="Fill" />
-                            </ListBox.Background>
-                        </ListBox>
-
-                        <ui:Button
-                            Grid.ColumnSpan="2"
-                            Width="370"
-                            Margin="202,186,0,0"
-                            VerticalAlignment="Top"
-                            Click="CopyButton_Click2"
-                            Content="Copy"
-                            Icon="Copy24" />
-                    </Grid>
-                </StackPanel>
-            </GroupBox>
 
             <GroupBox Margin="0" Header="Bratics Super Performace FFlags">
                 <StackPanel>

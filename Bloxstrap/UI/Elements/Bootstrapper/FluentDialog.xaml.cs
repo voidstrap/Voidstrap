@@ -2,7 +2,9 @@
 using Voidstrap.UI.ViewModels.Bootstrapper;
 using System;
 using System.ComponentModel;
+using System.IO;
 using System.Windows;
+using System.Windows.Media.Imaging;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using System.Windows.Forms;
@@ -15,6 +17,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         private bool _isClosing;
 
         public Voidstrap.Bootstrapper? Bootstrapper { get; set; }
+        public string? CustomBackgroundPath { get; set; }
 
         #region Properties
         public string Message
@@ -71,11 +74,36 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             _viewModel = new FluentDialogViewModel(this, aero);
             DataContext = _viewModel;
 
+            Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.PlayStartupAudio();
+            this.Closed += (s, e) =>
+            {
+                Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.StopAudio();
+            };
             Title = App.Settings.Prop.BootstrapperTitle;
             Icon = App.Settings.Prop.BootstrapperIcon.GetIcon().GetImageSource();
 
             if (aero)
                 AllowsTransparency = true;
+            string? lastBackground = Directory.GetFiles(Paths.Base, "bootstrapper_bg.*").FirstOrDefault();
+            if (lastBackground != null)
+                CustomBackgroundPath = lastBackground;
+            SetBackgroundImage();
+            BackgroundEvents.BackgroundChanged += (path) =>
+            {
+                Dispatcher.Invoke(() => ChangeBackground(path));
+            };
+        }
+
+        private void SetBackgroundImage()
+        {
+            BackgroundManager.SetBackgroundAsync(BackgroundImage, CustomBackgroundPath);
+
+        }
+
+        public async void ChangeBackground(string? newPath)
+        {
+            CustomBackgroundPath = newPath;
+            await BackgroundManager.SetBackgroundAsync(BackgroundImage, CustomBackgroundPath);
         }
 
         private void UiWindow_Closing(object sender, CancelEventArgs e)
@@ -83,7 +111,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             if (!_isClosing)
             {
                 Bootstrapper?.Cancel();
-                e.Cancel = true; // prevent auto close unless user explicitly cancels
+                e.Cancel = true;
             }
         }
 

@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Voidstrap.UI.Elements.Dialogs;
+using Voidstrap.UI.ViewModels.Settings;
+using Wpf.Ui.Common;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
-using Voidstrap.UI.ViewModels.Settings;
-using Voidstrap.UI.Elements.Dialogs;
-using Wpf.Ui.Common;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Voidstrap.UI.Elements.Settings
 {
@@ -23,12 +24,13 @@ namespace Voidstrap.UI.Elements.Settings
             InitializeViewModel();
             InitializeWindowState();
             InitializeNavigation();
-
+            UpdateButtonContent();
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
-
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbarAsync();
         }
+
+
 
         #region Initialization
 
@@ -41,6 +43,20 @@ namespace Voidstrap.UI.Elements.Settings
             viewModel.RequestSaveLaunchNoticeEvent += OnRequestSaveLaunchNotice;
             viewModel.RequestCloseWindowEvent += OnRequestCloseWindow;
         }
+
+        private void UpdateButtonContent()
+        {
+            if (InstallLaunchButton == null)
+                return;
+
+            string versionsPath = Paths.Versions;
+
+            InstallLaunchButton.Content =
+                (Directory.Exists(versionsPath) && Directory.EnumerateFileSystemEntries(versionsPath).Any())
+                    ? "Save and Launch"
+                    : "Install";
+        }
+
 
         private void InitializeWindowState()
         {
@@ -63,11 +79,13 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void InitializeNavigation()
         {
+            if (RootNavigation == null)
+                return;
+
             RootNavigation.SelectedPageIndex = App.State.Prop.LastPage;
-#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             RootNavigation.Navigated += SaveNavigation;
-#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
         }
+
 
         #endregion
 
@@ -87,9 +105,11 @@ namespace Voidstrap.UI.Elements.Settings
 
         private async Task ShowAlreadyRunningSnackbarAsync()
         {
-            await Task.Delay(225).ConfigureAwait(false);
-            Dispatcher.Invoke(() => AlreadyRunningSnackbar.Show());
+            await Task.Delay(225);
+            if (!Dispatcher.HasShutdownStarted)
+                Dispatcher.InvokeAsync(() => AlreadyRunningSnackbar?.Show());
         }
+
 
         #endregion
 
@@ -161,7 +181,11 @@ namespace Voidstrap.UI.Elements.Settings
         private void NavigationItem_Click(object sender, RoutedEventArgs e) { }
         private void NavigationItem_Click_1(object sender, RoutedEventArgs e) { }
         private void Button_Click(object sender, RoutedEventArgs e) { }
-        private void Button_Click_1(object sender, RoutedEventArgs e) { }
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+        }
+
+
         private void Button_Click_2(object sender, RoutedEventArgs e) { }
 
         #endregion

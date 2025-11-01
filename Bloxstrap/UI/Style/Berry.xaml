@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base">
+
+    <SolidColorBrush x:Key="NewTextEditorBackground" Color="#1C0E16" />
+    <SolidColorBrush x:Key="NewTextEditorForeground" Color="#F0E6F6" />
+    <SolidColorBrush x:Key="NewTextEditorLink" Color="#C77DFF" />
+    <SolidColorBrush x:Key="PrimaryBackgroundColor" Color="#12060F" />
+    <Color x:Key="ControlFillColorDefault">#12060F</Color>
+    <Color x:Key="WindowBackgroundColorPrimary">#2C112F</Color>
+    <Color x:Key="WindowBackgroundColorSecondary">#1E1C2C</Color>
+    <Color x:Key="WindowBackgroundColorThird">#271219</Color>
+    <Color x:Key="WindowBackgroundColorPrimaryWithOpacity">#802C112F</Color>
+    <Color x:Key="WindowBackgroundColorSecondaryWithOpacity">#801E1C2C</Color>
+    <Color x:Key="WindowBackgroundColorThirdWithOpacity">#80271219</Color>
+
+</ResourceDictionary>

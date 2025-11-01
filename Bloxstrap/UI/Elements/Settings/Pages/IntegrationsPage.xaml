@@ -10,7 +10,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     x:Name="IntegrationsPageView"
     Title="IntegrationsPage"
-    d:DesignHeight="1080"
+    d:DesignHeight="1580"
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
@@ -21,7 +21,7 @@
             Text="{x:Static resources:Strings.Menu_Integrations_Description}" />
 
         <TextBlock
-            Margin="0,16,0,0"
+            Margin="0,8,0,0"
             FontSize="20"
             FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Integrations_ActivityTracking}" />
@@ -34,7 +34,6 @@
             HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F">
             <ui:ToggleSwitch
                 Background="{DynamicResource SystemAccentBrush}"
-                Checked="ToggleSwitch_Checked"
                 IsChecked="{Binding ActivityTrackingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
@@ -44,6 +43,13 @@
             HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F#server-location-querying"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding ShowServerDetailsEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl
+            Description="Displays BetterBLOX server uptime, only works in games that are in the datacenter."
+            Header="Server Uptime"
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding ServerUptimeBetterBLOXcuzitsbetterXD, Mode=TwoWay}" />
         </controls:OptionControl>
 
         <controls:OptionControl
@@ -61,6 +67,15 @@
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DisableAppPatchEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
+        <controls:OptionControl 
+    Header="View Music Player"
+    Description="View and listen to your music, or manage from the tray menu.">
+            <Button Content="View" 
+            Command="{Binding MusicWindowCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"/>
+        </controls:OptionControl>
+
         <TextBlock
             Margin="0,16,0,0"
             FontSize="20"
@@ -70,14 +85,6 @@
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
             MarkdownText="{Binding Source={x:Static resources:Strings.Menu_Integrations_RequiresActivityTracking}, Converter={StaticResource StringFormatConverter}, ConverterParameter='https://github.com/Bloxstraplabs/Bloxstrap/wiki/What-is-activity-tracking%3F#discord-rich-presence'}"
             TextWrapping="Wrap" />
-
-        <controls:OptionControl
-            x:Name="VoidstrapRPC"
-            Description="Shows that you're using Voidstrap on Discord, but it overlaps with 'Show Game Activity'. Requires an app restart."
-            Header="Voidstrap RPC"
-            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding VoidstrapEnabled, Mode=TwoWay}"/>
-        </controls:OptionControl>
 
         <controls:OptionControl
             x:Name="DiscordActivityOption"
@@ -101,6 +108,103 @@
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DiscordActivityJoinEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
+        <controls:OptionControl 
+    Header="Custom RPC"
+    Description="Make/Edit a custom RPC for Discord.">
+            <Button Content="View" 
+            Command="{Binding RPCWindowCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"/>
+        </controls:OptionControl>
+
+        <Expander Header="RPC Advanced" Margin="0,8,0,0">
+            <StackPanel Orientation="Vertical">
+                <controls:OptionControl
+            Header="Game Server Location"
+            Description="Displays your In-Game Server Location on Discord."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding ServerLocationGame, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl
+            Header="Game Name"
+            Description="Displays your Roblox Games Name on Discord."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding GameNameChecked, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl
+            Header="Game Creator"
+            Description="Displays your Roblox Games Creators Name/Group on Discord."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding GameCreatorChecked, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl
+            Header="Game Icon"
+            Description="Displays your Roblox Games Icon on Discord."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding GameIconChecked, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl
+            Header="Server Status"
+            Description="Displays your Roblox Games Server Status (Public, Private, Reserved)."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding GameStatusChecked, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Header="Custom Image"
+            Description="Displays a custom image instead of the games image."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:TextBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        Text="{Binding gameimage, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Header="Custom Game Name"
+            Description="Displays a custom Game Name instead of the games name. (Game Name Must be Enabled)"
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:TextBox
+                        Width="200"
+                        Margin="5,0,0,0"
+                        Padding="10,5,10,5"
+                        Text="{Binding gamename, Mode=TwoWay}" />
+                </controls:OptionControl>
+            </StackPanel>
+        </Expander>
+
+
+        <TextBlock
+            Margin="0,16,0,0"
+            FontSize="20"
+            FontWeight="Medium"
+            Text="Roblox" />
+
+        <controls:OptionControl 
+            Header="FPS Unlocker"
+            Description="Removes the 240 FPS Limit without using FastFlags.">
+            <ui:ToggleSwitch IsChecked="{Binding UncapFPS, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl 
+    Header="View Game History"
+    Description="View your Roblox game history.">
+            <Button Content="View" 
+            Command="{Binding OpenHistoryWindowCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"/>
+        </controls:OptionControl>
 
 
         <TextBlock

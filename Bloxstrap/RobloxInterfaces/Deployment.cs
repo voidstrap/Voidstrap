@@ -1,5 +1,7 @@
 ﻿using System.Collections.Concurrent;
-using Voidstrap.RobloxInterfaces;
+using System.Net;
+using System.Net.Http;
+using System.Text.Json;
 using Voidstrap;
 
 namespace Voidstrap.RobloxInterfaces
@@ -31,6 +33,43 @@ namespace Voidstrap.RobloxInterfaces
             { "https://s3.amazonaws.com/setup.roblox.com", 4 }
         };
 
+        public static string GetInfoUrl(string channel)
+        {
+            bool isDefault = string.Equals(channel, DefaultChannel, StringComparison.OrdinalIgnoreCase);
+            string path = isDefault
+                ? $"/v2/client-version/{BinaryType}"
+                : $"/v2/client-version/{BinaryType}/channel/{channel}";
+            return $"https://clientsettingscdn.roblox.com{path}";
+        }
+
+        private static async Task<T> SafeGetJson<T>(string url)
+        {
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", "VoidstrapUpdater/1.0");
+            http.DefaultRequestHeaders.TryAddWithoutValidation("Accept", "application/json");
+
+            var response = await http.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+
+            string text = await response.Content.ReadAsStringAsync();
+            if (string.IsNullOrWhiteSpace(text) || text.TrimStart().StartsWith("<"))
+            {
+                throw new InvalidHTTPResponseException(
+                    $"Expected JSON but got HTML or empty response from {url}:\n{text.Substring(0, Math.Min(300, text.Length))}");
+            }
+
+            try
+            {
+                return JsonSerializer.Deserialize<T>(text, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? throw new InvalidHTTPResponseException($"Failed to deserialize JSON from {url}");
+            }
+            catch (JsonException ex)
+            {
+                throw new InvalidHTTPResponseException($"Invalid JSON from {url}: {ex.Message}. Snippet: {text.Substring(0, Math.Min(300, text.Length))}");
+            }
+        }
         private static async Task<string?> TestConnection(string url, int delaySeconds, CancellationToken token)
         {
             string logIdent = $"Deployment::TestConnection<{url}>";
@@ -59,7 +98,6 @@ namespace Voidstrap.RobloxInterfaces
         public static async Task<Exception?> InitializeConnectivity()
         {
             const string logIdent = "Deployment::InitializeConnectivity";
-
             using var cts = new CancellationTokenSource();
             var tasks = BaseUrls.Select(entry => TestConnection(entry.Key, entry.Value, cts.Token)).ToList();
 
@@ -74,7 +112,7 @@ namespace Voidstrap.RobloxInterfaces
                 if (!string.IsNullOrEmpty(result))
                 {
                     BaseUrl = result;
-                    cts.Cancel(); // Cancel others
+                    cts.Cancel();
                 }
             }
 
@@ -88,10 +126,10 @@ namespace Voidstrap.RobloxInterfaces
         public static string GetLocation(string resource)
         {
             var location = BaseUrl;
-
             if (!IsDefaultChannel)
             {
-                var useCommon = ApplicationSettings.GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel)
+                var useCommon = ApplicationSettings
+                    .GetSettings(nameof(ApplicationSettings.PCClientBootstrapper), Channel)
                     .Get<bool>("FFlagReplaceChannelNameForDownload");
 
                 var channelName = useCommon ? "common" : Channel.ToLowerInvariant();
@@ -116,15 +154,14 @@ namespace Voidstrap.RobloxInterfaces
                 return cachedVersion;
             }
 
-            var path = isDefault
-                ? $"/v2/client-version/{BinaryType}"
-                : $"/v2/client-version/{BinaryType}/channel/{channel}";
+            string cdnUrl = GetInfoUrl(channel);
+            string fallbackUrl = cdnUrl.Replace("clientsettingscdn.roblox.com", "clientsettings.roblox.com");
 
             ClientVersion clientVersion;
 
             try
             {
-                clientVersion = await Http.GetJson<ClientVersion>($"https://clientsettingscdn.roblox.com{path}");
+                clientVersion = await SafeGetJson<ClientVersion>(cdnUrl);
             }
             catch (HttpRequestException ex) when (!isDefault && BadChannelCodes.Contains(ex.StatusCode))
             {
@@ -132,20 +169,11 @@ namespace Voidstrap.RobloxInterfaces
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(logIdent, "Fallback to clientsettings.roblox.com");
+                App.Logger.WriteLine(logIdent, $"CDN failed for {channel}, falling back. Reason: {ex.Message}");
                 App.Logger.WriteException(logIdent, ex);
 
-                try
-                {
-                    clientVersion = await Http.GetJson<ClientVersion>($"https://clientsettings.roblox.com{path}");
-                }
-                catch (HttpRequestException ex2) when (!isDefault && BadChannelCodes.Contains(ex2.StatusCode))
-                {
-                    throw new InvalidChannelException(ex2.StatusCode);
-                }
+                clientVersion = await SafeGetJson<ClientVersion>(fallbackUrl);
             }
-
-            // Check version lag behind default
             if (!isDefault)
             {
                 var defaultVer = await GetInfo(DefaultChannel);
@@ -155,6 +183,72 @@ namespace Voidstrap.RobloxInterfaces
 
             ClientVersionCache.TryAdd(cacheKey, clientVersion);
             return clientVersion;
+        }
+
+        public static async Task<(string luaPackagesZip, string extraTexturesZip, string contentTexturesZip, string versionHash, string version)>
+            DownloadForModGenerator(bool overwrite = false)
+        {
+            const string LOG_IDENT = "Deployment::DownloadForModGenerator";
+            try
+            {
+                var clientInfo = await SafeGetJson<ClientVersion>("https://clientsettingscdn.roblox.com/v2/client-version/WindowsStudio64");
+                if (string.IsNullOrEmpty(clientInfo.VersionGuid) || !clientInfo.VersionGuid.StartsWith("version-"))
+                    throw new InvalidHTTPResponseException("Invalid clientVersionUpload from Roblox API.");
+
+                string versionHash = clientInfo.VersionGuid["version-".Length..];
+                string version = clientInfo.Version;
+
+                string tmp = Path.Combine(Path.GetTempPath(), "Voidstrap");
+                Directory.CreateDirectory(tmp);
+
+                string luaPackagesUrl = $"https://setup.rbxcdn.com/version-{versionHash}-extracontent-luapackages.zip";
+                string extraTexturesUrl = $"https://setup.rbxcdn.com/version-{versionHash}-extracontent-textures.zip";
+                string contentTexturesUrl = $"https://setup.rbxcdn.com/version-{versionHash}-content-textures2.zip";
+
+                string luaPackagesZip = Path.Combine(tmp, $"extracontent-luapackages-{versionHash}.zip");
+                string extraTexturesZip = Path.Combine(tmp, $"extracontent-textures-{versionHash}.zip");
+                string contentTexturesZip = Path.Combine(tmp, $"content-textures2-{versionHash}.zip");
+
+                async Task<string> DownloadFile(string url, string path)
+                {
+                    if (File.Exists(path))
+                    {
+                        if (!overwrite)
+                        {
+                            var fi = new FileInfo(path);
+                            if (fi.Length > 0)
+                            {
+                                App.Logger.WriteLine(LOG_IDENT, $"Reusing existing file: {path}");
+                                return path;
+                            }
+                            File.Delete(path);
+                        }
+                        else File.Delete(path);
+                    }
+
+                    App.Logger.WriteLine(LOG_IDENT, $"Downloading {url} -> {path}");
+                    using var client = new HttpClient() { Timeout = TimeSpan.FromMinutes(5) };
+                    using var resp = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead);
+                    resp.EnsureSuccessStatusCode();
+
+                    await using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+                    await resp.Content.CopyToAsync(fs);
+
+                    return path;
+                }
+
+                luaPackagesZip = await DownloadFile(luaPackagesUrl, luaPackagesZip);
+                extraTexturesZip = await DownloadFile(extraTexturesUrl, extraTexturesZip);
+                contentTexturesZip = await DownloadFile(contentTexturesUrl, contentTexturesZip);
+
+                App.Logger.WriteLine(LOG_IDENT, $"All downloads complete for version {versionHash}.");
+                return (luaPackagesZip, extraTexturesZip, contentTexturesZip, versionHash, version);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException(LOG_IDENT, ex);
+                throw;
+            }
         }
     }
 }

@@ -114,15 +114,27 @@
                 Content="{x:Static resources:Strings.Menu_FastFlagEditor_ShowPresetFlags}" />
         </WrapPanel>
 
-        <!--  Flag Count Text  -->
+        <!-- Flag Count Text -->
         <TextBlock
-            x:Name="TotalFlagsTextBlock"
-            Grid.Row="2"
-            Margin="0,71,10,5"
-            HorizontalAlignment="Right"
-            FontSize="14"
-            Foreground="{StaticResource TextFillColorSecondaryBrush}"
-            Text="Flags added: 0" />
+    x:Name="CrashRateTextBlock"
+    Grid.Row="2"
+    Margin="0,91,10,5"
+    HorizontalAlignment="Right"
+    VerticalAlignment="Top"
+    FontSize="14"
+    Foreground="{StaticResource TextFillColorSecondaryBrush}"
+    Text="Crash: 0%" />
+
+        <TextBlock
+    x:Name="TotalFlagsTextBlock"
+    Grid.Row="2"
+    Margin="0,71,10,5"
+    HorizontalAlignment="Right"
+    VerticalAlignment="Top"
+    FontSize="14"
+    Foreground="{StaticResource TextFillColorSecondaryBrush}"
+    Text="Flags added: 0" />
+
         <!--  Search Bar  -->
         <Grid
             Grid.Row="3"
@@ -162,82 +174,118 @@
             </TextBlock>
         </Grid>
 
-        <!--  Data Grid  -->
-        <DataGrid
-            Name="DataGrid"
-            Grid.Row="4"
-            Margin="0,0,0,-9"
-            AutoGenerateColumns="False"
-            CanUserAddRows="False"
-            CanUserDeleteRows="False"
-            CanUserReorderColumns="False"
-            CellEditEnding="DataGrid_CellEditEnding"
-            GridLinesVisibility="Horizontal"
-            HeadersVisibility="Column">
-            <DataGrid.Style>
-                <Style BasedOn="{StaticResource {x:Type DataGrid}}" TargetType="DataGrid">
-                    <Setter Property="Background" Value="Transparent" />
-                    <Setter Property="BorderThickness" Value="0" />
-                </Style>
-            </DataGrid.Style>
-            <DataGrid.ColumnHeaderStyle>
-                <Style TargetType="DataGridColumnHeader">
-                    <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
-                    <Setter Property="Height" Value="30" />
-                    <Setter Property="Padding" Value="12,0,12,0" />
-                    <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
-                    <Setter Property="BorderThickness" Value="1" />
-                </Style>
-            </DataGrid.ColumnHeaderStyle>
-            <DataGrid.CellStyle>
-                <Style TargetType="DataGridCell">
-                    <Setter Property="Height" Value="30" />
-                    <Setter Property="Template">
-                        <Setter.Value>
-                            <ControlTemplate TargetType="DataGridCell">
-                                <Border Padding="6,0,6,0" Background="{TemplateBinding Background}">
-                                    <ContentPresenter VerticalAlignment="Center" />
-                                </Border>
-                            </ControlTemplate>
-                        </Setter.Value>
-                    </Setter>
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Foreground">
-                                <Setter.Value>
-                                    <SolidColorBrush Color="{DynamicResource TextOnAccentFillColorPrimary}" />
-                                </Setter.Value>
-                            </Setter>
-                            <Setter Property="Background">
-                                <Setter.Value>
-                                    <SolidColorBrush Color="{DynamicResource SystemAccentColorSecondary}" />
-                                </Setter.Value>
-                            </Setter>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.CellStyle>
-            <DataGrid.Columns>
-                <DataGridTemplateColumn x:Name="PresetColumn" Header="Preset">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <Image
-                                Width="25"
-                                Height="50"
-                                Source="{Binding Preset}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridTextColumn
-                    Width="425"
-                    Binding="{Binding Name}"
-                    Header="{x:Static resources:Strings.Common_Name}" />
-                <DataGridTextColumn
-                    Width="*"
-                    Binding="{Binding Value}"
-                    Header="{x:Static resources:Strings.Common_Value}" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <Border
+    Grid.Row="4"
+    CornerRadius="8"
+    Background="{DynamicResource ControlFillColorPrimaryBrush}"
+    BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+    BorderThickness="1"
+    SnapsToDevicePixels="True"
+    Margin="0,0,0,0"
+    ClipToBounds="True"
+    Effect="{DynamicResource ControlElevationShadow}">
+
+            <DataGrid
+        x:Name="DataGrid"
+        AutoGenerateColumns="False"
+        CanUserAddRows="False"
+        CanUserDeleteRows="False"
+        CanUserReorderColumns="False"
+        CellEditEnding="DataGrid_CellEditEnding"
+        GridLinesVisibility="None"
+        HeadersVisibility="Column"
+        RowHeight="32"
+        AlternatingRowBackground="{DynamicResource ControlFillColorSecondaryBrush}"
+        Background="Transparent"
+        BorderThickness="0"
+        HorizontalGridLinesBrush="{DynamicResource ControlElevationBorderBrush}"
+        VerticalGridLinesBrush="{DynamicResource ControlElevationBorderBrush}"
+        Margin="0">
+                <DataGrid.ColumnHeaderStyle>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
+                        <Setter Property="Height" Value="32" />
+                        <Setter Property="Padding" Value="10,0,10,0" />
+                        <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+                        <Setter Property="BorderThickness" Value="0 0 1 1" />
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="FontWeight" Value="Medium" />
+
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridColumnHeader">
+                                    <Border
+                        Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="6,6,0,0">
+                                        <ContentPresenter
+                            Margin="{TemplateBinding Padding}"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.ColumnHeaderStyle>
+                
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Setter Property="Padding" Value="8,0,8,0"/>
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="DataGridCell">
+                                    <Border
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="4"
+                                Margin="1,0">
+                                        <ContentPresenter VerticalAlignment="Center"/>
+                                    </Border>
+                                </ControlTemplate>
+                            </Setter.Value>
+                        </Setter>
+                        <Style.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                <Setter Property="Background" Value="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+
+                <!-- Columns -->
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn x:Name="PresetColumn" Header="Preset" Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Image Width="24" Height="24" Source="{Binding Preset}" HorizontalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+
+                    <DataGridTextColumn
+                Width="56"
+                Binding="{Binding Index}"
+                Header="Index" IsReadOnly="True"/>
+
+                    <DataGridTextColumn
+                Width="2*"
+                Binding="{Binding Name}"
+                Header="{x:Static resources:Strings.Common_Name}" />
+
+                    <DataGridTextColumn
+                Width="*"
+                Binding="{Binding Value}"
+                Header="{x:Static resources:Strings.Common_Value}" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+
 
         <!--  Expander  -->
         <Expander
@@ -259,7 +307,6 @@
                     BorderThickness="1"
                     FontSize="13"
                     Foreground="{DynamicResource TextFillColorPrimaryBrush}">
-                    <!--  Adjust height as needed  -->
                     <ListBox.ItemTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding}" TextWrapping="Wrap" />

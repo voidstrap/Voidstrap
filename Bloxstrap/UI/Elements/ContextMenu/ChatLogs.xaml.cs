@@ -3,9 +3,6 @@ using Voidstrap.UI.ViewModels.ContextMenu;
 
 namespace Voidstrap.UI.Elements.ContextMenu
 {
-    /// <summary>
-    /// Interaction logic for ChatLogs.xaml
-    /// </summary>
     public partial class ChatLogs
     {
         public ChatLogs(ActivityWatcher watcher)

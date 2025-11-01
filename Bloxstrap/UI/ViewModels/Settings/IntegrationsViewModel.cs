@@ -1,19 +1,33 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows.Input;
-
+﻿using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
-
-using CommunityToolkit.Mvvm.Input;
+using System.Collections.ObjectModel;
+using System.Windows;
+using System.Windows.Input;
+using System.Xml.Linq;
+using Voidstrap.Integrations;
+using Voidstrap.UI.Elements.ContextMenu;
+using Wpf.Ui.Appearance;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
     public class IntegrationsViewModel : NotifyPropertyChangedViewModel
     {
         public ICommand AddIntegrationCommand => new RelayCommand(AddIntegration);
-
         public ICommand DeleteIntegrationCommand => new RelayCommand(DeleteIntegration);
-
         public ICommand BrowseIntegrationLocationCommand => new RelayCommand(BrowseIntegrationLocation);
+        public ICommand OpenHistoryWindowCommand { get; }
+        public ICommand MusicWindowCommand { get; }
+        public ICommand RPCWindowCommand { get; }
+
+        private readonly ActivityWatcher _watcher;
+
+        public IntegrationsViewModel(ActivityWatcher watcher)
+        {
+            _watcher = watcher;
+            OpenHistoryWindowCommand = new RelayCommand(OpenHistoryWindow);
+            MusicWindowCommand = new RelayCommand(MusicPlayerWindow);
+            RPCWindowCommand = new RelayCommand(RPCUIWindow);
+        }
 
         private void AddIntegration()
         {
@@ -26,6 +40,24 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             OnPropertyChanged(nameof(SelectedCustomIntegrationIndex));
             OnPropertyChanged(nameof(IsCustomIntegrationSelected));
+        }
+
+        private void OpenHistoryWindow()
+        {
+            var historyWindow = new ServerHistory(_watcher);
+            historyWindow.Show();
+        }
+
+        private void MusicPlayerWindow()
+        {
+            var musicPlayerWindow = new MusicPlayer(_watcher);
+            musicPlayerWindow.Show();
+        }
+
+        private void RPCUIWindow()
+        {
+            var rpcUIWindow = new RPCWindow();
+            rpcUIWindow.Show();
         }
 
         private void DeleteIntegration()
@@ -91,16 +123,35 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.ShowServerDetails = value;
         }
 
-        public bool VoidstrapEnabled
+        public bool exitondissy
         {
-            get => App.Settings.Prop.VoidstrapRPCReal;
-            set => App.Settings.Prop.VoidstrapRPCReal = value;
+            get => App.Settings.Prop.exitondissy;
+            set => App.Settings.Prop.exitondissy = value;
+        }
+
+        public string gamename
+        {
+            get => App.Settings.Prop.CustomGameName;
+            set => App.Settings.Prop.CustomGameName = value;
+        }
+
+        public bool ServerUptimeBetterBLOXcuzitsbetterXD
+        {
+            get => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD;
+            set => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD = value;
+        }
+
+        public string gameimage
+        {
+            get => App.Settings.Prop.UseCustomIcon;
+            set => App.Settings.Prop.UseCustomIcon = value;
         }
 
         public bool PlayerLogsEnabled
         {
             get => App.FastFlags.GetPreset("Players.LogLevel") == "trace";
-            set {
+            set
+            {
                 App.FastFlags.SetPreset("Players.LogLevel", value ? "trace" : null);
                 App.FastFlags.SetPreset("Players.LogPattern", value ? "ExpChat/mountClientApp" : null);
             }
@@ -108,7 +159,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool DiscordActivityEnabled
         {
-            get => App.Settings.Prop.UseDiscordRichPresence || App.Settings.Prop.VoidstrapRPCReal;
+            get => App.Settings.Prop.UseDiscordRichPresence;
             set
             {
                 App.Settings.Prop.UseDiscordRichPresence = value;
@@ -117,12 +168,21 @@ namespace Voidstrap.UI.ViewModels.Settings
                 {
                     DiscordActivityJoinEnabled = value;
                     DiscordAccountOnProfile = value;
+                    GameIconChecked = value;
+                    ServerLocationGame = value;
                     OnPropertyChanged(nameof(DiscordActivityJoinEnabled));
                     OnPropertyChanged(nameof(DiscordAccountOnProfile));
+                    OnPropertyChanged(nameof(GameIconChecked));
+                    OnPropertyChanged(nameof(ServerLocationGame));
                 }
             }
         }
 
+        public bool UncapFPS
+        {
+            get => RobloxSettings.IsUncapped();
+            set => RobloxSettings.SetUncapped(value);
+        }
 
         public bool DiscordActivityJoinEnabled
         {
@@ -134,6 +194,34 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.ShowAccountOnRichPresence;
             set => App.Settings.Prop.ShowAccountOnRichPresence = value;
+        }
+
+        public bool GameIconChecked
+        {
+            get => App.Settings.Prop.GameIconChecked;
+            set => App.Settings.Prop.GameIconChecked = value;
+        }
+        public bool GameNameChecked
+        {
+            get => App.Settings.Prop.GameNameChecked;
+            set => App.Settings.Prop.GameNameChecked = value;
+        }
+
+        public bool GameCreatorChecked
+        {
+            get => App.Settings.Prop.GameCreatorChecked;
+            set => App.Settings.Prop.GameCreatorChecked = value;
+        }
+        public bool GameStatusChecked
+        {
+            get => App.Settings.Prop.GameStatusChecked;
+            set => App.Settings.Prop.GameStatusChecked = value;
+        }
+
+        public bool ServerLocationGame
+        {
+            get => App.Settings.Prop.ServerLocationGame;
+            set => App.Settings.Prop.ServerLocationGame = value;
         }
 
         public bool DisableAppPatchEnabled

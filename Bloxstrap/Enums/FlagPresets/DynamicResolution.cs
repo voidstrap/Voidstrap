@@ -5,6 +5,9 @@
         [EnumName(FromTranslation = "Default")]
         Default,
 
+        [EnumName(StaticName = "144p")]
+        Resolution1,
+
         [EnumName(StaticName = "240p")]
         Resolution2,
 

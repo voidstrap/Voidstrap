@@ -3,9 +3,6 @@ using Voidstrap.UI.ViewModels.ContextMenu;
 
 namespace Voidstrap.UI.Elements.ContextMenu
 {
-    /// <summary>
-    /// Interaction logic for OutputConsole.xaml
-    /// </summary>
     public partial class OutputConsole
     {
         public OutputConsole(ActivityWatcher watcher)

@@ -11,190 +11,153 @@ using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Dpi;
 
-namespace Wpf.Ui.TitleBar;
-
-/// <summary>
-/// Brings the Snap Layout functionality from Windows 11 to a custom <see cref="Controls.TitleBar"/>.
-/// </summary>
-internal sealed class SnapLayout : IThemeControl
+namespace Wpf.Ui.TitleBar
 {
     /// <summary>
-    /// List of snap layout buttons.
+    /// Enables Windows 11 Snap Layout functionality for a custom <see cref="Controls.TitleBar"/>.
     /// </summary>
-    private readonly SnapLayoutButton[] _buttons;
-
-    /// <summary>
-    /// Currently used theme.
-    /// </summary>
-    private ThemeType _currentTheme;
-
-    /// <summary>
-    /// Currently active hover color.
-    /// </summary>
-    private SolidColorBrush _currentHoverColor = Brushes.Transparent;
-
-    /// <summary>
-    /// Current theme.
-    /// </summary>
-    public ThemeType Theme
+    internal sealed class SnapLayout : IThemeControl
     {
-        get => _currentTheme;
-        set
+        private readonly SnapLayoutButton[] _buttons;
+        private ThemeType _currentTheme;
+        private SolidColorBrush _currentHoverColor = Brushes.Transparent;
+
+        /// <summary>
+        /// Gets or sets the current theme.
+        /// </summary>
+        public ThemeType Theme
         {
-            _currentHoverColor = value == ThemeType.Light ? HoverColorLight : HoverColorDark;
-            _currentTheme = value;
+            get => _currentTheme;
+            set
+            {
+                _currentTheme = value;
+                _currentHoverColor = value == ThemeType.Light ? HoverColorLight : HoverColorDark;
+            }
         }
-    }
 
-    /// <summary>
-    /// Default background.
-    /// </summary>
-    public SolidColorBrush DefaultButtonBackground { get; set; } = Brushes.Transparent;
+        /// <summary>
+        /// Default button background.
+        /// </summary>
+        public SolidColorBrush DefaultButtonBackground { get; set; } = Brushes.Transparent;
 
-    /// <summary>
-    /// Hover background when light theme.
-    /// </summary>
-    public SolidColorBrush HoverColorLight = Brushes.Transparent;
+        /// <summary>
+        /// Hover color for light theme.
+        /// </summary>
+        public SolidColorBrush HoverColorLight { get; set; } = Brushes.Transparent;
 
-    /// <summary>
-    /// Hover background when dark theme.
-    /// </summary>
-    public SolidColorBrush HoverColorDark = Brushes.Transparent;
+        /// <summary>
+        /// Hover color for dark theme.
+        /// </summary>
+        public SolidColorBrush HoverColorDark { get; set; } = Brushes.Transparent;
 
-    /// <summary>
-    /// Creates new instance.
-    /// </summary>
-    private SnapLayout(Window window, Wpf.Ui.Controls.Button maximizeButton, Wpf.Ui.Controls.Button restoreButton)
-    {
-        if (window == null)
-            return;
-
-        var windowHandle = new WindowInteropHelper(window).Handle;
-
-        if (windowHandle == IntPtr.Zero)
-            return;
-
-        var windowDpi = DpiHelper.GetWindowDpi(windowHandle);
-
-        _buttons = new[]
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SnapLayout"/> class.
+        /// </summary>
+        private SnapLayout(Window window, Wpf.Ui.Controls.Button maximizeButton, Wpf.Ui.Controls.Button restoreButton)
         {
-            new SnapLayoutButton(maximizeButton, TitleBarButton.Maximize, windowDpi.DpiScaleX),
-            new SnapLayoutButton(restoreButton, TitleBarButton.Restore, windowDpi.DpiScaleX),
-        };
+            if (window == null) return;
 
-        var windowSource = HwndSource.FromHwnd(windowHandle);
+            var hwnd = new WindowInteropHelper(window).Handle;
+            if (hwnd == IntPtr.Zero) return;
 
-        if (windowSource != null)
-            windowSource.AddHook(HwndSourceHook);
-    }
+            var dpiScale = DpiHelper.GetWindowDpi(hwnd).DpiScaleX;
 
-    /// <summary>
-    /// Determines whether the snap layout is supported.
-    /// </summary>
-    public static bool IsSupported()
-    {
-        return Win32.Utilities.IsOSWindows11OrNewer;
-    }
+            _buttons = new[]
+            {
+                new SnapLayoutButton(maximizeButton, TitleBarButton.Maximize, dpiScale),
+                new SnapLayoutButton(restoreButton, TitleBarButton.Restore, dpiScale)
+            };
 
-    /// <summary>
-    /// Registers the snap layout for provided buttons and window.
-    /// </summary>
-    public static SnapLayout Register(Window window, Wpf.Ui.Controls.Button maximizeButton, Wpf.Ui.Controls.Button restoreButton)
-    {
-        return new SnapLayout(window, maximizeButton, restoreButton);
-    }
+            HwndSource.FromHwnd(hwnd)?.AddHook(WndProc);
+        }
 
-    /// <summary>
-    /// Represents the method that handles Win32 window messages.
-    /// </summary>
-    /// <param name="hWnd">The window handle.</param>
-    /// <param name="uMsg">The message ID.</param>
-    /// <param name="wParam">The message's wParam value.</param>
-    /// <param name="lParam">The message's lParam value.</param>
-    /// <param name="handled">A value that indicates whether the message was handled. Set the value to <see langword="true"/> if the message was handled; otherwise, <see langword="false"/>.</param>
-    /// <returns>The appropriate return value depends on the particular message. See the message documentation details for the Win32 message being handled.</returns>
-    private IntPtr HwndSourceHook(IntPtr hWnd, int uMsg, IntPtr wParam, IntPtr lParam, ref bool handled)
-    {
-        var mouseNotification = (Interop.User32.WM)uMsg;
+        /// <summary>
+        /// Checks if Snap Layouts are supported on the current OS.
+        /// </summary>
+        public static bool IsSupported() => Win32.Utilities.IsOSWindows11OrNewer;
 
-        switch (mouseNotification)
+        /// <summary>
+        /// Registers Snap Layout for the provided window and title bar buttons.
+        /// </summary>
+        public static SnapLayout Register(Window window, Wpf.Ui.Controls.Button maximizeButton, Wpf.Ui.Controls.Button restoreButton)
+            => new(window, maximizeButton, restoreButton);
+
+        /// <summary>
+        /// Processes native Win32 window messages.
+        /// </summary>
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
-            case Interop.User32.WM.MOVE:
-                // Adjust [Size] of the buttons if the DPI is changed
-                break;
+            var message = (Interop.User32.WM)msg;
 
-            // Mouse leaves the window
-            case Interop.User32.WM.NCMOUSELEAVE:
-                _buttons[0].RemoveHover(DefaultButtonBackground);
-                _buttons[1].RemoveHover(DefaultButtonBackground);
+            switch (message)
+            {
+                case Interop.User32.WM.MOVE:
+                    // Reserved for future DPI scaling updates.
+                    break;
 
-                break;
+                case Interop.User32.WM.NCMOUSELEAVE:
+                    RemoveHoverFromAll();
+                    break;
 
-            // Left button clicked down
-            case Interop.User32.WM.NCLBUTTONDOWN:
-                if (_buttons[0].IsMouseOver(lParam))
+                case Interop.User32.WM.NCLBUTTONDOWN:
+                    HandleMouseDown(lParam, ref handled);
+                    break;
+
+                case Interop.User32.WM.NCLBUTTONUP:
+                    HandleMouseUp(lParam, ref handled);
+                    break;
+
+                case Interop.User32.WM.NCHITTEST:
+                    return HandleHitTest(lParam, ref handled);
+            }
+
+            return IntPtr.Zero;
+        }
+
+        private void RemoveHoverFromAll()
+        {
+            foreach (var btn in _buttons)
+                btn.RemoveHover(DefaultButtonBackground);
+        }
+
+        private void HandleMouseDown(IntPtr lParam, ref bool handled)
+        {
+            foreach (var btn in _buttons)
+            {
+                if (!btn.IsMouseOver(lParam)) continue;
+                btn.IsClickedDown = true;
+                handled = true;
+            }
+        }
+
+        private void HandleMouseUp(IntPtr lParam, ref bool handled)
+        {
+            foreach (var btn in _buttons)
+            {
+                if (btn.IsClickedDown && btn.IsMouseOver(lParam))
                 {
-                    _buttons[0].IsClickedDown = true;
-
+                    btn.InvokeClick();
                     handled = true;
-                }
-
-                if (_buttons[1].IsMouseOver(lParam))
-                {
-                    _buttons[1].IsClickedDown = true;
-
-                    handled = true;
-                }
-
-                break;
-
-            // Left button clicked up
-            case Interop.User32.WM.NCLBUTTONUP:
-                if (_buttons[0].IsClickedDown && _buttons[0].IsMouseOver(lParam))
-                {
-                    _buttons[0].InvokeClick();
-
-                    handled = true;
-
                     break;
                 }
-
-                if (_buttons[1].IsClickedDown && _buttons[1].IsMouseOver(lParam))
-                {
-                    _buttons[1].InvokeClick();
-
-                    handled = true;
-                }
-
-                break;
-
-            // Hit test, for determining whether the mouse cursor is over one of the buttons
-            case Interop.User32.WM.NCHITTEST:
-                if (_buttons[0].IsMouseOver(lParam))
-                {
-                    _buttons[0].Hover(_currentHoverColor);
-
-                    handled = true;
-
-                    return new IntPtr((int)Interop.User32.WM_NCHITTEST.HTMAXBUTTON);
-                }
-
-                _buttons[0].RemoveHover(DefaultButtonBackground);
-
-                if (_buttons[1].IsMouseOver(lParam))
-                {
-                    _buttons[1].Hover(_currentHoverColor);
-
-                    handled = true;
-
-                    return new IntPtr((int)Interop.User32.WM_NCHITTEST.HTMAXBUTTON);
-                }
-
-                _buttons[1].RemoveHover(DefaultButtonBackground);
-
-                return IntPtr.Zero;
+            }
         }
 
-        return IntPtr.Zero;
+        private IntPtr HandleHitTest(IntPtr lParam, ref bool handled)
+        {
+            foreach (var btn in _buttons)
+            {
+                if (btn.IsMouseOver(lParam))
+                {
+                    btn.Hover(_currentHoverColor);
+                    handled = true;
+                    return new IntPtr((int)Interop.User32.WM_NCHITTEST.HTMAXBUTTON);
+                }
+
+                btn.RemoveHover(DefaultButtonBackground);
+            }
+
+            return IntPtr.Zero;
+        }
     }
 }
