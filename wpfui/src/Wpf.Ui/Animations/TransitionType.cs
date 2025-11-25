@@ -15,6 +15,8 @@ public enum TransitionType
     /// </summary>
     None,
 
+    FadeInWithSlideRight,
+
     /// <summary>
     /// Change opacity.
     /// </summary>

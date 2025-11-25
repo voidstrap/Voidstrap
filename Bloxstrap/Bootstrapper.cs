@@ -565,16 +565,10 @@ namespace Voidstrap
                         StartContinuousRobloxOptimization();
                     }
 
-                    if (App.Settings.Prop?.OverClockGPU == true)
-                    {
-                        StartAggressiveGpuPerf(LOG_IDENT);
-                    }
 
                     if (App.Settings.Prop?.IsBetterServersEnabled == true)
                         ApplyOptimizations(_robloxProcess);
 
-                    if (App.Settings.Prop?.OverClockCPU == true)
-                        ApplyOverclock(_robloxProcess);
 
                     if (App.Settings.Prop?.DX12Like == true)
                     {
@@ -899,104 +893,6 @@ namespace Voidstrap
             catch (Exception ex)
             {
                 App.Logger.WriteLine(logIdent, $"Priority worker crashed: {ex}");
-            }
-        }
-
-        private void StartAggressiveGpuPerf(string logIdent)
-        {
-            try
-            {
-                _gpuPerfManager = new AggressivePerformanceManager
-                {
-                    MonitorInterval = TimeSpan.FromSeconds(2),
-                    CpuThresholdPercent = 40,
-                    GpuThresholdPercent = 50,
-                    MinModeHoldTime = TimeSpan.FromSeconds(10),
-                    RaiseProcessPriority = true,
-                    SetAffinityToAllLogicalProcessors = true,
-                    IncreaseTimerResolution = true,
-                    UseGpuStress = true,
-                    GpuStressThreadsPerDispatch = 256,
-                    GpuStressWorkMultiplier = 16
-                };
-                _gpuPerfManager.OnLog += msg => App.Logger.WriteLine("AggressivePerf", msg);
-                _gpuPerfManager.OnModeChanged += isHigh =>
-                    App.Logger.WriteLine("AggressivePerf", $"Performance mode: {(isHigh ? "High" : "Balanced")}");
-                _gpuPerfManager.Start();
-            }
-            catch (Exception ex)
-            {
-                App.Logger.WriteLine(logIdent, $"GPU perf manager failed to start: {ex.Message}");
-            }
-        }
-
-        public void ApplyOverclock(Process targetProcess)
-        {
-            if (targetProcess == null || targetProcess.HasExited)
-                return;
-
-            try
-            {
-                targetProcess.PriorityClass = ProcessPriorityClass.High;
-                targetProcess.PriorityBoostEnabled = true;
-                TrySetRealtimePriority(targetProcess);
-                PinThreadsToCores(targetProcess);
-                _running = true;
-                _monitorThread = new Thread(() => CpuLoadBalancer(targetProcess))
-                {
-                    IsBackground = true
-                };
-                _monitorThread.Start();
-
-                Debug.WriteLine($"[CPU Tuner] Performance boost applied to {targetProcess.ProcessName} (PID {targetProcess.Id}).");
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"[CPU Tuner] Error: {ex.Message}");
-            }
-        }
-
-        private void TrySetRealtimePriority(Process process)
-        {
-            try
-            {
-                process.PriorityClass = ProcessPriorityClass.RealTime;
-            }
-            catch
-            {
-                process.PriorityClass = ProcessPriorityClass.High;
-            }
-        }
-
-        private void PinThreadsToCores(Process process)
-        {
-            int coreCount = Environment.ProcessorCount;
-            int coreIndex = 0;
-
-            foreach (ProcessThread thread in process.Threads.Cast<ProcessThread>())
-            {
-                try
-                {
-                    int mask = 1 << coreIndex;
-                    thread.ProcessorAffinity = (IntPtr)mask;
-                    thread.PriorityLevel = ThreadPriorityLevel.TimeCritical;
-                    coreIndex = (coreIndex + 1) % coreCount;
-                }
-                catch
-                {
-                }
-            }
-        }
-
-        private void CpuLoadBalancer(Process process)
-        {
-            while (_running && !process.HasExited)
-            {
-                try
-                {
-                    Thread.Sleep(100);
-                }
-                catch { break; }
             }
         }
 

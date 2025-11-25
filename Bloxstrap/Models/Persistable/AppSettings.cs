@@ -44,18 +44,18 @@ namespace Voidstrap.Models.Persistable
         public bool UseFastFlagManager { get; set; } = true;
         public bool WPFSoftwareRender { get; set; } = false;
         public bool FixTeleports { get; set; } = false;
-
-        // Launch Configuration
         public bool ConfirmLaunches { get; set; } = true;
         public bool HasLaunchedGame { get; set; } = false;
         public bool OptimizeRoblox { get; set; } = false;
         public bool BackgroundUpdatesEnabled { get; set; } = true;
+        public bool VoidNotify { get; set; } = true;
         public bool MultiInstanceLaunching { get; set; } = false;
         public bool EnableCustomStatusDisplay { get; set; } = true;
         public bool RenameClientToEuroTrucks2 { get; set; } = false;
+        public bool SnowWOWSOCOOLWpfSnowbtw { get; set; } = false;
+
         public string ClientPath { get; set; } = Path.Combine(Paths.Base, "Roblox", "Player");
 
-        // Localization
         public string Locale { get; set; } = "nil";
         public bool ForceRobloxLanguage { get; set; } = true;
         public bool FastFlagBypass { get; set; } = false;

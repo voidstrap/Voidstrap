@@ -8,8 +8,9 @@ namespace Wpf.Ui.Animations
 {
     public static class Transitions
     {
-        private const int MaxDuration = 1400;
+        private const int MaxDuration = 1200;
         private const int MinDuration = 150;
+
         public static bool ApplyTransition(object element, TransitionType type, int duration)
         {
             if (type == TransitionType.None ||
@@ -19,6 +20,7 @@ namespace Wpf.Ui.Animations
             {
                 return false;
             }
+
             duration = Math.Clamp(duration, 400, MaxDuration);
             var animationDuration = new Duration(TimeSpan.FromMilliseconds(duration));
 
@@ -32,6 +34,10 @@ namespace Wpf.Ui.Animations
 
                 case TransitionType.FadeInWithSlide:
                     ApplySlide(frameworkElement, animationDuration, 0, 60, fade: true);
+                    break;
+
+                case TransitionType.FadeInWithSlideRight:
+                    ApplySlide(frameworkElement, animationDuration, 80, 0, fade: true);
                     break;
 
                 case TransitionType.SlideBottom:
@@ -56,6 +62,7 @@ namespace Wpf.Ui.Animations
         private static void ApplyFade(FrameworkElement element, Duration duration)
         {
             element.Opacity = 0;
+
             var fadeIn = new DoubleAnimation
             {
                 From = 0.0,
@@ -67,7 +74,8 @@ namespace Wpf.Ui.Animations
             element.BeginAnimation(UIElement.OpacityProperty, fadeIn);
         }
 
-        private static void ApplySlide(FrameworkElement element, Duration duration, double offsetX, double offsetY, bool fade = false)
+        private static void ApplySlide(FrameworkElement element, Duration duration,
+                                       double offsetX, double offsetY, bool fade = false)
         {
             if (element.RenderTransform is not TranslateTransform)
                 element.RenderTransform = new TranslateTransform();
@@ -77,6 +85,7 @@ namespace Wpf.Ui.Animations
 
             var storyboard = new Storyboard();
 
+            // X animation
             if (offsetX != 0)
             {
                 var animX = new DoubleAnimation
@@ -87,10 +96,12 @@ namespace Wpf.Ui.Animations
                     EasingFunction = easing
                 };
                 Storyboard.SetTarget(animX, element);
-                Storyboard.SetTargetProperty(animX, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
+                Storyboard.SetTargetProperty(animX,
+                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.X)"));
                 storyboard.Children.Add(animX);
             }
 
+            // Y animation
             if (offsetY != 0)
             {
                 var animY = new DoubleAnimation
@@ -101,13 +112,16 @@ namespace Wpf.Ui.Animations
                     EasingFunction = easing
                 };
                 Storyboard.SetTarget(animY, element);
-                Storyboard.SetTargetProperty(animY, new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
+                Storyboard.SetTargetProperty(animY,
+                    new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
                 storyboard.Children.Add(animY);
             }
 
+            // Fade animation (optional)
             if (fade)
             {
                 element.Opacity = 0;
+
                 var fadeIn = new DoubleAnimation
                 {
                     From = 0.0,

@@ -4,12 +4,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Shapes;
+using System.Windows.Threading;
 using Voidstrap.UI.Elements.Dialogs;
 using Voidstrap.UI.ViewModels.Settings;
 using Wpf.Ui.Common;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
 using static System.Net.Mime.MediaTypeNames;
+using System.Windows.Media;
+
 
 namespace Voidstrap.UI.Elements.Settings
 {
@@ -17,6 +21,9 @@ namespace Voidstrap.UI.Elements.Settings
     {
         private Models.Persistable.WindowState _state => App.State.Prop.SettingsWindow;
         private bool _isSaveAndLaunchClicked = false;
+        private readonly Random _snowRandom = new();
+        private readonly List<Snowflake> _snowflakes = new();
+        private readonly DispatcherTimer _snowTimer;
 
         public MainWindow(bool showAlreadyRunningWarning)
         {
@@ -25,12 +32,132 @@ namespace Voidstrap.UI.Elements.Settings
             InitializeWindowState();
             InitializeNavigation();
             UpdateButtonContent();
+            _snowTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMilliseconds(26)
+            };
+            _snowTimer.Tick += SnowTimer_Tick;
+
+            Loaded += MainWindow_Loaded;
+            SizeChanged += MainWindow_SizeChanged;
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbarAsync();
         }
 
+        private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
+        {
+            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
+            {
+                InitSnow();
+                _snowTimer.Start();
+                if (SnowCanvas != null)
+                    SnowCanvas.Visibility = Visibility.Visible;
+            }
+            else
+            {
+                if (SnowCanvas != null)
+                    SnowCanvas.Visibility = Visibility.Collapsed;
+            }
+        }
 
+        private void MainWindow_SizeChanged(object? sender, SizeChangedEventArgs e)
+        {
+            InitSnow();
+        }
+
+        private void InitSnow()
+        {
+            if (SnowCanvas == null)
+                return;
+
+            SnowCanvas.Children.Clear();
+            _snowflakes.Clear();
+
+            double width = SnowCanvas.ActualWidth;
+            double height = SnowCanvas.ActualHeight;
+
+            if (width <= 0 || height <= 0)
+            {
+                width = ActualWidth;
+                height = ActualHeight;
+            }
+            const int flakeCount = 80;
+
+            for (int i = 0; i < flakeCount; i++)
+            {
+                double size = _snowRandom.Next(2, 6);
+
+                var ellipse = new Ellipse
+                {
+                    Width = size,
+                    Height = size,
+                    Fill = Brushes.White,
+                    Opacity = _snowRandom.NextDouble() * 0.6 + 0.3
+                };
+
+                SnowCanvas.Children.Add(ellipse);
+
+                var flake = new Snowflake
+                {
+                    Shape = ellipse,
+                    X = _snowRandom.NextDouble() * width,
+                    Y = _snowRandom.NextDouble() * height,
+                    SpeedY = 0.7 + _snowRandom.NextDouble() * 1.5,
+                    DriftX = -0.3 + _snowRandom.NextDouble() * 0.6,
+                    Size = size
+                };
+
+                Canvas.SetLeft(ellipse, flake.X);
+                Canvas.SetTop(ellipse, flake.Y);
+
+                _snowflakes.Add(flake);
+            }
+        }
+
+        private void SnowTimer_Tick(object? sender, EventArgs e)
+        {
+            UpdateSnow();
+        }
+
+        private void UpdateSnow()
+        {
+            if (SnowCanvas == null ||
+                SnowCanvas.ActualWidth <= 0 ||
+                SnowCanvas.ActualHeight <= 0)
+                return;
+
+            double width = SnowCanvas.ActualWidth;
+            double height = SnowCanvas.ActualHeight;
+
+            foreach (var flake in _snowflakes)
+            {
+                flake.Y += flake.SpeedY;
+                flake.X += flake.DriftX;
+                if (flake.Y > height + flake.Size)
+                {
+                    flake.Y = -flake.Size;
+                    flake.X = _snowRandom.NextDouble() * width;
+                }
+                if (flake.X < -flake.Size)
+                    flake.X = width + flake.Size;
+                else if (flake.X > width + flake.Size)
+                    flake.X = -flake.Size;
+
+                Canvas.SetLeft(flake.Shape, flake.X);
+                Canvas.SetTop(flake.Shape, flake.Y);
+            }
+        }
+
+        private sealed class Snowflake
+        {
+            public Ellipse Shape { get; set; } = null!;
+            public double X { get; set; }
+            public double Y { get; set; }
+            public double SpeedY { get; set; }
+            public double DriftX { get; set; }
+            public double Size { get; set; }
+        }
 
         #region Initialization
 

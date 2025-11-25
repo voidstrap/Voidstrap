@@ -40,6 +40,11 @@
             </LinearGradientBrush>
         </Grid.Background>
 
+        <Canvas x:Name="SnowCanvas"
+            Grid.RowSpan="3"
+            IsHitTestVisible="False"
+            Panel.ZIndex="0" />
+
         <!-- Snackbars -->
         <ui:Snackbar x:Name="AlreadyRunningSnackbar"
                      Title="{x:Static resources:Strings.Menu_AlreadyRunning_Title}"
@@ -125,10 +130,9 @@
                     <ui:NavigationItem Content="Help" Icon="ChatHelp20" PageType="{x:Type pages:HelpPage}" />
                 </ui:NavigationFluent.Items>
 
-                <!-- Footer -->
                 <ui:NavigationFluent.Footer>
-                    <ui:NavigationItem Content="Hub" Icon="Cloud16" PageType="{x:Type pages:HubPage}" />
                     <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
+                    <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:HubPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48"
                                        Command="{Binding OpenAboutCommand, Mode=OneTime}" />

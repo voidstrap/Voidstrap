@@ -11,23 +11,32 @@
                   Title="Music Player"
                   Width="1024"
                   Height="680"
+                  WindowStartupLocation="CenterScreen"
                   Background="{ui:ThemeResource ApplicationBackgroundBrush}"
                   ExtendsContentIntoTitleBar="True"
-                  WindowStartupLocation="CenterScreen">
+                  UseLayoutRounding="True"
+                  SnapsToDevicePixels="True">
 
     <Grid>
+        <!-- Window background -->
         <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Offset="0.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
-                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
-                <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
-                <GradientStop Offset="1.0"  Color="{DynamicResource WindowBackgroundColorPrimary}" />
+            <LinearGradientBrush StartPoint="0,0"
+                                 EndPoint="1,1">
+                <GradientStop Offset="0.0"
+                              Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.35"
+                              Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="0.75"
+                              Color="{DynamicResource WindowBackgroundColorThird}" />
+                <GradientStop Offset="1.0"
+                              Color="{DynamicResource WindowBackgroundColorPrimary}" />
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- 🔹 Title Bar -->
@@ -39,61 +48,96 @@
                      Icon="pack://application:,,,/Voidstrap.ico"
                      Background="{DynamicResource WindowTitleBarBackgroundBrush}" />
 
-        <!-- 🔹 Tabs -->
-        <TabControl Grid.Row="1" Margin="12" Background="Transparent">
+        <!-- 🔹 Main Content -->
+        <TabControl Grid.Row="1"
+                    Margin="12"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Padding="0">
 
             <!-- 🎵 Music Browser Tab -->
             <TabItem Header="Music Browser">
                 <Grid Margin="8">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
                     <!-- 🔍 Search Bar -->
-                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                        <TextBox Width="240"
-                     Height="32"
-                     VerticalContentAlignment="Center"
-                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"/>
-                    </StackPanel>
+                    <DockPanel Grid.Row="0"
+                               LastChildFill="True"
+                               Margin="0,0,0,8">
+                        <TextBlock Text="Search"
+                                   VerticalAlignment="Center"
+                                   Margin="0,0,8,0"
+                                   Opacity="0.7" />
+                        <TextBox Height="32"
+                                 VerticalContentAlignment="Center"
+                                 Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0"
+                                 MinWidth="240"
+                                 Padding="6,0" />
+                    </DockPanel>
 
                     <!-- 🎶 Music Library -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
                         <ItemsControl ItemsSource="{Binding FilteredMusicLibrary}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type models:TrackItem}">
                                     <Border CornerRadius="8"
-                                Padding="8"
-                                Margin="6"
-                                Background="{DynamicResource ControlFillColorDefaultBrush}">
-                                        <DockPanel>
+                                            Padding="10"
+                                            Margin="4"
+                                            Background="{DynamicResource ControlFillColorDefaultBrush}"
+                                            BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                                            BorderThickness="1">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="72" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="Auto" />
+                                            </Grid.ColumnDefinitions>
+
                                             <!-- Album icon / artwork -->
-                                            <Image Source="{Binding Icon}"
-                                       Width="64" Height="64"
-                                       Margin="0,0,8,0"
-                                       Stretch="UniformToFill"
-                                       ClipToBounds="True" />
+                                            <Image Grid.Column="0"
+                                                   Source="{Binding Icon}"
+                                                   Width="64"
+                                                   Height="64"
+                                                   Margin="0,0,8,0"
+                                                   Stretch="UniformToFill"
+                                                   ClipToBounds="True" />
 
                                             <!-- Track details -->
-                                            <StackPanel DockPanel.Dock="Left" VerticalAlignment="Center">
+                                            <StackPanel Grid.Column="1"
+                                                        VerticalAlignment="Center"
+                                                        Margin="0,0,8,0">
                                                 <TextBlock Text="{Binding Title}"
-                                               FontWeight="SemiBold"
-                                               FontSize="14"/>
+                                                           FontWeight="SemiBold"
+                                                           FontSize="14"
+                                                           TextTrimming="CharacterEllipsis" />
                                                 <TextBlock Text="{Binding Artist}"
-                                               FontSize="12"
-                                               Opacity="0.7"/>
+                                                           FontSize="12"
+                                                           Opacity="0.7"
+                                                           TextTrimming="CharacterEllipsis" />
                                             </StackPanel>
 
                                             <!-- Download button -->
-                                            <ui:Button Content="Download"
-                                           Icon="ArrowDownload24"
-                                           Appearance="Primary"
-                                           DockPanel.Dock="Right"
-                                           Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                           CommandParameter="{Binding}"
-                                           HorizontalAlignment="Right"/>
-                                        </DockPanel>
+                                            <ui:Button Grid.Column="2"
+                                                       Content="Download"
+                                                       Icon="ArrowDownload24"
+                                                       Appearance="Primary"
+                                                       HorizontalAlignment="Right"
+                                                       VerticalAlignment="Center"
+                                                       Command="{Binding DataContext.DownloadCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                       CommandParameter="{Binding}" />
+                                        </Grid>
                                     </Border>
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
@@ -102,73 +146,118 @@
                 </Grid>
             </TabItem>
 
-
-
-            <!-- 🎧 Music Player Tab -->
             <TabItem Header="Music Player">
                 <Grid Margin="16">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="360"/>
-                        <ColumnDefinition Width="16"/>
-                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="360" />
+                        <ColumnDefinition Width="16" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
                     <!-- Left: Track List -->
-                    <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Column="0"
+                                  VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
                         <StackPanel>
-                            <TextBlock Text="Library" FontSize="18" FontWeight="Medium" Margin="0,0,0,8"/>
+                            <TextBlock Text="Library"
+                                       FontSize="18"
+                                       FontWeight="Medium"
+                                       Margin="0,0,0,8" />
 
-                            <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,0,0,12">
                                 <ui:Button Content="Import Files"
                                            Command="{Binding OpenFilesCommand}"
-                                           Appearance="Secondary"/>
-
+                                           Appearance="Secondary" />
                                 <ui:Button Content="Connect RPC"
                                            Command="{Binding ConnectRpcCommand}"
                                            Appearance="Secondary"
-                                           Margin="4,0,0,0"/>
+                                           Margin="6,0,0,0" />
                             </StackPanel>
 
                             <ListView ItemsSource="{Binding Tracks}"
                                       SelectedItem="{Binding SelectedTrack, Mode=TwoWay}"
-                                      BorderThickness="0">
+                                      BorderThickness="0"
+                                      Background="Transparent"
+                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                      VirtualizingPanel.IsVirtualizing="True"
+                                      VirtualizingPanel.VirtualizationMode="Recycling">
+
+                                <ListView.ItemContainerStyle>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="Padding" Value="0" />
+                                        <Setter Property="Margin" Value="0,2" />
+                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        <Setter Property="VerticalContentAlignment" Value="Center" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                        <Setter Property="SnapsToDevicePixels" Value="True" />
+                                        <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource ControlFillColorSecondaryBrush}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter Property="Background"
+                                                        Value="{DynamicResource AccentFillColorDefaultBrush}" />
+                                                <Setter Property="Foreground" Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </ListView.ItemContainerStyle>
+
                                 <ListView.ItemTemplate>
                                     <DataTemplate DataType="{x:Type models:TrackItem}">
-                                        <Border Margin="0,2" CornerRadius="4" Padding="4"
+                                        <Border CornerRadius="4"
+                                                Padding="6"
                                                 Background="{DynamicResource ControlFillColorDefaultBrush}">
                                             <Grid>
                                                 <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="44"/>
-                                                    <ColumnDefinition Width="*"/>
-                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="44" />
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
                                                 </Grid.ColumnDefinitions>
 
-                                                <Image Source="{Binding Icon}" Width="36" Height="36"
-                                                       Margin="4" Grid.Column="0"
-                                                       Stretch="UniformToFill" ClipToBounds="True" />
+                                                <Image Grid.Column="0"
+                                                       Source="{Binding Icon}"
+                                                       Width="36"
+                                                       Height="36"
+                                                       Margin="4,0"
+                                                       Stretch="UniformToFill"
+                                                       ClipToBounds="True" />
 
-                                                <StackPanel Grid.Column="1" Orientation="Vertical" Margin="6,0,0,0">
+                                                <StackPanel Grid.Column="1"
+                                                            Orientation="Vertical"
+                                                            Margin="6,0,0,0">
                                                     <TextBox Text="{Binding Title, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-         FontWeight="SemiBold"
-         FontSize="14"
-         BorderThickness="0"
-         Background="Transparent"
-         Padding="2"
-         KeyDown="TrackTitleEdit_KeyDown"
-         ToolTip="{Binding Title}"
-         MaxLength="30"
-         TextWrapping="NoWrap"/>
-
-                                                    <TextBlock Text="{Binding FileType}" Opacity="0.7" FontSize="12"/>
+                                                             FontWeight="SemiBold"
+                                                             FontSize="14"
+                                                             BorderThickness="0"
+                                                             Background="Transparent"
+                                                             Padding="2,0"
+                                                             KeyDown="TrackTitleEdit_KeyDown"
+                                                             ToolTip="{Binding Title}"
+                                                             MaxLength="30"
+                                                             TextWrapping="NoWrap"
+                                                             VerticalAlignment="Center" />
+                                                    <TextBlock Text="{Binding FileType}"
+                                                               Opacity="0.7"
+                                                               FontSize="12" />
                                                 </StackPanel>
 
-                                                <StackPanel Grid.Column="2" Orientation="Horizontal"
-                                                            HorizontalAlignment="Right" VerticalAlignment="Center">
-                                                    <TextBlock Text="{Binding DurationString}" Opacity="0.8" Margin="0,0,8,0"/>
+                                                <StackPanel Grid.Column="2"
+                                                            Orientation="Horizontal"
+                                                            HorizontalAlignment="Right"
+                                                            VerticalAlignment="Center">
+                                                    <TextBlock Text="{Binding DurationString}"
+                                                               Opacity="0.8"
+                                                               Margin="0,0,8,0" />
                                                     <ui:Button Icon="Delete24"
                                                                ToolTip="Remove Track"
                                                                Appearance="Danger"
-                                                               Width="28" Height="28"
+                                                               Width="28"
+                                                               Height="28"
                                                                Command="{Binding DataContext.RemoveTrackCommand, RelativeSource={RelativeSource AncestorType=ListView}}"
                                                                CommandParameter="{Binding}" />
                                                 </StackPanel>
@@ -180,64 +269,101 @@
                         </StackPanel>
                     </ScrollViewer>
 
-                    <Grid Grid.Column="1"/>
+                    <!-- Spacer -->
+                    <Grid Grid.Column="1" />
 
                     <!-- Right: Player Controls -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Now Playing" FontSize="18" FontWeight="Medium"/>
+                        <TextBlock Text="Now Playing"
+                                   FontSize="18"
+                                   FontWeight="Medium" />
 
-                        <Border CornerRadius="4"
+                        <Border CornerRadius="8"
                                 Padding="16"
                                 Margin="0,8,0,16"
                                 BorderThickness="1"
                                 BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
                                 Background="{DynamicResource ControlFillColorDefaultBrush}">
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-                                    <Image Source="{Binding NowPlaying.Icon}" Width="64" Height="64" Margin="0,0,12,0"
-                                           Stretch="UniformToFill" ClipToBounds="True" />
+                                <StackPanel Orientation="Horizontal"
+                                            Margin="0,0,0,8">
+                                    <Image Source="{Binding NowPlaying.Icon}"
+                                           Width="72"
+                                           Height="72"
+                                           Margin="0,0,12,0"
+                                           Stretch="UniformToFill"
+                                           ClipToBounds="True" />
                                     <StackPanel>
-                                        <TextBlock Text="{Binding NowPlaying.Title}" FontSize="18" FontWeight="SemiBold"/>
-                                        <TextBlock Text="{Binding NowPlaying.FileType}" Opacity="0.7"/>
-                                        <TextBlock Text="{Binding NowPlaying.FilePath}" FontSize="11" Opacity="0.6" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding NowPlaying.Title}"
+                                                   FontSize="18"
+                                                   FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding NowPlaying.FileType}"
+                                                   Opacity="0.7" />
+                                        <TextBlock Text="{Binding NowPlaying.FilePath}"
+                                                   FontSize="11"
+                                                   Opacity="0.6"
+                                                   TextTrimming="CharacterEllipsis" />
                                     </StackPanel>
                                 </StackPanel>
 
                                 <Slider Minimum="0"
                                         Maximum="{Binding NowPlayingDurationSeconds}"
                                         Value="{Binding PositionSeconds, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                        Margin="0,4,0,0"/>
+                                        Margin="0,4,0,0" />
 
                                 <DockPanel Margin="0,4,0,0">
-                                    <TextBlock DockPanel.Dock="Left" Text="{Binding PositionString}" />
+                                    <TextBlock DockPanel.Dock="Left"
+                                               Text="{Binding PositionString}" />
                                     <TextBlock Text="   |   " />
-                                    <TextBlock DockPanel.Dock="Right" Text="{Binding DurationString}" />
+                                    <TextBlock DockPanel.Dock="Right"
+                                               Text="{Binding DurationString}" />
                                 </DockPanel>
                             </StackPanel>
                         </Border>
 
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,12">
-                            <ui:Button Icon="ArrowLeft24" Content="Previous" Command="{Binding PreviousCommand}" Width="100"/>
-                            <ui:Button Icon="MusicNote224" Margin="4,0,0,0"
+                        <!-- Playback controls -->
+                        <StackPanel Orientation="Horizontal"
+                                    HorizontalAlignment="Left"
+                                    Margin="0,0,0,12">
+                            <ui:Button Icon="ArrowLeft24"
+                                       Content="Previous"
+                                       Command="{Binding PreviousCommand}"
+                                       Width="100" />
+                            <ui:Button Icon="MusicNote224"
+                                       Margin="4,0,0,0"
                                        Content="{Binding PlayPauseLabel}"
                                        Command="{Binding PlayPauseCommand}"
                                        Appearance="Primary"
-                                       Width="120"/>
-                            <ui:Button Icon="ArrowRight24" Margin="4,0,0,0" Content="Next" Command="{Binding NextCommand}" Width="80"/>
-                            <ui:Button Icon="Stop24" Margin="4,0,0,0" Content="Stop" Command="{Binding StopCommand}" Width="80"/>
+                                       Width="120" />
+                            <ui:Button Icon="ArrowRight24"
+                                       Margin="4,0,0,0"
+                                       Content="Next"
+                                       Command="{Binding NextCommand}"
+                                       Width="80" />
+                            <ui:Button Icon="Stop24"
+                                       Margin="4,0,0,0"
+                                       Content="Stop"
+                                       Command="{Binding StopCommand}"
+                                       Width="80" />
                         </StackPanel>
 
-                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,4,0,0">
-                            <TextBlock Text="Volume" Margin="0,0,6,0" VerticalAlignment="Center"/>
+                        <!-- Volume & Loop -->
+                        <StackPanel Orientation="Horizontal"
+                                    VerticalAlignment="Center"
+                                    Margin="0,4,0,0">
+                            <TextBlock Text="Volume"
+                                       Margin="0,0,6,0"
+                                       VerticalAlignment="Center" />
                             <Slider Width="200"
                                     Minimum="0"
                                     Maximum="1.0"
                                     Value="{Binding Volume, Mode=TwoWay}"
-                                    TickFrequency="0.1"/>
+                                    TickFrequency="0.1"
+                                    IsSnapToTickEnabled="True" />
                             <ui:Button Icon="ArrowRepeatAll24"
                                        Content="{Binding LoopLabel}"
                                        Command="{Binding ToggleLoopCommand}"
-                                       Width="80"
                                        Margin="8,-4,0,0" />
                         </StackPanel>
                     </StackPanel>
@@ -246,9 +372,13 @@
         </TabControl>
 
         <!-- 🔹 Footer -->
-        <DockPanel Grid.Row="2" Margin="12,0,12,12">
-            <TextBlock Text="{Binding Status}" />
-            <TextBlock DockPanel.Dock="Right" Text="{Binding Tracks.Count, StringFormat=Tracks: {0}}"/>
+        <DockPanel Grid.Row="2"
+                   Margin="12,0,12,12">
+            <TextBlock Text="{Binding Status}"
+                       VerticalAlignment="Center" />
+            <TextBlock DockPanel.Dock="Right"
+                       Text="{Binding Tracks.Count, StringFormat=Tracks: {0}}"
+                       VerticalAlignment="Center" />
         </DockPanel>
     </Grid>
 </base:WpfUiWindow>

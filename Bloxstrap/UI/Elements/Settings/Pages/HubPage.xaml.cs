@@ -1,1420 +1,170 @@
-﻿using System.Windows;
+﻿using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Linq;
+using System.Net.Http;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
-
-using Voidstrap.UI.ViewModels.Settings;
+using System.Windows.Data;
+using System.Windows.Navigation;
+using Wpf.Ui.Controls;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    public partial class HubPage
+    public partial class HubPage : UiPage
     {
+        private static readonly Uri ReleasesApiUri =
+            new("https://api.github.com/repos/voidstrap/Voidstrap/releases");
+        public ObservableCollection<GithubRelease> Releases { get; } = new();
+
+        private readonly ICollectionView _releasesView;
+
         public HubPage()
         {
-            DataContext = new HubViewModel();
             InitializeComponent();
+
+            DataContext = this;
+
+            _releasesView = CollectionViewSource.GetDefaultView(Releases);
+
+            _ = LoadReleasesAsync();
+        }
+
+        private async Task LoadReleasesAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                    "VoidstrapApp/1.0 (+https://github.com/voidstrap/Voidstrap)");
+
+                var json = await client.GetStringAsync(ReleasesApiUri);
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+
+                var releases = JsonSerializer.Deserialize<GithubRelease[]>(json, options)
+                               ?? Array.Empty<GithubRelease>();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    Releases.Clear();
+                    foreach (var rel in releases)
+                    {
+                        rel.CalculateTotals();
+                        Releases.Add(rel);
+                    }
+                });
+            }
+            catch (Exception)
+            {
+            }
         }
 
         private void SearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string query = SearchBox.Text.Trim().ToLower();
+            var query = (sender as System.Windows.Controls.TextBox)?.Text?.Trim() ?? string.Empty;
 
-            foreach (var child in ResultsPanel.Children)
+            if (string.IsNullOrWhiteSpace(query))
             {
-                if (child is GroupBox groupBox)
-                {
-                    string header = groupBox.Header?.ToString().ToLower() ?? "";
-
-                    bool match = header.Contains(query);
-
-                    groupBox.Visibility = match || string.IsNullOrWhiteSpace(query)
-                        ? Visibility.Visible
-                        : Visibility.Collapsed;
-                }
+                _releasesView.Filter = null;
             }
+            else
+            {
+                query = query.ToLowerInvariant();
+
+                _releasesView.Filter = obj =>
+                {
+                    if (obj is not GithubRelease r)
+                        return false;
+
+                    bool Matches(string? s) =>
+                        !string.IsNullOrEmpty(s) &&
+                        s.ToLowerInvariant().Contains(query);
+
+                    return Matches(r.Name)
+                           || Matches(r.TagName)
+                           || Matches(r.Body);
+                };
+            }
+
+            _releasesView.Refresh();
         }
 
-
-        private void InstallButton_Click(object sender, RoutedEventArgs e)
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            var url = "https://cdn.discordapp.com/attachments/1333479052853383202/1374184025127649332/BlueLock.zip?ex=682d201a&is=682bce9a&hm=e10733bfb4066d2b289a9f506ff39adec39d6e7a36d3e014d496f7b7370af542&";
             try
             {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
+                e.Handled = true;
+
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = url,
+                    FileName = e.Uri.AbsoluteUri,
                     UseShellExecute = true
                 });
             }
-            catch (Exception)
+            catch
             {
             }
         }
 
-        private void InstallButton_Click2(object sender, RoutedEventArgs e)
+        public class GithubRelease
         {
-            var url = "https://drive.usercontent.google.com/u/0/uc?id=1kQTfIKBPyqF6o1G85v9fdXE2PHXUA5oM&export=download";
-            try
+            [JsonPropertyName("name")]
+            public string? Name { get; set; }
+
+            [JsonPropertyName("tag_name")]
+            public string? TagName { get; set; }
+
+            [JsonPropertyName("body")]
+            public string? Body { get; set; }
+
+            [JsonPropertyName("prerelease")]
+            public bool Prerelease { get; set; }
+
+            [JsonPropertyName("draft")]
+            public bool Draft { get; set; }
+
+            [JsonPropertyName("published_at")]
+            public DateTimeOffset PublishedAt { get; set; }
+
+            [JsonPropertyName("html_url")]
+            public string? HtmlUrl { get; set; }
+
+            [JsonPropertyName("assets")]
+            public GithubAsset[] Assets { get; set; } = Array.Empty<GithubAsset>();
+
+            public int TotalDownloads { get; private set; }
+
+            public void CalculateTotals()
             {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception)
-            {
+                TotalDownloads = Assets?.Sum(a => a.DownloadCount) ?? 0;
             }
         }
 
-
-
-        private void InstallButton_Click3(object sender, RoutedEventArgs e)
+        public class GithubAsset
         {
-            var url = "https://drive.google.com/file/d/1p3MDZJzWETND-qCyMfLobas6w91LZbhc/view?usp=sharing";
-            try
-            {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception)
-            {
-            }
-        }
+            [JsonPropertyName("name")]
+            public string? Name { get; set; }
 
-        private void CopyButton_Click(object sender, RoutedEventArgs e)
-        {
-            string jsonText = @"{
-  ""FFlagAnimationLodIkEnabled"": true,          
-  ""FFlagAnimationLodBoneEnabled"": true,            
-  ""FIntAnimationLodIkEnabledThreshold"": 0,             
-  ""FIntAnimationLodIkDisabledThreshold"": 2147483647,     
-  ""FIntAnimationLodFacsEnabledThreshold"": 0,          
-  ""FIntAnimationLodFacsDisabledThreshold"": 2147483647, 
-  ""FIntAnimationLodBoneLowPriorityEnabledThreshold"": 0,   
-  ""FIntAnimationLodBoneLowPriorityDisabledThreshold"": 2147483647,
-  ""FIntAnimationLodBoneMediumPriorityEnabledThreshold"": 0,  
-  ""FIntAnimationLodBoneMediumPriorityDisabledThreshold"": 2147483647, 
-  ""DFIntAnimationLodFacsMaxLodThreshold"": 0,    
-  ""DFIntAnimationLodRetargetingIkMaxLodThreshold"": 0, 
-  ""DFIntAnimationLodDistanceMaxLod0"": 2147483647,
-  ""DFIntAnimationLodDistanceMaxLod1"": 747483647,        
-  ""DFIntAnimationLodFacsDistanceMin"": 0,
-  ""DFIntAnimationLodFacsDistanceMax"": 2147483647,
-  ""DFIntAnimationLodThrottlerDistanceMin"": 0,
-  ""DFIntAnimationLodThrottlerDistanceMax"": 2147483647,
-  ""DFIntAnimationLodFacsVisibilityMin"": 0,
-  ""DFIntAnimationLodFacsVisibilityMax"": 2147483647,
-  ""DFIntAnimationLodThrottlerVisibilityMin"": 0,
-  ""DFIntAnimationLodThrottlerVisibilityMax"": 2147483647,
-  ""DFIntAnimationLodInverseVisibilityMinLod0"": 0,
-  ""DFIntAnimationLodInverseVisibilityMinLod1"": 0,
-  ""DFIntAnimationLodOutsideFrustumDistanceMaxLod0"": 2147483647,
-  ""DFIntAnimationLodFacsOutOfFrustumLodPercentage"": 0,     
-  ""DFIntAnimationLodThrottlerOutOfFrustumLodPercentage"": 0, 
-  ""DFIntAnimationLodFacsFpsMax"": 2147483647,
-  ""DFIntAnimationLodFacsFpsMin"": 0,
-  ""DFIntAnimationLodThrottlerFpsMax"": 2147483647,
-  ""DFIntAnimationLodThrottlerFpsMin"": 0,
-  ""DFIntAnimationLodFacsAnimationTimeMsMin"": 0,
-  ""DFIntAnimationLodFacsAnimationTimeMsMax"": 2147483647,
-  ""DFIntAnimationLodThrottlerAnimationTimeMsMin"": 0,
-  ""DFIntAnimationLodThrottlerAnimationTimeMsMax"": 2147483647,
-  ""DFIntAnimationLodThrottleMaxFramesToSkip"": 0,   
-  ""FIntAnimationLodIkFadeDurationMs"": 1,           
-  ""FIntAnimationLodFacsFadeDurationMs"": 1,         
-  ""FIntAnimationLodBoneFadeDurationMs"": 1,            
-  ""FIntAnimationLodIkFadeTimeoutMs"": 1,              
-  ""FIntAnimationLodFacsFadeTimeoutMs"": 1,                 
-  ""FIntAnimationLodBoneFadeTimeoutMs"": 1,                 
-  ""DFIntAnimationLodIntegralGainThousandths"": 0,           
-  ""DFIntAnimationLodDerivativeGainThousandths"": 0,         
-  ""DFIntAnimationLodProportionalGainThousandths"": 0,       
-  ""DFIntAnimationLodBudgetAdjustmentMaxInThousandths"": 0,  
-  ""DFIntAnimationLodBudgetAdjustmentMinInThousandths"": 0,  
-  ""DFFlagSupportMeshLOD"": true,                          
-  ""DFFlagSimModelLodUseMeshWithLessTriangles"": false,    
-  ""DFIntMeshNLoDs"": 1,                                 
-  ""FFlagMeshLoDSendTimeToServeMesh2"": false,           
-  ""DFFlagMeshLODZoom"": false,                            
-  ""DFIntCSGv2LodsToGenerate"": 1,                         
-  ""DFIntCSGv2LodMinTriangleCount"": 0,                  
-  ""DFIntCSGv2LodLevel1Percentage"": 100,                 
-  ""DFIntCSGv2LodLevel1Count"": 0,
-  ""FFlagUADFDisableImportLoD"": true
-}";
+            [JsonPropertyName("content_type")]
+            public string? ContentType { get; set; }
 
-            Clipboard.SetText(jsonText);
-        }
+            [JsonPropertyName("browser_download_url")]
+            public string? BrowserDownloadUrl { get; set; }
 
-        private void CopyButton_Click2(object sender, RoutedEventArgs e)
-        {
-            string jsonText = @"{
-    ""DFFlagDebugOverrideDPIScale"": ""False"",
-    ""DFFlagDebugPerfMode"": ""True"",
-    ""DFFlagDebugSkipMeshVoxelizer"": ""True"",
-    ""DFFlagDisableDPIScale"": ""False"",
-    ""DFFlagEnablePreloadAvatarAssets"": ""True"",
-    ""DFFlagEnableSoundPreloading"": ""True"",
-    ""DFFlagEnableTexturePreloading"": ""True"",
-    ""DFFlagRobloxTelemetryAddDeviceRAM"": ""False"",
-    ""DFFlagSampleAndRefreshRakPing"": ""True"",
-    ""DFFlagSimOptimizeSetSize"": ""True"",
-    ""DFFlagTaskSchedulerAvoidSleep"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingDoingExperiment"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingDoingExperiment2"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingEnabledIXP"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingEnabledIXP2"": ""True"",
-    ""DFIntAnimationLodFacsDistanceMax"": ""0"",
-    ""DFIntAnimationLodFacsDistanceMin"": ""0"",
-    ""DFIntAnimationLodFacsVisibilityDenominator"": ""0"",
-    ""DFIntAssetPreloading"": ""2147483647"",
-    ""DFIntCanHideGuiGroupId"": ""32380007"",
-    ""DFIntCharacterLoadTime"": ""1"",
-    ""DFIntContentProviderPreloadHangTelemetryHundredthsPercentage"": ""0"",
-    ""DFIntHACDPointSampleDistApartTenths"": ""2147483647"",
-    ""DFIntMaxFrameBufferSize"": ""4"",
-    ""DFIntMemoryUtilityCurveBaseHundrethsPercent"": ""10000"",
-    ""DFIntMemoryUtilityCurveNumSegments"": ""100"",
-    ""DFIntMemoryUtilityCurveTotalMemoryReserve"": ""0"",
-    ""DFIntNumAssetsMaxToPreload"": ""2147483647"",
-    ""DFIntPreloadAvatarAssets"": ""2147483647"",
-    ""DFIntS2PhysicsSenderRate"": ""128"",
-    ""DFIntSignalRCoreHandshakeTimeoutMs"": ""3000"",
-    ""DFIntSignalRCoreHubBaseRetryMs"": ""10"",
-    ""DFIntSignalRCoreHubMaxBackoffMs"": ""5000"",
-    ""DFIntSignalRCoreKeepAlivePingPeriodMs"": ""25"",
-    ""DFIntSignalRCoreRpcQueueSize"": ""2147483647"",
-    ""DFIntSignalRCoreServerTimeoutMs"": ""20000"",
-    ""DFIntTaskSchedulerTargetFps"": ""240"",
-    ""DFIntTeleportClientAssetPreloadingHundredthsPercentage"": ""100000"",
-    ""DFIntTeleportClientAssetPreloadingHundredthsPercentage2"": ""100000"",
-    ""DFIntTrackCountryRegionAPIHundredthsPercent"": ""10000"",
-    ""FFlagAddDMLogging"": ""False"",
-    ""FFlagAssetPreloadingIXP"": ""True"",
-    ""FFlagBetaBadgeLearnMoreLinkFormview"": ""False"",
-    ""FFlagChatTranslationEnableSystemMessage"": ""False"",
-    ""FFlagContentProviderPreloadHangTelemetry"": ""False"",
-    ""FFlagControlBetaBadgeWithGuac"": ""False"",
-    ""FFlagDebugCheckRenderThreading"": ""True"",
-    ""FFlagDebugDisableTelemetryEphemeralCounter"": ""True"",
-    ""FFlagDebugDisableTelemetryEphemeralStat"": ""True"",
-    ""FFlagDebugDisableTelemetryEventIngest"": ""True"",
-    ""FFlagDebugDisableTelemetryPoint"": ""True"",
-    ""FFlagDebugDisableTelemetryV2Counter"": ""True"",
-    ""FFlagDebugDisableTelemetryV2Event"": ""True"",
-    ""FFlagDebugDisableTelemetryV2Stat"": ""True"",
-    ""FFlagDebugForceFSMCPULightCulling"": ""True"",
-    ""FFlagDebugGraphicsPreferD3D11"": ""True"",
-    ""FFlagDebugSSAOForce"": ""True"",
-    ""FFlagDisablePostFx"": ""True"",
-    ""FFlagEnablePartyVoiceOnlyForEligibleUsers"": ""False"",
-    ""FFlagEnablePartyVoiceOnlyForUnfilteredThreads"": ""False"",
-    ""FFlagEnablePreferredTextSizeGuiService"": ""True"",
-    ""FFlagEnablePreferredTextSizeScale"": ""True"",
-    ""FFlagEnablePreferredTextSizeSettingInMenus2"": ""True"",
-    ""FFlagEnablePreferredTextSizeStyleFixesInAppShell3"": ""True"",
-    ""FFlagEnablePreferredTextSizeStyleFixesInAvatarExp"": ""True"",
-    ""FFlagFastGPULightCulling3"": ""True"",
-    ""FFlagFixSensitivityTextPrecision"": ""False"",
-    ""FFlagHandleAltEnterFullscreenManually"": ""False"",
-    ""FFlagHighlightOutlinesOnMobile"": ""True"",
-    ""FFlagImproveShiftLockTransition"": ""True"",
-    ""FFlagLoginPageOptimizedPngs"": ""True"",
-    ""FFlagLuauCodegen"": ""True"",
-    ""FFlagMessageBusCallOptimization"": ""True"",
-    ""FFlagPreloadAllFonts"": ""True"",
-    ""FFlagPreloadTextureItemsOption4"": ""True"",
-    ""FFlagQuaternionPoseCorrection"": ""True"",
-    ""FFlagRenderCBRefactor2"": ""True"",
-    ""FFlagRenderLegacyShadowsQualityRefactor"": ""True"",
-    ""FFlagRenderSkipReadingShaderData"": ""False"",
-    ""FFlagShoeSkipRenderMesh"": ""False"",
-    ""FFlagTaskSchedulerLimitTargetFpsTo2402"": ""False"",
-    ""FFlagUserBetterInertialScrolling"": ""True"",
-    ""FFlagUserCameraControlLastInputTypeUpdate"": ""False"",
-    ""FFlagUserShowGuiHideToggles"": ""True"",
-    ""FFlagVideoServiceAddHardwareCodecMetrics"": ""True"",
-    ""FFlagVoiceBetaBadge"": ""False"",
-    ""FIntCLI20390_2"": ""0"",
-    ""FIntCameraMaxZoomDistance"": ""2147483647"",
-    ""FIntDirectionalAttenuationMaxPoints"": ""200"",
-    ""FIntFullscreenTitleBarTriggerDelayMillis"": ""3600000"",
-    ""FIntGrassMovementReducedMotionFactor"": ""0"",
-    ""FIntPreferredTextSizeSettingBetaFeatureRolloutPercent"": ""100"",
-    ""FIntRenderLocalLightUpdatesMin"": ""1"",
-    ""FIntRenderMaxShadowAtlasUsageBeforeDownscale"": ""500"",
-    ""FIntRenderMeshOptimizeVertexBuffer"": ""1"",
-    ""FIntRenderShadowIntensity"": ""0"",
-    ""FIntSSAO"": ""2"",
-    ""FIntSSAOMipLevels"": ""2"",
-    ""FIntUITextureMaxUpdateDepth"": ""1"",
-    ""FIntUnifiedLightingBlendZone"": ""200"",
-    ""FIntVertexSmoothingGroupTolerance"": ""500"",
-    ""FStringGetPlayerImageDefaultTimeout"": ""1"",
-    ""FStringTencentAuthPath"": ""null"",
-    ""FStringVoiceBetaBadgeLearnMoreLink"": ""null""
-}";
+            [JsonPropertyName("size")]
+            public long Size { get; set; }
 
-            Clipboard.SetText(jsonText);
-        }
+            [JsonPropertyName("download_count")]
+            public int DownloadCount { get; set; }
 
-        private void CopyButton_Click3(object sender, RoutedEventArgs e)
-        {
-            string jsonText = @"{
-    ""DFFlagPolicyServiceReportDetailIsNotSubjectToChinaPolicies"": ""False"",
-    ""DFFlagVoiceChatPossibleDuplicateSubscriptionsTelemetry"": ""False"",
-    ""DFFlagPolicyServiceReportIsNotSubjectToChinaPolicies"": ""False"",
-    ""DFFlagVoiceChatJoinProfilingUsingTelemetryStat_RCC"": ""False"",
-    ""DFFlagVoiceChatCullingRecordEventIngestTelemetry"": ""False"",
-    ""DFFlagEnableSkipUpdatingGlobalTelemetryInfo2"": ""False"",
-    ""DFFlagPerformanceControlEnableMemoryProbing3"": ""True"",
-    ""DFFlagRobloxTelemetryAddDeviceRAMPointsV2"": ""False"",
-    ""DFFlagEmitSafetyTelemetryInCallbackEnable"": ""False"",
-    ""DFFlagRccLoadSoundLengthTelemetryEnabled"": ""False"",
-    ""DFFlagDebugRenderForceTechnologyVoxel"": ""True"",
-    ""DFFlagRobloxTelemetryV2PointEncoding"": ""False"",
-    ""DFFlagWindowsWebViewTelemetryEnabled"": ""False"",
-    ""DFFlagGraphicsQualityUsageTelemetry"": ""False"",
-    ""DFFlagReportRenderDistanceTelemetry"": ""False"",
-    ""DFFlagReportAssetRequestV1Telemetry"": ""False"",
-    ""DFFlagDSTelemetryV2ReplaceSeparator"": ""False"",
-    ""DFFlagSendRenderFidelityTelemetry"": ""False"",
-    ""DFFlagCollectAudioPluginTelemetry"": ""False"",
-    ""DFFlagEnableFmodErrorsTelemetry"": ""False"",
-    ""DFFlagEnableTelemetryV2FRMStats"": ""False"",
-    ""DFFlagTaskSchedulerAvoidSleep"": ""True"",
-    ""DFFlagGpuVsCpuBoundTelemetry"": ""False"",
-    ""DFFlagDebugOverrideDPIScale"": ""True"",
-    ""DFFlagDebugPauseVoxelizer"": ""True"",
-    ""DFFlagDisableDPIScale"": ""True"",
-    ""DFFlagDebugPerfMode"": ""True"",
-
-    ""DFIntPolicyServiceReportDetailIsNotSubjectToChinaPoliciesHundredthsPercentage"": ""10000"",
-    ""DFIntVoiceChatTaskStatsTelemetryThrottleHundrethsPercent"": ""0"",
-    ""DFIntWindowsWebViewTelemetryThrottleHundredthsPercent"": ""0"",
-    ""DFIntNetworkStopProducingPacketsToProcessThresholdMs"": ""0"",
-    ""DFIntGraphicsOptimizationModeMaxFrameTimeTargetMs"": ""240"",
-    ""DFIntGraphicsOptimizationModeMinFrameTimeTargetMs"": ""240"",
-    ""DFIntBandwidthManagerApplicationDefaultBps"": ""796850000"",
-    ""DFIntGraphicsOptimizationModeFRMFrameRateTarget"": ""240"",
-    ""DFIntMacWebViewTelemetryThrottleHundredthsPercent"": ""0"",
-    ""DFIntNetworkClusterPacketCacheNumParallelTasks"": ""12"",
-    ""DFIntBandwidthManagerDataSenderMaxWorkCatchupMs"": ""5"",
-    ""DFIntClientPacketMaxFrameMicroseconds"": ""1047483647"",
-    ""DFIntMaxProcessPacketsStepsPerCyclic"": ""1047483647"",
-    ""DFIntReplicationDataCacheNumParallelTasks"": ""12"",
-    ""DFIntMaxWaitTimeBeforeForcePacketProcessMS"": ""1"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL12"": ""0"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL23"": ""0"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL34"": ""0"",
-    ""DFIntCSGLevelOfDetailSwitchingDistance"": ""0"",
-    ""DFIntMaxProcessPacketsJobScaling"": ""5000000"",
-    ""DFIntMaxProcessPacketsStepsAccumulated"": ""1"",
-    ""DFIntSignalRCoreKeepAlivePingPeriodMs"": ""25"",
-    ""DFIntSignalRCoreRpcQueueSize"": ""2147483647"",
-    ""DFIntSignalRCoreHandshakeTimeoutMs"": ""3000"",
-    ""DFIntMegaReplicatorNumParallelTasks"": ""12"",
-    ""DFIntPhysicsReceiveNumParallelTasks"": ""12"",
-    ""DFIntInterpolationNumParallelTasks"": ""12"",
-    ""DFIntClientPacketExcessMicroseconds"": ""1"",
-    ""DFIntSignalRCoreServerTimeoutMs"": ""20000"",
-    ""DFIntNumAssetsMaxToPreload"": ""2147483647"",
-    ""DFIntSignalRCoreHubMaxBackoffMs"": ""5000"",
-    ""DFIntTextureCompositorActiveJobs"": ""0"",
-    ""DFIntTaskSchedulerTargetFps"": ""999999"",
-    ""DFIntClientPacketMinMicroseconds"": ""1"",
-    ""DFIntCliTcMaxPayloadRcv"": ""2147483647"",
-    ""DFIntRccTcMaxPayloadRcv"": ""2147483647"",
-    ""DFIntCliTcMaxPayloadSnd"": ""2147483647"",
-    ""DFIntRccTcMaxPayloadSnd"": ""2147483647"",
-    ""DFIntSignalRCoreHubBaseRetryMs"": ""10"",
-    ""DFIntRccMaxPayloadSnd"": ""2147483647"",
-    ""DFIntCliMaxPayloadRcv"": ""2147483647"",
-    ""DFIntCliMaxPayloadSnd"": ""2147483647"",
-    ""DFIntRccMaxPayloadRcv"": ""2147483647"",
-    ""DFIntAssetPreloading"": ""2147483647"",
-    ""DFIntClientPacketMaxDelayMs"": ""1"",
-    ""DFIntRuntimeConcurrency"": ""11"",
-    ""DFIntLCCageDeformLimit"": ""-1"",
-
-    ""DFStringWebviewUrlAllowlist"": ""www.youtube-nocookie.com"",
-
-    ""FFlagVoiceChatRobloxAudioDeviceUpdateRecordedBufferTelemetryEnabled"": ""False"",
-    ""FFlagVoiceChatCustomAudioDeviceEnableNeedMorePlayoutTelemetry3"": ""False"",
-    ""FFlagVoiceChatCustomAudioDeviceEnableNeedMorePlayoutTelemetry"": ""False"",
-    ""FFlagVoiceChatCustomAudioMixerEnableUpdateSourcesTelemetry2"": ""False"",
-    ""FFlagEnableSponsoredAdsPerTileTooltipExperienceFooter"": ""False"",
-    ""FFlagVoiceChatDontSendTelemetryForPubIceTrickle"": ""False"",
-    ""FFlagEnableSponsoredAdsSeeAllGamesListTooltip"": ""False"",
-    ""FFlagVoiceChatCullingEnableMutedSubsTelemetry"": ""False"",
-    ""FFlagVoiceChatCullingEnableStaleSubsTelemetry"": ""False"",
-    ""FFlagEnableSponsoredTooltipForAvatarCatalog2"": ""False"",
-    ""FFlagVoiceChatPeerConnectionTelemetryDetails"": ""False"",
-    ""FFlagEnableSponsoredAdsGameCarouselTooltip3"": ""False"",
-    ""FFlagVoiceChatSubscriptionsDroppedTelemetry"": ""False"",
-    ""FFlagDebugDisableTelemetryEphemeralCounter"": ""True"",
-    ""FFlagUpdateHTTPCookieStorageFromWKWebView"": ""False"",
-    ""FFlagTaskSchedulerLimitTargetFpsTo2402"": ""False"",
-    ""FFlagDebugDisableTelemetryEphemeralStat"": ""True"",
-    ""FFlagLuaVoiceChatAnalyticsUseCounterV2"": ""False"",
-    ""FFlagHandleAltEnterFullscreenManually"": ""False"",
-    ""FFlagLuaVoiceChatAnalyticsUseEventsV2"": ""False"",
-    ""FFlagLuaVoiceChatAnalyticsUsePointsV2"": ""False"",
-    ""FFlagEnableBubbleChatFromChatService"": ""False"",
-    ""FFlagDebugDisableTelemetryEventIngest"": ""True"",
-    ""FFlagLuaVoiceChatAnalyticsBanMessage"": ""False"",
-    ""FFlagDebugGraphicsDisableDirect3D11"": ""True"",
-    ""FFlagDebugRenderingSetDeterministic"": ""True"",
-    ""FFlagFixOutdatedTimeScaleParticles"": ""False"",
-    ""FFlagEnableLuaVoiceChatAnalyticsV2"": ""False"",
-    ""FFlagFixParticleAttachmentCulling"": ""False"",
-    ""FFlagDebugForceFSMCPULightCulling"": ""True"",
-    ""FFlagSyncWebViewCookieToEngine2"": ""False"",
-    ""FFlagDebugDisableTelemetryPoint"": ""True"",
-    ""FFlagDebugCheckRenderThreading"": ""True"",
-    ""FFlagDebugGraphicsPreferVulkan"": ""True"",
-    ""FFlagLuaAppSponsoredGridTiles"": ""False"",
-    ""FFlagFixParticleEmissionBias2"": ""False"",
-    ""FFlagLargeReplicatorEnabled6"": ""True"",
-    ""FFlagFixOutdatedParticles2"": ""False"",
-    ""FFlagEnableFPSAndFrameTime"": ""True"",
-    ""FFlagLargeReplicatorWrite4"": ""True"",
-    ""FFlagRenderNoLowFrmBloom"": ""False"",
-    ""FFlagFastGPULightCulling3"": ""True"",
-    ""FFlagLargeReplicatorRead4"": ""True"",
-    ""FFlagAdServiceEnabled"": ""False"",
-    ""FFlagDisablePostFx"": ""True"",
-    ""FFlagFRMRefactor"": ""False"",
-    ""FFlagDebugSkyGray"": ""True"",
-
-    ""FIntVoiceChatPerfSensitiveTelemetryIntervalSeconds"": ""-1"",
-    ""FIntFullscreenTitleBarTriggerDelayMillis"": ""3600000"",
-    ""FIntTaskSchedulerAsyncTasksMinimumThreadCount"": ""9"",
-    ""FIntStudioWebView2TelemetryHundredthsPercent"": ""0"",
-    ""FIntSmoothClusterTaskQueueMaxParallelTasks"": ""12"",
-    ""FIntLuaVoiceChatAnalyticsPointsThrottle"": ""0"",
-    ""FIntDebugFRMOptionalMSAALevelOverride"": ""1"",
-    ""FIntSimWorldTaskQueueParallelTasks"": ""12"",
-    ""FIntTaskSchedulerAutoThreadLimit"": ""11"",
-    ""FIntLuaGcParallelMinMultiTasks"": ""12"",
-    ""FIntRenderGrassDetailStrands"": ""0"",
-    ""FIntRobloxGuiBlurIntensity"": ""0"",
-    ""FIntRenderShadowIntensity"": ""0"",
-    ""FIntTerrainArraySliceSize"": ""0"",
-    ""FIntDebugForceMSAASamples"": ""1"",
-    ""FIntRenderShadowmapBias"": ""-1"",
-    ""FIntFRMMinGrassDistance"": ""0"",
-    ""FIntFRMMaxGrassDistance"": ""0"",
-
-    ""FLogTencentAuthPath"": ""/tencent/"",
-    ""FStringExperienceGuidelinesExplainedPageUrl"": ""https://www.gov.cn"",
-    ""FStringXboxExperienceGuidelinesUrl"": ""https://www.gov.cn"",
-    ""FStringGetPlayerImageDefaultTimeout"": ""1"",
-    ""FStringTencentAuthPath"": ""/tencent/""
-}
-";
-
-            Clipboard.SetText(jsonText);
-        }
-
-        private void InstallButton_Click4(object sender, RoutedEventArgs e)
-        {
-            var url = "https://drive.google.com/file/d/1-MAUWSjCW3T0ZBRx7eIfMruwIU3Wyos8/view?usp=sharing";
-            try
-            {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        private void InstallButton_Click5(object sender, RoutedEventArgs e)
-        {
-            var url = "https://drive.google.com/file/d/1Ml4CNz1YMIvfkj17X90Ys_s6-ABVd1M7/view?usp=sharing";
-            try
-            {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        private void InstallButton_Click6(object sender, RoutedEventArgs e)
-        {
-            var url = "https://drive.google.com/file/d/1pBisqEaMxCruw_VdnFdXzJlkkDmlpFiX/view?usp=sharing";
-            try
-            {
-                System.Diagnostics.Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception)
-            {
-            }
-        }
-
-        private void CopyButton_Click4(object sender, RoutedEventArgs e)
-        {
-            string jsonText = @"{
-    ""DFFlagUpdateBoundExtentsForHugeMixedReplicationComponents"": ""True"",
-    ""DFFlagSimAdaptiveExplicitlyMarkInterpolatedAssemblies"": ""True"",
-    ""DFFlagAcceleratorUpdateOnPropsAndValueTimeChange"": ""True"",
-    ""DFFlagOnlyDecrementCompletenessIfReplicating"": ""True"",
-    ""DFFlagReplicatorCheckReadTableCollisions"": ""True"",
-    ""DFFlagReplicatorSeparateVarThresholds"": ""True"",
-    ""DFFlagSimSmoothedRunningController2"": ""True"",
-    ""DFFlagClampIncomingReplicationLag"": ""True"",
-    ""DFFlagHumanoidReplicateSimulated2"": ""True"",
-    ""DFFlagSolverStateReplicatedOnly2"": ""True"",
-    ""DFFlagReplicateCreateToPlayer"": ""True"",
-    ""DFFlagMergeFakeInputEvents3"": ""True"",
-
-    ""FFlagDebugNextGenReplicatorEnabledWriteCFrameColor"": ""True"",
-    ""FFlagPreComputeAcceleratorArrayForSharingTimeCurve"": ""True"",
-    ""FFlagKeyframeSequenceUseRuntimeSyncPrims"": ""True"",
-    ""FFlagAnimationCurveDenseCacheEnabled5"": ""True"",
-    ""FFlagHumanoidStateUseRuntimeSyncPrims"": ""True"",
-    ""FFlagLargeReplicatorSerializeWrite"": ""True"",
-    ""FFlagLargeReplicatorSerializeRead"": ""True"",
-    ""FFlagDebugNextGenRepAttributeRep"": ""True"",
-    ""FFlagLargeReplicatorEnabled6"": ""True"",
-    ""FFlagLuaMenuPerfImprovements"": ""True"",
-    ""FFlagLargeReplicatorWrite4"": ""True"",
-    ""FFlagLargeReplicatorRead4"": ""True"",
-    ""FFlagSimDcdRefactorDelta3"": ""True"",
-    ""FFlagSortKeyOptimization"": ""True"",
-    ""FFlagFasterPreciseTime4"": ""True"",
-    ""FFlagSimDcdEnableDelta2"": ""True"",
-    ""FFlagSmoothInputOffset"": ""True"",
-
-    ""FFlagUserCameraControlLastInputTypeUpdate"": ""False"",
-    ""FFlagHandleAltEnterFullscreenManually"": ""False"",
-    ""FFlagEnableInGameMenuDurationLogger"": ""False"",
-    ""FFlagMovePrerenderV2"": ""False"",
-    ""FFlagMovePrerender"": ""False"",
-
-    ""DFIntCheckPVDifferencesForInterpolationMinVelThresholdStudsPerSecHundredth"": ""1"",
-    ""DFIntCheckPVLinearVelocityIntegrateVsDeltaPositionThresholdPercent"": ""1"",
-    ""DFIntGameNetPVHeaderRotationOrientIdToleranceExponent"": ""-2147483648"",
-    ""DFIntGameNetPVHeaderRotationalVelocityZeroCutoffExponent"": ""-5000"",
-    ""DFIntSignalRCoreHubConnectionDisconnectInfoHundredthsPercent"": ""5"",
-    ""DFIntHumanoidStateChangeEventIngestThrottleHundrethsPercent"": ""0"",
-    ""DFIntRakNetApplicationFeedbackScaleUpFactorHundredthPercent"": ""0"",
-    ""DFIntGameNetPVHeaderLinearVelocityZeroCutoffExponent"": ""-5000"",
-    ""DFIntSimAdaptiveHumanoidPDControllerSubstepMultiplier"": ""1000"",
-    ""DFIntInterpolationFrameRotVelocityThresholdMillionth"": ""100"",
-    ""DFIntGameNetPVHeaderTranslationZeroCutoffExponent"": ""-5000"",
-    ""DFIntIncorrectlyPausedReplicationHundredthsPercentage"": ""0"",
-    ""DFIntRakNetApplicationFeedbackScaleUpThresholdPercent"": ""0"",
-    ""DFIntGameNetDontSendRedundantDeltaThresholdMillionth"": ""0"",
-    ""DFIntGameNetDontSendRedundantDeltaPositionMillionth"": ""0"",
-    ""DFIntInterpolationFramePositionThresholdMillionth"": ""100"",
-    ""DFIntJoinDataItemEstimatedCompressionRatioHundreths"": ""0"",
-    ""DFIntGraphicsOptimizationModeMaxFrameTimeTargetMs"": ""25"",
-    ""DFIntReplicatorCountLimitInfluxHundrethsPercentage"": ""0"",
-    ""DFIntReplicatorVariantContainerCountLimit"": ""2147483647"",
-    ""DFIntMaxReceiveToDeserializeLatencyMilliseconds"": ""10"",
-    ""DFIntSignalRHubConnectionHeartbeatTimerRateMs"": ""1000"",
-    ""DFIntClusterEstimatedCompressionRatioHundredths"": ""0"",
-    ""DFIntMegaReplicatorNetworkQualityProcessorUnit"": ""10"",
-    ""DFIntReplicatorVariantKickRateLimitMax"": ""2147483647"",
-    ""DFIntNetworkInDeserializeLimitGameplayMsClient"": ""3"",
-    ""DFIntReplicationVariantKickLimitBytes"": ""2147483647"",
-    ""DFIntMaxNumReplicatorsToDisconnectPerFrame"": ""2000"",
-    ""DFIntClientNetworkInfluxHundredthsPercentage"": ""0"",
-    ""DFIntReplicationVariantLimitHundredthPercent"": ""0"",
-    ""DFIntSignalRHubConnectionConnectTimeoutMs"": ""2000"",
-    ""DFIntNetworkInDeserializeLimitGameplayMsRcc"": ""3"",
-    ""DFIntPerformanceControlFrameTimeMaxUtility"": ""-1"",
-    ""DFIntClientPacketHealthyAllocationPercent"": ""20"",
-    ""DFIntSignalRHubConnectionBaseRetryTimeMs"": ""100"",
-    ""DFIntInitialAccelerationLatencyMultTenths"": ""1"",
-    ""DFIntClientPacketMaxFrameMicroseconds"": ""200"",
-    ""DFIntMaxProcessPacketsStepsPerCyclic"": ""5000"",
-    ""DFIntNetworkQualityResponderMaxWaitTime"": ""1"",
-    ""DFIntSignalRCoreKeepAlivePingPeriodMs"": ""250"",
-    ""DFIntClientPacketExcessMicroseconds"": ""1000"",
-    ""DFIntMaxProcessPacketsStepsAccumulated"": ""0"",
-    ""DFIntGameNetDontSendRedundantNumTimes"": ""0"",
-    ""DFIntSignalRCoreHandshakeTimeoutMs"": ""5000"",
-    ""DFIntWaitOnUpdateNetworkLoopEndedMS"": ""100"",
-    ""DFIntLargePacketQueueSizeCutoffMB"": ""1000"",
-    ""DFIntMaxProcessPacketsJobScaling"": ""10000"",
-    ""DFIntSignalRHeartbeatIntervalSeconds"": ""1"",
-    ""DFIntBatchThumbnailResultsSizeCap"": ""200"",
-    ""DFIntPerformanceControlFrameTimeMax"": ""1"",
-    ""DFIntSignalRCoreServerTimeoutMs"": ""11100"",
-    ""DFIntMaxDataPacketPerSend"": ""2147483647"",
-    ""DFIntNetworkSchemaCompressionRatio"": ""0"",
-    ""DFIntSignalRCoreHubMaxElapsedMs"": ""1000"",
-    ""DFIntNetworkQualityResponderUnit"": ""10"",
-    ""DFIntSignalRCoreHubMaxBackoffMs"": ""100"",
-    ""DFIntSimDesiredVelocityDiffCutoff"": ""0"",
-    ""DFIntSignalRCoreHubBaseRetryMs"": ""200"",
-    ""DFIntSimAdaptiveExtraIterations"": ""32"",
-    ""DFIntHttpBatchApi_cacheDelayMs"": ""15"",
-    ""DFIntSignalRCoreRpcQueueSize"": ""4096"",
-    ""DFIntWaitOnRecvFromLoopEndedMS"": ""10"",
-    ""DFIntCodecMaxIncomingPackets"": ""100"",
-    ""DFIntCodecMaxOutgoingFrames"": ""1000"",
-    ""DFIntJoinDataCompressionLevel"": ""0"",
-    ""DFIntMaxAcceptableUpdateDelay"": ""1"",
-    ""DFIntServerFramesBetweenJoins"": ""1"",
-    ""DFIntHttpBatchApi_maxWaitMs"": ""40"",
-    ""DFIntRakNetResendRttMultiple"": ""1"",
-    ""DFIntBufferCompressionLevel"": ""0"",
-    ""DFIntClientPacketMaxDelayMs"": ""1"",
-    ""DFIntHttpBatchApi_minWaitMs"": ""5"",
-    ""DFIntRakNetNakResendDelayMs"": ""1"",
-    ""DFIntRakNetSelectTimeoutMs"": ""1"",
-    ""DFIntS2PhysicsSenderRate"": ""512"",
-    ""DFIntSignalRCoreTimerMs"": ""50"",
-    ""DFIntMaxFrameBufferSize"": ""4"",
-    ""DFIntRakNetLoopMs"": ""1"",
-
-    ""FIntSmoothMouseSpringFrequencyTenths"": ""100"",
-    ""FIntRuntimeMaxNumOfConditions"": ""1000000"",
-    ""FIntRuntimeMaxNumOfSchedulers"": ""1000000"",
-    ""FIntRuntimeMaxNumOfSemaphores"": ""1000000"",
-    ""FIntRuntimeMaxNumOfLatches"": ""1000000"",
-    ""FIntRuntimeMaxNumOfMutexes"": ""1000000"",
-    ""FIntRuntimeMaxNumOfThreads"": ""1000000"",
-    ""FIntInterpolationMaxDelayMSec"": ""100"",
-    ""FIntRuntimeMaxNumOfDPCs"": ""64"",
-    ""FIntDefaultJitterN"": ""0"",
-    ""FIntCLI20390_2"": ""1""
-}";
-
-            Clipboard.SetText(jsonText);
-        }
-
-        private void CopyButton_Click5(object sender, RoutedEventArgs e)
-        {
-            {
-                string jsonText = @"{
-  ""FFlagTaskSchedulerLimitTargetFpsTo2402"": ""False"",
-  ""FFlagGraphicsGLEnableHQShadersExclusion"": ""True"",
-  ""FFlagGraphicsGLEnableSuperHQShadersExclusion"": ""True"",
-  ""FFlagGraphicsVulkanBlacklistIDs"": ""True"",
-  ""FFlagGraphicsVulkanBlacklistIDs2"": ""True"",
-  ""FFlagGraphicsVulkanDeviceLostCrash"": ""True"",
-  ""GmaAdUnitStringAndroid"": ""/1015347/gvpadtest_feb6"",
-  ""GmaSdkCheckReflectionDirectly"": ""true"",
-  ""GmasdkFixUiContainerCoverAds"": ""true"",
-  ""GmasdkHandleDurationNeededAdString"": ""True"",
-  ""GmaSdkHandleResourceUnavailable"": ""true"",
-  ""GrantPendingPurchaseInterval"": ""3600"",
-  ""IgnoreSoftwareKeyboardKeyEvents2"": ""true"",
-  ""InfluxThrottleRate"": ""10"",
-  ""JavaANRUploadToBacktracePercentage"": ""1"",
-  ""FStringGetPlayerImageDefaultTimeout"": ""1"",
-  ""DFIntNumAssetsMaxToPreload"": ""2147483647"",
-  ""DFIntAssetPreloading"": ""2147483647"",
-  ""DFFlagDSTelemetryV2ReplaceSeparator"": ""False"",
-  ""DFFlagRobloxTelemetryV2PointEncoding"": ""False"",
-  ""DFFlagEmitSafetyTelemetryInCallbackEnable"": ""False"",
-  ""DFFlagEnableSkipUpdatingGlobalTelemetryInfo2"": ""False"",
-  ""DFFlagEnableTelemetryV2FRMStats"": ""False"",
-  ""DFFlagRemoveTelemetryFlushOnJobClose"": ""False"",
-  ""DFFlagRobloxTelemetryAddDeviceRAMPointsV2"": ""False"",
-  ""DFFlagPerformanceControlUseSeparateTelemetryEventsForPointsAndEventIngest_DataCenterFilter"": ""False"",
-  ""DFFlagReportAssetRequestV1Telemetry"": ""False"",
-  ""DFFlagRccLoadSoundLengthTelemetryEnabled"": ""False"",
-  ""DFFlagEnableFmodErrorsTelemetry"": ""False"",
-  ""DFFlagCollectAudioPluginTelemetry"": ""False"",
-  ""DFFlagSimEnableBadMoverConstraintTelemetry"": ""False"",
-  ""DFFlagSimSolverSendPerfTelemetryToElasticSearch2"": ""False"",
-  ""DFFlagReportRenderDistanceTelemetry"": ""False"",
-  ""DFFlagSendRenderFidelityTelemetry"": ""False"",
-  ""DFFlagGpuVsCpuBoundTelemetry"": ""False"",
-  ""DFFlagGraphicsQualityUsageTelemetry"": ""False"",
-  ""FFlagDebugDisableTelemetryPoint"": ""True"",
-  ""FFlagDebugDisableTelemetryEventIngest"": ""True"",
-  ""FFlagDebugDisableTelemetryEphemeralStat"": ""True"",
-  ""FFlagDebugDisableTelemetryEphemeralCounter"": ""True"",
-  ""FIntRomarkStartWithGraphicQualityLevel"": ""1"",
-  ""FFlagDebugGraphicsPreferD3D11"": ""True"",
-  ""DFIntTextureQualityOverride"": ""1"",
-  ""DFFlagTextureQualityOverrideEnabled"": ""True"",
-  ""DFFlagTeleportPreloadingMetrics5"": ""True"",
-  ""FFlagPreloadTextureItemsOption4"": ""True"",
-  ""FFlagPreloadAllFonts"": ""True"",
-  ""DFFlagTeleportClientAssetPreloadingEnabled9"": ""True"",
-  ""DFFlagEnableTexturePreloading"": ""True"",
-  ""DFFlagEnableSoundPreloading"": ""True"",
-  ""DFFlagEnableMeshPreloading2"": ""False"",
-  ""FIntDebugForceMSAASamples"": ""1"",
-  ""FFlagAdServiceEnabled"": ""True"",
-  ""DFFlagDebugRenderForceTechnologyVoxel"": ""True"",
-  ""DFIntTaskSchedulerTargetFps"": ""2000"",
-  ""FFlagDisablePostFx"": ""True"",
-  ""FIntTerrainArraySliceSize"": ""0"",
-  ""FIntRenderGrassDetailStrands"": ""0"",
-  ""FIntFRMMaxGrassDistance"": ""0"",
-  ""FIntFRMMinGrassDistance"": ""0"",
-  ""DFFlagDebugPauseVoxelizer"": ""True"",
-  ""DFFlagDebugPerfMode"": ""True"",
-  ""FFlagHandleAltEnterFullscreenManually"": ""False""
-}";
-                Clipboard.SetText(jsonText);
-            }
-        }
-
-        private void CopyButton_Click6(object sender, RoutedEventArgs e)
-        {
-            string jsonText = @"{
-    ""DFFlagRobloxTelemetryAddDeviceRAM"": ""False"",
-    ""DFIntGameNetPVHeaderRotationOrientIdToleranceExponent"": ""-2147483647"",
-    ""FStringGetPlayerImageDefaultTimeout"": ""1"",
-    ""FIntGrassMovementReducedMotionFactor"": ""0"",
-    ""FFlagEnableConnectDisconnectInSettingsAndChrome"": ""False"",
-    ""DFIntClientNetworkInfluxHundredthsPercentage"": ""0"",
-    ""FFlagEnablePartyQuickStartButton3"": ""False"",
-    ""FFlagDisableChromeDefaultOpen"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingDoingExperiment"": ""True"",
-    ""DFIntAudioOcclusionMaxNumQueriesPerFrame"": ""6"",
-    ""FFlagDebugAvatarAutosetupJobIdToConsole"": ""False"",
-    ""FFlagEnableChromeLikeButtonIntegration"": ""False"",
-    ""FFlagCaptureServicePostToFeedEnabled2"": ""False"",
-    ""FFlagSoundsUsePhysicalVelocity"": ""True"",
-    ""FIntTerrainAtlasTileSize"": ""-2147483648"",
-    ""DFIntMemoryUtilityCurveTotalMemoryReserve"": ""0"",
-    ""FFlagCaptureServiceEnableDevApiPostToFeed"": ""False"",
-    ""FFlagGraphicsEnableD3D10Compute"": ""true"",
-    ""FIntActivatedCountTimerMSMouse"": ""0"",
-    ""FFlagCaptureServiceAssetsInfoEnabled"": ""False"",
-    ""FIntActivatedCountTimerMSKeyboard"": ""0"",
-    ""FIntVR"": ""0"",
-    ""DFIntAudioOcclusionUpdateRateMs"": ""2"",
-    ""DFFlagJointIrregularityOptimization"": ""True"",
-    ""FFlagEnableChromePinnedChat"": ""False"",
-    ""DFIntGameNetPVHeaderLinearVelocityZeroCutoffExponent"": ""-5000"",
-    ""DFFlagSimDcdRefactorSetPhysics"": ""True"",
-    ""FFlagQuaternionPoseCorrection"": ""True"",
-    ""FIntPreferredTextSizeSettingBetaFeatureRolloutPercent"": ""100"",
-    ""DFIntPerformanceControlFrameTimeMaxUtility"": ""-1"",
-    ""DFIntGameNetCompressionLodByteBudgetThresholdPct"": ""0"",
-    ""DFIntRuntimeConcurrency"": ""4"",
-    ""FFlagSortKeyOptimization"": ""True"",
-    ""DFIntRakNetResendRttMultiple"": ""1"",
-    ""FFlagEnablePlayerPartyId3"": ""False"",
-    ""FFlagImproveMicroprofilerReadability"": ""False"",
-    ""FIntPartyVoiceAudioFaderVolumePerc"": ""0"",
-    ""DFIntSJTChangesWeight"": ""500000"",
-    ""FFlagPartyVoiceCatchError"": ""False"",
-    ""DFIntGraphicsOptimizationModeMVPThrottleHundredthsPercent"": ""100"",
-    ""FFlagFixOutdatedTimeScaleParticles"": ""False"",
-    ""FIntSmoothMouseSpringFrequencyTenths"": ""100"",
-    ""FFlagBetaBadgeLearnMoreLinkFormview"": ""False"",
-    ""FIntRuntimeMaxNumOfSchedulers"": ""1000000"",
-    ""FFlagFixTextureCompositorFramebufferManagement2"": ""True"",
-    ""FLogGraphics"": ""True"",
-    ""FIntRuntimeMaxNumOfLatches"": ""1000000"",
-    ""FFlagDebugGraphicsPreferOpenGL"": ""False"",
-    ""FIntDefaultMeshCacheSizeMB"": ""256"",
-    ""DFIntAnimationLodFacsDistanceMax"": ""0"",
-    ""FFlagDebugCheckRenderThreading"": ""True"",
-    ""FFlagDebugNextGenReplicatorEnabledWriteCFrameColor"": ""True"",
-    ""FIntFRMMinGrassDistance"": ""0"",
-    ""DFIntGraphicsOptimizationModePerformanceBiasPercent"": ""2147483647"",
-    ""DFIntReplicatorVariantKickRateLimitMax"": ""2147483647"",
-    ""FFlagFixPartyVoiceGetPermissions2"": ""False"",
-    ""FFlagPartyVoiceIdleDontReconnect"": ""False"",
-    ""FFlagVideoCaptureFixRestart"": ""False"",
-    ""FFlagDisablePostFx"": ""True"",
-    ""FIntTextureUseACRHundredthPercent"": ""10000"",
-    ""FFlagNewLightAttenuation"": ""True"",
-    ""DFIntCliMaxPayloadSnd"": ""2147483647"",
-    ""FFlagEnableTextureGenerator2"": ""True"",
-    ""DFIntCliTcMaxPayloadRcv"": ""2147483647"",
-    ""DFIntTeleportV2ForPartyPerTenThousand2"": ""0"",
-    ""DFFlagDebugSkipMeshVoxelizer"": ""True"",
-    ""DFIntAnimationLodFacsVisibilityDenominator"": ""0"",
-    ""DFIntRccMaxPayloadRcv"": ""2147483647"",
-    ""FFlagHidePartyInviteToastsU13"": ""False"",
-    ""DFIntGameNetDontSendRedundantDeltaPositionMillionth"": ""1"",
-    ""DFIntDebugDynamicRenderKiloPixels"": ""100"",
-    ""FFlagPreloadAllFonts"": ""True"",
-    ""DFIntTeleportClientAssetPreloadingHundredthsPercentage2"": ""1000"",
-    ""DFIntSJTMRFWeight"": ""500000"",
-    ""DFIntSJTBaseWeight"": ""500000"",
-    ""FFlagHighlightOutlinesOnMobile"": ""True"",
-    ""FFlagTextureUseACR4"": ""True"",
-    ""DFIntInterpolationFrameRotVelocityThresholdMillionth"": ""10"",
-    ""FIntLuaGcParallelMinMultiTasks"": ""16"",
-    ""DFIntSoundVelocitySmoothingNewRatio"": ""2"",
-    ""FFlagReportGpuLimitedToPerfControl"": ""False"",
-    ""FIntTerrainAtlasBorderSize"": ""-2147483648"",
-    ""DFIntCSGInPlaceMigrationDataHundredthsPercent"": ""0"",
-    ""FFlagHandleAltEnterFullscreenManually"": ""False"",
-    ""FFlagFixOutdatedParticles2"": ""False"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL23"": ""0"",
-    ""DFFlagReplicatorSeparateVarThresholds"": ""True"",
-    ""DFIntReplicationDataCacheNumParallelTasks"": ""4"",
-    ""FFlagEnableChromeMusicPlayingIconIntegration"": ""False"",
-    ""DFIntTaskSchedulerJobInGameThreads"": ""4"",
-    ""FFlagEnablePartyVoiceOnlyForEligibleUsers"": ""False"",
-    ""DFFlagRenderDeviceIncludeAdapterIdInCaps"": ""False"",
-    ""DFIntCSGv2LodLevel2Percentage"": ""0"",
-    ""DFIntCSGv2LodLevel3Count"": ""0"",
-    ""DFFlagRenderSmootherStepUpsampling"": ""False"",
-    ""DFIntPerformanceControlTextureQualityBestUtility"": ""-1"",
-    ""FFlagTouchscreenSupport"": ""True"",
-    ""DFIntOcclusionFresnelConsensusNumerator"": ""2"",
-    ""DFFlagSimOptimizeGeometryChangedAssemblies3"": ""True"",
-    ""DFIntDebugLimitMinTextureResolutionWhenSkipMips"": ""1"",
-    ""FFlagDebugGraphicsPreferD3D11"": ""false"",
-    ""DFFlagHttpPointsReporterUseCompression"": ""False"",
-    ""DFIntVoiceChatVolumeThousandths"": ""5000"",
-    ""DFIntCodecMaxIncomingPackets"": ""100"",
-    ""DFIntSendItemLimit"": ""5"",
-    ""FFlagUserCameraControlLastInputTypeUpdate"": ""False"",
-    ""FFlagRenderInstanceClusterRetryPartInvalidationWhenMeshNotReady4"": ""False"",
-    ""FIntNewDevConsoleMaxLogCount"": ""0"",
-    ""FFlagD3D11SupportBGRA"": ""False"",
-    ""DFFlagReplicateCreateToPlayer"": ""True"",
-    ""FFlagEnableChromeAudioFocusManagement"": ""False"",
-    ""FFlagFixParticleEmissionBias2"": ""False"",
-    ""FIntScrollWheelDeltaAmount"": ""140"",
-    ""FIntCameraMaxZoomDistance"": ""2147483647"",
-    ""FLogGraphicsTextureReductionD3D11"": ""True"",
-    ""FFlagGraphicsTextureCopy"": ""True"",
-    ""FFlagEnableChromeEscapeFix"": ""False"",
-    ""FFlagSimCSGV3IncrementalTriangulationStreamingCompression"": ""False"",
-    ""DFIntMaxFrameBufferSize"": ""4"",
-    ""FFlagSongbirdFasterUpdatesBetweenMusicChanges"": ""False"",
-    ""FFlagShouldShowMusicFtuxTooltipXTimes3"": ""False"",
-    ""DFIntInterpolationFrameVelocityThresholdMillionth"": ""10"",
-    ""DFIntCSGLevelOfDetailSwitchingDistance"": ""0"",
-    ""DFFlagAcceleratorUpdateOnPropsAndValueTimeChange"": ""True"",
-    ""DFIntRakNetLoopMs"": ""1"",
-    ""FFlagEnableChromeBackwardsSignalAPI"": ""False"",
-    ""FFlagDisableChromeV3StaticSelfView"": ""True"",
-    ""FFlagRenderTechniqueBindResourceOpt"": ""true"",
-    ""DFIntTouchSenderMaxBandwidthBps"": ""1050"",
-    ""DFIntServerBandwidthPlayerSampleRateFacsOverride"": ""2147483647"",
-    ""FFlagDisableChromeV3Baseline"": ""True"",
-    ""DFIntHttpBatchApi_maxWaitMs"": ""40"",
-    ""DFIntHttpBatchApi_cacheDelayMs"": ""15"",
-    ""FStringDebugGraphicsPreferredGPUName"": ""Intel(R) HD Graphics 620"",
-    ""FFlagFastGPULightCulling3"": ""True"",
-    ""DFIntMegaReplicatorNumParallelTasks"": ""4"",
-    ""DFFlagSolverStateReplicatedOnly2"": ""True"",
-    ""DFFlagHumanoidReplicateSimulated2"": ""True"",
-    ""DFIntDataSenderRate"": ""38760"",
-    ""FFlagEnablePartyVoiceStatusChangedDetailAnalytics"": ""False"",
-    ""FFlagAssetPreloadingIXP"": ""True"",
-    ""FFlagSquadThirdPartySettingsChangesEnabled2"": ""False"",
-    ""FFlagRenderDebugCheckThreading2"": ""True"",
-    ""DFFlagRenderLanczosUpsamplingNonRinging2"": ""False"",
-    ""DFFlagHttpDiskMemoryCacheCounts"": ""True"",
-    ""DFIntAnimationLodFacsDistanceMin"": ""0"",
-    ""FFlagPartyVoiceDisallowIXPLayerExposureOnInit"": ""False"",
-    ""FFlagDisableChromeFollowupUnibar"": ""True"",
-    ""FFlagPartyVoiceEnableMicPermissionsBanner"": ""False"",
-    ""DFIntJoinDataCompressionLevel"": ""0"",
-    ""DFIntBandwidthManagerDataSenderMaxWorkCatchupMs"": ""20"",
-    ""FFlagEnableGameJoinParamsPartyId3"": ""False"",
-    ""DFIntCSGPendingMigrationDataHundredthsPercent"": ""0"",
-    ""FFlagPartyVoiceMuteOthers"": ""False"",
-    ""FFlagShouldShowSimpleMusicFtuxTooltip2"": ""False"",
-    ""DFIntGraphicsOptimizationModeQualityScalePercent"": ""0"",
-    ""FFlagSongbirdUnverifiedMusicState2"": ""False"",
-    ""FFlagControlBetaBadgeWithGuac"": ""False"",
-    ""DFIntNetworkClusterPacketCacheNumParallelTasks"": ""4"",
-    ""DFIntTimestepArbiterHumanoidTurningVelThreshold"": ""1"",
-    ""DFFlagGraphicsOptimizationModeMVPExposureEnrollment4"": ""True"",
-    ""FFlagShoeSkipRenderMesh"": ""False"",
-    ""FFlagPartyVoiceShouldConnect"": ""False"",
-    ""DFFlagRenderLanczosSeparateAxis2"": ""False"",
-    ""DFFlagReportPartyVoiceActiveInCrashes"": ""False"",
-    ""DFIntRenderMeshBulkUploadMinDeviceMemoryInMbs"": ""0"",
-    ""DFIntOcclusionShelfScalarNumerator"": ""2"",
-    ""DFFlagExperienceStateCaptureDisableSound"": ""False"",
-    ""DFIntCSGv2LodLevel4Percentage"": ""0"",
-    ""FIntMVTerrainHeightMapBlendScale"": ""-2147483647"",
-    ""DFIntNetworkQualityResponderUnit"": ""10"",
-    ""DFFlagRakNetUnblockSelectOnShutdownByWritingToSocket"": ""True"",
-    ""DFIntAudioOcclusionMaxPiercedPrimitives"": ""6"",
-    ""DFIntMemoryUtilityCurveBaseHundrethsPercent"": ""10000"",
-    ""DFIntRenderPostFxBasePixelCount"": ""0"",
-    ""DFIntGameNetPVHeaderRotationalVelocityZeroCutoffExponent"": ""-5000"",
-    ""FFlagCapturesCarouselCTABarUIUpdateEnabled"": ""False"",
-    ""DFIntCheckPVLinearVelocityIntegrateVsDeltaPositionThresholdPercent"": ""1"",
-    ""FFlagOptimizeCFrameUpdatesIC2"": ""True"",
-    ""FFlagLogPartyVoiceGameJoinFailure2"": ""False"",
-    ""DFIntRenderTextureOrphanBudgetMB"": ""0"",
-    ""DFIntBatchThumbnailResultsSizeCap"": ""200"",
-    ""DFIntPhysicsReceiveNumParallelTasks"": ""100"",
-    ""FIntSmoothClusterTaskQueueMaxParallelTasks"": ""4"",
-    ""FIntSimSolverResponsiveness"": ""2147483647"",
-    ""FFlagDebugDisableTelemetryV2Stat"": ""True"",
-    ""FFlagEnableCapturesInChrome"": ""False"",
-    ""DFFlagMergeFakeInputEvents3"": ""True"",
-    ""FFlagJoinVoiceHideWhenPartyVoiceFocused"": ""False"",
-    ""FFlagEnablePartyVoiceCrossContextIdValidation"": ""False"",
-    ""DFIntTargetTimeDelayFacctorTenths"": ""15"",
-    ""DFFlagEnableSoundPreloading"": ""True"",
-    ""FFlagUserUpdateInputConnections"": ""True"",
-    ""DFIntGameNetDontSendRedundantNumTimes"": ""1"",
-    ""FIntRuntimeMaxNumOfDPCs"": ""64"",
-    ""FFlagDebugNextGenRepAttributeRep"": ""True"",
-    ""FFlagEnablePreferredTextSizeGuiService"": ""True"",
-    ""DFIntClusterCompressionLevel"": ""0"",
-    ""FFlagChatTranslationEnableSystemMessage"": ""False"",
-    ""DFIntSignalRCoreRpcQueueSize"": ""2147483647"",
-    ""DFFlagSimSmoothedRunningController2"": ""True"",
-    ""DFIntMaxProcessPacketsStepsAccumulated"": ""0"",
-    ""DFFlagRenderMeshBulkUploadIgnoreBudget"": ""True"",
-    ""FFlagDebugDeterministicParticles"": ""False"",
-    ""DFIntSendRakNetStatsInterval"": ""2147483647"",
-    ""DFFlagTeleportClientAssetPreloadingDoingExperiment2"": ""True"",
-    ""DFIntPerformanceControlTextureQualityExponentTenThousandths"": ""0"",
-    ""DFFlagDebugOverrideDPIScale"": ""False"",
-    ""FFlagDisableChromeFollowupFTUX"": ""True"",
-    ""DFIntCSGv2LodLevel1Count"": ""0"",
-    ""DFIntReplicationVariantKickLimitBytes"": ""2147483647"",
-    ""DFIntCSGv2LodsToGenerate"": ""1"",
-    ""FFlagVideoSeparateRebuffering"": ""True"",
-    ""FFlagLogPartyVoiceJoinFailure"": ""False"",
-    ""DFIntGcInParallelWithRenderPrepareEventHundredthsPercent"": ""0"",
-    ""FIntUITextureMaxRenderTextureSize"": ""-2147483648"",
-    ""DFFlagMouseGetPartOptimization2"": ""True"",
-    ""DFIntNumAssetsMaxToPreload"": ""9999999"",
-    ""DFIntCSGv2LodLevel4Count"": ""0"",
-    ""FIntRenderLocalLightUpdatesMax"": ""1"",
-    ""DFFlagAddPartyVoiceActiveToPerfdata"": ""False"",
-    ""DFIntSJTTargetRadiusWeight"": ""500000"",
-    ""DFIntReplicatorVariantContainerCountLimit"": ""2147483647"",
-    ""DFIntDefaultTimeoutTimeMs"": ""15000"",
-    ""FFlagEnableChromeMusicIntegration2"": ""False"",
-    ""DFIntPartyDataUpdateRateLimitCapacity"": ""0"",
-    ""FFlagJoinCrossExpVoiceWithPartyId"": ""False"",
-    ""FFlagPartyVoiceLaunchFlowTelemetry"": ""False"",
-    ""DFFlagEnablePreloadAvatarAssets"": ""True"",
-    ""DFIntClientPacketMaxFrameMicroseconds"": ""200"",
-    ""FFlagUserSoundsUseRelativeVelocity2"": ""True"",
-    ""FFlagEnablePartyLobbyDeepLink"": ""False"",
-    ""FFlagDebugForceFSMCPULightCulling"": ""True"",
-    ""DFIntTeleportV2ForTeleportAsyncPartyPerTenThousand2_PlaceFilter"": ""0;"",
-    ""DFIntWaitOnRecvFromLoopEndedMS"": ""10"",
-    ""FFlagOptimizeFacsSmoothingTargetReached"": ""True"",
-    ""DFIntRccTcMaxPayloadRcv"": ""2147483647"",
-    ""DFFlagRenderRecordLongestShaderTime"": ""False"",
-    ""FFlagRenderLegacyShadowsQualityRefactor"": ""True"",
-    ""FFlagRenderSkipReadingShaderData"": ""True"",
-    ""DFIntS2PhysicsSenderRate"": ""38760"",
-    ""DFIntRakNetApplicationFeedbackMaxSpeedBPS"": ""0"",
-    ""FFlagCEVFlowStartPartyBegin"": ""False"",
-    ""DFFlagSkipPlaceFilterUpdateForPartyVoice"": ""False"",
-    ""DFFlagRakNetEnablePoll"": ""True"",
-    ""FIntTaskSchedulerTasksDefaultMaxCountPerCycle"": ""2147483647"",
-    ""DFStringNetworkInProcessLimitGameplayPerDCRcc"": ""0"",
-    ""FIntOptimizedContactPipelineSpatialHashOverlapToleranceMicro"": ""30000"",
-    ""FFlagPushFrameTimeToHarmony"": ""True"",
-    ""FFlagSortKeyOptimizationTelemetry"": ""True"",
-    ""FFlagDisableChromeFollowupOcclusion"": ""True"",
-    ""DFFlagPerMipLoading"": ""True"",
-    ""FFlagFixParticleAttachmentCulling"": ""False"",
-    ""FFlagEnablePartyUnreadMessageIndicator2"": ""False"",
-    ""FFlagCaptureUtilitiesUseUpdatedCreatePost"": ""False"",
-    ""FFlagSaveClientSettingsCacheOptimization2"": ""True"",
-    ""DFIntBandwidthManagerApplicationDefaultBps"": ""64000"",
-    ""FFlagLogPartyVoiceReconnect"": ""False"",
-    ""FFlagDebugSSAOForce"": ""False"",
-    ""FFlagSongbirdUseMusicIconWithBackground"": ""False"",
-    ""FFlagRenderGpuTextureCompressor"": ""True"",
-    ""DFFlagReplicatorDisKickSize"": ""True"",
-    ""FFlagDisableChromeV3Icon"": ""True"",
-    ""FFlagTaskSchedulerLimitTargetFpsTo2402"": ""False"",
-    ""FFlagDebugRenderCollectGpuCounters"": ""True"",
-    ""FFlagLoginPageOptimizedPngs"": ""True"",
-    ""FFlagEnableSocialCaptureTakenIXPLayer"": ""False"",
-    ""DFIntSignalRCoreServerTimeoutMs"": ""20000"",
-    ""DFIntServerFramesBetweenJoins"": ""1"",
-    ""DFIntServerBandwidthPlayerSampleRate"": ""2147483647"",
-    ""DFIntRenderMeshBulkUploadMaxCount"": ""2147483648"",
-    ""DFIntRccTcMaxPayloadSnd"": ""2147483647"",
-    ""FFlagAdServiceEnabled"": ""False"",
-    ""DFFlagTeleportPreloadingMetrics5"": ""True"",
-    ""FFlagPreComputeAcceleratorArrayForSharingTimeCurve"": ""True"",
-    ""DFIntGameNetDontSendRedundantDeltaThresholdMillionth"": ""1"",
-    ""FFlagSimDcdEnableDelta2"": ""True"",
-    ""FFlagOnlySurfaceMusicWithRecordingCode"": ""False"",
-    ""FStringRemoteAnimationSmoothingStrategy"": ""Default"",
-    ""DFIntPartyDataUpdateRateLimitDuration"": ""0"",
-    ""DFIntPerformanceControlFrameTimeMax"": ""1"",
-    ""DFIntGameNetPVHeaderTranslationZeroCutoffExponent"": ""-5000"",
-    ""DFIntSJTLodRadiusWeight"": ""1"",
-    ""FIntMVTerrainDetilingParam"": ""2147483648"",
-    ""FFlagShouldShowMusicFtuxTooltip2"": ""False"",
-    ""DFFlagEnableTexturePreloading"": ""True"",
-    ""FFlagVoiceEnabledForPartyIfUserEligible"": ""False"",
-    ""FFlagVoiceEnabledForPartyIfUserEligibleClient"": ""False"",
-    ""FIntRenderGrassDetailStrands"": ""0"",
-    ""DFIntSJTPrefetchWeight"": ""500000"",
-    ""FFlagIncludeWaitingForPartyInCondition"": ""False"",
-    ""DFIntSJTMinRadiusWeight"": ""500000"",
-    ""DFFlagRenderShaderLoadReportInformation"": ""False"",
-    ""FFlagSongbirdUseSmallWidthMusicIcon2"": ""False"",
-    ""DFIntTeleportV2ForPartyPerTenThousand2_PlaceFilter"": ""0;"",
-    ""FIntInterpolationAwareTargetTimeLerpHundredth"": ""40"",
-    ""FFlagFixSensitivityTextPrecision"": ""False"",
-    ""DFIntPreloadAvatarAssets"": ""2147483648"",
-    ""DFIntTeleportV2ForTeleportAsyncPartyPerTenThousand2"": ""0"",
-    ""DFIntRakNetNakResendDelayMsMax"": ""1"",
-    ""DFIntCSGv2LodMinTriangleCount"": ""0"",
-    ""DFIntTaskSchedulerJobInitThreads"": ""4"",
-    ""FFlagPartyVoiceReportJoinFailed"": ""False"",
-    ""FFlagContentFeedFixPartyBannerZoomArea"": ""False"",
-    ""DFIntGcInParallelWithRenderPrepareTelemetryCooldownSec"": ""0"",
-    ""DFFlagExperienceStateCaptureEnableBillboardSelection"": ""False"",
-    ""FIntNewDevConsoleMaxHttpCount"": ""0"",
-    ""FIntRakNetResendBufferArrayLength"": ""512"",
-    ""FFlagEnableChromeDefaultOpen"": ""False"",
-    ""DFFlagNetworkUseZstdWrapper"": ""False"",
-    ""FIntEnableCullableScene2HundredthPercent3"": ""1000"",
-    ""FFlagPartyVoiceUseStateForLocalUserId"": ""False"",
-    ""FIntDefaultJitterN"": ""0"",
-    ""FFlagSongbirdUpdateMusicLoadingState"": ""False"",
-    ""FFlagOptimizeCFrameUpdates2"": ""True"",
-    ""DFFlagSimOptimizeSetThrottle2"": ""True"",
-    ""FIntVertexSmoothingGroupTolerance"": ""0"",
-    ""DFIntReplicatorCountLimitInfluxHundrethsPercentage"": ""0"",
-    ""FFlagEnablePlayerPartyId2"": ""False"",
-    ""DFIntInterpolationFramePositionThresholdMillionth"": ""10"",
-    ""DFIntCodecMaxOutgoingFrames"": ""1000"",
-    ""DFFlagRenderLanczosUpsampling2"": ""False"",
-    ""FFlagDisableChromePinnedChat"": ""True"",
-    ""DFIntPartyAsyncThrottleCountPerMinute"": ""0"",
-    ""FFlagEnablePreferredTextSizeScale"": ""True"",
-    ""DFIntInitialAccelerationLatencyMultTenths"": ""1"",
-    ""DFIntTeleportClientAssetPreloadingHundredthsPercentage"": ""100000"",
-    ""DFIntRakNetApplicationFeedbackScaleUpFactorHundredthPercent"": ""0"",
-    ""DFIntCharacterLoadTime"": ""1"",
-    ""FFlagGameBasicSettingsFramerateCap5"": ""False"",
-    ""FIntRuntimeMaxNumOfConditions"": ""1000000"",
-    ""FFlagNetworkSchemaVersionServerBit"": ""True"",
-    ""FIntDirectionalAttenuationMaxPoints"": ""0"",
-    ""DFIntCliTcMaxPayloadSnd"": ""2147483647"",
-    ""DFIntGraphicsOptimizationModePerformanceScalePercent"": ""2147483647"",
-    ""FFlagEnabledChromeIntegrationIsActivated"": ""False"",
-    ""FIntCLI20390_2"": ""0"",
-    ""FFlagShouldShowSimpleMusicFtuxTooltip"": ""False"",
-    ""DFFlagSimEnableStepPhysicsSelective"": ""True"",
-    ""DFIntIncorrectlyPausedReplicationHundredthsPercentage"": ""0"",
-    ""DFIntClusterEstimatedCompressionRatioHundredths"": ""0"",
-    ""DFIntServerRakNetBandwidthPlayerSampleRate"": ""2147483647"",
-    ""FFlagRenderDynamicResolutionScale12"": ""true"",
-    ""DFIntMaxReceiveToDeserializeLatencyMilliseconds"": ""10"",
-    ""DFIntCSGv2LodLevel1Percentage"": ""100"",
-    ""FFlagContentFeedFixOffsetForPartyBanner"": ""False"",
-    ""FFlagLuaAppEnableFoundationColors7"": ""True"",
-    ""FStringVoiceBetaBadgeLearnMoreLink"": ""null"",
-    ""DFFlagHumanoidReplicateSimulated2TurnOffLocalState"": ""True"",
-    ""FFlagEnablePartyVoiceVolume2"": ""False"",
-    ""FIntRenderShadowmapBias"": ""-1"",
-    ""DFIntJoinDataItemEstimatedCompressionRatioHundreths"": ""0"",
-    ""DFFlagRenderRecordMemoryInShaderTime"": ""False"",
-    ""DFIntClientPacketHealthyAllocationPercent"": ""20"",
-    ""FFlagEnableChromePinAnalytics2"": ""True"",
-    ""DFFlagDebugDisableLogServiceExecuteScript"": ""True"",
-    ""DFIntRenderMeshBulkUploadMaxTimeMs"": ""0"",
-    ""DFIntCSGv2LodLevel2Count"": ""0"",
-    ""DFIntNetworkInProcessLimitGameplayMsClient"": ""0"",
-    ""DFIntGraphicsOptimizationModeMinFrameTimeTargetMs"": ""0"",
-    ""FIntSSAOMipLevels"": ""0"",
-    ""FStringPartyChatPerfIxpLayer"": """",
-    ""FStringPartyCoordinationExperienceJoinIxpLayer"": """",
-    ""FStringPartyFormationInviteIxpLayer"": """",
-    ""FFlagReshufflePartyIconsInUnibar"": ""False"",
-    ""FStringPartyCoordinationUIIxpLayer"": """",
-    ""DFFlagMaxDataPayloadSizePreciseCh"": ""false"",
-    ""DFIntMaxDataPayloadSize"": ""96000000"",
-    ""DFIntCheckPVDifferencesForInterpolationMinVelThresholdStudsPerSecHundredth"": ""1"",
-    ""FFlagNetworkSchemaVersionClientBit"": ""True"",
-    ""FFlagPartyVoiceBlockSync2"": ""False"",
-    ""FFlagPartyVoiceExecuteVoiceActionsPostAsyncInit"": ""False"",
-    ""DFIntConnectionMTUSize"": ""1492"",
-    ""DFFlagEnableCaptureModeDontCaptureChatWindow"": ""False"",
-    ""DFIntCLI61964inKB"": ""2147483647"",
-    ""DFFlagExperienceStateCaptureMinMemEnabled"": ""False"",
-    ""FStringTerrainMaterialTable2022"": """",
-    ""DFFlagExperienceStateCaptureHiddenSelection"": ""False"",
-    ""FStringTerrainMaterialTablePre2022"": """",
-    ""DFIntContentProviderPreloadHangTelemetryHundredthsPercentage"": ""0"",
-    ""FFlagDisableChromeV3Captures"": ""True"",
-    ""DFFlagDebugPerfMode"": ""True"",
-    ""DFFlagTextureQualityOverrideEnabled"": ""True"",
-    ""FFlagDisableChromeV3DockedMic"": ""True"",
-    ""DFIntSignalRCoreKeepAlivePingPeriodMs"": ""25"",
-    ""FStringVulkanBuggyRenderpassList2"": ""Intel(R) HD Graphics 620"",
-    ""FFlagDebugGraphicsPreferVulkan"": ""False"",
-    ""DFIntSignalRCoreHandshakeTimeoutMs"": ""3000"",
-    ""DFIntSignalRCoreHubMaxBackoffMs"": ""5000"",
-    ""FFlagDebugGraphicsDisableDirect3D11"": ""False"",
-    ""DFIntSignalRCoreHubBaseRetryMs"": ""10"",
-    ""FFlagPartyVoiceSidFix"": ""False"",
-    ""FFlagOptimizeChildNameCopy"": ""True"",
-    ""FStringPartyFormationCreateUserLayer"": """",
-    ""FFlagFixShowMusicFtuxTooltipWithoutConnect"": ""False"",
-    ""FFlagEnablePeekStaticMusicIconIntegration"": ""False"",
-    ""DFFlagOptimizePartsInPart"": ""True"",
-    ""FFlagPartyVoiceControlsAnalytics"": ""False"",
-    ""DFIntRenderingThrottleDelayInMS"": ""0"",
-    ""DFIntHACDPointSampleDistApartTenths"": ""2147483647"",
-    ""FFlagRenderCBRefactor2"": ""True"",
-    ""FIntUnifiedLightingBlendZone"": ""0"",
-    ""DFFlagRenderUseHardwareBufferTextureForWinVideoEncode"": ""False"",
-    ""FIntFRMMaxGrassDistance"": ""0"",
-    ""FFlagNewCameraControls_SpeedAdjustEnum"": ""False"",
-    ""DFFlagLightGridSimdNew3"": ""True"",
-    ""FFlagAppChatRebrandIconUpdates"": ""False"",
-    ""FIntRenderMaxShadowAtlasUsageBeforeDownscale"": ""0"",
-    ""DFIntMegaReplicatorNetworkQualityProcessorUnit"": ""0"",
-    ""DFIntRakNetSelectTimeoutMs"": ""1"",
-    ""DFIntRakNetNakResendDelayMs"": ""1"",
-    ""FFlagCaptureEngineSupportDisableAudio"": ""True"",
-    ""DFFlagSolverNOURemovedUnderSetOptimized2"": ""True"",
-    ""DFIntRenderShadowHugeRadius"": ""0"",
-    ""FFlagCanReplicateContentPropertiesServer"": ""True"",
-    ""DFFlagRenderBloomMakeResolutionIndependent"": ""False"",
-    ""FIntGeometryBufferMaxElementsFCStandard"": ""0"",
-    ""FIntGeometryBufferMaxElementsModel"": ""0"",
-    ""DFIntCSGv2LodLevel3Percentage"": ""0"",
-    ""FIntMVTerrainHeightMapBlendMin"": ""-2147483647"",
-    ""FIntNewDevConsoleMaxGraphCount"": ""0"",
-    ""FFlagDebugAvatarAutosetupWarningsToConsole"": ""True"",
-    ""FFlagAddPartyVoiceActiveToiOSCrashReports"": ""False"",
-    ""DFIntRccMaxPayloadSnd"": ""2147483647"",
-    ""DFIntMaxAcceptableUpdateDelay"": ""1"",
-    ""DFIntReplicationVariantLimitHundredthPercent"": ""0"",
-    ""DFIntMaxNumReplicatorsToDisconnectPerFrame"": ""2000"",
-    ""DFFlagUpdateBoundExtentsForHugeMixedReplicationComponents"": ""True"",
-    ""DFFlagDebugRenderForceTechnologyVoxel"": ""True"",
-    ""DFFlagRakNetCalculateApplicationFeedback2"": ""False"",
-    ""FFlagEnableZstdDictionaryForClientSettings"": ""False"",
-    ""DFFlagTaskSchedulerAvoidSleep"": ""True"",
-    ""FIntDebugFRMOptionalMSAALevelOverride"": ""0"",
-    ""DFIntTouchSenderMaxBandwidthBpsScaling"": ""2"",
-    ""FFlagDebugDisableTelemetryEventIngest"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingEnabledIXP"": ""True"",
-    ""DFIntOcclusionFresnelEllipsoids"": ""6"",
-    ""DFIntAssetPreloading"": ""2147483647"",
-    ""FFlagEnablePartyVoiceOnlyForUnfilteredThreads"": ""False"",
-    ""FIntUITextureMaxUpdateDepth"": ""1"",
-    ""DFFlagSampleAndRefreshRakPing"": ""True"",
-    ""DFFlagReplicatorCheckReadTableCollisions"": ""True"",
-    ""DFFlagSimOptimizeSetSize"": ""True"",
-    ""FFlagDebugSkyGray"": ""true"",
-    ""FIntRomarkStartWithGraphicQualityLevel"": ""1"",
-    ""FFlagEnablePartyIconInNonChrome2"": ""False"",
-    ""FFlagVoiceBetaBadge"": ""False"",
-    ""FFlagFasterPreciseTime4"": ""True"",
-    ""DFIntSoundVelocitySmoothingOldRatio"": ""5"",
-    ""DFIntClusterSenderMaxUpdateBandwidthBps"": ""2100000000"",
-    ""FFlagEnablePreferredTextSizeStyleFixesInAvatarExp"": ""True"",
-    ""DFIntTaskSchedulerTargetFps"": ""5588562"",
-    ""FFlagMessageBusCallOptimization"": ""True"",
-    ""DFIntClusterSenderMaxJoinBandwidthBps"": ""2100000000"",
-    ""FIntRenderLocalLightFadeInMs"": ""0"",
-    ""DFIntNetworkSchemaCompressionRatio"": ""0"",
-    ""FFlagDisableChromeUnibar"": ""True"",
-    ""FFlagEnableZstdForClientSettings"": ""False"",
-    ""FFlagUserBetterInertialScrolling"": ""True"",
-    ""DFIntTrackCountryRegionAPIHundredthsPercent"": ""10000"",
-    ""FIntTaskSchedulerThreadMin"": ""0"",
-    ""DFIntClientPacketExcessMicroseconds"": ""1000"",
-    ""FIntRenderLocalLightUpdatesMin"": ""1"",
-    ""FIntRobloxGuiBlurIntensity"": ""0"",
-    ""FFlagShaderLightingRefactor"": ""False"",
-    ""DFFlagHttpApplyDecompressionMultiplier"": ""False"",
-    ""DFIntMaxProcessPacketsStepsPerCyclic"": ""5000"",
-    ""DFIntClientPacketMaxDelayMs"": ""1"",
-    ""FFlagDisableFeedbackSoothsayerCheck"": ""False"",
-    ""DFIntTeleportPartyExpirationMillisecond"": ""0"",
-    ""FFlagApplyVoiceConnectingStatusInPartySheet"": ""False"",
-    ""FFlagAppChatLandingEnableJoinPartyFTUX"": ""False"",
-    ""FFlagAppChatFixPartySettingsRealtime"": ""False"",
-    ""DFIntCliMaxPayloadRcv"": ""2147483647"",
-    ""DFIntNetworkQualityResponderMaxWaitTime"": ""1"",
-    ""DFFlagEnableMeshPreloading2"": ""True"",
-    ""DFIntHttpBatchApi_minWaitMs"": ""5"",
-    ""DFIntTextureQualityOverride"": ""0"",
-    ""FFlagRenderEnableGlobalInstancingD3D10"": ""true"",
-    ""FFlagPreloadTextureItemsOption4"": ""True"",
-    ""FFlagDebugForceGenerateHSR"": ""true"",
-    ""DFFlagFastEndUpdateLoop"": ""true"",
-    ""DFIntFrameRateMSToReduceTouchEvents"": ""30"",
-    ""DFIntNumFramesToKeepAfterInterpolation"": ""0"",
-    ""FFlagEnableChromePinIntegrations2"": ""False"",
-    ""DFIntDebugFRMQualityLevelOverride"": ""1"",
-    ""FIntTaskSchedulerAutoThreadLimit"": ""16"",
-    ""DFIntGraphicsOptimizationModeMaxFrameTimeTargetMs"": ""0"",
-    ""FFlagDebugEnableDirectAudioOcclusion2"": ""True"",
-    ""DFFlagTeleportClientAssetPreloadingEnabled9"": ""True"",
-    ""DFIntTimestepArbiterHumanoidLinearVelThreshold"": ""1"",
-    ""FFlagEnablePreferredTextSizeStyleFixesInAppShell3"": ""True"",
-    ""FLogNetwork"": ""7"",
-    ""FFlagDebugDisableTelemetryV2Event"": ""True"",
-    ""DFIntMaxDataPacketPerSend"": ""2147483647"",
-    ""DFFlagPerformanceControlEnableMemoryProbing3"": ""True"",
-    ""DFFlagEnableMeshPreloading"": ""True"",
-    ""FIntInterpolationMaxDelayMSec"": ""100"",
-    ""DFFlagClampIncomingReplicationLag"": ""True"",
-    ""FFlagFixIGMTabTransitions"": ""True"",
-    ""FIntRuntimeMaxNumOfThreads"": ""1000000"",
-    ""FFlagContentProviderPreloadHangTelemetry"": ""False"",
-    ""DFIntOcclusionGainScalarNumerator"": ""2"",
-    ""FFlagRenderEnableIGCounters"": ""True"",
-    ""FIntRenderMeshOptimizeVertexBuffer"": ""1"",
-    ""FIntRuntimeMaxNumOfMutexes"": ""1000000"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL12"": ""0"",
-    ""DFIntPerformanceControlReportingPeriodInMs"": ""700"",
-    ""DFIntMemoryUtilityCurveNumSegments"": ""100"",
-    ""FIntSSAO"": ""0"",
-    ""DFFlagSimEnableStepPhysics"": ""True"",
-    ""FFlagAddHapticsToggle"": ""False"",
-    ""FFlagEnableChromeAnalytics"": ""False"",
-    ""FIntRuntimeMaxNumOfSemaphores"": ""1000000"",
-    ""DFIntCSGLevelOfDetailSwitchingDistanceL34"": ""0"",
-    ""FStringAndroidVfsLowspecHwCondition"": ""\""FStringAndroidVfsLowspecHwCondition\"": \""{\""and\"":[ {\""=\"":[\""app_bitness()\"",16]}, {\""not\"":[ {\""is_any_of\"":[\""manufacturer()\"",\""samsung\"",\""amazon\"",\""lge\"",\""lg\"",\""lg electronics\"",\""vivo\""]} ]} ]}\"""",
-    ""DFIntMaxProcessPacketsJobScaling"": ""10000"",
-    ""FFlagUWPBetterJsonParsingInUpdateCheck"": ""True"",
-    ""DFIntRakNetApplicationFeedbackScaleUpThresholdPercent"": ""0"",
-    ""DFIntBufferCompressionLevel"": ""0"",
-    ""FIntMVTerrainHeightMapBlendMax"": ""-2147483647"",
-    ""FIntTerrainOTAMaxTextureSize"": ""-2147483648"",
-    ""DFFlagRenderSunRaysMakeResolutionIndependent"": ""False"",
-    ""DFIntRenderMeshBulkUploadMaxSize"": ""2147483648"",
-    ""DFIntGetUserPartyIdsMaxLimit"": ""0"",
-    ""FIntTerrainArraySliceSize"": ""0"",
-    ""FIntMVTerrainRotationParam"": ""-2147483647"",
-    ""DFIntRenderClampRoughnessMax"": ""0"",
-    ""FIntPartyVoiceJoinRequestPulseCheckTimeout"": ""0"",
-    ""FIntPartyVoiceTelemetryThrottlingThousandths"": ""0"",
-    ""FIntFontSizePadding"": ""2"",
-    ""DFIntPartyVoiceLaunchFlowTelemetryThrottle"": ""0"",
-    ""FIntPartyPlayerInactivityTimeoutInSeconds"": ""0"",
-    ""DFIntGraphicsOptimizationModeFRMFrameRateTarget"": ""200"",
-    ""FIntTaskSchedulerTasksDefaultMaxTimeMsPerCycle"": ""2147483647"",
-    ""DFIntMaxAverageFrameDelayExceedFactor"": ""2"",
-    ""DFFlagThrottleDeveloperConsoleEvents"": ""False"",
-    ""FFlagFRMRefactor"": ""false"",
-    ""DFIntDebugPerformanceControlFrameTime"": ""2"",
-    ""FIntRenderShadowIntensity"": ""0"",
-    ""FFlagDebugForceFutureIsBrightPhase2"": ""False"",
-    ""FFlagDebugForceFutureIsBrightPhase3"": ""False"",
-    ""FFlagDebugDisplayFPS"": ""False"",
-    ""FFlagShouldShowMusicFtuxTooltip3"": ""False"",
-    ""FFlagDebugDisableTelemetryPoint"": ""True"",
-    ""FFlagLuauCodegen"": ""True"",
-    ""FFlagDebugGraphicsPreferD3D11FL10"": ""true"",
-    ""FFlagDebugDisableTelemetryV2Counter"": ""True"",
-    ""FFlagAlwaysShowVRToggleV3"": ""False"",
-    ""FFlagChatTranslationSettingEnabled3"": ""False"",
-    ""FFlagDebugDisableTelemetryEphemeralStat"": ""True"",
-    ""FFlagDebugDisableTelemetryEphemeralCounter"": ""True"",
-    ""FFlagEnableToggleCaptureIntegration"": ""False"",
-    ""FFlagCaptureServiceUploadFlowSupportEnabled"": ""False"",
-    ""FFlagCapturesOpenInVideos"": ""False"",
-    ""FFlagCapturesManagerGuacPolicy"": ""False"",
-    ""FFlagCapturesPromptsSupportVideo2"": ""False"",
-    ""FFlagCapturesPromptsSupportVideo"": ""False"",
-    ""FFlagCapturesHotkeyEnabledForAll"": ""False"",
-    ""DFFlagVideoCaptureServiceEnabled"": ""False"",
-    ""FStringMusicTooltipLocalStorageKey_v2"": """",
-    ""FStringChromeMusicIntegrationUtilityId"": """",
-    ""FIntMusicFtuxShowDelayMs"": ""9999999"",
-    ""FIntMusicFtuxDismissDelayMs"": ""9999999"",
-    ""FFlagFixLoadedSignal"": ""True"",
-    ""FFlagEnablePartyMicIconInChrome"": ""False"",
-    ""FFlagEnablePartyIconInNonChrome5"": ""False"",
-    ""DFFlagTeleportClientAssetPreloadingEnabledIXP2"": ""True"",
-    ""FFlagVideoServiceAddHardwareCodecMetrics"": ""True"",
-    ""DFIntWaitOnUpdateNetworkLoopEndedMS"": ""100"",
-    ""FFlagEnableTFFeedbackModeEntryCheck"": ""False"",
-    ""DFIntSendGameServerDataMaxLen"": ""9999999"",
-    ""FFlagImproveShiftLockTransition"": ""True"",
-    ""FFlagUISUseLastFrameTimeInUpdateInputSignal"": ""True"",
-    ""DFFlagRenderInternalDisplayName"": ""False"",
-    ""DFFlagRenderBlurMakeResolutionIndependent"": ""False"",
-    ""FIntGeometryBufferMaxElementsParts"": ""0"",
-    ""FIntGeometryBufferMaxElementsMesh"": ""0"",
-    ""FIntGeometryBufferMaxElementsFCSkinned"": ""0"",
-    ""FIntGeometryBufferMaxBytesParts"": ""0"",
-    ""FIntGeometryBufferMaxBytesModel"": ""0"",
-    ""FIntGeometryBufferMaxBytesMesh"": ""0"",
-    ""FIntGeometryBufferMaxBytesFCStandard"": ""0"",
-    ""FIntGeometryBufferMaxBytesFCSkinned"": ""0"",
-    ""FIntGeometryBufferAlignBytes"": ""64"",
-    ""FStringSocialPartyLayer"": """",
-    ""FStringPartyVoiceBannerErrorUserNotEligibleURL"": """",
-    ""FIntDebugTextureManagerSkipMips"": ""100000"",
-    ""FFlagSkyUseRGBEEncoding"": ""False"",
-    ""FFlagDebugRenderingSetDeterministic"": ""True"",
-    ""FFlagEnableFacialAgeEstimationService"": ""False"",
-    ""FFlagSmoothClusterOcclusionCulling"": ""true"",
-    ""FFlagSmoothClusterOcclusionCullingFix32Bit"": ""True"",
-    ""FFlagAnimationLodIkEnabled"": ""True"",
-    ""FFlagAnimationLodBoneEnabled"": ""True"",
-    ""FIntAnimationLodIkEnabledThreshold"": ""0"",
-    ""FIntAnimationLodIkDisabledThreshold"": ""2147483647"",
-    ""FIntAnimationLodFacsEnabledThreshold"": ""0"",
-    ""FIntAnimationLodFacsDisabledThreshold"": ""2147483647"",
-    ""FIntAnimationLodBoneLowPriorityEnabledThreshold"": ""0"",
-    ""FIntAnimationLodBoneLowPriorityDisabledThreshold"": ""2147483647"",
-    ""FIntAnimationLodBoneMediumPriorityEnabledThreshold"": ""0"",
-    ""FIntAnimationLodBoneMediumPriorityDisabledThreshold"": ""2147483647"",
-    ""DFIntAnimationLodFacsMaxLodThreshold"": ""0"",
-    ""DFIntAnimationLodRetargetingIkMaxLodThreshold"": ""0"",
-    ""DFIntAnimationLodDistanceMaxLod0"": ""2147483647"",
-    ""DFIntAnimationLodDistanceMaxLod1"": ""747483647"",
-    ""DFIntAnimationLodThrottlerDistanceMin"": ""0"",
-    ""DFIntAnimationLodThrottlerDistanceMax"": ""2147483647"",
-    ""DFIntAnimationLodFacsVisibilityMin"": ""0"",
-    ""DFIntAnimationLodFacsVisibilityMax"": ""2147483647"",
-    ""DFIntAnimationLodThrottlerVisibilityMin"": ""0"",
-    ""DFIntAnimationLodThrottlerVisibilityMax"": ""2147483647"",
-    ""DFIntAnimationLodInverseVisibilityMinLod0"": ""0"",
-    ""DFIntAnimationLodInverseVisibilityMinLod1"": ""0"",
-    ""DFIntAnimationLodOutsideFrustumDistanceMaxLod0"": ""2147483647"",
-    ""DFIntAnimationLodFacsOutOfFrustumLodPercentage"": ""0"",
-    ""DFIntAnimationLodThrottlerOutOfFrustumLodPercentage"": ""0"",
-    ""DFIntAnimationLodFacsFpsMax"": ""2147483647"",
-    ""DFIntAnimationLodFacsFpsMin"": ""0"",
-    ""DFIntAnimationLodThrottlerFpsMax"": ""2147483647"",
-    ""DFIntAnimationLodThrottlerFpsMin"": ""0"",
-    ""DFIntAnimationLodFacsAnimationTimeMsMin"": ""0"",
-    ""DFIntAnimationLodFacsAnimationTimeMsMax"": ""2147483647"",
-    ""DFIntAnimationLodThrottlerAnimationTimeMsMin"": ""0"",
-    ""DFIntAnimationLodThrottlerAnimationTimeMsMax"": ""2147483647"",
-    ""DFIntAnimationLodThrottleMaxFramesToSkip"": ""0"",
-    ""FIntAnimationLodIkFadeDurationMs"": ""1"",
-    ""FIntAnimationLodFacsFadeDurationMs"": ""1"",
-    ""FIntAnimationLodBoneFadeDurationMs"": ""1"",
-    ""FIntAnimationLodIkFadeTimeoutMs"": ""1"",
-    ""FIntAnimationLodFacsFadeTimeoutMs"": ""1"",
-    ""FIntAnimationLodBoneFadeTimeoutMs"": ""1"",
-    ""DFIntAnimationLodIntegralGainThousandths"": ""0"",
-    ""DFIntAnimationLodDerivativeGainThousandths"": ""0"",
-    ""DFIntAnimationLodProportionalGainThousandths"": ""0"",
-    ""DFIntAnimationLodBudgetAdjustmentMaxInThousandths"": ""0"",
-    ""DFIntAnimationLodBudgetAdjustmentMinInThousandths"": ""0"",
-    ""DFFlagSupportMeshLOD"": ""True"",
-    ""DFFlagSimModelLodUseMeshWithLessTriangles"": ""False"",
-    ""DFIntMeshNLoDs"": ""1"",
-    ""FFlagMeshLoDSendTimeToServeMesh2"": ""False"",
-    ""DFFlagMeshLODZoom"": ""False"",
-    ""FFlagUADFDisableImportLoD"": ""True"",
-    ""DFFlagAnimationLodDisableAnchoredThrottling"": ""True"",
-    ""DFFlagAnimatorLodModelInstanceOwnershipFix"": ""True"",
-    ""DFFlagAnimatorLodOptOutPhase"": ""True"",
-    ""DFFlagAnimatorPreferLodEnabledPropertyActive"": ""True"",
-    ""FFlagGenerateMeshLOD_Fix1"": ""True"",
-    ""FFlagCDRigLod"": ""True"",
-    ""FFlagDisableInitialArmLODBasedOnArm82Capabilities"": ""False"",
-    ""FFlagSimModelLodFixSpottyColor"": ""True"",
-    ""FFlagSurfaceAppearanceUseLowestRoughnessMipAtLowLOD3"": ""False"",
-    ""FFlagBaseWrapRespectsLODs"": ""False"",
-    ""DFFlagMeshLODOffsetCheck"": ""True"",
-    ""DFFlagMeshLODTranscode2"": ""True"",
-    ""DFFlagSimModelLodAsync"": ""True"",
-    ""DFFlagSurfaceAppearanceTintingBakeLODColor"": ""True"",
-    ""DFIntAvatarFacechatLODCameraDisableTelemetryThrottleHundrethsPercent"": ""0"",
-    ""DFIntAvatarFacechatPipelineLodTelemetryThrottleHundrethsPercent"": ""0"",
-    ""DFIntAvatarFaceChatSDKFailedSetLodThrottleHundrethsPercent"": ""0"",
-    ""DFIntReportLodDataStatsHundredthsPercentage"": ""0"",
-    ""DFIntReportLodOscillationHundredthsPercentage"": ""0"",
-    ""DFIntAnimationLodConfigVersion"": ""1"",
-    ""DFIntAnimationLodCleanupIntervalSeconds"": ""20"",
-    ""DFIntFaceTrackingLod"": ""-1"",
-    ""DFIntInterpolationDtLimitForLod"": ""15"",
-    ""DFIntLodOscillationThresholdMS"": ""200"",
-    ""DFIntSimModelLodVoxelNumPerAxis"": ""16"",
-    ""DFIntStreamingLodWorkMaxPercent"": ""100"",
-    ""DFIntStreamingTerrainMinimumLowLodRadius"": ""2147483647"",
-    ""DFIntTrackerLODFrameRateLimitVoteAmount"": ""0"",
-    ""DFStringMeshLODTranscodeDefaultFormat"": ""fmd"",
-    ""DFStringMeshLODTranscodeDefaultFidelity"": ""ALL"",
-    ""DFStringMeshLODTranscodeMajorVersion"": ""1.0.1"",
-    ""DFStringMeshLODTranscodeRolloutMajorVersion"": ""0.1.2"",
-    ""DFFlagMeshLODTranscodeRollout"": ""False"",
-    ""FFlagMeshLoDAnalyticsFixIsLocalAsset"": ""True"",
-    ""FFlagModelLodStats2"": ""False"",
-    ""FFlagSimMeshLoDTranscoderE2ETest"": ""False"",
-    ""FFlagTrackerLodControllerThermalState"": ""False"",
-    ""DFIntAnimationLodThrottlerVisibilityDenominator"": ""1"",
-    ""DFIntTrackerLodArmOffset"": ""0"",
-    ""DFIntMeshLODTranscodeRolloutHundredthPercent"": ""0"",
-    ""DFFlagSkipHighResolutiontextureMipsOnLowMemoryDevices2"": ""True"",
-    ""DFFlagRenderHighlightManagerPrepare"": ""True"",
-    ""DFFlagTelemetryRemoveHardcodedV2URL"": ""True"",
-    ""DFFlagDebugPauseVoxelizer"": ""False"",
-    ""DFFlagDisableDPIScale"": ""True"",
-    ""DFIntRaycastMaxDistance"": ""2147483647"",
-    ""DFIntLuauGcStepSizeKb"": ""2147483647"",
-    ""DFIntDebugRestrictGCDistance"": ""1"",
-    ""DFIntCanHideGuiGroupId"": ""5774246"",
-    ""DFIntVideoEncoderBitrate"": ""0"",
-    ""DFIntLuaGcMaxKb"": ""2147483647"",
-    ""DFStringTelemetryV2Url"": ""0.0.0.0"",
-    ""FFlagEnableSponsoredAdsPerTileTooltipExperienceFooter"": ""False"",
-    ""FFlagEnableSponsoredAdsSeeAllGamesListTooltip"": ""False"",
-    ""FFlagEnableSponsoredTooltipForAvatarCatalog2"": ""False"",
-    ""FFlagEnableSponsoredAdsGameCarouselTooltip3"": ""False"",
-    ""FFlagRenderEnableGlobalInstancingD3D11"": ""false"",
-    ""FFlagEnableBubbleChatFromChatService"": ""False"",
-    ""FFlagDebugGridForceFractalUpsample"": ""False"",
-    ""FFlagLuaAppSponsoredGridTiles"": ""False"",
-    ""FFlagUserShowGuiHideToggles"": ""False"",
-    ""FFlagRenderNoLowFrmBloom"": ""True"",
-    ""FFlagUpdateHealthBar"": ""False"",
-    ""FIntPerformanceControlTextureManagerLowTextureLevel"": ""100000"",
-    ""FIntPerformanceControlTextureManagerHighTextureLevel"": ""0"",
-    ""FIntFullscreenTitleBarTriggerDelayMillis"": ""3600000"",
-    ""FIntBloomFrmCutoff"": ""2147483647"",
-    ""FIntDebugForceMSAASamples"": ""0"",
-    ""FStringGraphicsDisableUnalignedDxtGPUNameBlacklist"": ""Intel(R) HD Graphics 620"",
-    ""FFlagDynamicGeometryBufferSizing"": ""true"",
-    ""FFlagLargeReplicatorRead4"": ""True"",
-    ""DFIntRenderFixedTargetResolutionMargin2"": ""0"",
-    ""FFlagLargeReplicatorWrite4"": ""True"",
-    ""FFlagLargeReplicatorEnabled6"": ""True""
-}
-";
-            Clipboard.SetText(jsonText);
-        }
-
-        private void InstallButton_Click10000(object sender, RoutedEventArgs e)
-        {
-            string url = "https://plexity.netlify.app";
-            try
-            {
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = url,
-                    UseShellExecute = true
-                });
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Failed to open URL: {ex.Message}");
-            }
+            public double SizeMb => Size / 1024d / 1024d;
         }
     }
 }

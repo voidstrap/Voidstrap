@@ -18,7 +18,6 @@ namespace Voidstrap.RobloxInterfaces
         private Dictionary<string, string>? _flags;
 
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-
         private ApplicationSettings(string applicationName, string channelName)
         {
             _applicationName = applicationName;

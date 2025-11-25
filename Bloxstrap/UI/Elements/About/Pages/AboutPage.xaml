@@ -77,8 +77,7 @@
                         Text="Voidstrap" />
 
                 </Grid>
-                <TextBlock Text="A Bloxstrap Fork." />
-
+                <TextBlock Text="A Bloxstrap Fork. Mod based :3" />
             </StackPanel>
         </Grid>
 
@@ -324,6 +323,7 @@
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />
+                    <controls:MarkdownTextBlock MarkdownText="[Froststrap](https://github.com/RealMeddsam/Froststrap)" />
                     <controls:MarkdownTextBlock MarkdownText="[MaximumADHD](https://github.com/BloxstrapLabs)" />
                     <controls:MarkdownTextBlock MarkdownText="[Multako](https://www.roblox.com/users/2485612194/profile)" />
                     <controls:MarkdownTextBlock MarkdownText="[axstin](https://github.com/axstin)" />

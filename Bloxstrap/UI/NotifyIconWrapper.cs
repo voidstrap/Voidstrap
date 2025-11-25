@@ -1,4 +1,4 @@
-using Voidstrap.Integrations;
+﻿using Voidstrap.Integrations;
 using Voidstrap.UI.Elements.About;
 using Voidstrap.UI.Elements.ContextMenu;
 using System;
@@ -11,14 +11,12 @@ namespace Voidstrap.UI
     public class NotifyIconWrapper : IDisposable
     {
         private bool _disposed;
-
         private readonly NotifyIcon _notifyIcon;
         private readonly MenuContainer _menuContainer;
         private readonly Watcher _watcher;
-
         private ActivityWatcher? ActivityWatcher => _watcher.ActivityWatcher;
-
         private EventHandler? _alertClickHandler;
+        public bool EnableAppNotifications { get; set; } = App.Settings.Prop.VoidNotify;
 
         public NotifyIconWrapper(Watcher watcher)
         {
@@ -32,6 +30,7 @@ namespace Voidstrap.UI
                 Text = "Voidstrap",
                 Visible = true
             };
+
             _notifyIcon.MouseClick += NotifyIcon_MouseClick;
 
             if (ActivityWatcher != null && App.Settings.Prop.ShowServerDetails)
@@ -40,7 +39,6 @@ namespace Voidstrap.UI
             _menuContainer = new MenuContainer(_watcher);
             _menuContainer.Show();
         }
-
         private void NotifyIcon_MouseClick(object? sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Right)
@@ -59,8 +57,6 @@ namespace Voidstrap.UI
                 return;
 
             string? serverLocation = await ActivityWatcher.Data.QueryServerLocation();
-
-
             if (string.IsNullOrEmpty(serverLocation))
                 return;
 
@@ -71,17 +67,29 @@ namespace Voidstrap.UI
                 ServerType.Reserved => Strings.ContextMenu_ServerInformation_Notification_Title_Reserved,
                 _ => string.Empty
             };
-
-            ShowAlert(
-                title,
-                string.Format(Strings.ContextMenu_ServerInformation_Notification_Text, serverLocation),
-                10,
-                (_, _) => _menuContainer.Dispatcher.Invoke(() => _menuContainer.ShowServerInformationWindow())
-            );
+            if (EnableAppNotifications)
+            {
+                ShowAlert(
+                    title,
+                    string.Format(Strings.ContextMenu_ServerInformation_Notification_Text, serverLocation),
+                    10,
+                    (_, _) => _menuContainer.Dispatcher.Invoke(() => _menuContainer.ShowServerInformationWindow())
+                );
+            }
+            else
+            {
+                App.Logger.WriteLine("NotifyIconWrapper::OnGameJoinAsync", "App notifications disabled — skipping alert");
+            }
         }
 
         public void ShowAlert(string caption, string message, int durationSeconds, EventHandler? clickHandler)
         {
+            if (!EnableAppNotifications)
+            {
+                App.Logger.WriteLine("NotifyIconWrapper::ShowAlert", "Notifications disabled — skipping alert display");
+                return;
+            }
+
             string id = Guid.NewGuid().ToString("N").Substring(0, 8);
             string logIdent = $"NotifyIconWrapper::ShowAlert.{id}";
 
@@ -113,48 +121,49 @@ namespace Voidstrap.UI
                 if (clickHandler != null)
                 {
                     _notifyIcon.BalloonTipClicked -= clickHandler;
-
                     App.Logger.WriteLine(logIdent, "Alert duration ended, removed click handler");
 
                     if (_alertClickHandler == clickHandler)
-                    {
                         _alertClickHandler = null;
-                    }
                     else
-                    {
                         App.Logger.WriteLine(logIdent, "Click handler was overridden by another alert");
-                    }
                 }
             });
         }
 
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        protected virtual void Dispose(bool disposing)
+        {
             if (_disposed)
                 return;
 
+            if (disposing)
+            {
+                App.Logger.WriteLine("NotifyIconWrapper::Dispose", "Disposing NotifyIcon");
+
+                try
+                {
+                    _menuContainer.Dispatcher.Invoke(() => _menuContainer.Close());
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine("NotifyIconWrapper::Dispose", $"Failed to close menu container: {ex}");
+                }
+
+                if (_alertClickHandler != null)
+                {
+                    _notifyIcon.BalloonTipClicked -= _alertClickHandler;
+                    _alertClickHandler = null;
+                }
+
+                _notifyIcon.Dispose();
+            }
+
             _disposed = true;
-
-            App.Logger.WriteLine("NotifyIconWrapper::Dispose", "Disposing NotifyIcon");
-
-            try
-            {
-                _menuContainer.Dispatcher.Invoke(() => _menuContainer.Close());
-            }
-            catch (Exception ex)
-            {
-                App.Logger.WriteLine("NotifyIconWrapper::Dispose", $"Failed close menu container: {ex}");
-            }
-
-            if (_alertClickHandler != null)
-            {
-                _notifyIcon.BalloonTipClicked -= _alertClickHandler;
-                _alertClickHandler = null;
-            }
-
-            _notifyIcon.Dispose();
-
-            GC.SuppressFinalize(this);
         }
     }
 }

@@ -73,7 +73,7 @@ public abstract class NavigationBase : System.Windows.Controls.Control, INavigat
     public static readonly DependencyProperty TransitionTypeProperty = DependencyProperty.Register(
         nameof(TransitionType),
         typeof(Animations.TransitionType), typeof(NavigationBase),
-        new PropertyMetadata(Animations.TransitionType.FadeInWithSlide, OnTransitionTypeChanged));
+        new PropertyMetadata(Animations.TransitionType.FadeInWithSlideRight, OnTransitionTypeChanged));
 
     /// <summary>
     /// Property for <see cref="SelectedPageIndex"/>.

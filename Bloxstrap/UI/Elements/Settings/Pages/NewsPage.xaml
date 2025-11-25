@@ -11,87 +11,109 @@
     d:DesignWidth="820"
     Title="News"
     Scrollable="True">
+
     <ui:UiPage.Resources>
         <conv:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <conv:InvertBooleanToVisibilityConverter x:Key="InvertBoolToVis" />
-        <SolidColorBrush x:Key="NewBadgeBrush"
-                         Color="{DynamicResource AccentColorPrimary}" />
     </ui:UiPage.Resources>
 
     <StackPanel Margin="0,0,20,20">
+
+        <!-- Header -->
         <StackPanel Margin="0,0,0,16">
-            <TextBlock Text="Latest updates and announcements"
-                       FontSize="14"
-                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                       Margin="0,0,0,4"/>
-            <TextBlock Text="{Binding LastUpdatedText}"
-                       FontSize="12"
-                       Foreground="{DynamicResource TextFillColorTertiaryBrush}"/>
+            <TextBlock
+                Text="Latest updates and announcements"
+                Margin="0,0,0,4"
+                FontSize="14"
+                Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+            <TextBlock
+                Text="{Binding LastUpdatedText}"
+                FontSize="12"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
         </StackPanel>
 
-        <StackPanel Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}"
-                    HorizontalAlignment="Center"
-                    Margin="0,40,0,0">
-            <ProgressBar IsIndeterminate="True"
-                         Width="220"
-                         Height="5"
-                         Margin="0,0,0,12"/>
-            <TextBlock Text="Loading news..."
-                       FontSize="14"
-                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                       HorizontalAlignment="Center"/>
+        <!-- Loading State -->
+        <StackPanel
+            Margin="0,40,0,0"
+            HorizontalAlignment="Center"
+            Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}">
+            <ProgressBar
+                Width="220"
+                Height="5"
+                Margin="0,0,0,12"
+                IsIndeterminate="True" />
+            <TextBlock
+                Text="Loading news..."
+                FontSize="14"
+                HorizontalAlignment="Center"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
         </StackPanel>
 
-        <ItemsControl ItemsSource="{Binding NewsItems}"
-                      Visibility="{Binding IsLoading, Converter={StaticResource InvertBoolToVis}}">
+        <!-- News Items -->
+        <ItemsControl
+            ItemsSource="{Binding NewsItems}"
+            Visibility="{Binding IsLoading, Converter={StaticResource InvertBoolToVis}}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <ui:Card Margin="0,0,0,14" Padding="14">
                         <StackPanel>
-                            <TextBlock Text="{Binding Title}"
-                                       FontSize="16"
-                                       FontWeight="Bold"
-                                       Foreground="{DynamicResource TextFillColorPrimaryBrush}"
-                                       Margin="0,0,0,4"/>
 
-                            <StackPanel Orientation="Horizontal"
-            Margin="0,0,0,10"
-            VerticalAlignment="Center">
-                                <TextBlock Text="{Binding Date, StringFormat='{}{0:MMMM dd, yyyy}'}"
-               FontSize="12"
-               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                <Border Background="{DynamicResource AccentFillColorPrimaryBrush}"
-            CornerRadius="4"
-            Padding="6,1"
-            Margin="8,0,0,0"
-            VerticalAlignment="Center"
-            Visibility="{Binding IsNew, Converter={StaticResource BoolToVis}}">
-                                    <TextBlock Text="{Binding AgeLabel}"
-                   FontSize="10"
-                   FontWeight="Bold"
-                   Foreground="White"
-                   VerticalAlignment="Center" />
+                            <!-- Title -->
+                            <TextBlock
+                                Text="{Binding Title}"
+                                Margin="0,0,0,4"
+                                FontSize="16"
+                                FontWeight="Bold"
+                                Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+
+                            <!-- Date + New Badge -->
+                            <StackPanel
+                                Margin="0,0,0,10"
+                                Orientation="Horizontal"
+                                VerticalAlignment="Center">
+                                <TextBlock
+                                    Text="{Binding Date, StringFormat='{}{0:MMMM dd, yyyy}'}"
+                                    FontSize="12"
+                                    Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <Border
+                                    Margin="8,0,0,0"
+                                    Padding="6,1"
+                                    VerticalAlignment="Center"
+                                    CornerRadius="4"
+                                    Background="{DynamicResource AccentFillColorPrimaryBrush}"
+                                    Visibility="{Binding IsNew, Converter={StaticResource BoolToVis}}">
+                                    <TextBlock
+                                        Text="{Binding AgeLabel}"
+                                        FontSize="10"
+                                        FontWeight="Bold"
+                                        VerticalAlignment="Center"
+                                        Foreground="White" />
                                 </Border>
                             </StackPanel>
 
-                            <Image Source="{Binding Image}"
-                                   Height="200"
-                                   Stretch="UniformToFill"
-                                   Margin="0,0,0,10"
-                                   SnapsToDevicePixels="True"
-                                   Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
+                            <!-- Image -->
+                            <Image
+                                Source="{Binding Image}"
+                                Height="200"
+                                Margin="0,0,0,10"
+                                Stretch="UniformToFill"
+                                SnapsToDevicePixels="True"
+                                Visibility="{Binding Image, Converter={StaticResource NullToVisibilityConverter}}">
                                 <Image.Style>
                                     <Style TargetType="Image">
-                                        <Setter Property="Opacity" Value="0"/>
+                                        <Setter Property="Opacity" Value="0" />
                                         <Style.Triggers>
                                             <EventTrigger RoutedEvent="Image.Loaded">
                                                 <BeginStoryboard>
                                                     <Storyboard>
-                                                        <DoubleAnimation Storyboard.TargetProperty="Opacity"
-                                                                         From="0" To="1"
-                                                                         Duration="0:0:0.3"
-                                                                         FillBehavior="HoldEnd"/>
+                                                        <DoubleAnimation
+                                                            Storyboard.TargetProperty="Opacity"
+                                                            From="0"
+                                                            To="1"
+                                                            Duration="0:0:0.3"
+                                                            FillBehavior="HoldEnd" />
                                                     </Storyboard>
                                                 </BeginStoryboard>
                                             </EventTrigger>
@@ -99,39 +121,46 @@
                                     </Style>
                                 </Image.Style>
                             </Image>
-                            <TextBlock Text="{Binding DisplayContent}"
-                                       TextWrapping="Wrap"
-                                       FontSize="13"
-                                       Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                                       Margin="0,0,0,10"/>
 
+                            <!-- Content -->
+                            <TextBlock
+                                Text="{Binding DisplayContent}"
+                                Margin="0,0,0,10"
+                                FontSize="13"
+                                TextWrapping="Wrap"
+                                Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+
+                            <!-- Tags -->
                             <ItemsControl ItemsSource="{Binding Tags}" Margin="0,4,0,0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <WrapPanel/>
+                                        <WrapPanel />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
-                                        <Button Content="{Binding}"
-                                                Margin="0,4,6,0"
-                                                Padding="8,3"
-                                                FontSize="12"
-                                                Cursor="Hand"
-                                                Foreground="{DynamicResource AccentFillColorPrimaryBrush}"
-                                                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
-                                                BorderBrush="{DynamicResource AccentFillColorPrimaryBrush}"
-                                                BorderThickness="1"
-                                                Command="{Binding DataContext.OpenUrlCommand,
-                                                    RelativeSource={RelativeSource AncestorType={x:Type ui:UiPage}}}"
-                                                CommandParameter="{Binding}"/>
+                                        <Button
+                                            Content="{Binding}"
+                                            Margin="0,4,6,0"
+                                            Padding="8,3"
+                                            FontSize="12"
+                                            Cursor="Hand"
+                                            Foreground="{DynamicResource AccentFillColorPrimaryBrush}"
+                                            Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{DynamicResource AccentFillColorPrimaryBrush}"
+                                            BorderThickness="1"
+                                            Command="{Binding DataContext.OpenUrlCommand,
+                                                RelativeSource={RelativeSource AncestorType={x:Type ui:UiPage}}}"
+                                            CommandParameter="{Binding}" />
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
                             </ItemsControl>
+
                         </StackPanel>
                     </ui:Card>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
+
     </StackPanel>
 </ui:UiPage>

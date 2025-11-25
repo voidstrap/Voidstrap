@@ -80,6 +80,11 @@
                 </StackPanel>
             </ui:CardExpander.Header>
             <StackPanel>
+                <ui:CardControl Margin="0,8,0,0" 
+                Header="Some features may not work on all devices. Use them with caution.">
+                    <Image HorizontalAlignment="Center" Source="pack://application:,,,/Resources/MessageBox/Warning.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" />
+                </ui:CardControl>
+                
                 <controls:OptionControl
     Header="Set CPU cores for Roblox"
     Description="{Binding CpuSummary}">
@@ -100,16 +105,6 @@
                     <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Header="Safe Overclock GPU" 
-                        Description="Overclock GPU based on Roblox’s status.">
-                    <ui:ToggleSwitch IsChecked="{Binding OverClockGPU, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Header="Safe Overclock CPU" 
-                        Description="Overclock CPU based on Roblox’s status.">
-                    <ui:ToggleSwitch IsChecked="{Binding OverClockCPU, Mode=TwoWay}" />
-                </controls:OptionControl>
-
                 <controls:OptionControl Header="Help Roblox Connect to Better Servers" 
                         Description="Helps Roblox run networking smoother. Doesn’t choose the best server, just improves connection.">
                     <ui:ToggleSwitch IsChecked="{Binding IsBetterServersEnabled, Mode=TwoWay}" />
@@ -117,7 +112,6 @@
             </StackPanel>
         </ui:CardExpander>
 
-        <!-- Cleaner Expander -->
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
                 <StackPanel>

@@ -286,6 +286,18 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
+        public bool VoidNotify
+        {
+            get => App.Settings.Prop.VoidNotify;
+            set => App.Settings.Prop.VoidNotify = value;
+        }
+
+        public bool Snowww
+        {
+            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
+            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
+        }
+
         private string _viewChannel;
         public string ViewChannel
         {

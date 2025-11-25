@@ -16,8 +16,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
 
         public static async Task SetBackgroundAsync(Image imageControl, string? customPath)
         {
-            if (imageControl == null)
-                return;
+            if (imageControl == null) return;
 
             if (string.IsNullOrWhiteSpace(customPath) || !File.Exists(customPath))
             {
@@ -25,26 +24,17 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
                 return;
             }
-
-            bool isGif = Path.GetExtension(customPath)
-                .Equals(".gif", StringComparison.OrdinalIgnoreCase);
-
             try
             {
-                await imageControl.Dispatcher.InvokeAsync(() =>
-                {
-                    ImageBehavior.SetAnimatedSource(imageControl, null);
-                    imageControl.Source = null;
-                }, DispatcherPriority.Render);
+                await ClearBackgroundAsync(imageControl);
+
+                string extension = Path.GetExtension(customPath);
+                bool isGif = extension.Equals(".gif", StringComparison.OrdinalIgnoreCase);
 
                 if (isGif)
-                {
                     await LoadGifAsync(imageControl, customPath);
-                }
                 else
-                {
                     await LoadStaticImageAsync(imageControl, customPath);
-                }
             }
             catch (Exception ex)
             {
@@ -52,7 +42,6 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
-
         private static async Task LoadGifAsync(Image imageControl, string path)
         {
             try
@@ -68,15 +57,14 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                     gifBitmap.BeginInit();
                     gifBitmap.CacheOption = BitmapCacheOption.OnLoad;
                     gifBitmap.StreamSource = _gifStream;
-                    gifBitmap.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
                     gifBitmap.DecodePixelWidth = MaxWidth;
                     gifBitmap.DecodePixelHeight = MaxHeight;
+                    gifBitmap.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
                     gifBitmap.EndInit();
                     gifBitmap.Freeze();
 
                     ImageBehavior.SetAnimatedSource(imageControl, gifBitmap);
-                    ImageBehavior.SetRepeatBehavior(
-                        imageControl,
+                    ImageBehavior.SetRepeatBehavior(imageControl,
                         System.Windows.Media.Animation.RepeatBehavior.Forever);
                 }, DispatcherPriority.Render);
             }
@@ -86,7 +74,6 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
-
         private static async Task LoadStaticImageAsync(Image imageControl, string path)
         {
             try
@@ -116,14 +103,13 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
-
-        private static async Task ClearBackgroundAsync(Image imageControl)
+        private static Task ClearBackgroundAsync(Image imageControl)
         {
-            await imageControl.Dispatcher.InvokeAsync(() =>
+            return imageControl.Dispatcher.InvokeAsync(() =>
             {
                 ImageBehavior.SetAnimatedSource(imageControl, null);
                 imageControl.Source = null;
-            }, DispatcherPriority.Render);
+            }, DispatcherPriority.Render).Task;
         }
     }
 }

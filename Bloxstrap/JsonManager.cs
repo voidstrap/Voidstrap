@@ -10,10 +10,8 @@ namespace Voidstrap
     {
         public T OriginalProp { get; set; } = new();
         public T Prop { get; set; } = new();
-
         public virtual string ClassName => typeof(T).Name;
         public string? LastFileHash { get; private set; }
-
         public virtual string BackupsLocation => Path.Combine(Paths.Base, "Backup.json");
         public virtual string FileLocation => Path.Combine(Paths.Base, $"{ClassName}.json");
         public virtual string LOG_IDENT_CLASS => $"JsonManager<{ClassName}>";
@@ -31,16 +29,12 @@ namespace Voidstrap
                     Save();
                     return;
                 }
-
                 string json = File.ReadAllText(FileLocation);
                 T? settings = JsonSerializer.Deserialize<T>(json);
-
                 if (settings is null)
                     throw new InvalidOperationException("Deserialization returned null.");
-
                 Prop = settings;
                 LastFileHash = MD5Hash.FromFile(FileLocation);
-
                 App.Logger.WriteLine(LOG_IDENT, "Loaded successfully!");
             }
             catch (Exception ex)
@@ -103,7 +97,7 @@ namespace Voidstrap
             }
             catch
             {
-                return true; // Assume changed if hash can't be computed
+                return true;
             }
         }
 

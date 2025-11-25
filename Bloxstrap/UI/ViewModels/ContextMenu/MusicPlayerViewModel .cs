@@ -1,9 +1,8 @@
-﻿// Added/cleaned up usings
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized; // FIX: for CollectionChanged
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
