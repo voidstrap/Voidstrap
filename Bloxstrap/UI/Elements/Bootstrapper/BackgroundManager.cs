@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using WpfAnimatedGif;
@@ -17,6 +18,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         public static async Task SetBackgroundAsync(Image imageControl, string? customPath)
         {
             if (imageControl == null) return;
+            ApplyHighQualityScaling(imageControl);
 
             if (string.IsNullOrWhiteSpace(customPath) || !File.Exists(customPath))
             {
@@ -24,6 +26,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
                 return;
             }
+
             try
             {
                 await ClearBackgroundAsync(imageControl);
@@ -42,6 +45,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
+
         private static async Task LoadGifAsync(Image imageControl, string path)
         {
             try
@@ -57,15 +61,17 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                     gifBitmap.BeginInit();
                     gifBitmap.CacheOption = BitmapCacheOption.OnLoad;
                     gifBitmap.StreamSource = _gifStream;
-                    gifBitmap.DecodePixelWidth = MaxWidth;
-                    gifBitmap.DecodePixelHeight = MaxHeight;
                     gifBitmap.CreateOptions = BitmapCreateOptions.PreservePixelFormat;
                     gifBitmap.EndInit();
                     gifBitmap.Freeze();
 
                     ImageBehavior.SetAnimatedSource(imageControl, gifBitmap);
-                    ImageBehavior.SetRepeatBehavior(imageControl,
-                        System.Windows.Media.Animation.RepeatBehavior.Forever);
+                    ImageBehavior.SetRepeatBehavior(
+                        imageControl,
+                        System.Windows.Media.Animation.RepeatBehavior.Forever
+                    );
+
+                    ApplyHighQualityScaling(imageControl);
                 }, DispatcherPriority.Render);
             }
             catch (Exception ex)
@@ -74,6 +80,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
+
         private static async Task LoadStaticImageAsync(Image imageControl, string path)
         {
             try
@@ -86,6 +93,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                     bmp.UriSource = new Uri(path, UriKind.Absolute);
                     bmp.DecodePixelWidth = MaxWidth;
                     bmp.DecodePixelHeight = MaxHeight;
+
                     bmp.EndInit();
                     bmp.Freeze();
                     return bmp;
@@ -95,6 +103,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 {
                     ImageBehavior.SetAnimatedSource(imageControl, null);
                     imageControl.Source = bitmap;
+                    ApplyHighQualityScaling(imageControl);
                 }, DispatcherPriority.Render);
             }
             catch (Exception ex)
@@ -103,6 +112,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await ClearBackgroundAsync(imageControl);
             }
         }
+
         private static Task ClearBackgroundAsync(Image imageControl)
         {
             return imageControl.Dispatcher.InvokeAsync(() =>
@@ -110,6 +120,13 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 ImageBehavior.SetAnimatedSource(imageControl, null);
                 imageControl.Source = null;
             }, DispatcherPriority.Render).Task;
+        }
+
+        private static void ApplyHighQualityScaling(Image imageControl)
+        {
+            RenderOptions.SetBitmapScalingMode(imageControl, BitmapScalingMode.HighQuality);
+            imageControl.SnapsToDevicePixels = true;
+            imageControl.UseLayoutRounding = true;
         }
     }
 }

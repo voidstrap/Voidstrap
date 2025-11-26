@@ -52,11 +52,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             SetDefaultStates();
             HistoryListBox.ItemsSource = _flagHistory;
         }
+
         private async Task LoadKnownFlagsAsync()
         {
             if (_knownFlagNames.Count > 0)
                 return;
-            var fetchTasks = _flagSourceUrls.Select(async url =>
+
+            foreach (var url in _flagSourceUrls)
             {
                 try
                 {
@@ -91,9 +93,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 catch
                 {
                 }
-            });
-
-            await Task.WhenAll(fetchTasks).ConfigureAwait(false);
+            }
         }
 
         private void UpdateExistsColumn()
@@ -101,7 +101,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             foreach (var flag in _fastFlagList)
                 flag.Index = _knownFlagNames.Contains(flag.Name);
         }
-
 
         private void SetDefaultStates()
         {

@@ -58,18 +58,17 @@
             <ui:ToggleSwitch IsChecked="{Binding MultiInstanceLaunchingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <controls:OptionControl 
-            Header="Disable RobloxCrashHandler" 
-            Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
-            <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <!-- Cross-game Teleport -->
         <controls:OptionControl
             Header="Allow cross-game teleportation"
             Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
             <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl 
+            Header="Disable RobloxCrashHandler" 
+            Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
+            <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
         </controls:OptionControl>
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">

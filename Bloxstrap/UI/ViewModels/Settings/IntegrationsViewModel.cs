@@ -18,6 +18,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand OpenHistoryWindowCommand { get; }
         public ICommand MusicWindowCommand { get; }
         public ICommand RPCWindowCommand { get; }
+        public ICommand AccountWindowCommand { get; }
 
         private readonly ActivityWatcher _watcher;
 
@@ -27,6 +28,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             OpenHistoryWindowCommand = new RelayCommand(OpenHistoryWindow);
             MusicWindowCommand = new RelayCommand(MusicPlayerWindow);
             RPCWindowCommand = new RelayCommand(RPCUIWindow);
+            AccountWindowCommand = new RelayCommand(AccountWindow);
         }
 
         private void AddIntegration()
@@ -139,6 +141,12 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD;
             set => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD = value;
+        }
+
+        private void AccountWindow()
+        {
+            var accountWindow = new AccountManagerWindow();
+            accountWindow.Show();
         }
 
         public string gameimage

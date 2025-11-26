@@ -9,6 +9,7 @@
     xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:media="clr-namespace:System.Windows.Media.Animation;assembly=PresentationCore"
     Title="{x:Static resources:Strings.Menu_Title}"
     Width="1185"
     Height="720"
@@ -21,7 +22,42 @@
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Auto"
     WindowStartupLocation="CenterScreen"
+    Loaded="MainWindow_Loaded"
+    UseLayoutRounding="True"
+    SnapsToDevicePixels="True"
     mc:Ignorable="d">
+
+    <base:WpfUiWindow.Resources>
+        <BitmapImage x:Key="AppIconImage"
+                     UriSource="pack://application:,,,/Voidstrap.ico" />
+        <media:QuadraticEase x:Key="QuadEaseOut" EasingMode="EaseInOut" />
+
+        <Storyboard x:Key="IntroStoryboard">
+            <DoubleAnimation
+                Storyboard.TargetName="IntroScaleTransform"
+                Storyboard.TargetProperty="ScaleX"
+                From="0.98"
+                To="1.0"
+                Duration="0:0:0.6"
+                EasingFunction="{StaticResource QuadEaseOut}" />
+
+            <DoubleAnimation
+                Storyboard.TargetName="IntroScaleTransform"
+                Storyboard.TargetProperty="ScaleY"
+                From="0.98"
+                To="1.0"
+                Duration="0:0:0.6"
+                EasingFunction="{StaticResource QuadEaseOut}" />
+            <DoubleAnimation
+                Storyboard.TargetName="IntroOverlay"
+                Storyboard.TargetProperty="Opacity"
+                From="1.0"
+                To="0.0"
+                BeginTime="0:0:0.6"
+                Duration="0:0:0.6"
+                FillBehavior="Stop" />
+        </Storyboard>
+    </base:WpfUiWindow.Resources>
 
     <Grid>
         <Grid.RowDefinitions>
@@ -30,7 +66,6 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Background -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
@@ -41,11 +76,47 @@
         </Grid.Background>
 
         <Canvas x:Name="SnowCanvas"
-            Grid.RowSpan="3"
-            IsHitTestVisible="False"
-            Panel.ZIndex="0" />
+                Grid.RowSpan="3"
+                IsHitTestVisible="False"
+                Panel.ZIndex="0" />
 
-        <!-- Snackbars -->
+        <Grid x:Name="IntroOverlay"
+              Grid.RowSpan="3"
+              Panel.ZIndex="999"
+              Background="#CC06030B"
+              Opacity="1"
+              RenderTransformOrigin="0.5,0.5">
+            <Grid.RenderTransform>
+                <ScaleTransform x:Name="IntroScaleTransform"
+                                ScaleX="1"
+                                ScaleY="1" />
+            </Grid.RenderTransform>
+
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Orientation="Vertical">
+                <Image Width="120"
+                       Height="120"
+                       Source="{StaticResource AppIconImage}"
+                       Stretch="Uniform"
+                       Margin="0,0,0,12" />
+
+                <TextBlock Text="Voidstrap"
+                           FontSize="28"
+                           FontWeight="SemiBold"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           Opacity="0.95" />
+
+                <TextBlock Text="Bloxstrap Fork | Voidstrap Team"
+                           FontSize="14"
+                           HorizontalAlignment="Center"
+                           Foreground="White"
+                           Opacity="0.7"
+                           Margin="0,4,0,0" />
+            </StackPanel>
+        </Grid>
+
         <ui:Snackbar x:Name="AlreadyRunningSnackbar"
                      Title="{x:Static resources:Strings.Menu_AlreadyRunning_Title}"
                      Grid.RowSpan="10"
@@ -83,7 +154,6 @@
                      Message="Changes have been saved."
                      Timeout="2000" />
 
-        <!-- Title Bar -->
         <ui:TitleBar Padding="8"
                      x:Name="RootTitleBar"
                      Grid.Row="0"
@@ -93,7 +163,6 @@
                      Title="{x:Static resources:Strings.Menu_Title}"
                      Icon="pack://application:,,,/Voidstrap.ico" />
 
-        <!-- Main Content -->
         <Grid x:Name="RootGrid"
               Grid.Row="1"
               Margin="8,12,0,0">
@@ -106,28 +175,27 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!-- Navigation -->
             <ui:NavigationFluent x:Name="RootNavigation"
                                  Grid.Row="1"
                                  Grid.Column="0"
                                  Margin="0,0,5,0"
                                  Frame="{Binding ElementName=RootFrame}"
                                  SelectedPageIndex="0">
-                <!-- Items -->
+
                 <ui:NavigationFluent.Items>
-                    <ui:NavigationItem Content="Voidstrap News" Icon="News16" PageType="{x:Type pages:NewsPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" PageType="{x:Type pages:IntegrationsPage}" />
                     <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" PageType="{x:Type pages:BehaviourPage}" />
                     <ui:NavigationItem Content="Modifications" Icon="WrenchScrewdriver20" PageType="{x:Type pages:ModsPage}" />
+                    <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" PageType="{x:Type pages:FastFlagsPage}" />
                     <ui:NavigationItem Content="FastFlag Editor"
                                        Icon="Flag28"
                                        PageType="{x:Type pages:FastFlagEditorPage}"
                                        Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" PageType="{x:Type pages:FastFlagsPage}" />
                     <ui:NavigationItem Content="Global Settings" Icon="GlobeLocation24" PageType="{x:Type pages:GBSEditorPage}" />
                     <ui:NavigationItem Content="Appearance" Icon="PaintBucket24" PageType="{x:Type pages:AppearancePage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}" Icon="Apps32" PageType="{x:Type pages:ShortcutsPage}" />
                     <ui:NavigationItem Content="Help" Icon="ChatHelp20" PageType="{x:Type pages:HelpPage}" />
+                    <ui:NavigationItem Content="News" Icon="News16" PageType="{x:Type pages:NewsPage}" />
                 </ui:NavigationFluent.Items>
 
                 <ui:NavigationFluent.Footer>

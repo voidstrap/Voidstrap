@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Navigation;
 using Wpf.Ui.Controls;
+using Process = System.Diagnostics.Process;
+using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -18,18 +21,31 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     {
         private static readonly Uri ReleasesApiUri =
             new("https://api.github.com/repos/voidstrap/Voidstrap/releases");
+        private static readonly HttpClient HttpClient = CreateHttpClient();
+
         public ObservableCollection<GithubRelease> Releases { get; } = new();
 
         private readonly ICollectionView _releasesView;
 
+        private static HttpClient CreateHttpClient()
+        {
+            var client = new HttpClient
+            {
+                Timeout = TimeSpan.FromSeconds(15)
+            };
+
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "VoidstrapApp/1.0 (+https://github.com/voidstrap/Voidstrap)");
+            client.DefaultRequestHeaders.Accept.Add(
+                new MediaTypeWithQualityHeaderValue("application/json"));
+
+            return client;
+        }
         public HubPage()
         {
             InitializeComponent();
-
             DataContext = this;
-
             _releasesView = CollectionViewSource.GetDefaultView(Releases);
-
             _ = LoadReleasesAsync();
         }
 
@@ -37,11 +53,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
             try
             {
-                using var client = new HttpClient();
-                client.DefaultRequestHeaders.UserAgent.ParseAdd(
-                    "VoidstrapApp/1.0 (+https://github.com/voidstrap/Voidstrap)");
-
-                var json = await client.GetStringAsync(ReleasesApiUri);
+                var json = await HttpClient.GetStringAsync(ReleasesApiUri).ConfigureAwait(true);
 
                 var options = new JsonSerializerOptions
                 {
@@ -50,16 +62,22 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
                 var releases = JsonSerializer.Deserialize<GithubRelease[]>(json, options)
                                ?? Array.Empty<GithubRelease>();
+                Releases.Clear();
 
-                Application.Current.Dispatcher.Invoke(() =>
+                foreach (var rel in releases)
                 {
-                    Releases.Clear();
-                    foreach (var rel in releases)
-                    {
-                        rel.CalculateTotals();
-                        Releases.Add(rel);
-                    }
-                });
+                    rel.CalculateTotals();
+                    Releases.Add(rel);
+                }
+            }
+            catch (TaskCanceledException)
+            {
+            }
+            catch (HttpRequestException)
+            {
+            }
+            catch (JsonException)
+            {
             }
             catch (Exception)
             {
@@ -76,8 +94,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
             else
             {
-                query = query.ToLowerInvariant();
-
                 _releasesView.Filter = obj =>
                 {
                     if (obj is not GithubRelease r)
@@ -85,7 +101,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
                     bool Matches(string? s) =>
                         !string.IsNullOrEmpty(s) &&
-                        s.ToLowerInvariant().Contains(query);
+                        s.IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0;
 
                     return Matches(r.Name)
                            || Matches(r.TagName)
@@ -102,11 +118,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             {
                 e.Handled = true;
 
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                var psi = new ProcessStartInfo
                 {
                     FileName = e.Uri.AbsoluteUri,
                     UseShellExecute = true
-                });
+                };
+
+                Process.Start(psi);
             }
             catch
             {

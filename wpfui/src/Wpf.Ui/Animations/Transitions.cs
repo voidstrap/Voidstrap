@@ -21,7 +21,7 @@ namespace Wpf.Ui.Animations
                 return false;
             }
 
-            duration = Math.Clamp(duration, 400, MaxDuration);
+            duration = Math.Clamp(duration, 500, MaxDuration);
             var animationDuration = new Duration(TimeSpan.FromMilliseconds(duration));
 
             RenderOptions.SetBitmapScalingMode(frameworkElement, BitmapScalingMode.Fant);
@@ -84,8 +84,6 @@ namespace Wpf.Ui.Animations
             var easing = new QuinticEase { EasingMode = EasingMode.EaseOut };
 
             var storyboard = new Storyboard();
-
-            // X animation
             if (offsetX != 0)
             {
                 var animX = new DoubleAnimation
@@ -101,7 +99,6 @@ namespace Wpf.Ui.Animations
                 storyboard.Children.Add(animX);
             }
 
-            // Y animation
             if (offsetY != 0)
             {
                 var animY = new DoubleAnimation
@@ -116,8 +113,6 @@ namespace Wpf.Ui.Animations
                     new PropertyPath("(UIElement.RenderTransform).(TranslateTransform.Y)"));
                 storyboard.Children.Add(animY);
             }
-
-            // Fade animation (optional)
             if (fade)
             {
                 element.Opacity = 0;

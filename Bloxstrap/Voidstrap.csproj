@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.7.0</Version>
-		<FileVersion>1.0.7.0</FileVersion>
+		<Version>1.0.7.1</Version>
+		<FileVersion>1.0.7.1</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -47,30 +47,12 @@
 		<None Remove="ThemeImages\GalaxyBB.jpeg" />
 		<None Remove="ThemeImages\GalaxyBB.jpg" />
 		<None Remove="ThemeImages\PureFF.jpg" />
-		<None Remove="UI\Elements\Settings\Pages\AnimationEffects.png" />
-		<None Remove="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
-		<None Remove="UI\Elements\Settings\Pages\BlueLockTheme.png" />
-		<None Remove="UI\Elements\Settings\Pages\BraticFF.png" />
-		<None Remove="UI\Elements\Settings\Pages\CmdBB.png" />
-		<None Remove="UI\Elements\Settings\Pages\GWBB.png" />
-		<None Remove="UI\Elements\Settings\Pages\Icon %281%29.png" />
-		<None Remove="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
-		<None Remove="UI\Elements\Settings\Pages\RobloxBB.png" />
 		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="ThemeImages\GalaxyBB.jpeg" />
 		<Resource Include="ThemeImages\PureFF.jpg" />
-		<Resource Include="UI\Elements\Settings\Pages\AnimationEffects.png" />
-		<Resource Include="UI\Elements\Settings\Pages\BloxstrapTheme.png" />
-		<Resource Include="UI\Elements\Settings\Pages\BlueLockTheme.png" />
-		<Resource Include="UI\Elements\Settings\Pages\BraticFF.png" />
-		<Resource Include="UI\Elements\Settings\Pages\CmdBB.png" />
-		<Resource Include="UI\Elements\Settings\Pages\GWBB.png" />
-		<Resource Include="UI\Elements\Settings\Pages\Icon (1).png" />
-		<Resource Include="UI\Elements\Settings\Pages\klikos-mod-thumbnail.png" />
-		<Resource Include="UI\Elements\Settings\Pages\RobloxBB.png" />
 		<Resource Include="Voidstrap.ico" />
 		<Resource Include="Resources\Checkmark.ico" />
 		<Resource Include="Resources\CrossMark.ico" />

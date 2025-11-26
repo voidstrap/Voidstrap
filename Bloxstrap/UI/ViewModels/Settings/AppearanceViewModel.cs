@@ -63,6 +63,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             PopulateCustomThemes();
         }
 
+        public bool Snowww
+        {
+            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
+            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
+        }
+
         #region Properties
 
         public IEnumerable<Theme> Themes { get; } = Enum.GetValues(typeof(Theme)).Cast<Theme>();
@@ -370,6 +376,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         }
 
         #endregion
+
         private void ImportBackground()
         {
             var openDialog = new OpenFileDialog

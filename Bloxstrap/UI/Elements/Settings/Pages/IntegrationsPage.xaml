@@ -198,6 +198,16 @@
         </controls:OptionControl>
 
         <controls:OptionControl 
+    Header="Account Switcher"
+    Description="Easily create or switch Roblox accounts. Backup Accounts for Later Use.">
+            <StackPanel>
+                <Button Content="View"
+                HorizontalAlignment="Left"
+                Command="{Binding AccountWindowCommand}"/>
+            </StackPanel>
+        </controls:OptionControl>
+
+        <controls:OptionControl 
     Header="View Game History"
     Description="View your Roblox game history.">
             <Button Content="View" 

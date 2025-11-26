@@ -49,14 +49,12 @@ namespace Voidstrap.UI.ViewModels.Settings
         private readonly string npiUrl = "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.29/nvidiaProfileInspector.zip";
         private readonly string potatoUrl = "https://github.com/KloBraticc/nividaVoidstrap/raw/main/RobloxApply.nip";
         private readonly string defaultUrl = "https://github.com/KloBraticc/nividaVoidstrap/raw/main/RobloxRevert.nip";
-        public ICommand AccountWindowCommand { get; }
         public ChannelViewModel()
         {
             Directory.CreateDirectory(npiFolder);
             LoadPotatoQualitySetting();
             _ = EnsureProfilesExistAsync();
             _ = LoadNetworkStreamingStateAsync();
-            AccountWindowCommand = new RelayCommand(AccountWindow);
 
             CpuLimitOptions = new ObservableCollection<int>();
             int coreCount = Environment.ProcessorCount;
@@ -292,10 +290,16 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.VoidNotify = value;
         }
 
-        public bool Snowww
+        public string BufferSizeKbte
         {
-            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
-            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
+            get => App.Settings.Prop.BufferSizeKbte;
+            set => App.Settings.Prop.BufferSizeKbte = value;
+        }
+
+        public string BufferSizeKbtes
+        {
+            get => App.Settings.Prop.BufferSizeKbtes;
+            set => App.Settings.Prop.BufferSizeKbtes = value;
         }
 
         private string _viewChannel;
@@ -581,12 +585,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             {
                 Console.Error.WriteLine($"Error in background task: {ex}");
             }
-        }
-
-        private void AccountWindow()
-        {
-            var accountWindow = new AccountManagerWindow();
-            accountWindow.Show();
         }
     }
 }

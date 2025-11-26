@@ -10,11 +10,11 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.About_Title}"
     Width="800"
-    Height="440"
-    MinWidth="800"
+    Height="500"
+    MinWidth="850"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
     BorderBrush="{DynamicResource SystemAccentBrush}"
-    BorderThickness="2,2,2,2"
+    BorderThickness="2"
     ExtendsContentIntoTitleBar="True"
     WindowBackdropType="Mica"
     WindowStartupLocation="CenterScreen"
@@ -23,44 +23,43 @@
     <Grid>
         <Grid.Background>
             <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
-                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
-                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
-                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}"/>
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                <GradientStop Offset="1.00" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!--  TitleBar  -->
         <ui:TitleBar
             x:Name="RootTitleBar"
-            Title="{x:Static resources:Strings.About_Title}"
             Grid.Row="0"
             Padding="8"
-            ForceShutdown="False"
+            Title="{x:Static resources:Strings.About_Title}"
             Icon="pack://application:,,,/Voidstrap.ico"
+            ForceShutdown="False"
             MinimizeToTray="False"
             UseSnapLayout="True" />
 
-        <!--  Main Content Grid  -->
         <Grid
             x:Name="RootGrid"
             Grid.Row="1"
-            Margin="12,12,0,0"
-            Visibility="Visible">
+            Margin="12,12,0,0">
+
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
+
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <!--  Navigation  -->
             <ui:NavigationStore
                 x:Name="RootNavigation"
                 Grid.Row="1"
@@ -68,6 +67,7 @@
                 Margin="0,0,12,0"
                 Frame="{Binding ElementName=RootFrame}"
                 SelectedPageIndex="0">
+
                 <ui:NavigationStore.Items>
                     <ui:NavigationItem
                         Margin="0,0,0,12"
@@ -76,13 +76,14 @@
                         IconFilled="True"
                         PageType="{x:Type pages:AboutPage}"
                         Tag="about" />
+
                     <ui:NavigationItem
                         Margin="0,0,0,12"
                         Content="Supporters"
                         Icon="Heart24"
                         PageType="{x:Type pages:SupportersPage}"
-                        Tag="translators"
-                        />
+                        Tag="supporters" />
+
                     <ui:NavigationItem
                         Margin="0,0,0,12"
                         Icon="Translate24"
@@ -93,6 +94,7 @@
                             FontSize="10"
                             Text="{x:Static resources:Strings.About_Translators_Title}" />
                     </ui:NavigationItem>
+
                     <ui:NavigationItem
                         Margin="0,0,0,12"
                         Content="{x:Static resources:Strings.About_Licenses_Title}"
@@ -102,7 +104,6 @@
                 </ui:NavigationStore.Items>
             </ui:NavigationStore>
 
-            <!--  Frame for Content Display  -->
             <Frame
                 x:Name="RootFrame"
                 Grid.Row="0"

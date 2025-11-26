@@ -16,10 +16,7 @@
     Scrollable="True"
     mc:Ignorable="d">
 
-    <!--  Main StackPanel for content structure  -->
     <StackPanel Margin="0,0,14,14">
-
-        <!--  Channel Description Section  -->
         <TextBlock
             Margin="0,0,0,8"
             FontSize="14"
@@ -58,12 +55,6 @@
         </controls:OptionControl>
 
         <controls:OptionControl
-            Description="Adds Snow to Voidstraps background (Uses GPU - Voidstrap Restart Required)"
-            Header="Background Snow">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding Snowww, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
             Description="Displays Voidstrap notifications, joined servers, and more."
             Header="App Notifications">
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding VoidNotify, Mode=TwoWay}" />
@@ -94,17 +85,32 @@
             Margin="0,16,0,0"
             FontSize="16"
             FontWeight="Medium"
+            Text="Installer" />
+
+        <controls:OptionControl
+    Header="BufferSize kilobyte"
+    Description="Specify the buffer size in kilobytes.">
+            <ui:TextBox
+        Width="200"
+        Margin="5,0,0,0"
+        Padding="10,5,10,5" Text="{Binding BufferSizeKbte, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl
+    Header="BufferSize kilobytes"
+    Description="Enter the desired buffer size in kilobytes.">
+            <ui:TextBox
+        Width="200"
+        Margin="5,0,0,0"
+        Padding="10,5,10,5" Text="{Binding BufferSizeKbtes, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <TextBlock
+            Margin="0,16,0,0"
+            FontSize="16"
+            FontWeight="Medium"
             Text="Roblox" />
 
-        <controls:OptionControl 
-    Header="Account Switcher"
-    Description="Easily create or switch Roblox accounts. Backup Accounts for Later Use.">
-            <StackPanel>
-                <Button Content="View"
-                HorizontalAlignment="Left"
-                Command="{Binding AccountWindowCommand}"/>
-            </StackPanel>
-        </controls:OptionControl>
 
         <controls:OptionControl 
     Header="Roblox Priority"

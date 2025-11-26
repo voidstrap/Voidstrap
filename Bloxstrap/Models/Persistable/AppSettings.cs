@@ -57,6 +57,8 @@ namespace Voidstrap.Models.Persistable
         public string ClientPath { get; set; } = Path.Combine(Paths.Base, "Roblox", "Player");
 
         public string Locale { get; set; } = "nil";
+        public string BufferSizeKbte { get; set; } = "1024";
+        public string BufferSizeKbtes { get; set; } = "2048";
         public bool ForceRobloxLanguage { get; set; } = true;
         public bool FastFlagBypass { get; set; } = false;
 

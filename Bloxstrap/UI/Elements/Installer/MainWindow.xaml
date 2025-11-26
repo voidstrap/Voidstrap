@@ -10,9 +10,10 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.Installer_Title}"
-    Width="840"
-    Height="540"
-    MinWidth="840"
+    Width="640"
+    Height="400"
+    MinWidth="640"
+    MinHeight="400"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel,
                                      IsDesignTimeCreatable=True}"
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
@@ -41,7 +42,7 @@
             x:Name="RootTitleBar"
             Title="{x:Static resources:Strings.Installer_Title}"
             Grid.Row="0"
-            Padding="8"
+            Padding="4"
             ForceShutdown="False"
             Icon="pack://application:,,,/Voidstrap.ico"
             MinimizeToTray="False"
@@ -51,13 +52,14 @@
         <Grid
             x:Name="RootGrid"
             Grid.Row="1"
-            Margin="12,12,0,0">
+            Margin="8,8,0,0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="200" />
+                <!-- Narrower nav to save space -->
+                <ColumnDefinition Width="160" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -66,7 +68,7 @@
                 x:Name="RootNavigation"
                 Grid.Row="1"
                 Grid.Column="0"
-                Margin="0,0,12,0"
+                Margin="0,0,8,0"
                 Frame="{Binding ElementName=RootFrame}"
                 IsEnabled="False"
                 SelectedPageIndex="0">
@@ -100,14 +102,16 @@
                 <!--  Breadcrumb Navigation  -->
                 <ui:Breadcrumb
                     Grid.Row="0"
-                    Margin="0,0,0,5"
+                    Margin="0,0,0,4"
                     Navigation="{Binding ElementName=RootNavigation}" />
 
                 <!--  Page Content Frame  -->
                 <Frame
                     x:Name="RootFrame"
                     Grid.Row="1"
-                    Content="This installation process will be quick and simple,                         and you will be able to configure any of Voidstrap's settings after installation." Navigated="RootFrame_Navigated" />
+                    Margin="0,2,8,0"
+                    Content="This installation process will be quick and simple, and you will be able to configure any of Voidstrap's settings after installation."
+                    Navigated="RootFrame_Navigated" />
             </Grid>
         </Grid>
 
@@ -115,7 +119,7 @@
         <StatusBar
             x:Name="RootStatusBar"
             Grid.Row="2"
-            Padding="14,10"
+            Padding="8,6"
             BorderThickness="0,1,0,0"
             Background="{DynamicResource PrimaryBackgroundColor}">
 
@@ -132,26 +136,27 @@
                 </ItemsPanelTemplate>
             </StatusBar.ItemsPanel>
 
-            <StatusBarItem Grid.Column="1" Padding="0,0,4,0">
+            <StatusBarItem Grid.Column="1" Padding="0,0,2,0">
                 <ui:Button
-                    Width="100"
+                    Width="80"
                     Command="{Binding BackPageCommand, Mode=OneWay}"
                     Content="{x:Static resources:Strings.Common_Navigation_Back}"
                     IsEnabled="{Binding BackButtonEnabled, Mode=OneWay}" />
             </StatusBarItem>
 
-            <StatusBarItem Grid.Column="2" Padding="4,0,4,0">
+            <StatusBarItem Grid.Column="2" Padding="2,0,2,0">
                 <ui:Button
                     Name="NextButton"
-                    Width="100"
+                    Width="80"
                     Command="{Binding NextPageCommand, Mode=OneWay}"
                     Content="{Binding NextButtonText, Mode=OneWay}"
                     IsEnabled="{Binding NextButtonEnabled, Mode=OneWay}"/>
             </StatusBarItem>
 
-            <StatusBarItem Grid.Column="3" Padding="12,0,4,0">
+            <StatusBarItem Grid.Column="3" Padding="8,0,2,0">
                 <ui:Button
                     Width="{Binding ButtonWidth, Mode=OneTime}"
+                    MinWidth="80"
                     Command="{Binding CloseWindowCommand}"
                     Content="{x:Static resources:Strings.Common_Close}"/>
             </StatusBarItem>

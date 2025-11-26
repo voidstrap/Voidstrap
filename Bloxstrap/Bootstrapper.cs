@@ -1706,9 +1706,10 @@ namespace Voidstrap
                 try
                 {
                     App.Logger.WriteLine(LOG_IDENT, "Registering approximate program size...");
-                    int distributionSize = _versionPackageManifest.Sum(x => x.Size + x.PackedSize) / 1024;
+                    int bufferSizeKbte = int.Parse(App.Settings.Prop.BufferSizeKbte);
+                    int distributionSize =
+                        _versionPackageManifest.Sum(x => x.Size + x.PackedSize) / bufferSizeKbte;
                     AppData.State.Size = distributionSize;
-
                     int totalSize = App.State.Prop.Player.Size + App.State.Prop.Studio.Size;
                     using (var uninstallKey = Registry.CurrentUser.CreateSubKey(App.UninstallKey))
                         uninstallKey?.SetValueSafe("EstimatedSize", totalSize);
@@ -1745,6 +1746,7 @@ namespace Voidstrap
             string robloxClientSettingsFolder = Path.Combine(localAppData, "Roblox", "ClientSettings");
             string ixpSettingsPath = Path.Combine(robloxClientSettingsFolder, "IxpSettings.json");
             bool fastFlagBypass = App.Settings.Prop.FastFlagBypass;
+
             var enforcedSettings = new Dictionary<string, string>
 {
     { "FStringDebugLuaLogLevel", "trace" },
@@ -1796,16 +1798,25 @@ namespace Voidstrap
             try
             {
                 Directory.CreateDirectory(robloxClientSettingsFolder);
-                Task.Run(() =>
+
+                var monitorTask = Task.Run(() =>
                 {
-                    Console.WriteLine($"{LOG_IDENT} Monitoring {ixpSettingsPath} continuously...");
+                    Console.WriteLine($"{LOG_IDENT} Monitoring {ixpSettingsPath} until Roblox launches...");
                     string lastJson = string.Empty;
 
                     while (true)
                     {
                         try
                         {
-                            File.SetAttributes(ixpSettingsPath, FileAttributes.Normal);
+                            if (IsRobloxRunning())
+                            {
+                                Console.WriteLine($"{LOG_IDENT} Roblox detected. Stopping IXP enforcement loop.");
+                                break;
+                            }
+                            if (!Directory.Exists(robloxClientSettingsFolder))
+                                Directory.CreateDirectory(robloxClientSettingsFolder);
+                            if (File.Exists(ixpSettingsPath))
+                                File.SetAttributes(ixpSettingsPath, FileAttributes.Normal);
 
                             var finalSettings = new Dictionary<string, string>();
 
@@ -1815,7 +1826,9 @@ namespace Voidstrap
                                 if (File.Exists(clientAppSettingsPath))
                                 {
                                     string clientAppText = File.ReadAllText(clientAppSettingsPath);
-                                    var clientAppJson = JsonSerializer.Deserialize<Dictionary<string, object>>(clientAppText) ?? new Dictionary<string, object>();
+                                    var clientAppJson = JsonSerializer.Deserialize<Dictionary<string, object>>(clientAppText)
+                                                        ?? new Dictionary<string, object>();
+
                                     foreach (var kvp in clientAppJson)
                                     {
                                         if (!blockedFlags.Contains(kvp.Key))
@@ -1823,8 +1836,10 @@ namespace Voidstrap
                                     }
                                 }
                             }
+
                             foreach (var kvp in enforcedSettings)
                                 finalSettings[kvp.Key] = kvp.Value;
+
                             string updatedJson = JsonSerializer.Serialize(finalSettings, new JsonSerializerOptions { WriteIndented = true });
 
                             if (updatedJson != lastJson)
@@ -1840,18 +1855,35 @@ namespace Voidstrap
                             Console.WriteLine($"{LOG_IDENT} Error while updating IxpSettings.json: {ex.Message}");
                         }
 
-                        Thread.Sleep(550);
+                        Thread.Sleep(250);
                     }
+
+                    Console.WriteLine($"{LOG_IDENT} Monitor task finished.");
                 });
 
-                Console.WriteLine($"{LOG_IDENT} Program running. Press Ctrl+C to exit.");
-                Console.ReadLine();
+                Console.WriteLine($"{LOG_IDENT} Program running. IXP monitor in background.");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"{LOG_IDENT} Unexpected error: {ex.Message}");
             }
 
+            static bool IsRobloxRunning()
+            {
+                try
+                {
+                    var processes = Process.GetProcesses();
+                    return processes.Any(p =>
+                    {
+                        string name = p.ProcessName.ToLowerInvariant();
+                        return name.Contains("robloxplayer") || name == "roblox";
+                    });
+                }
+                catch
+                {
+                    return false;
+                }
+            }
             App.Logger.WriteLine(LOG_IDENT, "Checking file mods...");
             File.Delete(Path.Combine(Paths.Base, "ModManifest.txt"));
 
@@ -2088,7 +2120,9 @@ namespace Voidstrap
             }
 
             const int MaxRetries = 10;
-            const int BufferSize = 1024 * 2048;
+            int BufferSize =
+    int.Parse(App.Settings.Prop.BufferSizeKbte) *
+    int.Parse(App.Settings.Prop.BufferSizeKbtes);
             var tempFile = package.DownloadPath + ".part";
             if (File.Exists(tempFile))
                 File.Delete(tempFile);

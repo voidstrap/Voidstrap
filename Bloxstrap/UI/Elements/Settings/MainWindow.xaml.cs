@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Voidstrap.UI.Elements.Dialogs;
@@ -12,7 +14,6 @@ using Wpf.Ui.Common;
 using Wpf.Ui.Controls.Interfaces;
 using Wpf.Ui.Mvvm.Contracts;
 using static System.Net.Mime.MediaTypeNames;
-using System.Windows.Media;
 
 
 namespace Voidstrap.UI.Elements.Settings
@@ -30,16 +31,16 @@ namespace Voidstrap.UI.Elements.Settings
             InitializeComponent();
             InitializeViewModel();
             InitializeWindowState();
-            InitializeNavigation();
             UpdateButtonContent();
-            _snowTimer = new DispatcherTimer
+            _snowTimer = new DispatcherTimer(DispatcherPriority.Background)
             {
-                Interval = TimeSpan.FromMilliseconds(26)
+                Interval = TimeSpan.FromMilliseconds(50)
             };
             _snowTimer.Tick += SnowTimer_Tick;
 
             Loaded += MainWindow_Loaded;
             SizeChanged += MainWindow_SizeChanged;
+
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbarAsync();
@@ -47,10 +48,12 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
+            InitializeNavigation();
             if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
             {
                 InitSnow();
                 _snowTimer.Start();
+
                 if (SnowCanvas != null)
                     SnowCanvas.Visibility = Visibility.Visible;
             }
@@ -59,13 +62,41 @@ namespace Voidstrap.UI.Elements.Settings
                 if (SnowCanvas != null)
                     SnowCanvas.Visibility = Visibility.Collapsed;
             }
+            var storyboard = TryFindResource("IntroStoryboard") as Storyboard;
+            if (storyboard != null)
+            {
+                storyboard.Completed += (_, _) =>
+                {
+                    IntroOverlay.Visibility = Visibility.Collapsed;
+                    IntroOverlay.Opacity = 1.0;
+                };
+                storyboard.Begin();
+            }
+            else
+            {
+                IntroOverlay.Visibility = Visibility.Collapsed;
+            }
         }
 
+        private Size _lastSnowCanvasSize = Size.Empty;
         private void MainWindow_SizeChanged(object? sender, SizeChangedEventArgs e)
         {
+            if (SnowCanvas == null)
+                return;
+
+            var newSize = new Size(SnowCanvas.ActualWidth, SnowCanvas.ActualHeight);
+            if (newSize.Width <= 0 || newSize.Height <= 0)
+                return;
+            const double minDelta = 20.0;
+            if (Math.Abs(newSize.Width - _lastSnowCanvasSize.Width) < minDelta &&
+                Math.Abs(newSize.Height - _lastSnowCanvasSize.Height) < minDelta)
+                return;
+
+            _lastSnowCanvasSize = newSize;
             InitSnow();
         }
 
+        private const int FlakeCount = 60;
         private void InitSnow()
         {
             if (SnowCanvas == null)
@@ -82,9 +113,8 @@ namespace Voidstrap.UI.Elements.Settings
                 width = ActualWidth;
                 height = ActualHeight;
             }
-            const int flakeCount = 80;
 
-            for (int i = 0; i < flakeCount; i++)
+            for (int i = 0; i < FlakeCount; i++)
             {
                 double size = _snowRandom.Next(2, 6);
 
@@ -115,11 +145,6 @@ namespace Voidstrap.UI.Elements.Settings
             }
         }
 
-        private void SnowTimer_Tick(object? sender, EventArgs e)
-        {
-            UpdateSnow();
-        }
-
         private void UpdateSnow()
         {
             if (SnowCanvas == null ||
@@ -130,15 +155,19 @@ namespace Voidstrap.UI.Elements.Settings
             double width = SnowCanvas.ActualWidth;
             double height = SnowCanvas.ActualHeight;
 
-            foreach (var flake in _snowflakes)
+            for (int i = 0; i < _snowflakes.Count; i++)
             {
+                var flake = _snowflakes[i];
+
                 flake.Y += flake.SpeedY;
                 flake.X += flake.DriftX;
+
                 if (flake.Y > height + flake.Size)
                 {
                     flake.Y = -flake.Size;
                     flake.X = _snowRandom.NextDouble() * width;
                 }
+
                 if (flake.X < -flake.Size)
                     flake.X = width + flake.Size;
                 else if (flake.X > width + flake.Size)
@@ -148,6 +177,25 @@ namespace Voidstrap.UI.Elements.Settings
                 Canvas.SetTop(flake.Shape, flake.Y);
             }
         }
+
+        private void SnowTimer_Tick(object? sender, EventArgs e)
+        {
+            UpdateSnow();
+        }
+
+        protected override void OnActivated(EventArgs e)
+        {
+            base.OnActivated(e);
+            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
+                _snowTimer.Start();
+        }
+
+        protected override void OnDeactivated(EventArgs e)
+        {
+            base.OnDeactivated(e);
+            _snowTimer.Stop();
+        }
+
 
         private sealed class Snowflake
         {
