@@ -81,7 +81,12 @@
             </StackPanel>
         </Grid>
 
-        <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal">
+        <WrapPanel HorizontalAlignment="Center"
+           Orientation="Horizontal"
+           ItemHeight="40"
+           ItemWidth="Auto"
+           Margin="0,8,0,0">
+
             <ui:Anchor
                 Margin="0,0,8,8"
                 Content="{x:Static resources:Strings.Menu_About_ReportIssue}"
@@ -219,31 +224,31 @@
             TextWrapping="Wrap" />
         <Grid Margin="0,8,0,0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
             </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
 
             <controls:Expander
                 Grid.Column="0"
                 Margin="0,0,4,0"
                 BorderThickness="2,2,2,2"
-                Foreground="{x:Null}"
                 HeaderIcon="Code24"
                 HeaderText="Coders"
-                IsExpanded="True"
-                OpacityMask="Black">
+                IsExpanded="False">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[pizzaboxer](https://github.com/pizzaboxer)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
                     <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
                     <controls:MarkdownTextBlock MarkdownText="[ミダスキラ](https://www.roblox.com/users/2438075486/profile)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bratic](https://www.youtube.com/@ThisBratic)" />
                     <controls:MarkdownTextBlock MarkdownText="[stoof](https://www.youtube.com/@stoofis)" />
                     <controls:MarkdownTextBlock MarkdownText="[Luc6i](https://github.com/Luc6i)" />
                     <controls:MarkdownTextBlock MarkdownText="[return_request](https://github.com/returnrqt)" />
-                    <controls:MarkdownTextBlock MarkdownText="[Alexa](https://github.com/GoingCrazyDude/)" />
-                    <controls:MarkdownTextBlock MarkdownText="[pizzaboxer](https://github.com/pizzaboxer)" />
                     <controls:MarkdownTextBlock MarkdownText="[Matt](https://github.com/bluepilledgreat)" />
                     <controls:MarkdownTextBlock MarkdownText="[GSczbfXn](https://github.com/ZFkQSZ3GxWFy6bthZ)" />
                     <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
@@ -251,7 +256,6 @@
                     <controls:MarkdownTextBlock MarkdownText="[EasternBloxxer](https://github.com/EasternBloxxer)" />
                     <controls:MarkdownTextBlock MarkdownText="[sitiom](https://github.com/sitiom)" />
                     <controls:MarkdownTextBlock MarkdownText="[Extravi](https://github.com/Extravi)" />
-                    <controls:MarkdownTextBlock MarkdownText="[EpixScripts](https://github.com/EpixScripts)" />
                     <controls:MarkdownTextBlock MarkdownText="[swatTurret](https://github.com/swatTurret)" />
                     <controls:MarkdownTextBlock MarkdownText="[fxeP1](https://github.com/fxeP1)" />
                     <controls:MarkdownTextBlock MarkdownText="[Redusofficial](https://github.com/Redusofficial)" />
@@ -269,7 +273,7 @@
                 BorderThickness="2,2,2,2"
                 HeaderIcon="AppsAddIn28"
                 HeaderText="Contribution"
-                IsExpanded="True">
+                IsExpanded="False">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[TnoobixRT](https://guns.lol/tnoobixrt)" />
                     <controls:MarkdownTextBlock MarkdownText="[Flemish](https://www.discord.com/users/1286961047990702124)" />
@@ -287,7 +291,6 @@
                     <controls:MarkdownTextBlock MarkdownText="[he3als](https://github.com/he3als)" />
                     <controls:MarkdownTextBlock MarkdownText="[NikSavchenk0](https://github.com/NikSavchenk0)" />
                     <controls:MarkdownTextBlock MarkdownText="[carter0nline](https://github.com/carter0nline)" />
-                    <controls:MarkdownTextBlock MarkdownText="[lolmanurfunny](https://github.com/lolmanurfunny)" />
                     <controls:MarkdownTextBlock MarkdownText="[MehKako](https://github.com/MehKako)" />
                     <controls:MarkdownTextBlock MarkdownText="[EpixScripts](https://github.com/EpixScripts)" />
                     <controls:MarkdownTextBlock MarkdownText="[knivesofeylis](https://github.com/knivesofeylis)" />
@@ -319,7 +322,7 @@
                 BorderThickness="2,2,2,2"
                 HeaderIcon="Heart20"
                 HeaderText="Inspirations"
-                IsExpanded="True">
+                IsExpanded="False">
                 <StackPanel>
                     <controls:MarkdownTextBlock MarkdownText="[Fishstrap](https://github.com/returnrqt/)" />
                     <controls:MarkdownTextBlock MarkdownText="[Bloxstrap](https://github.com/MaximumADHD)" />

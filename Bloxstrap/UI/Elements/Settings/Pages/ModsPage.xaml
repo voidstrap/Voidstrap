@@ -94,6 +94,10 @@
                         <ui:ToggleSwitch IsChecked="{Binding OldCharacterSoundsTask.NewState, Mode=TwoWay}" />
                     </controls:OptionControl>
 
+                    <controls:OptionControl Description="Attempt to recreate Fullbright without FFlags. Not effective when Lighting FFlags are used." Header="FullBright">
+                        <ui:ToggleSwitch IsChecked="{Binding Fullbright, Mode=TwoWay}" />
+                    </controls:OptionControl>
+
                     <controls:OptionControl Description="Attempts to add potato graphics to certain Roblox games." Header="Potato graphics">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <ui:Button Content="Clear Textures" Command="{Binding ClearTexturesCommand}" Margin="0,0,5,0"/>
@@ -131,7 +135,26 @@
                         </ComboBox>
                     </controls:OptionControl>
 
-                    <!--  Miscellaneous Section  -->
+                    <controls:OptionControl 
+    Header="Skybox Manager (BETA)"
+    Description="Select a Custom Roblox Skybox to use. Works best in Rivals.">
+
+                        <StackPanel Orientation="Vertical">
+
+                            <ComboBox 
+            ItemsSource="{Binding AvailableSkyboxPacks}" 
+            SelectedItem="{Binding SelectedSkyboxPack, Mode=TwoWay}" 
+            DisplayMemberPath="Name" 
+            Width="200"
+            Margin="0,0,0,5"/>
+
+                            <ui:ToggleSwitch 
+            IsChecked="{Binding SkyboxEnabled, Mode=TwoWay}" HorizontalAlignment="Right"
+            Margin="0,6,0,0"/>
+
+                        </StackPanel>
+                    </controls:OptionControl>
+
                     <TextBlock
             Margin="0,16,0,0"
             FontSize="20"

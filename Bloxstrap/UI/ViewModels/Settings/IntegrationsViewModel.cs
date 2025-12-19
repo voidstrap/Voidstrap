@@ -137,6 +137,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.CustomGameName = value;
         }
 
+        public bool GameWIP
+        {
+            get => App.Settings.Prop.GameWIP;
+            set => App.Settings.Prop.GameWIP = value;
+        }
+
         public bool ServerUptimeBetterBLOXcuzitsbetterXD
         {
             get => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD;

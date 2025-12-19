@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DiscordRPC;
@@ -22,7 +25,6 @@ namespace Voidstrap.Integrations
 
         private bool _visible = true;
         private long? _previousPlaceId;
-
         private DateTime _lastPresenceUpdate = DateTime.MinValue;
         private readonly TimeSpan _updateCooldown = TimeSpan.FromSeconds(5);
 
@@ -30,6 +32,7 @@ namespace Voidstrap.Integrations
         {
             const string LOG_IDENT = "DiscordRichPresence";
             _activityWatcher = activityWatcher;
+
             _activityWatcher.OnGameJoin += async (_, _) => await SetCurrentGameAsync();
             _activityWatcher.OnGameLeave += async (_, _) => await SetCurrentGameAsync();
             _activityWatcher.OnRPCMessage += (_, message) => ProcessRPCMessage(message);
@@ -89,14 +92,6 @@ namespace Voidstrap.Integrations
                 _currentPresence.Details = UpdateField(_currentPresence.Details, presenceData.Details, _originalPresence.Details, 128);
                 _currentPresence.State = UpdateField(_currentPresence.State, presenceData.State, _originalPresence.State, 128);
 
-                presenceData.TimestampStart = _currentPresence.Timestamps.StartUnixMilliseconds.HasValue
-                    ? (ulong?)_currentPresence.Timestamps.StartUnixMilliseconds.Value
-                    : null;
-
-                presenceData.TimestampEnd = _currentPresence.Timestamps.EndUnixMilliseconds.HasValue
-                    ? (ulong?)_currentPresence.Timestamps.EndUnixMilliseconds.Value
-                    : null;
-
                 UpdateAssets(_currentPresence.Assets, _originalPresence.Assets, presenceData.SmallImage, true);
                 UpdateAssets(_currentPresence.Assets, _originalPresence.Assets, presenceData.LargeImage, false);
             }
@@ -133,10 +128,8 @@ namespace Voidstrap.Integrations
 
             if (data.Clear)
             {
-                if (small)
-                    current.SmallImageKey = "";
-                else
-                    current.LargeImageKey = "";
+                if (small) current.SmallImageKey = "";
+                else current.LargeImageKey = "";
                 return;
             }
 
@@ -157,38 +150,30 @@ namespace Voidstrap.Integrations
 
             if (!string.IsNullOrEmpty(data.CustomKey))
             {
-                if (small)
-                    current.SmallImageKey = data.CustomKey;
-                else
-                    current.LargeImageKey = data.CustomKey;
+                if (small) current.SmallImageKey = data.CustomKey;
+                else current.LargeImageKey = data.CustomKey;
                 return;
             }
 
             if (data.AssetId.HasValue)
             {
                 var url = $"https://assetdelivery.roblox.com/v1/asset/?id={data.AssetId.Value}";
-                if (small)
-                    current.SmallImageKey = url;
-                else
-                    current.LargeImageKey = url;
+                if (small) current.SmallImageKey = url;
+                else current.LargeImageKey = url;
             }
 
             if (!string.IsNullOrEmpty(data.HoverText))
             {
-                if (small)
-                    current.SmallImageText = data.HoverText;
-                else
-                    current.LargeImageText = data.HoverText;
+                if (small) current.SmallImageText = data.HoverText;
+                else current.LargeImageText = data.HoverText;
             }
         }
 
         public void SetVisibility(bool visible)
         {
             _visible = visible;
-            if (_visible)
-                UpdatePresence();
-            else
-                _rpcClient.ClearPresence();
+            if (_visible) UpdatePresence();
+            else _rpcClient.ClearPresence();
         }
 
         private async Task SetCurrentGameAsync()
@@ -196,7 +181,8 @@ namespace Voidstrap.Integrations
             if (!await _updateLock.WaitAsync(0)) return;
             try
             {
-                await SetCurrentGame();
+                bool changed = await SetCurrentGame();
+                if (changed) RobloxMemoryCleaner.CleanRobloxMemory();
             }
             finally
             {
@@ -221,7 +207,6 @@ namespace Voidstrap.Integrations
             var activity = _activityWatcher.Data;
             var timeStarted = activity.RootActivity?.TimeJoined ?? activity.TimeJoined;
             var placeId = activity.PlaceId;
-
             bool teleported = _previousPlaceId.HasValue && _previousPlaceId.Value != placeId;
             _previousPlaceId = placeId;
 
@@ -231,7 +216,6 @@ namespace Voidstrap.Integrations
                 {
                     await UniverseDetails.FetchSingle(activity.UniverseId);
                     activity.UniverseDetails = UniverseDetails.LoadFromCache(activity.UniverseId);
-                    App.Logger.WriteLine(LOG_IDENT, $"Fetched universe details for {activity.UniverseId}");
                 }
                 catch (Exception ex)
                 {
@@ -243,12 +227,6 @@ namespace Voidstrap.Integrations
             var universe = activity.UniverseDetails!;
             var (smallImage, smallText) = await GetSmallImageAsync(activity);
 
-            if (!_activityWatcher.InGame || placeId != _activityWatcher.Data.PlaceId)
-            {
-                App.Logger.WriteLine(LOG_IDENT, "Player left the game during setup.");
-                return false;
-            }
-
             string serverPrivacy = activity.ServerType switch
             {
                 ServerType.Private => "Private Server",
@@ -256,53 +234,35 @@ namespace Voidstrap.Integrations
                 _ => "Public Server"
             };
 
-            App.Logger.WriteLine(LOG_IDENT, $"Server type detected: {serverPrivacy}");
+            var (cleanName, betaTag) = ExtractBetaTag(universe.Data.Name, universe.Data.Description);
+            string universeName = !string.IsNullOrWhiteSpace(App.Settings.Prop.CustomGameName)
+                ? App.Settings.Prop.CustomGameName!
+                : cleanName.Length < 2 ? cleanName + "\x2800\x2800\x2800" : cleanName;
 
-            string universeName;
-            if (!string.IsNullOrWhiteSpace(App.Settings.Prop.CustomGameName))
-            {
-                universeName = App.Settings.Prop.CustomGameName!;
-                App.Logger.WriteLine(LOG_IDENT, $"Using custom game name: {universeName}");
-            }
-            else
-            {
-                universeName = universe.Data.Name.Length < 2
-                    ? universe.Data.Name + "\x2800\x2800\x2800"
-                    : universe.Data.Name;
-            }
 
             if (teleported)
-            {
                 universeName = $"Teleported to {universeName}";
-                App.Logger.WriteLine(LOG_IDENT, "Player teleported to a new place.");
-            }
 
             string serverLocation = string.Empty;
             if (App.Settings.Prop.ServerLocationGame)
             {
-                try
-                {
-                    serverLocation = await activity.QueryServerLocation();
-                }
-                catch
-                {
-                    serverLocation = "Unknown Location";
-                }
+                try { serverLocation = await activity.QueryServerLocation(); }
+                catch { serverLocation = "Unknown Location"; }
             }
 
             var detailsParts = new List<string>();
-            if (App.Settings.Prop.GameNameChecked)
-                detailsParts.Add(universeName);
-            if (App.Settings.Prop.GameStatusChecked)
-                detailsParts.Add(serverPrivacy);
-            if (App.Settings.Prop.ServerLocationGame)
-                detailsParts.Add(serverLocation);
-
+            if (App.Settings.Prop.GameNameChecked) detailsParts.Add(universeName);
+            if (App.Settings.Prop.GameStatusChecked) detailsParts.Add(serverPrivacy);
+            if (App.Settings.Prop.ServerLocationGame) detailsParts.Add(serverLocation);
             string details = string.Join(" • ", detailsParts);
+
+            if (!string.IsNullOrEmpty(betaTag))
+                details = $"{details} {betaTag}";
 
             string state = App.Settings.Prop.GameCreatorChecked
                 ? $"by {universe.Data.Creator.Name}{(universe.Data.Creator.HasVerifiedBadge ? " ☑️" : "")}"
                 : "";
+
             string largeImageKey = !string.IsNullOrWhiteSpace(App.Settings.Prop.UseCustomIcon)
                 ? App.Settings.Prop.UseCustomIcon
                 : (App.Settings.Prop.GameIconChecked ? universe.Thumbnail.ImageUrl : "");
@@ -311,22 +271,35 @@ namespace Voidstrap.Integrations
                 ? ""
                 : (App.Settings.Prop.GameIconChecked && App.Settings.Prop.GameNameChecked ? universe.Data.Name : "");
 
-            _currentPresence = new DiscordRPC.RichPresence
+            if (_currentPresence != null)
             {
-                Details = details,
-                State = state,
-                Timestamps = new Timestamps { Start = timeStarted.ToUniversalTime() },
-                Buttons = GetButtons(),
-                Assets = new Assets
+                _currentPresence.Details = details;
+                _currentPresence.State = state;
+                _currentPresence.Assets.LargeImageKey = largeImageKey;
+                _currentPresence.Assets.LargeImageText = largeImageText;
+                _currentPresence.Assets.SmallImageKey = smallImage;
+                _currentPresence.Assets.SmallImageText = smallText;
+                _currentPresence.Buttons = GetButtons();
+                _currentPresence.Timestamps.Start = timeStarted.ToUniversalTime();
+            }
+            else
+            {
+                _currentPresence = new DiscordRPC.RichPresence
                 {
-                    LargeImageKey = largeImageKey,
-                    LargeImageText = largeImageText,
-                    SmallImageKey = smallImage,
-                    SmallImageText = smallText
-                }
-            };
-
-            _originalPresence = _currentPresence;
+                    Details = details,
+                    State = state,
+                    Timestamps = new Timestamps { Start = timeStarted.ToUniversalTime() },
+                    Buttons = GetButtons(),
+                    Assets = new Assets
+                    {
+                        LargeImageKey = largeImageKey,
+                        LargeImageText = largeImageText,
+                        SmallImageKey = smallImage,
+                        SmallImageText = smallText
+                    }
+                };
+                _originalPresence = _currentPresence;
+            }
 
             while (_messageQueue.TryDequeue(out var msg))
                 ProcessRPCMessage(msg, false);
@@ -336,10 +309,41 @@ namespace Voidstrap.Integrations
             return true;
         }
 
+        private static (string CleanName, string? Tag) ExtractBetaTag(string gameName, string? description)
+        {
+            if (string.IsNullOrWhiteSpace(gameName))
+                return (gameName ?? "", null);
+
+            if (!App.Settings.Prop.GameWIP)
+                return (gameName, null);
+
+            string combined = (gameName + " " + (description ?? "")).ToUpperInvariant();
+            var keywords = new Dictionary<string, string>
+    {
+        { "BETA", "[BETA]" },
+        { "TESTING", "[TESTING]" },
+        { "IN WORKS", "[IN WORKS]" },
+        { "ALPHA", "[ALPHA]" },
+        { "PREVIEW", "[PREVIEW]" },
+    };
+
+            foreach (var kvp in keywords)
+            {
+                string pattern = @"[\[\{]?\s*" + Regex.Escape(kvp.Key) + @"\s*[\]\}]?";
+                if (Regex.IsMatch(combined, pattern, RegexOptions.IgnoreCase))
+                {
+                    string cleanName = Regex.Replace(gameName, pattern, "", RegexOptions.IgnoreCase).Trim();
+                    return (string.IsNullOrEmpty(cleanName) ? gameName : cleanName, kvp.Value);
+                }
+            }
+
+            return (gameName, null);
+        }
+
         private async Task<(string key, string text)> GetSmallImageAsync(ActivityData activity)
         {
             if (!App.Settings.Prop.ShowAccountOnRichPresence)
-                return ("roblox", "Roblox");
+                return ("voidstrap", "Voidstrap");
 
             try
             {
@@ -348,7 +352,7 @@ namespace Voidstrap.Integrations
             }
             catch
             {
-                return ("roblox", "Roblox");
+                return ("voidstrap", "Voidstrap");
             }
         }
 
@@ -360,7 +364,6 @@ namespace Voidstrap.Integrations
             if (!App.Settings.Prop.HideRPCButtons)
             {
                 string? inviteUrl = null;
-
                 if (data.ServerType == ServerType.Public ||
                     (data.ServerType == ServerType.Reserved && !string.IsNullOrEmpty(data.RPCLaunchData)))
                 {
@@ -371,12 +374,7 @@ namespace Voidstrap.Integrations
                     buttons.Add(new Button { Label = "Join server", Url = inviteUrl });
             }
 
-            buttons.Add(new Button
-            {
-                Label = "Game Page",
-                Url = $"https://www.roblox.com/games/{data.PlaceId}"
-            });
-
+            buttons.Add(new Button { Label = "Game Page", Url = $"https://www.roblox.com/games/{data.PlaceId}" });
             return buttons.ToArray();
         }
 
@@ -401,5 +399,28 @@ namespace Voidstrap.Integrations
             _rpcClient.Dispose();
             GC.SuppressFinalize(this);
         }
+    }
+
+    public static class RobloxMemoryCleaner
+    {
+        public static void CleanRobloxMemory()
+        {
+            var robloxProcesses = Process.GetProcessesByName("Roblox")
+                .Concat(Process.GetProcessesByName("RobloxPlayerBeta"));
+
+            foreach (var proc in robloxProcesses)
+            {
+                try
+                {
+                    proc.Refresh();
+                    if (!proc.HasExited)
+                        EmptyWorkingSet(proc.Handle);
+                }
+                catch { }
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("psapi.dll")]
+        private static extern bool EmptyWorkingSet(IntPtr hProcess);
     }
 }

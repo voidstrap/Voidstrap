@@ -1,6 +1,7 @@
 ﻿using Voidstrap.AppData;
 using Voidstrap.Integrations;
 using Voidstrap.Models;
+using Voidstrap.UI.Elements.ContextMenu;
 
 namespace Voidstrap
 {
@@ -65,6 +66,7 @@ namespace Voidstrap
 
                 if (App.Settings.Prop.UseDiscordRichPresence)
                     RichPresence = new(ActivityWatcher);
+
 
                 IntegrationWatcher = new IntegrationWatcher(ActivityWatcher);
             }

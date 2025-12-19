@@ -59,11 +59,6 @@
             <ui:ToggleSwitch IsChecked="{Binding UseFastFlagManager, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <controls:OptionControl Header="IXP FastFlags (Works only sometimes!)"
-                        Description="Uses Roblox's FFlag bypass. May lead to bans if misused use with caution.">
-            <ui:ToggleSwitch IsChecked="{Binding EnableFastFlagBypass, Mode=TwoWay}" />
-        </controls:OptionControl>
-
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Reset_Title}">
             <ui:ToggleSwitch IsChecked="{Binding ResetConfiguration, Mode=TwoWay}" />
         </controls:OptionControl>
@@ -537,8 +532,6 @@ Margin="8,0,8,0" />
             FontSize="17.65"
             FontWeight="Medium"
             Text="Profiles and Debug" />
-
-
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>

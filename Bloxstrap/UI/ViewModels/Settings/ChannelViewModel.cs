@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,6 +23,53 @@ namespace Voidstrap.UI.ViewModels.Settings
 {
     public class ChannelViewModel : INotifyPropertyChanged
     {
+        [StructLayout(LayoutKind.Sequential)]
+        private struct DEVMODE
+        {
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string dmDeviceName;
+            public ushort dmSpecVersion;
+            public ushort dmDriverVersion;
+            public ushort dmSize;
+            public ushort dmDriverExtra;
+            public uint dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public uint dmDisplayOrientation;
+            public uint dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+            public string dmFormName;
+            public ushort dmLogPixels;
+            public uint dmBitsPerPel;
+            public uint dmPelsWidth;
+            public uint dmPelsHeight;
+            public uint dmDisplayFlags;
+            public uint dmDisplayFrequency;
+            public uint dmICMMethod;
+            public uint dmICMIntent;
+            public uint dmMediaType;
+            public uint dmDitherType;
+            public uint dmReserved1;
+            public uint dmReserved2;
+            public uint dmPanningWidth;
+            public uint dmPanningHeight;
+        }
+
+        [DllImport("user32.dll")]
+        private static extern bool EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DEVMODE lpDevMode);
+
+        [DllImport("user32.dll")]
+        private static extern int ChangeDisplaySettings(ref DEVMODE lpDevMode, int dwFlags);
+
+        private const int ENUM_CURRENT_SETTINGS = -1;
+        private const int CDS_UPDATEREGISTRY = 0x01;
+        private const int DISP_CHANGE_SUCCESSFUL = 0;
+
         private string _oldPlayerVersionGuid = "";
         private string _oldStudioVersionGuid = "";
         private CancellationTokenSource? _loadChannelCts;
@@ -53,6 +101,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             Directory.CreateDirectory(npiFolder);
             LoadPotatoQualitySetting();
+            LoadAvailableResolutions();
             _ = EnsureProfilesExistAsync();
             _ = LoadNetworkStreamingStateAsync();
 
@@ -78,7 +127,75 @@ namespace Voidstrap.UI.ViewModels.Settings
         _selectedPriority = App.Settings.Prop.PriorityLimit ?? "Normal";
             _ = LoadChannelDeployInfoSafeAsync(App.Settings.Prop.Channel);
         }
-        
+
+        public ObservableCollection<DisplayMode> AvailableResolutions { get; } = new();
+
+        private DisplayMode? _selectedResolution;
+        public DisplayMode? SelectedResolution
+        {
+            get => _selectedResolution;
+            set
+            {
+                if (_selectedResolution != value)
+                {
+                    _selectedResolution = value;
+                    OnPropertyChanged(nameof(SelectedResolution));
+                    if (_selectedResolution != null)
+                        ApplyResolution(_selectedResolution);
+                }
+            }
+        }
+        private void LoadAvailableResolutions()
+        {
+            List<DisplayMode> modes = new();
+            DEVMODE devMode = new();
+            devMode.dmSize = (ushort)Marshal.SizeOf(typeof(DEVMODE));
+
+            int modeIndex = 0;
+            while (EnumDisplaySettings(null, modeIndex++, ref devMode))
+            {
+                if (devMode.dmPelsWidth == 0 || devMode.dmPelsHeight == 0)
+                    continue;
+
+                var existing = modes.FirstOrDefault(m => m.Width == devMode.dmPelsWidth && m.Height == devMode.dmPelsHeight);
+                if (existing == null)
+                    modes.Add(new DisplayMode { Width = (int)devMode.dmPelsWidth, Height = (int)devMode.dmPelsHeight, RefreshRate = (int)devMode.dmDisplayFrequency });
+                else if (devMode.dmDisplayFrequency > existing.RefreshRate)
+                    existing.RefreshRate = (int)devMode.dmDisplayFrequency;
+            }
+
+            AvailableResolutions.Clear();
+            foreach (var m in modes.OrderBy(m => m.Width).ThenBy(m => m.Height))
+                AvailableResolutions.Add(m);
+            if (EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode))
+            {
+                SelectedResolution = AvailableResolutions.FirstOrDefault(m =>
+                    m.Width == devMode.dmPelsWidth &&
+                    m.Height == devMode.dmPelsHeight &&
+                    m.RefreshRate == devMode.dmDisplayFrequency);
+            }
+        }
+
+        private void ApplyResolution(DisplayMode mode)
+        {
+            DEVMODE dm = new();
+            dm.dmSize = (ushort)Marshal.SizeOf(typeof(DEVMODE));
+
+            if (!EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref dm))
+            {
+                MessageBox.Show("Failed to read current display settings.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            dm.dmPelsWidth = (uint)mode.Width;
+            dm.dmPelsHeight = (uint)mode.Height;
+            dm.dmDisplayFrequency = (uint)mode.RefreshRate;
+            dm.dmBitsPerPel = 32;
+            dm.dmFields = 0x180000 | 0x400000;
+            int result = ChangeDisplaySettings(ref dm, CDS_UPDATEREGISTRY);
+            if (result != DISP_CHANGE_SUCCESSFUL)
+                MessageBox.Show($"Failed to change resolution. Error code: {result}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+        }
 
         public ObservableCollection<string> PriorityOptions { get; set; }
 

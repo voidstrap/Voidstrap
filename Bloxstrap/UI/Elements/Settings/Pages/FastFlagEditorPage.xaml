@@ -6,12 +6,17 @@
     xmlns:local="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:conv="clr-namespace:Voidstrap.UI.Converters"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="FastFlagEditorPage"
     d:DesignHeight="450"
     d:DesignWidth="800"
     Loaded="Page_Loaded"
     mc:Ignorable="d">
+
+    <ui:UiPage.Resources>
+        <conv:TagColorConverter x:Key="TagColorConverter"/>
+    </ui:UiPage.Resources>
 
     <Grid Margin="0,0,14,14">
         <Grid.RowDefinitions>
@@ -72,26 +77,7 @@
                 Click="DeleteAllButton_Click"
                 Content="Delete all"
                 Icon="Delete48" />
-            <ui:Button
-                Margin="0,0,10,16"
-                VerticalAlignment="Top"
-                Click="CopyJSONButton_Click1"
-                ClipToBounds="True"
-                Content="Copy all"
-                Icon="Clipboard16" />
-            <ui:Button
-                Margin="0,0,10,16"
-                VerticalAlignment="Top"
-                Click="CopyJSONButton_Click2"
-                ClipToBounds="True"
-                Content="Copy Better JSON"
-                Icon="Copy16" />
-            <ui:Button
-                Margin="0,0,10,16"
-                VerticalAlignment="Top"
-                Click="ExportJSONButton_Click"
-                Content="{x:Static resources:Strings.Menu_FastFlagEditor_ExportJson}"
-                Icon="ArrowExit20" />
+
             <ui:Button
                 Width="95"
                 Margin="0,0,10,16"
@@ -99,13 +85,7 @@
                 Click="FlagProfiles_Click"
                 Content="Profiles"
                 Icon="Edit28" />
-            <ui:Button
-                Width="120"
-                Margin="0,0,10,16"
-                VerticalAlignment="Top"
-                Click="FlagFind_Click"
-                Content="Find FFlags"
-                Icon="Book24" />
+
             <ToggleButton
                 x:Name="TogglePresetsButton"
                 Margin="0,0,10,16"
@@ -114,28 +94,26 @@
                 Content="{x:Static resources:Strings.Menu_FastFlagEditor_ShowPresetFlags}" />
         </WrapPanel>
 
-        <!-- Flag Count Text -->
         <TextBlock
     x:Name="CrashRateTextBlock"
     Grid.Row="2"
-    Margin="0,91,10,5"
+    Margin="0,20,10,5"
     HorizontalAlignment="Right"
     VerticalAlignment="Top"
     FontSize="14"
     Foreground="{StaticResource TextFillColorSecondaryBrush}"
-    Text="Crash: 0%" />
+    Text="Bloat: 0%" />
 
         <TextBlock
     x:Name="TotalFlagsTextBlock"
     Grid.Row="2"
-    Margin="0,71,10,5"
+    Margin="0,0,10,5"
     HorizontalAlignment="Right"
     VerticalAlignment="Top"
     FontSize="14"
     Foreground="{StaticResource TextFillColorSecondaryBrush}"
     Text="Flags added: 0" />
 
-        <!--  Search Bar  -->
         <Grid
             Grid.Row="3"
             Height="40"
@@ -256,8 +234,65 @@
                     </Style>
                 </DataGrid.CellStyle>
 
-                <!-- Columns -->
                 <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Tags" Width="Auto">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <ItemsControl ItemsSource="{Binding VisibleTags}">
+                                    <ItemsControl.Style>
+                                        <Style TargetType="ItemsControl">
+                                            <Setter Property="ItemsPanel">
+                                                <Setter.Value>
+                                                    <ItemsPanelTemplate>
+                                                        <WrapPanel VerticalAlignment="Center" />
+                                                    </ItemsPanelTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding VisibleTags.Count}" Value="1">
+                                                    <Setter Property="ItemsPanel">
+                                                        <Setter.Value>
+                                                            <ItemsPanelTemplate>
+                                                                <Grid />
+                                                            </ItemsPanelTemplate>
+                                                        </Setter.Value>
+                                                    </Setter>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </ItemsControl.Style>
+
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <Border
+                            x:Name="TagBorder"
+                            Height="22"
+                            Margin="2,0"
+                            Padding="8,0"
+                            VerticalAlignment="Center"
+                            CornerRadius="8"
+                            Background="{Binding ., Converter={StaticResource TagColorConverter}}">
+                                                <TextBlock
+                                Text="{Binding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="Center"
+                                FontSize="11"
+                                FontWeight="SemiBold"
+                                Foreground="White"/>
+                                            </Border>
+
+                                            <DataTemplate.Triggers>
+                                                <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=Items.Count}" Value="1">
+                                                    <Setter TargetName="TagBorder" Property="Margin" Value="0"/>
+                                                </DataTrigger>
+                                            </DataTemplate.Triggers>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
                     <DataGridTemplateColumn x:Name="PresetColumn" Header="Preset" Width="60">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
@@ -265,7 +300,6 @@
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
-
 
                     <DataGridTextColumn
                 Width="56"
@@ -285,12 +319,42 @@
             </DataGrid>
         </Border>
 
+        <StackPanel Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,10,0,0">
+            <ui:Button
+        Width="140"
+        VerticalAlignment="Center"
+        Click="ExportJSONButton_Click"
+        Content="{x:Static resources:Strings.Menu_FastFlagEditor_ExportJson}"
+        Icon="ArrowExit20"
+        Margin="0,0,10,0" />
+
+            <ui:Button
+                Margin="0,0,10,0"
+                VerticalAlignment="Top"
+                Click="FlagFind_Click"
+                Content="Find"
+                Icon="Book24" />
+
+            <ui:Button
+                Margin="0,0,10,0"
+                VerticalAlignment="Top"
+                Click="CopyJSONButton_Click1"
+                ClipToBounds="True"
+                Content="Copy all"
+                Icon="Clipboard16" />
+            <ui:Button
+                Margin="0,0,10,0"
+                VerticalAlignment="Top"
+                Click="CopyJSONButton_Click2"
+                ClipToBounds="True"
+                Content="Copy all Better"
+                Icon="Copy16" />
+        </StackPanel>
 
 
-        <!--  Expander  -->
         <Expander
             Grid.Row="6"
-            Margin="0,30,0,0"
+            Margin="0,6,0,0"
             Background="{DynamicResource ControlFillColorTertiaryBrush}"
             ExpandDirection="Up"
             Header="FFlag History"

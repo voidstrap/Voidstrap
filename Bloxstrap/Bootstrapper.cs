@@ -15,19 +15,27 @@ using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.VisualBasic.Devices;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
-using System.Net;
+using SharpCompress.Archives;
+using SharpCompress.Common;
 using System;
 using System.Buffers;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Management;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Loader;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +47,8 @@ using Voidstrap.AppData;
 using Voidstrap.Integrations;
 using Voidstrap.RobloxInterfaces;
 using Voidstrap.UI.Elements.Bootstrapper.Base;
+using Voidstrap.UI.ViewModels.Settings;
+using static Voidstrap.UI.ViewModels.Settings.ModsViewModel;
 
 
 namespace Voidstrap
@@ -74,9 +84,9 @@ namespace Voidstrap
         private double _taskbarProgressIncrement;
         private double _taskbarProgressMaximum;
         private long _totalDownloadedBytes = 0;
+        private System.Timers.Timer? _memoryClearTimer;
         private CancellationTokenSource? _optimizationCts;
-        private Thread _monitorThread;
-        private bool _running = false;
+        private Process? _fflagRunnerProcess;
 
         private bool _mustUpgrade => String.IsNullOrEmpty(AppData.State.VersionGuid) || !File.Exists(AppData.ExecutablePath);
         private bool _noConnection = false;
@@ -84,8 +94,6 @@ namespace Voidstrap
         private AsyncMutex? _mutex;
 
         private int _appPid = 0;
-
-        private int totalPackageSize = 0;
 
         public IBootstrapperDialog? Dialog = null;
 
@@ -110,7 +118,6 @@ namespace Voidstrap
         private Process? _robloxProcess;
         private System.Threading.Timer? _gcTimer;
         private System.Threading.Timer? _processOptimizerTimer;
-        private System.Diagnostics.Stopwatch? _downloadStopwatch;
 
 
         [DllImport("kernel32.dll")]
@@ -157,11 +164,11 @@ namespace Voidstrap
 
             if (_isInstalling)
             {
-                App.Logger.WriteLine(LOG_IDENT, "Already upgrading; skipping retry.");
+                App.Logger.WriteLine(LOG_IDENT, "Already upgrading skipping retry.");
                 return;
             }
 
-            string message = "A network or server issue occurred while checking for updates.";
+            string message = "A network or server issue occurred this is likely a channel problem try switching your default channel!.";
 
             if (exception is HttpRequestException httpEx)
             {
@@ -397,21 +404,6 @@ namespace Voidstrap
 
         private void StartMemoryAndProcessOptimizer()
         {
-            _gcTimer = new System.Threading.Timer(_ =>
-            {
-                try
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                    GC.Collect();
-                    App.Logger.WriteLine("MemoryCleaner", $"GC ran at {DateTime.Now}");
-                }
-                catch (Exception ex)
-                {
-                    App.Logger.WriteLine("MemoryCleaner", $"Error during GC: {ex}");
-                }
-            }, null, TimeSpan.Zero, TimeSpan.FromSeconds(3));
-
             _processOptimizerTimer = new System.Threading.Timer(_ =>
             {
                 try
@@ -446,6 +438,7 @@ namespace Voidstrap
             SetStatus(Strings.Bootstrapper_Status_Starting);
             try
             {
+                HandleFullBright();
                 StartMemoryAndProcessOptimizer();
                 if (_launchMode == LaunchMode.Player && App.Settings.Prop?.ForceRobloxLanguage == true)
                 {
@@ -578,7 +571,6 @@ namespace Voidstrap
                             HighResMillis = 1,
                             OverrideAffinity = true,
                             AffinityMask = 0xFFFFFFFFFFFFFFFFUL,
-                            PriorityClass = ProcessPriorityClass.High,
                             WorkingSetMinMB = 128,
                             WorkingSetMaxMB = 2048,
                             BoostThreads = true,
@@ -772,6 +764,104 @@ namespace Voidstrap
             }
         }
 
+        private void HandleFullBright()
+        {
+            const string LOG_IDENT = "FullBright";
+
+            try
+            {
+                if (!Directory.Exists(Paths.Versions))
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Versions directory missing.");
+                    return;
+                }
+
+                string backupDir = Path.Combine(Paths.Base, "FullBrightBackup");
+                string metaPath = Path.Combine(backupDir, "brdf.json");
+
+                Directory.CreateDirectory(backupDir);
+                if (App.Settings.Prop?.Fullbright == false && File.Exists(metaPath))
+                {
+                    var meta = JsonSerializer.Deserialize<BrdfBackupInfo>(
+                        File.ReadAllText(metaPath));
+
+                    if (meta != null)
+                    {
+                        string restorePath = Path.Combine(
+                            Paths.Versions,
+                            meta.RelativePath,
+                            meta.FileName
+                        );
+
+                        Directory.CreateDirectory(Path.GetDirectoryName(restorePath)!);
+
+                        string backupFile = Path.Combine(backupDir, meta.FileName);
+                        if (File.Exists(backupFile))
+                        {
+                            File.Copy(backupFile, restorePath, overwrite: true);
+                            App.Logger.WriteLine(LOG_IDENT, $"Restored {meta.FileName}");
+                        }
+                    }
+
+                    return;
+                }
+
+                foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+                {
+                    var texturesRoot = Path.Combine(
+                        versionDir,
+                        "PlatformContent",
+                        "pc",
+                        "textures"
+                    );
+
+                    if (!Directory.Exists(texturesRoot))
+                        continue;
+
+                    var brdf = Directory
+                        .EnumerateFiles(texturesRoot, "brdfLUT.*", SearchOption.AllDirectories)
+                        .FirstOrDefault();
+
+                    if (brdf == null)
+                        continue;
+
+                    if (App.Settings.Prop?.Fullbright == true && File.Exists(brdf))
+                    {
+                        string relativePath = Path.GetRelativePath(Paths.Versions, Path.GetDirectoryName(brdf)!);
+                        string fileName = Path.GetFileName(brdf);
+                        string backupFile = Path.Combine(backupDir, fileName);
+
+                        if (!File.Exists(backupFile))
+                        {
+                            File.Copy(brdf, backupFile);
+                            File.WriteAllText(metaPath, JsonSerializer.Serialize(
+                                new BrdfBackupInfo
+                                {
+                                    RelativePath = relativePath,
+                                    FileName = fileName
+                                }));
+
+                            App.Logger.WriteLine(LOG_IDENT, $"Backed up {fileName}");
+                        }
+
+                        File.Delete(brdf);
+                        App.Logger.WriteLine(LOG_IDENT, "brdfLUT removed (FullBright ON).");
+                    }
+
+                    break;
+                }
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine(LOG_IDENT, $"FullBright error: {ex}");
+            }
+        }
+        private sealed class BrdfBackupInfo
+        {
+            public string RelativePath { get; set; } = string.Empty;
+            public string FileName { get; set; } = string.Empty;
+        }
+
         private CancellationTokenSource _cpuWatcherCts;
         private void StartCpuLimitWatcher()
         {
@@ -920,12 +1010,9 @@ namespace Voidstrap
                     unchecked { affinityMask |= 1UL << i; }
                 }
                 robloxProcess.ProcessorAffinity = (IntPtr)affinityMask;
-                robloxProcess.PriorityClass = ProcessPriorityClass.High;
-
                 robloxProcess.MinWorkingSet = new IntPtr(128L * 1024 * 1024);
                 robloxProcess.MaxWorkingSet = new IntPtr(1024L * 1024 * 1024);
                 LowerBackgroundProcessesPriority();
-                OptimizeNetworkForRoblox(robloxProcess);
 
                 App.Logger.WriteLine("Servers", "Optimizations applied successfully.");
                 robloxProcess.EnableRaisingEvents = true;
@@ -956,10 +1043,8 @@ namespace Voidstrap
                     ulong affinityMask = 0;
                     for (int i = 0; i < cores; i++) unchecked { affinityMask |= 1UL << i; }
                     robloxProcess.ProcessorAffinity = (IntPtr)affinityMask;
-                    robloxProcess.PriorityClass = ProcessPriorityClass.High;
                     robloxProcess.MinWorkingSet = new IntPtr(128L * 1024 * 1024);
                     robloxProcess.MaxWorkingSet = new IntPtr(1024L * 1024 * 1024);
-                    OptimizeNetworkForRoblox(robloxProcess);
                 }
                 catch { }
             }
@@ -979,8 +1064,6 @@ namespace Voidstrap
                 robloxProcess.MinWorkingSet = IntPtr.Zero;
                 robloxProcess.MaxWorkingSet = IntPtr.Zero;
 
-                RevertNetworkSettings(robloxProcess);
-
                 App.Logger.WriteLine("Servers", "All optimizations reverted.");
             }
             catch (Exception ex)
@@ -989,68 +1072,6 @@ namespace Voidstrap
             }
         }
 
-        #region Network Optimizations
-
-        private void OptimizeNetworkForRoblox(Process robloxProcess)
-        {
-            try
-            {
-                var sockets = GetRobloxSockets(robloxProcess);
-                foreach (var sock in sockets)
-                {
-                    try
-                    {
-                        sock.NoDelay = true;
-                        sock.SendBufferSize = 65536;
-                        sock.ReceiveBufferSize = 65536;
-                    }
-                    catch { }
-                }
-
-                App.Logger.WriteLine("Servers", $"Optimized {sockets.Length} network connections for Roblox.");
-            }
-            catch { }
-        }
-
-        private void RevertNetworkSettings(Process robloxProcess)
-        {
-            try
-            {
-                var sockets = GetRobloxSockets(robloxProcess);
-                foreach (var sock in sockets)
-                {
-                    try
-                    {
-                        sock.NoDelay = false;
-                        sock.SendBufferSize = 8192;
-                        sock.ReceiveBufferSize = 8192;
-                    }
-                    catch { }
-                }
-            }
-            catch { }
-        }
-
-        private Socket[] GetRobloxSockets(Process robloxProcess)
-        {
-            try
-            {
-                var tcpConnections = TcpHelper.GetTcpConnections();
-                var robloxConns = tcpConnections
-                    .Where(c => c.pid == robloxProcess.Id)
-                    .Select(c =>
-                    {
-                        var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                        return s;
-                    })
-                    .ToArray();
-
-                return robloxConns;
-            }
-            catch { return Array.Empty<Socket>(); }
-        }
-
-        #endregion
 
         #region Background Process Management
 
@@ -1080,7 +1101,6 @@ namespace Voidstrap
             int logicalCores = Environment.ProcessorCount;
             long affinityMask = logicalCores >= 64 ? -1L : (1L << logicalCores) - 1;
             SafeAction(() => process.ProcessorAffinity = (IntPtr)affinityMask, "set CPU affinity");
-            process.PriorityClass = logicalCores >= 4 ? ProcessPriorityClass.RealTime : ProcessPriorityClass.High;
             ulong totalMemory = new ComputerInfo().TotalPhysicalMemory;
             long maxWorkingSet = totalMemory switch
             {
@@ -1106,55 +1126,7 @@ namespace Voidstrap
                     App.Logger.WriteLine("Optimizer", $"Detected GPU: {gpuName}, VRAM: {gpuMemory / (1024 * 1024)} MB");
                 }
             }, "read GPU info");
-
-            SafeAction(() =>
-            {
-                int targetThreads = logicalCores * 6;
-                App.Logger.WriteLine("Optimizer", $"Spawning {targetThreads} worker threads for extreme max CPU utilization.");
-
-                for (int i = 0; i < targetThreads; i++)
-                {
-                    Thread t = new Thread(() =>
-                    {
-                        Random rnd = new Random();
-                        while (!process.HasExited)
-                        {
-                            double dummy = Math.Sqrt(rnd.NextDouble()) * Math.Sqrt(rnd.NextDouble());
-                            double cpuUsage = GetCpuUsage(process);
-                            if (cpuUsage > 90) Thread.Sleep(1);
-                            else if (cpuUsage < 50) Thread.SpinWait(100);
-                        }
-                    })
-                    {
-                        IsBackground = true,
-                        Priority = ThreadPriority.Highest
-                    };
-                    t.Start();
-                }
-            }, "spawn extreme worker threads");
-
             App.Logger.WriteLine("Optimizer", $"Extreme max optimization complete for {process.ProcessName}.");
-        }
-        private double GetCpuUsage(Process process)
-        {
-            try
-            {
-                var startTime = DateTime.UtcNow;
-                var startCpuUsage = process.TotalProcessorTime;
-                Thread.Sleep(50);
-                var endTime = DateTime.UtcNow;
-                var endCpuUsage = process.TotalProcessorTime;
-
-                double cpuUsedMs = (endCpuUsage - startCpuUsage).TotalMilliseconds;
-                double totalMsPassed = (endTime - startTime).TotalMilliseconds;
-
-                int logicalCores = Environment.ProcessorCount;
-                return (cpuUsedMs / (totalMsPassed * logicalCores)) * 100;
-            }
-            catch
-            {
-                return 0;
-            }
         }
 
         private void StartContinuousRobloxOptimization()
@@ -1253,21 +1225,6 @@ namespace Voidstrap
                 float cpuUsage = cpuCounters[process.Id].NextValue() / Environment.ProcessorCount;
                 if (cpuUsage > CpuHighThreshold)
                     process.PriorityClass = ProcessPriorityClass.AboveNormal;
-                else if (cpuUsage < CpuLowThreshold)
-                    process.PriorityClass = ProcessPriorityClass.High;
-
-                ulong totalMemory = new Microsoft.VisualBasic.Devices.ComputerInfo().TotalPhysicalMemory;
-                long memoryUsage = process.WorkingSet64;
-
-                if (memoryUsage > totalMemory * MemoryHighThreshold)
-                {
-                    try
-                    {
-                        process.MinWorkingSet = (IntPtr)(MinWorkingSetMB * 1024 * 1024);
-                        process.MaxWorkingSet = (IntPtr)Math.Min(memoryUsage, (long)IntPtr.MaxValue);
-                    }
-                    catch { }
-                }
 
                 try
                 {
@@ -1738,158 +1695,194 @@ namespace Voidstrap
             }
         }
 
+
+            private static readonly string PackRepoZip = "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
+            private static readonly string PackFolder = Path.Combine(Paths.Base, "SkyboxPack");
+        private static readonly HttpClient Http = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(30)
+        };
+
+        private static readonly Dictionary<string, string> SkyboxPatchFolderMap = new()
+    {
+        { "a564ec8aeef3614e788d02f0090089d8", "a5" },
+        { "7328622d2d509b95dd4dd2c721d1ca8b", "73" },
+        { "a50f6563c50ca4d5dcb255ee5cfab097", "a5" },
+        { "6c94b9385e52d221f0538aadaceead2d", "6c" },
+        { "9244e00ff9fd6cee0bb40a262bb35d31", "92" },
+        { "78cb2e93aee0cdbd79b15a866bc93a54", "78" }
+    };
+        public async Task EnsureSkyboxPackDownloadedAsync()
+        {
+            if (Directory.Exists(PackFolder) && Directory.GetDirectories(PackFolder).Length > 0)
+                return;
+
+            Directory.CreateDirectory(PackFolder);
+            SetStatus("Installing Skybox Mods...");
+
+            string tempZipPath = Path.Combine(Path.GetTempPath(), "SkyboxPackV2.zip");
+            using (var response = await Http.GetAsync(PackRepoZip, HttpCompletionOption.ResponseHeadersRead))
+            {
+                response.EnsureSuccessStatusCode();
+                var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+                long totalRead = 0;
+                var buffer = new byte[262144];
+
+                using (var stream = await response.Content.ReadAsStreamAsync())
+                using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None, buffer.Length, true))
+                {
+                    int read;
+                    var lastUpdate = Stopwatch.StartNew();
+
+                    while ((read = await stream.ReadAsync(buffer)) > 0)
+                    {
+                        await fs.WriteAsync(buffer.AsMemory(0, read));
+                        totalRead += read;
+
+                        if (lastUpdate.ElapsedMilliseconds > 200)
+                        {
+                            if (totalBytes > 0)
+                            {
+                                double percent = totalRead * 100.0 / totalBytes;
+                                SetStatus($"Downloading Skybox Data... {percent:F1}%");
+                            }
+                            else
+                            {
+                                SetStatus($"Downloading Skybox Data... {BytesToString(totalRead)}");
+                            }
+                            lastUpdate.Restart();
+                        }
+                    }
+                }
+            }
+                    using (var zip = System.IO.Compression.ZipFile.OpenRead(tempZipPath))
+            {
+                int totalFiles = zip.Entries.Count(e => !string.IsNullOrEmpty(e.Name));
+                int extractedFiles = 0;
+
+                foreach (var entry in zip.Entries)
+                {
+                    if (string.IsNullOrEmpty(entry.Name)) continue;
+                    string[] parts = entry.FullName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                    string relativePath = Path.Combine(parts.Skip(1).ToArray());
+                    string entryDest = Path.Combine(PackFolder, relativePath);
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(entryDest)!);
+
+                    using (var entryStream = entry.Open())
+                    using (var fs = new FileStream(entryDest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
+                    {
+                        await entryStream.CopyToAsync(fs);
+                    }
+
+                    extractedFiles++;
+                    SetStatus($"Extracting Skybox Pack... {extractedFiles}/{totalFiles}");
+                }
+            }
+
+            File.Delete(tempZipPath);
+        }
+
+        private static string BytesToString(long byteCount)
+        {
+            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" };
+            if (byteCount == 0) return "0B";
+            long bytes = Math.Abs(byteCount);
+            int place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
+            double num = Math.Round(bytes / Math.Pow(1024, place), 1);
+            return $"{Math.Sign(byteCount) * num} {suf[place]}";
+        }
+
+        public static async Task ApplySkyboxAsync(string skyboxName, string modsFolder)
+            {
+                string sourceFolder = Path.Combine(PackFolder, skyboxName);
+                if (!Directory.Exists(sourceFolder))
+                    throw new DirectoryNotFoundException($"Skybox '{skyboxName}' not found in PackFolder.");
+
+                string skyboxPath = Path.Combine(modsFolder, "PlatformContent", "pc", "textures", "sky");
+                if (Directory.Exists(skyboxPath))
+                {
+                    foreach (var file in Directory.GetFiles(skyboxPath, "*.*", SearchOption.AllDirectories))
+                        File.SetAttributes(file, FileAttributes.Normal);
+                    Directory.Delete(skyboxPath, true);
+                }
+
+                Directory.CreateDirectory(skyboxPath);
+
+                foreach (var file in Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories))
+                {
+                    string relative = Path.GetRelativePath(sourceFolder, file);
+                    string dest = Path.Combine(skyboxPath, relative);
+                    Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+                    File.Copy(file, dest, true);
+                }
+
+                await Task.CompletedTask;
+            }
+
+        public static async Task ApplySkyboxPatchToRobloxStorageAsync()
+        {
+            string rbxStorage = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Roblox", "rbx-storage");
+            string githubBaseUrl = "https://raw.githubusercontent.com/KloBraticc/SkyboxPatch/main/assets/";
+
+            using HttpClient http = new HttpClient();
+
+            foreach (var kv in SkyboxPatchFolderMap)
+            {
+                string fileDestFolder = Path.Combine(rbxStorage, kv.Value);
+                Directory.CreateDirectory(fileDestFolder);
+
+                string destFile = Path.Combine(fileDestFolder, kv.Key);
+
+                try
+                {
+                    string fileUrl = githubBaseUrl + kv.Key;
+                    byte[] fileData = await http.GetByteArrayAsync(fileUrl);
+                    if (File.Exists(destFile))
+                        File.SetAttributes(destFile, FileAttributes.Normal);
+
+                    await File.WriteAllBytesAsync(destFile, fileData);
+                    File.SetAttributes(destFile, FileAttributes.ReadOnly);
+
+                    Console.WriteLine($"Downloaded and patched: {kv.Key}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to process {kv.Key}: {ex.Message}");
+                }
+            }
+        }
+
         private async Task ApplyModifications()
         {
             const string LOG_IDENT = "Bootstrapper::ApplyModifications";
             SetStatus(Strings.Bootstrapper_Status_ApplyingModifications);
-            string localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string robloxClientSettingsFolder = Path.Combine(localAppData, "Roblox", "ClientSettings");
-            string ixpSettingsPath = Path.Combine(robloxClientSettingsFolder, "IxpSettings.json");
-            bool fastFlagBypass = App.Settings.Prop.FastFlagBypass;
 
-            var enforcedSettings = new Dictionary<string, string>
-{
-    { "FStringDebugLuaLogLevel", "trace" },
-    { "FStringDebugLuaLogPattern", "ExpChat/mountClientApp" },
-    { "FFlagPlayerLogsEnabled", "True" },
-    { "FFlagEnablePlayerLogging", "True" }
-};
-            var blockedFlags = new HashSet<string>
-{
-    "FFlagEnableCreatorSubtitleNavigation_v2_IXPValue",
-    "FFlagCarouselUseNewUserTileWithPresenceIcon_IXPValue",
-    "FFlagFilterPurchasePromptInputDispatch_IXPValue",
-    "FFlagRemovePermissionsButtons_IXPValue",
-    "FFlagPlayerListReduceRerenders_IXPValue",
-    "FFlagAvatarEditorPromptsNoPromptNoRender_IXPValue",
-    "FFlagPlayerListClosedNoRenderWithTenFoot_IXPValue",
-    "FFlagUseUserProfileStore4_IXPValue",
-    "FFlagPublishAssetPromptNoPromptNoRender_IXPValue",
-    "FFlagUseNewPlayerList3_IXPValue",
-    "FFlagFixLeaderboardCleanup_IXPValue",
-    "FFlagMoveNewPlayerListDividers_IXPValue",
-    "FFlagFixLeaderboardStatSortTypeMismatch_IXPValue",
-    "FFlagFilterNewPlayerListValueStat_IXPValue",
-    "FFlagUnreduxChatTransparencyV2_IXPValue",
-    "FFlagExpChatRemoveMessagesFromAppContainer_IXPValue",
-    "FFlagChatWindowOnlyRenderMessagesOnce_IXPValue",
-    "FFlagUnreduxLastInputTypeChanged_IXPValue",
-    "FFlagChatWindowSemiRoduxMessages_IXPValue",
-    "FFlagInitializeAutocompleteOnlyIfEnabled_IXPValue",
-    "FFlagChatWindowMessageRemoveState_IXPValue",
-    "FFlagExpChatUseVoiceParticipantsStore2_IXPValue",
-    "FFlagExpChatMemoBillboardGui_IXPValue",
-    "FFlagExpChatRemoveBubbleChatAppUserMessagesState_IXPValue",
-    "FFlagEnableLeaveGameUpsellEntrypoint_IXPValue",
-    "FFlagExpChatUseAdorneeStoreV4_IXPValue",
-    "FFlagEnableChatMicPerfBinding_IXPValue",
-    "FFlagChatOptimizeCommandProcessing_IXPValue",
-    "FFlagMemoizeChatReportingMenu_IXPValue",
-    "FFlagMemoizeChatInputApp_IXPValue",
-    "FFlagProfilePlatformEnableClickToCopyUsername_IXPValue",
-    "FFlagAddNavigationToTryOnPageForCurrentlyWearing2_IXPValue",
-    "FFlagAppChatRemoveUserProfileTitles2_IXPValue",
-    "FFlagMacUnifyKeyCodeMapping_IXPValue",
-    "FFlagAddPriceBelowCurrentlyWearing_IXPValue",
-    "FFlagProfilePlatformEnableEditAvatar_IXPValue",
-    "FFlagEnableNotApprovedPageV2_IXPValue",
-    "FFlagEnableNapIxpLayerExposure_IXPValue"
-};
-            try
-            {
-                Directory.CreateDirectory(robloxClientSettingsFolder);
-
-                var monitorTask = Task.Run(() =>
-                {
-                    Console.WriteLine($"{LOG_IDENT} Monitoring {ixpSettingsPath} until Roblox launches...");
-                    string lastJson = string.Empty;
-
-                    while (true)
-                    {
-                        try
-                        {
-                            if (IsRobloxRunning())
-                            {
-                                Console.WriteLine($"{LOG_IDENT} Roblox detected. Stopping IXP enforcement loop.");
-                                break;
-                            }
-                            if (!Directory.Exists(robloxClientSettingsFolder))
-                                Directory.CreateDirectory(robloxClientSettingsFolder);
-                            if (File.Exists(ixpSettingsPath))
-                                File.SetAttributes(ixpSettingsPath, FileAttributes.Normal);
-
-                            var finalSettings = new Dictionary<string, string>();
-
-                            if (fastFlagBypass)
-                            {
-                                string clientAppSettingsPath = Path.Combine(Paths.Mods, "ClientSettings", "ClientAppSettings.json");
-                                if (File.Exists(clientAppSettingsPath))
-                                {
-                                    string clientAppText = File.ReadAllText(clientAppSettingsPath);
-                                    var clientAppJson = JsonSerializer.Deserialize<Dictionary<string, object>>(clientAppText)
-                                                        ?? new Dictionary<string, object>();
-
-                                    foreach (var kvp in clientAppJson)
-                                    {
-                                        if (!blockedFlags.Contains(kvp.Key))
-                                            finalSettings[kvp.Key] = kvp.Value?.ToString() ?? "";
-                                    }
-                                }
-                            }
-
-                            foreach (var kvp in enforcedSettings)
-                                finalSettings[kvp.Key] = kvp.Value;
-
-                            string updatedJson = JsonSerializer.Serialize(finalSettings, new JsonSerializerOptions { WriteIndented = true });
-
-                            if (updatedJson != lastJson)
-                            {
-                                File.WriteAllText(ixpSettingsPath, updatedJson);
-                                File.SetAttributes(ixpSettingsPath, FileAttributes.ReadOnly);
-                                Console.WriteLine($"{LOG_IDENT} Updated {ixpSettingsPath}");
-                                lastJson = updatedJson;
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"{LOG_IDENT} Error while updating IxpSettings.json: {ex.Message}");
-                        }
-
-                        Thread.Sleep(250);
-                    }
-
-                    Console.WriteLine($"{LOG_IDENT} Monitor task finished.");
-                });
-
-                Console.WriteLine($"{LOG_IDENT} Program running. IXP monitor in background.");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"{LOG_IDENT} Unexpected error: {ex.Message}");
-            }
-
-            static bool IsRobloxRunning()
-            {
-                try
-                {
-                    var processes = Process.GetProcesses();
-                    return processes.Any(p =>
-                    {
-                        string name = p.ProcessName.ToLowerInvariant();
-                        return name.Contains("robloxplayer") || name == "roblox";
-                    });
-                }
-                catch
-                {
-                    return false;
-                }
-            }
             App.Logger.WriteLine(LOG_IDENT, "Checking file mods...");
             File.Delete(Path.Combine(Paths.Base, "ModManifest.txt"));
 
             List<string> modFolderFiles = new();
 
             Directory.CreateDirectory(Paths.Mods);
+            App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Applying SkyboxPatch...");
+
+            string selectedSkybox = App.Settings.Prop.SkyboxName;
+            string selectedFont = App.Settings.Prop.FontName;
+            string modsFolder = Paths.Mods;
+
+            App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Applying Skybox mod and patch...");
+
+            try
+            {
+                await ApplySkyboxPatchToRobloxStorageAsync();
+                await EnsureSkyboxPackDownloadedAsync();
+                await ApplySkyboxAsync(selectedSkybox, modsFolder);
+                App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Skybox mod and patch applied successfully!");
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Failed to apply Skybox mod/patch: " + ex.Message);
+            }
 
             string modFontFamiliesFolder = Path.Combine(Paths.Mods, "content\\fonts\\families");
 
@@ -1951,17 +1944,16 @@ namespace Voidstrap
                 if (_cancelTokenSource.IsCancellationRequested)
                     return;
 
-                // get relative directory path
                 string relativeFile = file.Substring(Paths.Mods.Length + 1);
 
-                // v1.7.0 - README has been moved to the preferences menu now
                 if (relativeFile == "README.txt")
                 {
                     File.Delete(file);
                     continue;
                 }
 
-                if (!App.Settings.Prop.UseFastFlagManager && String.Equals(relativeFile, "ClientSettings\\ClientAppSettings.json", StringComparison.OrdinalIgnoreCase))
+                if (!App.Settings.Prop.UseFastFlagManager &&
+                    String.Equals(relativeFile, "ClientSettings\\ClientAppSettings.json", StringComparison.OrdinalIgnoreCase))
                     continue;
 
                 if (relativeFile.EndsWith(".lock"))
@@ -1972,7 +1964,8 @@ namespace Voidstrap
                 string fileModFolder = Path.Combine(Paths.Mods, relativeFile);
                 string fileVersionFolder = Path.Combine(_latestVersionDirectory, relativeFile);
 
-                if (File.Exists(fileVersionFolder) && MD5Hash.FromFile(fileModFolder) == MD5Hash.FromFile(fileVersionFolder))
+                if (File.Exists(fileVersionFolder) &&
+                    MD5Hash.FromFile(fileModFolder) == MD5Hash.FromFile(fileVersionFolder))
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"{relativeFile} already exists in the version folder, and is a match");
                     continue;
@@ -1987,10 +1980,6 @@ namespace Voidstrap
                 App.Logger.WriteLine(LOG_IDENT, $"{relativeFile} has been copied to the version folder");
             }
 
-            // the manifest is primarily here to keep track of what files have been
-            // deleted from the modifications folder, so that we know when to restore the original files from the downloaded packages
-            // now check for files that have been deleted from the mod folder according to the manifest
-
             var fileRestoreMap = new Dictionary<string, List<string>>();
 
             foreach (string fileLocation in App.State.Prop.ModManifest)
@@ -1998,10 +1987,9 @@ namespace Voidstrap
                 if (modFolderFiles.Contains(fileLocation))
                     continue;
 
-                var packageMapEntry = AppData.PackageDirectoryMap.SingleOrDefault(x => !String.IsNullOrEmpty(x.Value) && fileLocation.StartsWith(x.Value));
+                var packageMapEntry = AppData.PackageDirectoryMap
+                    .SingleOrDefault(x => !String.IsNullOrEmpty(x.Value) && fileLocation.StartsWith(x.Value));
                 string packageName = packageMapEntry.Key;
-
-                // package doesn't exist, likely mistakenly placed file
                 if (String.IsNullOrEmpty(packageName))
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"{fileLocation} was removed as a mod but does not belong to a package");
@@ -2045,7 +2033,7 @@ namespace Voidstrap
 
             try
             {
-                bool isEuroTrucks = File.Exists(Path.Combine(_latestVersionDirectory, "eurotrucks2.exe")) ? true : false;
+                bool isEuroTrucks = File.Exists(Path.Combine(_latestVersionDirectory, "eurotrucks2.exe"));
 
                 if (App.Settings.Prop.RenameClientToEuroTrucks2)
                 {
@@ -2068,10 +2056,8 @@ namespace Voidstrap
             {
                 App.Logger.WriteLine(LOG_IDENT, "Failed to update client! " + ex.Message);
             }
-
-            App.Logger.WriteLine(LOG_IDENT, $"Finished checking file mods");
         }
-
+ 
         private async Task DownloadPackage(Package package)
         {
             string LOG_IDENT = $"Bootstrapper::DownloadPackage.{package.Name}";
@@ -2081,12 +2067,14 @@ namespace Voidstrap
                 return;
 
             Directory.CreateDirectory(Paths.Downloads);
+
             string packageUrl = Deployment.GetLocation($"/{_latestVersionGuid}-{package.Name}");
             if (!packageUrl.StartsWith("https://setup.rbxcdn.com", StringComparison.OrdinalIgnoreCase))
             {
                 App.Logger.WriteLine(LOG_IDENT, $"Warning: Deployment.GetLocation() returned unexpected URL '{packageUrl}'. Forcing setup.rbxcdn.com as base.");
                 packageUrl = $"https://setup.rbxcdn.com/{_latestVersionGuid}-{package.Name}";
             }
+
             string robloxPackageLocation = Path.Combine(Paths.LocalAppData, "Roblox", "Downloads", package.Signature);
             if (File.Exists(package.DownloadPath))
             {
@@ -2120,9 +2108,10 @@ namespace Voidstrap
             }
 
             const int MaxRetries = 10;
-            int BufferSize =
-    int.Parse(App.Settings.Prop.BufferSizeKbte) *
-    int.Parse(App.Settings.Prop.BufferSizeKbtes);
+            const int MaxParallelSegments = 4;
+            const int BufferSize = 1024 * 1024;
+            const long MinMultiPartSize = BufferSize * 4;
+
             var tempFile = package.DownloadPath + ".part";
             if (File.Exists(tempFile))
                 File.Delete(tempFile);
@@ -2145,6 +2134,7 @@ namespace Voidstrap
                     if (!response.IsSuccessStatusCode)
                     {
                         App.Logger.WriteLine(LOG_IDENT, $"Download failed with HTTP {(int)response.StatusCode} {response.ReasonPhrase}");
+
                         if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                         {
                             App.Logger.WriteLine(LOG_IDENT, "Received 403 Forbidden — using setup.rbxcdn.com fallback.");
@@ -2154,40 +2144,51 @@ namespace Voidstrap
                         response.EnsureSuccessStatusCode();
                     }
 
-                    await using var networkStream = await response.Content.ReadAsStreamAsync(_cancelTokenSource.Token);
-                    await using var fileStream = new FileStream(tempFile, FileMode.Create, FileAccess.Write, FileShare.None, BufferSize, useAsync: true);
+                    var contentLength = response.Content.Headers.ContentLength;
+                    bool supportsRanges =
+                        contentLength.HasValue &&
+                        contentLength.Value >= MinMultiPartSize &&
+                        response.Headers.AcceptRanges != null &&
+                        response.Headers.AcceptRanges.Contains("bytes");
+                    if (File.Exists(tempFile))
+                        File.Delete(tempFile);
 
-                    byte[] buffer = ArrayPool<byte>.Shared.Rent(BufferSize);
-                    var sw = Stopwatch.StartNew();
-                    long totalRead = 0;
-                    int read;
-
-                    while ((read = await networkStream.ReadAsync(buffer.AsMemory(0, BufferSize), _cancelTokenSource.Token)) > 0)
+                    if (supportsRanges)
                     {
-                        await fileStream.WriteAsync(buffer.AsMemory(0, read), _cancelTokenSource.Token);
-                        totalRead += read;
-                        _totalDownloadedBytes += read;
-
-                        if (sw.ElapsedMilliseconds > 400)
-                        {
-                            if (isUpdating)
-                            {
-                                UpdateProgressBar();
-                            }
-
-                            sw.Restart();
-                        }
+                        response.Dispose();
+                        await DownloadMultipartAsync(
+                            packageUrl,
+                            tempFile,
+                            contentLength!.Value,
+                            BufferSize,
+                            MaxParallelSegments,
+                            isUpdating,
+                            LOG_IDENT,
+                            _cancelTokenSource.Token
+                        );
+                    }
+                    else
+                    {
+                        await DownloadSingleThreadAsync(
+                            response,
+                            tempFile,
+                            BufferSize,
+                            isUpdating,
+                            LOG_IDENT,
+                            _cancelTokenSource.Token
+                        );
                     }
 
-                    ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
-                    await fileStream.FlushAsync(_cancelTokenSource.Token);
-                    fileStream.Close();
                     string hash = MD5Hash.FromFile(tempFile);
                     if (!hash.Equals(package.Signature, StringComparison.OrdinalIgnoreCase))
                         throw new ChecksumFailedException($"Checksum mismatch for {package.Name}: expected {package.Signature}, got {hash}");
 
                     File.Move(tempFile, package.DownloadPath, true);
-                    App.Logger.WriteLine(LOG_IDENT, $"Download complete ({totalRead:N0} bytes)");
+                    App.Logger.WriteLine(LOG_IDENT, $"Download complete ({package.Name})");
+                    _totalDownloadedBytes += package.PackedSize;
+                    if (isUpdating)
+                        UpdateProgressBar();
+
                     return;
                 }
                 catch (ChecksumFailedException ex)
@@ -2212,16 +2213,212 @@ namespace Voidstrap
                 }
                 catch (Exception ex)
                 {
+                    if (ex is AggregateException agg)
+                        ex = agg.Flatten().InnerException ?? agg;
+
                     App.Logger.WriteLine(LOG_IDENT, $"Download failed ({attempt}/{MaxRetries}): {ex.Message}");
                     if (File.Exists(tempFile)) File.Delete(tempFile);
 
-                    int delay = Math.Min(2000 * attempt, 10000);
-                    await Task.Delay(delay, _cancelTokenSource.Token);
-
                     if (attempt == MaxRetries)
                         throw;
+
+                    int delay = Math.Min(2000 * attempt, 10000);
+                    await Task.Delay(delay, _cancelTokenSource.Token);
                 }
             }
+        }
+        private static async Task DownloadSingleThreadAsync(
+            HttpResponseMessage response,
+            string tempFile,
+            int bufferSize,
+            bool isUpdating,
+            string logIdent,
+            CancellationToken token)
+        {
+            await using var networkStream = await response.Content.ReadAsStreamAsync(token);
+            await using var fileStream = new FileStream(
+                tempFile,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize,
+                FileOptions.Asynchronous | FileOptions.SequentialScan
+            );
+
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+            try
+            {
+                long totalRead = 0;
+                long localDownloaded = 0;
+                var sw = Stopwatch.StartNew();
+                int read;
+
+                while ((read = await networkStream.ReadAsync(buffer.AsMemory(0, bufferSize), token)) > 0)
+                {
+                    await fileStream.WriteAsync(buffer.AsMemory(0, read), token);
+                    totalRead += read;
+                    localDownloaded += read;
+
+                    if (isUpdating && sw.ElapsedMilliseconds >= 400)
+                    {
+                        App.Current.Dispatcher.Invoke(() => {
+                            App.Logger.WriteLine(logIdent, $"Progress: +{localDownloaded:N0} bytes (single-thread)");
+                        });
+
+                        localDownloaded = 0;
+                        sw.Restart();
+                    }
+                }
+
+                App.Logger.WriteLine(logIdent, $"Downloaded {totalRead:N0} bytes (single-threaded)");
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+        private async Task DownloadMultipartAsync(
+            string packageUrl,
+            string tempFile,
+            long contentLength,
+            int bufferSize,
+            int maxParallelSegments,
+            bool isUpdating,
+            string logIdent,
+            CancellationToken token)
+        {
+            const long MinSegmentSize = 2L * 1024 * 1024;
+
+            int segmentCount = (int)Math.Min(
+                maxParallelSegments,
+                Math.Max(1, contentLength / MinSegmentSize)
+            );
+
+            if (segmentCount <= 1)
+            {
+                using var fallbackClient = new HttpClient();
+                using var resp = await fallbackClient.GetAsync(packageUrl, HttpCompletionOption.ResponseHeadersRead, token);
+                await DownloadSingleThreadAsync(resp, tempFile, bufferSize, isUpdating, logIdent, token);
+                return;
+            }
+
+            long baseSegmentSize = contentLength / segmentCount;
+
+            App.Logger.WriteLine(logIdent, $"Using multi-part download: {segmentCount} segments of ~{baseSegmentSize:N0} bytes");
+            using var fileStream = new FileStream(
+                tempFile,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.Read,
+                bufferSize,
+                FileOptions.Asynchronous | FileOptions.RandomAccess
+            );
+            fileStream.SetLength(contentLength);
+
+            object fileLock = new object();
+            long totalRead = 0;
+
+            var tasks = new List<Task>(segmentCount);
+            CancellationTokenSource? progressCts = null;
+            Task progressTask = Task.CompletedTask;
+
+            if (isUpdating)
+            {
+                progressCts = CancellationTokenSource.CreateLinkedTokenSource(token);
+                var progressToken = progressCts.Token;
+
+                progressTask = Task.Run(async () =>
+                {
+                    var sw = Stopwatch.StartNew();
+                    while (!progressToken.IsCancellationRequested)
+                    {
+                        if (sw.ElapsedMilliseconds >= 400)
+                        {
+                            try
+                            {
+                                UpdateProgressBar();
+                            }
+                            catch (Exception ex)
+                            {
+                                App.Logger.WriteLine(logIdent, $"Progress update failed: {ex.Message}");
+                            }
+
+                            sw.Restart();
+                        }
+
+                        await Task.Delay(100, progressToken);
+                    }
+                }, progressToken);
+            }
+
+            for (int i = 0; i < segmentCount; i++)
+            {
+                long start = i * baseSegmentSize;
+                long end = (i == segmentCount - 1)
+                    ? contentLength - 1
+                    : (start + baseSegmentSize - 1);
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Get, packageUrl)
+                    {
+                        Headers = { Range = new RangeHeaderValue(start, end) }
+                    };
+
+                    using var response = await App.HttpClient.SendAsync(
+                        request,
+                        HttpCompletionOption.ResponseHeadersRead,
+                        token
+                    );
+
+                    response.EnsureSuccessStatusCode();
+
+                    await using var networkStream = await response.Content.ReadAsStreamAsync(token);
+                    byte[] buffer = ArrayPool<byte>.Shared.Rent(bufferSize);
+
+                    try
+                    {
+                        long position = start;
+                        int read;
+
+                        while ((read = await networkStream.ReadAsync(buffer.AsMemory(0, bufferSize), token)) > 0)
+                        {
+                            lock (fileLock)
+                            {
+                                fileStream.Position = position;
+                                fileStream.Write(buffer, 0, read);
+                            }
+
+                            position += read;
+
+                            Interlocked.Add(ref totalRead, read);
+                            Interlocked.Add(ref _totalDownloadedBytes, read);
+                        }
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(buffer);
+                    }
+                }, token));
+            }
+
+            try
+            {
+                await Task.WhenAll(tasks);
+                await fileStream.FlushAsync(token);
+            }
+            finally
+            {
+                if (progressCts != null)
+                {
+                    progressCts.Cancel();
+                    try { await progressTask; } catch {}
+                    progressCts.Dispose();
+                }
+            }
+
+            App.Logger.WriteLine(logIdent, $"Downloaded {totalRead:N0} bytes (multi-part)");
         }
 
         private void ExtractPackage(Package package, List<string>? files = null)

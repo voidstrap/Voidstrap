@@ -7,8 +7,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.7.1</Version>
-		<FileVersion>1.0.7.1</FileVersion>
+		<Version>1.0.8.1</Version>
+		<FileVersion>1.0.8.1</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -43,16 +43,10 @@
 	
 
 	<ItemGroup>
-		<None Remove="ThemeImages\GalaxyBackground.jpg" />
-		<None Remove="ThemeImages\GalaxyBB.jpeg" />
-		<None Remove="ThemeImages\GalaxyBB.jpg" />
-		<None Remove="ThemeImages\PureFF.jpg" />
 		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="ThemeImages\GalaxyBB.jpeg" />
-		<Resource Include="ThemeImages\PureFF.jpg" />
 		<Resource Include="Voidstrap.ico" />
 		<Resource Include="Resources\Checkmark.ico" />
 		<Resource Include="Resources\CrossMark.ico" />
@@ -139,8 +133,10 @@
 		</PackageReference>
 		<PackageReference Include="NAudio" Version="2.2.1" />
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
+		<PackageReference Include="SharpCompress" Version="0.42.1" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
+		<PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
 		<PackageReference Include="System.Management" Version="9.0.9" />
 		<PackageReference Include="System.Net.Http" Version="4.3.4" />
 		<PackageReference Include="System.Resources.ResourceManager" Version="4.3.0" />

@@ -47,7 +47,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             _viewModel.OpenFlagEditorEvent += OpenFlagEditor;
             _viewModel.RequestPageReloadEvent += (_, _) => SetupViewModel();
-
             DataContext = _viewModel;
         }
 

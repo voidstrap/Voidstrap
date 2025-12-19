@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Voidstrap.Integrations;
 using Windows.Win32;
@@ -38,6 +39,21 @@ namespace Voidstrap.UI.Elements.ContextMenu
         private TimeSpan playTime = TimeSpan.Zero;
         private DispatcherTimer playTimer;
 
+        private static string TrimWithThreeDots(string text, int maxChars = 18)
+        {
+            if (string.IsNullOrEmpty(text) || text.Length <= maxChars)
+                return text;
+
+            const string dots = "...";
+            int take = maxChars - dots.Length;
+
+            if (take <= 0)
+                return dots;
+
+            return text.Substring(0, take) + dots;
+        }
+
+
         public MenuContainer(Watcher watcher)
         {
             InitializeComponent();
@@ -62,6 +78,52 @@ namespace Voidstrap.UI.Elements.ContextMenu
             VersionTextBlock.Text = $"{App.ProjectName} v{App.Version}";
         }
 
+        public void UpdateCurrentGameInfo(string gameName, string gameIconUrl)
+        {
+            if (string.IsNullOrEmpty(gameName))
+            {
+                CurrentGameMenuItem.Visibility = Visibility.Collapsed;
+                CurrentGameIcon.Source = null;
+                CurrentGameNameTextBlock.Text = "";
+                return;
+            }
+
+            CurrentGameMenuItem.Visibility = Visibility.Visible;
+
+            if (!string.IsNullOrEmpty(gameIconUrl))
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(gameIconUrl);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                CurrentGameIcon.Source = bitmap;
+            }
+            else
+            {
+                CurrentGameIcon.Source = null;
+            }
+            CurrentGameNameTextBlock.Text = TrimWithThreeDots(gameName);
+        }
+        private async Task UpdateCurrentGameIconAsync(ActivityData data)
+        {
+            string universeName = data.UniverseDetails?.Data.Name ?? $"Place {data.PlaceId}";
+            string? iconUrl = data.UniverseDetails?.Thumbnail.ImageUrl;
+
+            if (iconUrl == null && data.UniverseDetails == null)
+            {
+                try
+                {
+                    await UniverseDetails.FetchSingle(data.UniverseId);
+                    data.UniverseDetails = UniverseDetails.LoadFromCache(data.UniverseId);
+                    iconUrl = data.UniverseDetails?.Thumbnail.ImageUrl;
+                    universeName = data.UniverseDetails?.Data.Name ?? universeName;
+                }
+                catch {}
+            }
+            Dispatcher.Invoke(() => UpdateCurrentGameInfo(universeName, iconUrl));
+        }
+
         public void ShowServerInformationWindow()
         {
             if (_serverInformationWindow is null)
@@ -84,7 +146,8 @@ namespace Voidstrap.UI.Elements.ContextMenu
             if (_activityWatcher is null)
                 return;
 
-            Dispatcher.Invoke(() => {
+            Dispatcher.Invoke(() =>
+            {
                 if (_activityWatcher.Data.ServerType == ServerType.Public)
                     InviteDeeplinkMenuItem.Visibility = Visibility.Visible;
 
@@ -97,6 +160,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                     ChatLogsMenuItem.Visibility = Visibility.Visible;
                 }
             });
+            _ = UpdateCurrentGameIconAsync(_activityWatcher.Data);
         }
 
         public void ActivityWatcher_OnGameLeave(object? sender, EventArgs e)
@@ -116,6 +180,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 }
 
                 _serverInformationWindow?.Close();
+                UpdateCurrentGameInfo(null, null);
             });
         }
 

@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
+using static Voidstrap.UI.Elements.Settings.Pages.FastFlagEditorPage;
 
 namespace Voidstrap.Models
 {
@@ -38,6 +40,27 @@ namespace Voidstrap.Models
         {
             get => _index;
             set { _index = value; OnPropertyChanged(); }
+        }
+
+        public ObservableCollection<string> Tags => FastFlagTagHelper.GetTags(Name);
+        private const int MaxVisibleTags = 3;
+
+        public ObservableCollection<string> VisibleTags
+        {
+            get
+            {
+                var visible = new ObservableCollection<string>();
+                if (Tags.Count <= MaxVisibleTags)
+                {
+                    foreach (var t in Tags) visible.Add(t);
+                }
+                else
+                {
+                    for (int i = 0; i < MaxVisibleTags; i++) visible.Add(Tags[i]);
+                    visible.Add($"+{Tags.Count - MaxVisibleTags}");
+                }
+                return visible;
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

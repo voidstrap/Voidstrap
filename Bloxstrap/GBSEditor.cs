@@ -30,7 +30,6 @@ namespace Voidstrap
 
         public bool Loaded { get; private set; } = false;
 
-        // ✅ Fixed invalid interpolated string syntax and environment variable usage
         public string FileLocation => Path.Combine(
             Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Roblox",

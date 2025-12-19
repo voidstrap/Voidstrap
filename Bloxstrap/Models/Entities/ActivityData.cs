@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -16,19 +17,22 @@ namespace Voidstrap.Models.Entities
     {
         private long _universeId = 0;
         public ActivityData? RootActivity;
+
         public long UniverseId
         {
             get => _universeId;
             set
             {
                 _universeId = value;
-                UniverseDetails.LoadFromCache(value);
+                UniverseDetails = UniverseDetails.LoadFromCache(value);
             }
         }
+
         #region Display Properties
         public string DisplayTimeJoined { get; private set; } = "Unknown";
         public string DisplayTimeLeft { get; private set; } = "Unknown";
         public string ServerStatus { get; private set; } = "Offline";
+
         public void ComputeDisplayTimes()
         {
             DisplayTimeJoined = TimeJoined != default
@@ -42,6 +46,8 @@ namespace Voidstrap.Models.Entities
             ServerStatus = online ? "Online" : "Offline";
         }
         #endregion
+
+        #region Existing Classes
         public class UserLog
         {
             public string UserId { get; set; } = "Unknown";
@@ -49,11 +55,15 @@ namespace Voidstrap.Models.Entities
             public string Type { get; set; } = "Unknown";
             public DateTime Time { get; set; } = DateTime.Now;
         }
+
         public class UserMessage
         {
             public string Message { get; set; } = "Unknown";
             public DateTime Time { get; set; } = DateTime.Now;
         }
+        #endregion
+
+        #region Core Properties
         public long PlaceId { get; set; } = 0;
         public string JobId { get; set; } = string.Empty;
         public string AccessCode { get; set; } = string.Empty;
@@ -67,6 +77,11 @@ namespace Voidstrap.Models.Entities
         public DateTime? TimeLeft { get; set; }
         public string RPCLaunchData { get; set; } = string.Empty;
         public UniverseDetails? UniverseDetails { get; set; }
+        public Dictionary<int, UserLog> PlayerLogs { get; internal set; } = new();
+        public Dictionary<int, UserMessage> MessageLogs { get; internal set; } = new();
+        #endregion
+
+        #region Derived Properties & Commands
         public string GameHistoryDescription
         {
             get
@@ -85,10 +100,13 @@ namespace Voidstrap.Models.Entities
                 return desc;
             }
         }
+
         public ICommand RejoinServerCommand => new RelayCommand(RejoinServer);
-        public Dictionary<int, UserLog> PlayerLogs { get; internal set; } = new();
-        public Dictionary<int, UserMessage> MessageLogs { get; internal set; } = new();
+        #endregion
+
+        #region Server Methods
         private SemaphoreSlim serverQuerySemaphore = new(1, 1);
+
         public string GetInviteDeeplink(bool launchData = true)
         {
             string deeplink = $"https://www.roblox.com/games/start?placeId={PlaceId}";
@@ -102,36 +120,33 @@ namespace Voidstrap.Models.Entities
 
             return deeplink;
         }
+
         public async Task<string?> QueryServerLocation()
         {
             const string LOG_IDENT = "ActivityData::QueryServerLocation";
 
             if (!MachineAddressValid)
                 throw new InvalidOperationException($"Machine address is invalid ({MachineAddress})");
+
             await serverQuerySemaphore.WaitAsync();
             if (GlobalCache.ServerLocation.TryGetValue(MachineAddress, out string? cachedLocation))
             {
                 serverQuerySemaphore.Release();
                 return cachedLocation;
             }
+
             string? location = null;
             try
             {
                 var ipInfo = await Http.GetJson<IPInfoResponse>($"https://ipinfo.io/{MachineAddress}/json");
                 if (string.IsNullOrEmpty(ipInfo.Country))
                     throw new InvalidHTTPResponseException("Reported country was blank");
+
                 string flag = CountryCodeToFlagEmoji(ipInfo.Country);
-                if (!string.IsNullOrEmpty(ipInfo.City))
-                {
-                    if (ipInfo.City == ipInfo.Region)
-                        location = $"{ipInfo.Region}, {flag}";
-                    else
-                        location = $"{ipInfo.City}, {ipInfo.Region}, {flag}";
-                }
-                else
-                {
-                    location = $"{ipInfo.Country} {flag}";
-                }
+
+                location = !string.IsNullOrEmpty(ipInfo.City)
+                    ? (ipInfo.City == ipInfo.Region ? $"{ipInfo.Region}, {flag}" : $"{ipInfo.City}, {ipInfo.Region}, {flag}")
+                    : $"{ipInfo.Country} {flag}";
 
                 GlobalCache.ServerLocation[MachineAddress] = location;
             }
@@ -140,6 +155,7 @@ namespace Voidstrap.Models.Entities
                 App.Logger.WriteLine(LOG_IDENT, $"Failed to get server location for {MachineAddress}");
                 App.Logger.WriteException(LOG_IDENT, ex);
                 GlobalCache.ServerLocation[MachineAddress] = location;
+
                 Frontend.ShowConnectivityDialog(
                     string.Format(Strings.Dialog_Connectivity_UnableToConnect, "ipinfo.io"),
                     Strings.ActivityWatcher_LocationQueryFailed,
@@ -154,22 +170,23 @@ namespace Voidstrap.Models.Entities
 
             return location;
         }
+
         private static string CountryCodeToFlagEmoji(string countryCode)
         {
             if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2)
                 return string.Empty;
+
             int offset = 0x1F1E6 - 'A';
-            var emoji = string.Concat(
-                countryCode.ToUpper().Select(c => char.ConvertFromUtf32(c + offset))
-            );
-            return emoji;
+            return string.Concat(countryCode.ToUpper().Select(c => char.ConvertFromUtf32(c + offset)));
         }
+
         public override string ToString() => $"{PlaceId}/{JobId}";
+
         private void RejoinServer()
         {
             string playerPath = new RobloxPlayerData().ExecutablePath;
             Process.Start(playerPath, GetInviteDeeplink(false));
         }
+        #endregion
     }
 }
-

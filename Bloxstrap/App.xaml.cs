@@ -10,14 +10,12 @@ using System.Windows.Media.Animation;
 using System.Windows.Shell;
 using System.Windows.Threading;
 using Voidstrap.Integrations;
+using Voidstrap.UI.Elements.Bootstrapper;
 using Voidstrap.UI.ViewModels.ContextMenu;
 using Wpf.Ui.Hardware;
 
 namespace Voidstrap
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
 #if QA_BUILD
@@ -72,6 +70,7 @@ namespace Voidstrap
         public static readonly GBSEditor GlobalSettings = new();
         private static readonly MD5 mD5 = MD5.Create();
         private static MD5? _md5Provider = mD5;
+        private CancellationTokenSource? _memoryTrimCts;
 
         private static HttpClient? _httpClient;
         public static HttpClient HttpClient => _httpClient ??= new HttpClient(
@@ -192,14 +191,13 @@ namespace Voidstrap
             }
         }
 
-        protected override void OnStartup(StartupEventArgs e)
+        protected override async void OnStartup(StartupEventArgs e)
         {
             const string LOG_IDENT = "App::OnStartup";
 
             Locale.Initialize();
             base.OnStartup(e);
             Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
-
             string userAgent = $"{ProjectName}/{Version}";
 
             if (IsActionBuild)
@@ -322,6 +320,7 @@ namespace Voidstrap
                 RobloxState.Load();
                 FastFlags.Load();
                 Settings.Load();
+                TrimTimer();
 
                 var rpcVm = new RPCCustomizerViewModel();
                 if (rpcVm.AutoStartRpc && !string.IsNullOrWhiteSpace(rpcVm.ApplicationId))
@@ -352,11 +351,43 @@ namespace Voidstrap
                 if (!LaunchSettings.BypassUpdateCheck)
                     Installer.HandleUpgrade();
 
-                WindowsRegistry.RegisterApis(); // we want to register those early on
-                                                // so we wont have any issues with bloxshade
-
+                WindowsRegistry.RegisterApis();
                 LaunchHandler.ProcessLaunchArgs();
             }
+        }
+
+        private void TrimTimer()
+        {
+            _memoryTrimCts = new CancellationTokenSource();
+            CancellationToken token = _memoryTrimCts.Token;
+
+            Task.Run(async () =>
+            {
+                while (!token.IsCancellationRequested)
+                {
+                    try
+                    {
+                        if (DiscordClient != null)
+                        {
+                            GC.Collect();
+                            GC.WaitForPendingFinalizers();
+                            GC.Collect();
+#if NET5_0_OR_GREATER
+                            System.Runtime.GCSettings.LargeObjectHeapCompactionMode =
+                                System.Runtime.GCLargeObjectHeapCompactionMode.CompactOnce;
+                            GC.Collect();
+#endif
+                            Logger.WriteLine("App::MemoryTrim", "Memory trimmed successfully (background).");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.WriteException("App::MemoryTrim", ex);
+                    }
+
+                    await Task.Delay(TimeSpan.FromSeconds(5), token);
+                }
+            }, token);
         }
 
         protected override void OnExit(ExitEventArgs e)

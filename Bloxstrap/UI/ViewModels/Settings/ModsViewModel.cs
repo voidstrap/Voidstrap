@@ -1,15 +1,16 @@
-﻿using Voidstrap.AppData;
-using CommunityToolkit.Mvvm.Input;
+﻿using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
 using System;
 using System.Collections.ObjectModel;
+using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Xml.Linq;
 using Voidstrap;
+using Voidstrap.AppData;
 using Voidstrap.UI.ViewModels;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -56,6 +57,76 @@ namespace Voidstrap.UI.ViewModels.Settings
             OnPropertyChanged(nameof(ChooseCustomFontVisibility));
             OnPropertyChanged(nameof(DeleteCustomFontVisibility));
         }
+
+        public ObservableCollection<SkyboxPack> AvailableSkyboxPacks { get; } = new();
+
+        public class SkyboxPack
+        {
+            public string Name { get; set; } = "";
+            public Uri? DownloadUri { get; set; }
+
+            public override string ToString() => Name;
+        }
+
+        private static readonly string RepoRoot = "https://api.github.com/repos/KloBraticc/SkyboxPackV2/contents";
+        private readonly HttpClient _http = new HttpClient();
+
+        public async Task LoadSkyboxPacksFromGithub()
+        {
+            _http.DefaultRequestHeaders.UserAgent.ParseAdd("VoidstrapSkyboxClient");
+
+            AvailableSkyboxPacks.Clear();
+
+            var response = await _http.GetFromJsonAsync<JsonElement[]>(RepoRoot);
+            if (response == null) return;
+            var folders = response
+                .Where(e => e.GetProperty("type").GetString() == "dir")
+                .Select(e => e.GetProperty("name").GetString()!)
+                .ToList();
+
+            if (folders.Contains("Default"))
+            {
+                AvailableSkyboxPacks.Add(new SkyboxPack
+                {
+                    Name = "Default",
+                    DownloadUri = new Uri("https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip#Default")
+                });
+            }
+            foreach (var name in folders.Where(f => !f.Equals("Default", StringComparison.OrdinalIgnoreCase)))
+            {
+                AvailableSkyboxPacks.Add(new SkyboxPack
+                {
+                    Name = name,
+                    DownloadUri = new Uri($"https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip#{name}")
+                });
+            }
+            var selected = AvailableSkyboxPacks.FirstOrDefault(s =>
+                s.Name.Equals(App.Settings.Prop.SkyboxName, StringComparison.OrdinalIgnoreCase))
+                ?? AvailableSkyboxPacks.First();
+
+            SelectedSkyboxPack = selected;
+            App.Settings.Prop.SkyboxName = selected.Name;
+        }
+
+        private SkyboxPack? _selectedSkyboxPack;
+        public SkyboxPack? SelectedSkyboxPack
+        {
+            get => _selectedSkyboxPack;
+            set
+            {
+                if (_selectedSkyboxPack != value)
+                {
+                    _selectedSkyboxPack = value;
+                    OnPropertyChanged(nameof(SelectedSkyboxPack));
+
+                    if (_selectedSkyboxPack != null)
+                    {
+                        App.Settings.Prop.SkyboxName = _selectedSkyboxPack.Name;
+                    }
+                }
+            }
+        }
+
 
         public ICommand OpenModsFolderCommand => new RelayCommand(OpenModsFolder);
 
@@ -141,7 +212,17 @@ namespace Voidstrap.UI.ViewModels.Settings
             }}
         });
 
+        public bool Fullbright
+        {
+            get => App.Settings.Prop.Fullbright;
+            set => App.Settings.Prop.Fullbright = value;
+        }
 
+        public bool SkyboxEnabled
+        {
+            get => App.Settings.Prop.SkyBoxDataSending;
+            set => App.Settings.Prop.SkyBoxDataSending = value;
+        }
 
         public FontModPresetTask TextFontTask { get; } = new();
 
@@ -166,6 +247,9 @@ namespace Voidstrap.UI.ViewModels.Settings
 
                 string integrationsPath = Paths.Integrations;
                 string backupFolderName = "OriginalTextures";
+                bool IsBrdfLUT(string file) =>
+                    Path.GetFileNameWithoutExtension(file)
+                        .Equals("brdfLUT", StringComparison.OrdinalIgnoreCase);
 
                 void MoveFiles(string sourceDir, string destDir)
                 {
@@ -174,62 +258,74 @@ namespace Voidstrap.UI.ViewModels.Settings
 
                     foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
                     {
+                        if (IsBrdfLUT(file))
+                            continue;
+
                         string relativePath = Path.GetRelativePath(sourceDir, file);
                         string destPath = Path.Combine(destDir, relativePath);
+
                         Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
                         File.Move(file, destPath, true);
                     }
                 }
-
                 void CleanDirectory(string dir)
                 {
-                    if (!Directory.Exists(dir)) return;
+                    if (!Directory.Exists(dir))
+                        return;
 
-                    foreach (var subDir in Directory.GetDirectories(dir))
-                        Directory.Delete(subDir, true);
+                    foreach (var file in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
+                    {
+                        if (IsBrdfLUT(file))
+                            continue;
 
-                    foreach (var file in Directory.GetFiles(dir))
                         File.Delete(file);
+                    }
+                    foreach (var subDir in Directory.GetDirectories(dir, "*", SearchOption.AllDirectories)
+                                                   .OrderByDescending(d => d.Length))
+                    {
+                        if (!Directory.EnumerateFileSystemEntries(subDir).Any())
+                            Directory.Delete(subDir);
+                    }
                 }
+
                 var versionFolders = Directory.GetDirectories(versionsPath)
-                                              .Where(d => Path.GetFileName(d).StartsWith("version-"))
-                                              .ToArray();
+                                              .Where(d => Path.GetFileName(d).StartsWith("version-"));
 
                 foreach (var versionFolder in versionFolders)
                 {
                     string pcPath = Path.Combine(versionFolder, "PlatformContent", "pc", "textures");
-                    string backupPath = Path.Combine(integrationsPath, backupFolderName, Path.GetFileName(versionFolder));
+                    string backupPath = Path.Combine(
+                        integrationsPath,
+                        backupFolderName,
+                        Path.GetFileName(versionFolder)
+                    );
 
                     if (!Directory.Exists(pcPath))
                         continue;
 
                     if (enableDarkTextures)
                     {
-                        if (!Directory.Exists(backupPath))
-                            Directory.CreateDirectory(backupPath);
-
+                        Directory.CreateDirectory(backupPath);
                         MoveFiles(pcPath, backupPath);
                         CleanDirectory(pcPath);
                     }
-                    else
+                    else if (Directory.Exists(backupPath))
                     {
-                        if (Directory.Exists(backupPath))
-                        {
-                            CleanDirectory(pcPath);
-                            MoveFiles(backupPath, pcPath);
-                        }
+                        CleanDirectory(pcPath);
+                        MoveFiles(backupPath, pcPath);
                     }
                 }
 
                 Console.WriteLine(enableDarkTextures
-                    ? "All textures removed and backed up for all version-* folders."
-                    : "Original textures restored from backup for all version-* folders.");
+                    ? "Textures removed (brdfLUT preserved)."
+                    : "Textures restored (brdfLUT preserved).");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error applying textures: {ex.Message}");
             }
         }
+
 
         private Visibility GetVisibility(string directory, string[] filenames, bool checkExist)
         {
@@ -471,10 +567,9 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public ModsViewModel()
         {
+            _ = LoadSkyboxPacksFromGithub();
             LoadCustomCursorSets();
-
             LoadCursorPathsForSelectedSet();
-
             NotifyCursorVisibilities();
         }
         #endregion

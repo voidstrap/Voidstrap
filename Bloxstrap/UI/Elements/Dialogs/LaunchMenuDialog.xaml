@@ -79,7 +79,7 @@
 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                     <ui:Hyperlink Icon="QuestionCircle48" Content="{x:Static resources:Strings.About_Title}" Command="{Binding LaunchAboutCommand, Mode=OneTime}" />
-                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/bsR6EbZmvX" HorizontalAlignment="Center" />
+                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/bzdbHHytFR" HorizontalAlignment="Center" />
                 </StackPanel>
 
 
@@ -159,7 +159,7 @@
                     Width="285"
                     Margin="0,10,0,0"
                     Command="models:GlobalViewModel.OpenWebpageCommand"
-                    CommandParameter="https://github.com/BloxstrapLabs/Bloxstrap/wiki/"
+                    CommandParameter="https://bloxstraplabs.com/wiki/"
                     Icon="BookQuestionMark24"
                     IconFilled="False"
                     TabIndex="2">

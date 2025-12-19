@@ -137,7 +137,6 @@
             <ui:ToggleSwitch IsChecked="{Binding ForceRobloxReinstallation, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <!--  Roblox Updates Toggle  -->
         <controls:OptionControl Description="When disabled, Roblox won't update to newer versions." Header="Roblox updates">
             <controls:OptionControl.Style>
                 <Style TargetType="controls:OptionControl">
@@ -155,6 +154,20 @@
         <controls:OptionControl Description="Uses Nvidia Profile Inspector Filters that Optimize Roblox." Header="Nvidia Filters">
             <ui:ToggleSwitch IsChecked="{Binding PotatoQuality, Mode=TwoWay}" />
         </controls:OptionControl>
+
+        <controls:OptionControl
+    Header="Resolution Changer"
+    Description="Select a resolution for your primary monitor">
+
+            <StackPanel>
+                <ComboBox
+    ItemsSource="{Binding AvailableResolutions}"
+    SelectedItem="{Binding SelectedResolution, Mode=TwoWay}"
+    DisplayMemberPath="DisplayName"
+    Width="220"/>
+            </StackPanel>
+        </controls:OptionControl>
+
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>

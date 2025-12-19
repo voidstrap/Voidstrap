@@ -28,17 +28,11 @@ public static class SystemInfo
         public ushort wProcessorRevision;
     }
 
-    // Import the GetSystemInfo function from kernel32.dll
     [DllImport("kernel32.dll")]
     private static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
-
-    // Method to get the number of logical processors
     public static int GetLogicalProcessorCount()
     {
-        // Call the Windows API to get system information
         GetSystemInfo(out SYSTEM_INFO systemInfo);
-
-        // Return the number of logical processors
         return (int)systemInfo.dwNumberOfProcessors;
     }
 }
@@ -89,13 +83,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public bool EnableFastFlagBypass
-        {
-            get => App.Settings.Prop.FastFlagBypass;
-            set => App.Settings.Prop.FastFlagBypass = value;
-        }
-
-        public bool GoogleToggle
+		public bool GoogleToggle
         {
             get => string.Equals(App.FastFlags.GetPreset("VoiceChat.VoiceChat1"), "False", StringComparison.OrdinalIgnoreCase);
             set

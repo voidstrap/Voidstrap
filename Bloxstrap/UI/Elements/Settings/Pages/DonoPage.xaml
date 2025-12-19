@@ -1,0 +1,105 @@
+﻿<ui:UiPage x:Class="Voidstrap.UI.Elements.Settings.Pages.DonoPage"
+           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+           xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+           xmlns:local="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
+           xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+           mc:Ignorable="d"
+           d:DesignHeight="600"
+           d:DesignWidth="800"
+           Title="Donations"
+           Scrollable="True">
+
+    <StackPanel Margin="12">
+
+        <controls:Expander HeaderIcon="Gift24"
+                           HeaderText="Donation Info"
+                           IsExpanded="True">
+
+            <StackPanel Margin="8">
+                <controls:MarkdownTextBlock MarkdownText="**Why Dono?**" Margin="0,0,0,6"/>
+                <controls:MarkdownTextBlock
+                    MarkdownText="My projects are not about money, so I will never force you to pay. I have never received money from any of my projects!"
+                    Margin="0,0,0,6"/>
+                <controls:MarkdownTextBlock
+                    MarkdownText="This page exists so you can support me through Voidstrap giveaways in the Discord server or in general."
+                    Margin="0,0,0,6"/>
+                <controls:MarkdownTextBlock
+                    MarkdownText="All donations are voluntary and highly appreciated ❤️"/>
+            </StackPanel>
+
+        </controls:Expander>
+
+        <WrapPanel HorizontalAlignment="Center"
+                   Margin="0,16,0,8">
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1634970203">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 50R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1635786271">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 300R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1635148417">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 1000R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1635666786">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 1500R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+        </WrapPanel>
+
+        <controls:MarkdownTextBlock
+            MarkdownText="All donations go to the group so they can be handed out faster and smoother!"
+            TextAlignment="Center"
+            Margin="0,8,0,0"/>
+
+        <TextBlock TextAlignment="Center" Margin="0,8,0,0" FontSize="12">
+        <Hyperlink Command="{Binding OpenUrlCommand}" 
+                   CommandParameter="https://www.roblox.com/groups/36100411">
+            Join our Roblox Group!
+        </Hyperlink>
+        </TextBlock>
+
+    </StackPanel>
+</ui:UiPage>

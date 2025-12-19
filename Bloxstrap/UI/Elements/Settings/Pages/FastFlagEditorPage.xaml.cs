@@ -1,20 +1,20 @@
-﻿using System.Windows;
+﻿using Microsoft.Win32;
+using System.Collections.ObjectModel;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
-using System.Collections.ObjectModel;
-
-using Wpf.Ui.Mvvm.Contracts;
-
-using Voidstrap.UI.Elements.Dialogs;
-using Microsoft.Win32;
-using System.Windows.Media.Animation;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Threading;
-using Voidstrap.UI.Elements.Settings.Pages;
-using Voidstrap;
-using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
+using Voidstrap;
+using Voidstrap.UI.Elements.Dialogs;
+using Voidstrap.UI.Elements.Settings.Pages;
+using Wpf.Ui.Mvvm.Contracts;
+using static ICSharpCode.SharpZipLib.Zip.ExtendedUnixData;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -41,8 +41,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCStudioApp.json",
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCDesktopClient",
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/refs/heads/roblox/FVariables.txt",
-    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/PCDesktopClient.json",
-    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/FVariablesV2.json",
+    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/FVariablesV2.json", // credits to scroom not froststrap
     "https://clientsettings.roblox.com/v2/settings/application/PCDesktopClient"
         };
 
@@ -51,6 +50,50 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             InitializeComponent();
             SetDefaultStates();
             HistoryListBox.ItemsSource = _flagHistory;
+        }
+
+        public static class FastFlagTagHelper
+        {
+            public static ObservableCollection<string> GetTags(string name)
+            {
+                var tags = new ObservableCollection<string>();
+                if (string.IsNullOrEmpty(name))
+                {
+                    tags.Add("Unknown");
+                    return tags;
+                }
+
+                name = name.ToLowerInvariant();
+
+                if (name.Contains("perf") || name.Contains("fps") || name.Contains("frame") || name.Contains("frm") ||
+                    name.Contains("render") || name.Contains("thread") || name.Contains("graphics"))
+                    tags.Add("Performance");
+
+                if (name.Contains("fix") || name.Contains("debug") ||
+                    name.Contains("crash") || name.Contains("stability"))
+                    tags.Add("Fix");
+
+                if (name.Contains("experimental") || name.Contains("test") || name.Contains("task") ||
+                    name.Contains("beta"))
+                    tags.Add("Experimental");
+
+                if (name.Contains("graphics") || name.Contains("render") || name.Contains("quality") ||
+    name.Contains("gpu") || name.Contains("shader") || name.Contains("postfx") ||
+    name.Contains("texture") || name.Contains("blur") || name.Contains("voxel") || name.Contains("detail") || name.Contains("lighting"))
+                    tags.Add("Graphics");
+
+                if (name.Contains("distance") || name.Contains("level") || name.Contains("lod"))
+                    tags.Add("LOD");
+
+                if (name.Contains("ui") || name.Contains("ux") ||
+                    name.Contains("menu") || name.Contains("title") || name.Contains("interface"))
+                    tags.Add("UI");
+
+                if (tags.Count == 0)
+                    tags.Add("Unknown");
+
+                return tags;
+            }
         }
 
         private async Task LoadKnownFlagsAsync()
@@ -151,7 +194,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 ? crashRate.ToString("0")
                 : crashRate.ToString("0.##");
 
-            CrashRateTextBlock.Text = $"Crash: {formattedCrashRate}%";
+            CrashRateTextBlock.Text = $"Bloat: {formattedCrashRate}%";
         }
 
         public class FlagHistoryEntry

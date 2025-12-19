@@ -1,8 +1,6 @@
 ﻿<!--
-    This Source Code Form is subject to the terms of the MIT License.
-    If a copy of the MIT was not distributed with this file, You can obtain one at https://opensource.org/licenses/MIT.
-    Copyright (C) Leszek Pomianowski and WPF UI Contributors.
-    All Rights Reserved.
+    MIT License
+    Copyright (C) Leszek Pomianowski
 -->
 
 <ResourceDictionary
@@ -10,53 +8,64 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Wpf.Ui.Controls">
 
-    <Style x:Key="UiDynamicScrollViewer" TargetType="{x:Type controls:DynamicScrollViewer}">
+    <Style x:Key="UiDynamicScrollViewer"
+           TargetType="{x:Type controls:DynamicScrollViewer}">
         <Setter Property="Margin" Value="0" />
         <Setter Property="Padding" Value="0" />
         <Setter Property="VerticalScrollBarVisibility" Value="Auto" />
         <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
         <Setter Property="SnapsToDevicePixels" Value="True" />
         <Setter Property="OverridesDefaultStyle" Value="True" />
+        <Setter Property="Background" Value="Transparent" />
+
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type controls:DynamicScrollViewer}">
-                    <Grid>
+                    <Grid
+                        SnapsToDevicePixels="True"
+                        Background="{TemplateBinding Background}">
+
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
+
                         <Grid.RowDefinitions>
                             <RowDefinition Height="*" />
                             <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
 
-
                         <Border
                             Grid.Row="0"
-                            Grid.RowSpan="2"
                             Grid.Column="0"
-                            Grid.ColumnSpan="2"
-                            Padding="{TemplateBinding Padding}">
-                            <ScrollContentPresenter CanContentScroll="{TemplateBinding CanContentScroll}" />
+                            Padding="{TemplateBinding Padding}"
+                            Background="Transparent"
+                            SnapsToDevicePixels="True">
+
+                            <ScrollContentPresenter
+                                CanContentScroll="{TemplateBinding CanContentScroll}"
+                                SnapsToDevicePixels="True" />
                         </Border>
 
                         <controls:DynamicScrollBar
                             x:Name="PART_VerticalScrollBar"
                             Grid.Row="0"
                             Grid.Column="1"
+                            Margin="0"
                             IsScrolling="{TemplateBinding IsScrollingVertically}"
                             Maximum="{TemplateBinding ScrollableHeight}"
                             ViewportSize="{TemplateBinding ViewportHeight}"
                             Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"
                             Value="{TemplateBinding VerticalOffset}" />
-
+                        
                         <controls:DynamicScrollBar
                             x:Name="PART_HorizontalScrollBar"
                             Grid.Row="1"
                             Grid.Column="0"
+                            Margin="0"
+                            Orientation="Horizontal"
                             IsScrolling="{TemplateBinding IsScrollingHorizontally}"
                             Maximum="{TemplateBinding ScrollableWidth}"
-                            Orientation="Horizontal"
                             ViewportSize="{TemplateBinding ViewportWidth}"
                             Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"
                             Value="{TemplateBinding HorizontalOffset}" />
@@ -66,6 +75,7 @@
         </Setter>
     </Style>
 
-    <Style BasedOn="{StaticResource UiDynamicScrollViewer}" TargetType="{x:Type controls:DynamicScrollViewer}" />
+    <Style BasedOn="{StaticResource UiDynamicScrollViewer}"
+           TargetType="{x:Type controls:DynamicScrollViewer}" />
 
 </ResourceDictionary>

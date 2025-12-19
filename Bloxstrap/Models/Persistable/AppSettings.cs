@@ -59,11 +59,13 @@ namespace Voidstrap.Models.Persistable
         public string Locale { get; set; } = "nil";
         public string BufferSizeKbte { get; set; } = "1024";
         public string BufferSizeKbtes { get; set; } = "2048";
+        public string SkyboxName { get; set; } = "Default";
+        public string FontName { get; set; } = "Default";
+        public bool SkyBoxDataSending { get; set; } = false;
+        public bool GameWIP { get; set; } = false;
         public bool ForceRobloxLanguage { get; set; } = true;
-        public bool FastFlagBypass { get; set; } = false;
 
         // Analytics & Tracking
-
         public bool DarkTextures { get; set; } = false;
         public bool EnableActivityTracking { get; set; } = true;
         public bool OverClockCPU { get; set; } = false;
@@ -72,6 +74,8 @@ namespace Voidstrap.Models.Persistable
 
         public string DownloadingStringFormat { get; set; } = Strings.Bootstrapper_Status_Downloading + " {0} - {1}MB / {2}MB";
         public bool ConnectCloset { get; set; } = false;
+
+        public bool Fullbright { get; set; } = false;
 
         public bool GameIconChecked { get; set; } = true;
         public bool ServerLocationGame { get; set; } = false;

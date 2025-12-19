@@ -22,8 +22,6 @@ namespace Voidstrap.Integrations
         private const string GameLeavingEntry = "[FLog::SingleSurfaceApp] leaveUGCGameInternal";
         private const string GamePlayerJoinLeaveEntry = "[ExpChat/mountClientApp (Trace)] - Player ";
         private const string GameMessageLogEntry = "[ExpChat/mountClientApp (Debug)] - Incoming MessageReceived Status: ";
-
-        // Patterns
         private const string GameJoiningEntryPattern = @"! Joining game '([0-9a-f\-]{36})' place ([0-9]+) at ([0-9\.]+)";
         private const string GameJoiningPrivateServerPattern = @"""accessCode"":""([0-9a-f\-]{36})""";
         private const string GameJoiningUniversePattern = @"universeid:([0-9]+).*userid:([0-9]+)";
@@ -140,7 +138,6 @@ namespace Voidstrap.Integrations
                 }
             }
 
-            // ---- Game joining ----
             if (!InGame && Data.PlaceId == 0)
             {
                 if (entry.Contains(GameJoiningPrivateServerEntry))
@@ -159,7 +156,7 @@ namespace Voidstrap.Integrations
 
                     InGame = false;
                     Data.PlaceId = long.Parse(match.Groups[2].Value);
-                    Data.JobId = match.Groups[1].Value; // ✅ Real Roblox server UUID
+                    Data.JobId = match.Groups[1].Value;
                     Data.MachineAddress = match.Groups[3].Value;
 
                     if (_teleportMarker)
@@ -177,7 +174,7 @@ namespace Voidstrap.Integrations
                     App.Logger.WriteLine(LOG_IDENT, $"Joining Game ({Data.JobId})");
                 }
             }
-            // ---- Game joining details ----
+
             else if (!InGame && Data.PlaceId != 0)
             {
                 if (entry.Contains(GameJoiningUniverseEntry))
@@ -207,8 +204,6 @@ namespace Voidstrap.Integrations
                 }
                 else if (entry.Contains(GameJoinedEntry))
                 {
-                    // ✅ Updated: we no longer parse the "serverId" log line
-                    // We trust the JobId parsed earlier.
                     App.Logger.WriteLine(LOG_IDENT, $"Confirmed game join (JobId = {Data.JobId})");
 
                     InGame = true;
@@ -216,7 +211,7 @@ namespace Voidstrap.Integrations
                     OnGameJoin?.Invoke(this, EventArgs.Empty);
                 }
             }
-            // ---- In-game ----
+
             else if (InGame && Data.PlaceId != 0)
             {
                 if (entry.Contains(GameDisconnectedEntry))

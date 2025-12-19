@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -56,18 +55,22 @@ namespace Voidstrap.UI.ViewModels.Settings
 
             _http = new HttpClient(handler)
             {
-                Timeout = TimeSpan.FromSeconds(8)
+                Timeout = TimeSpan.FromSeconds(15)
             };
-            _http.DefaultRequestHeaders.UserAgent.Add(
-                new ProductInfoHeaderValue("Voidstrap", "1.0"));
-            _ = SafeRefreshAsync();
+            _http.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Voidstrap", "1.0"));
 
+            _ = SafeRefreshAsync();
             _timer = new DispatcherTimer
             {
                 Interval = TimeSpan.FromSeconds(30)
             };
-            _timer.Tick += async (_, __) => await SafeRefreshAsync();
+            _timer.Tick += Timer_Tick;
             _timer.Start();
+        }
+
+        private async void Timer_Tick(object? sender, EventArgs e)
+        {
+            await SafeRefreshAsync();
         }
 
         [RelayCommand]
@@ -95,9 +98,9 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (!await _loadLock.WaitAsync(0))
                 return;
 
-            _cts.Cancel();
-            _cts.Dispose();
+            var oldCts = _cts;
             _cts = new CancellationTokenSource();
+            oldCts.Cancel();
 
             try
             {
@@ -106,6 +109,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             catch (OperationCanceledException) { }
             finally
             {
+                oldCts.Dispose();
                 _loadLock.Release();
             }
         }
@@ -163,40 +167,46 @@ namespace Voidstrap.UI.ViewModels.Settings
                     throw new InvalidOperationException("No news data available (network and cache unavailable).");
 
                 var items = ParseNews(json);
+                bool hasNewContent = !NewsItems.Select(n => n.Title).SequenceEqual(items.Select(i => i.Title));
 
-                foreach (var item in items)
+                if (!hasNewContent && fromCache)
+                {
+                    await SetLoadingAsync(false, $"Last updated: {DateTime.Now:G} (no new items)");
+                    return;
+                }
+
+                var imageTasks = items.Select(async item =>
                 {
                     ct.ThrowIfCancellationRequested();
 
                     if (string.IsNullOrWhiteSpace(item.ImageUrl))
-                        continue;
+                        return;
 
                     if (!Uri.TryCreate(item.ImageUrl, UriKind.Absolute, out var uri))
-                        continue;
+                        return;
 
                     var fileName = SanitizeFileName(Path.GetFileName(uri.LocalPath) ?? $"img_{Guid.NewGuid():N}.bin");
                     var localPath = Path.Combine(BasePath, fileName);
 
                     try
                     {
-                        if (!File.Exists(localPath) && !fromCache)
+                        if (!File.Exists(localPath) || !fromCache)
                         {
                             var data = await _http.GetByteArrayAsync(uri, ct);
                             await SafeWriteAllBytesAsync(localPath, data, ct);
                         }
 
-                        if (File.Exists(localPath))
-                        {
-                            var bmp = LoadLocalImage(localPath);
-                            if (bmp != null)
-                                item.Image = bmp;
-                        }
+                        var bmp = await LoadLocalImageAsync(localPath, ct);
+                        if (bmp != null)
+                            item.Image = bmp;
                     }
                     catch (Exception ex)
                     {
                         Debug.WriteLine($"[ImageLoad ERROR] {ex}");
                     }
-                }
+                });
+
+                await Task.WhenAll(imageTasks);
 
                 await OnUiAsync(() =>
                 {
@@ -245,9 +255,7 @@ namespace Voidstrap.UI.ViewModels.Settings
                     NullValueHandling = NullValueHandling.Ignore
                 };
 
-                var dtos = arr.ToObject<NewsItemDto[]>(
-                    Newtonsoft.Json.JsonSerializer.Create(settings)
-                ) ?? Array.Empty<NewsItemDto>();
+                var dtos = arr.ToObject<NewsItemDto[]>(Newtonsoft.Json.JsonSerializer.Create(settings)) ?? Array.Empty<NewsItemDto>();
 
                 static DateTime ParseDate(string? s) =>
                     DateTime.TryParse(s, null, System.Globalization.DateTimeStyles.AdjustToUniversal, out var d)
@@ -277,7 +285,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         private static async Task<string> SafeReadAllTextAsync(string path, CancellationToken ct)
         {
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true);
             using var sr = new StreamReader(fs);
             ct.ThrowIfCancellationRequested();
             return await sr.ReadToEndAsync();
@@ -285,7 +293,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         private static async Task SafeWriteAllTextAsync(string path, string content, CancellationToken ct)
         {
-            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
             using var sw = new StreamWriter(fs);
             ct.ThrowIfCancellationRequested();
             await sw.WriteAsync(content.AsMemory(), ct);
@@ -293,30 +301,45 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         private static async Task SafeWriteAllBytesAsync(string path, byte[] content, CancellationToken ct)
         {
-            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None);
+            using var fs = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
             ct.ThrowIfCancellationRequested();
             await fs.WriteAsync(content.AsMemory(0, content.Length), ct);
         }
 
-        private static BitmapImage? LoadLocalImage(string path)
+        private static async Task<byte[]> SafeReadAllBytesAsync(string path, CancellationToken ct)
+        {
+            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite, 4096, true);
+            var buffer = new byte[fs.Length];
+            int bytesRead = 0;
+            while (bytesRead < buffer.Length)
+            {
+                ct.ThrowIfCancellationRequested();
+                bytesRead += await fs.ReadAsync(buffer.AsMemory(bytesRead, buffer.Length - bytesRead), ct);
+            }
+            return buffer;
+        }
+
+        private static async Task<BitmapImage?> LoadLocalImageAsync(string path, CancellationToken ct)
         {
             try
             {
-                byte[] data = File.ReadAllBytes(path);
-                using var ms = new MemoryStream(data);
-
-                var bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.CacheOption = BitmapCacheOption.OnLoad;
-                bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
-                bmp.StreamSource = ms;
-                bmp.EndInit();
-                bmp.Freeze();
-                return bmp;
+                var data = await SafeReadAllBytesAsync(path, ct);
+                return await Task.Run(() =>
+                {
+                    using var ms = new MemoryStream(data);
+                    var bmp = new BitmapImage();
+                    bmp.BeginInit();
+                    bmp.CacheOption = BitmapCacheOption.OnLoad;
+                    bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                    bmp.StreamSource = ms;
+                    bmp.EndInit();
+                    bmp.Freeze();
+                    return bmp;
+                }, ct);
             }
             catch (Exception ex)
             {
-                Debug.WriteLine($"[LoadLocalImage ERROR] {ex.Message}");
+                Debug.WriteLine($"[LoadLocalImageAsync ERROR] {ex}");
                 return null;
             }
         }

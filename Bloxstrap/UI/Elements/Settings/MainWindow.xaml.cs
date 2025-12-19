@@ -1,13 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
+using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using Voidstrap.Integrations;
 using Voidstrap.UI.Elements.Dialogs;
 using Voidstrap.UI.ViewModels.Settings;
 using Wpf.Ui.Common;
@@ -46,14 +49,14 @@ namespace Voidstrap.UI.Elements.Settings
                 _ = ShowAlreadyRunningSnackbarAsync();
         }
 
-        private void MainWindow_Loaded(object? sender, RoutedEventArgs e)
+
+        private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
-            InitializeNavigation();
+           InitializeNavigation();
             if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
             {
                 InitSnow();
                 _snowTimer.Start();
-
                 if (SnowCanvas != null)
                     SnowCanvas.Visibility = Visibility.Visible;
             }
@@ -62,6 +65,9 @@ namespace Voidstrap.UI.Elements.Settings
                 if (SnowCanvas != null)
                     SnowCanvas.Visibility = Visibility.Collapsed;
             }
+
+            await Dispatcher.InvokeAsync(() => { }, System.Windows.Threading.DispatcherPriority.Loaded);
+
             var storyboard = TryFindResource("IntroStoryboard") as Storyboard;
             if (storyboard != null)
             {
@@ -70,7 +76,9 @@ namespace Voidstrap.UI.Elements.Settings
                     IntroOverlay.Visibility = Visibility.Collapsed;
                     IntroOverlay.Opacity = 1.0;
                 };
-                storyboard.Begin();
+
+                IntroOverlay.Visibility = Visibility.Visible;
+                storyboard.Begin(IntroOverlay, true);
             }
             else
             {
@@ -99,25 +107,23 @@ namespace Voidstrap.UI.Elements.Settings
         private const int FlakeCount = 60;
         private void InitSnow()
         {
-            if (SnowCanvas == null)
-                return;
-
-            SnowCanvas.Children.Clear();
-            _snowflakes.Clear();
+            if (SnowCanvas == null) return;
 
             double width = SnowCanvas.ActualWidth;
             double height = SnowCanvas.ActualHeight;
 
             if (width <= 0 || height <= 0)
-            {
-                width = ActualWidth;
-                height = ActualHeight;
-            }
+                return;
+
+            if (_snowflakes.Count == FlakeCount)
+                return;
+
+            _snowflakes.Clear();
+            SnowCanvas.Children.Clear();
 
             for (int i = 0; i < FlakeCount; i++)
             {
                 double size = _snowRandom.Next(2, 6);
-
                 var ellipse = new Ellipse
                 {
                     Width = size,
@@ -125,10 +131,9 @@ namespace Voidstrap.UI.Elements.Settings
                     Fill = Brushes.White,
                     Opacity = _snowRandom.NextDouble() * 0.6 + 0.3
                 };
-
                 SnowCanvas.Children.Add(ellipse);
 
-                var flake = new Snowflake
+                _snowflakes.Add(new Snowflake
                 {
                     Shape = ellipse,
                     X = _snowRandom.NextDouble() * width,
@@ -136,21 +141,13 @@ namespace Voidstrap.UI.Elements.Settings
                     SpeedY = 0.7 + _snowRandom.NextDouble() * 1.5,
                     DriftX = -0.3 + _snowRandom.NextDouble() * 0.6,
                     Size = size
-                };
-
-                Canvas.SetLeft(ellipse, flake.X);
-                Canvas.SetTop(ellipse, flake.Y);
-
-                _snowflakes.Add(flake);
+                });
             }
         }
 
         private void UpdateSnow()
         {
-            if (SnowCanvas == null ||
-                SnowCanvas.ActualWidth <= 0 ||
-                SnowCanvas.ActualHeight <= 0)
-                return;
+            if (SnowCanvas == null) return;
 
             double width = SnowCanvas.ActualWidth;
             double height = SnowCanvas.ActualHeight;
@@ -158,20 +155,12 @@ namespace Voidstrap.UI.Elements.Settings
             for (int i = 0; i < _snowflakes.Count; i++)
             {
                 var flake = _snowflakes[i];
-
                 flake.Y += flake.SpeedY;
                 flake.X += flake.DriftX;
 
-                if (flake.Y > height + flake.Size)
-                {
-                    flake.Y = -flake.Size;
-                    flake.X = _snowRandom.NextDouble() * width;
-                }
-
-                if (flake.X < -flake.Size)
-                    flake.X = width + flake.Size;
-                else if (flake.X > width + flake.Size)
-                    flake.X = -flake.Size;
+                if (flake.Y > height + flake.Size) flake.Y = -flake.Size;
+                if (flake.X < -flake.Size) flake.X = width + flake.Size;
+                else if (flake.X > width + flake.Size) flake.X = -flake.Size;
 
                 Canvas.SetLeft(flake.Shape, flake.X);
                 Canvas.SetTop(flake.Shape, flake.Y);
@@ -195,7 +184,6 @@ namespace Voidstrap.UI.Elements.Settings
             base.OnDeactivated(e);
             _snowTimer.Stop();
         }
-
 
         private sealed class Snowflake
         {
@@ -232,7 +220,6 @@ namespace Voidstrap.UI.Elements.Settings
                     : "Install";
         }
 
-
         private void InitializeWindowState()
         {
             if (_state.Left > SystemParameters.VirtualScreenWidth || _state.Top > SystemParameters.VirtualScreenHeight)
@@ -261,9 +248,7 @@ namespace Voidstrap.UI.Elements.Settings
             RootNavigation.Navigated += SaveNavigation;
         }
 
-
         #endregion
-
         #region Snackbar Events
 
         private void OnRequestSaveNotice(object? sender, EventArgs e)
@@ -285,9 +270,7 @@ namespace Voidstrap.UI.Elements.Settings
                 Dispatcher.InvokeAsync(() => AlreadyRunningSnackbar?.Show());
         }
 
-
         #endregion
-
         #region ViewModel Events
 
         private async void OnRequestCloseWindow(object? sender, EventArgs e)
@@ -352,10 +335,10 @@ namespace Voidstrap.UI.Elements.Settings
 
         #region Placeholder Events
 
-        // TODO: Implement these handlers or remove if unused
         private void NavigationItem_Click(object sender, RoutedEventArgs e) { }
         private void NavigationItem_Click_1(object sender, RoutedEventArgs e) { }
-        private void Button_Click(object sender, RoutedEventArgs e) { }
+
+
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
         }
