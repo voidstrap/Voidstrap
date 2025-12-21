@@ -280,6 +280,9 @@ namespace Voidstrap
                     mutex = null;
                 }
             }
+            
+            if (App.Settings.Prop.ExclusiveFullscreen)
+                 Task.Run(() => RobloxFullscreen.WaitAndTriggerFullscreen());
 
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {

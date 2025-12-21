@@ -62,6 +62,7 @@ namespace Voidstrap.Models.Persistable
         public string SkyboxName { get; set; } = "Default";
         public string FontName { get; set; } = "Default";
         public bool SkyBoxDataSending { get; set; } = false;
+        public bool ExclusiveFullscreen { get; set; } = false;
         public bool GameWIP { get; set; } = false;
         public bool ForceRobloxLanguage { get; set; } = true;
 

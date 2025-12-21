@@ -161,6 +161,11 @@
             FontWeight="Bold"
             Text="{x:Static resources:Strings.Common_Miscellaneous}" />
 
+                    <!--  Exclusive Fullscreen  -->
+                    <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
+                        <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
+                    </controls:OptionControl>
+
                     <!--  Custom Font Option  -->
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Description}" Header="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Title}">
                         <StackPanel>

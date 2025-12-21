@@ -224,6 +224,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.SkyBoxDataSending = value;
         }
 
+        public bool ExclusiveFullscreen
+        {
+            get => App.Settings.Prop.ExclusiveFullscreen;
+            set => App.Settings.Prop.ExclusiveFullscreen = value;
+        }
+
         public FontModPresetTask TextFontTask { get; } = new();
 
         private void OpenCompatSettings()
