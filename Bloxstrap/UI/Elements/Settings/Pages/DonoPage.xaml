@@ -19,7 +19,7 @@
                            IsExpanded="True">
 
             <StackPanel Margin="8">
-                <controls:MarkdownTextBlock MarkdownText="**Why Dono?**" Margin="0,0,0,6"/>
+                <controls:MarkdownTextBlock MarkdownText="**Why Donate?**" Margin="0,0,0,6"/>
                 <controls:MarkdownTextBlock
                     MarkdownText="My projects are not about money, so I will never force you to pay. I have never received money from any of my projects!"
                     Margin="0,0,0,6"/>
