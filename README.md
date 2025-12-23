@@ -45,6 +45,14 @@
     style="border-radius: 12px; box-shadow: 0 0 12px #4d3dff;"
   >
 </a>
+<a href="https://voidstrap.app" target="_blank" rel="noopener noreferrer" aria-label="Visit our website">
+  <img
+    src="https://img.shields.io/badge/Website-voidstrap.app-8f2bff?style=for-the-badge&logo=google-chrome&logoColor=white"
+    alt="Website Badge"
+    style="border-radius: 12px; box-shadow: 0 0 12px #8f2bff;"
+  >
+</a>
+
 
 </p>
 
