@@ -119,6 +119,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.FastFlags.SetPreset("UI.RainbowText", value ? "True" : null);
         }
 
+        public bool LockDefault
+        {
+            get => App.Settings.Prop.LockDefault;
+            set => App.Settings.Prop.LockDefault = value;
+        }
+
         private static readonly string[] LODLevels = { "L0", "L12", "L23", "L34" };
 
         public bool FRMQualityOverrideEnabled

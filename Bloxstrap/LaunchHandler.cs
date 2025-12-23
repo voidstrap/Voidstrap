@@ -255,7 +255,7 @@ namespace Voidstrap
 
             App.Logger.WriteLine(LOG_IDENT, "Initializing bootstrapper");
             App.Bootstrapper = new Bootstrapper(launchMode);
-
+            
             IBootstrapperDialog? dialog = null;
             if (!App.LaunchSettings.QuietFlag.Active)
             {
@@ -280,6 +280,12 @@ namespace Voidstrap
                     mutex = null;
                 }
             }
+
+            if (App.Settings.Prop.ExclusiveFullscreen)
+                Task.Run(() => RobloxFullscreen.WaitAndTriggerFullscreen());
+            
+            if (App.Settings.Prop.EnableLuaScripting)
+                Task.Run(() => LuaScriptManager.WaitForRobloxAndExecuteScript());
 
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {

@@ -79,9 +79,8 @@
 
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center">
                     <ui:Hyperlink Icon="QuestionCircle48" Content="{x:Static resources:Strings.About_Title}" Command="{Binding LaunchAboutCommand, Mode=OneTime}" />
-                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/bzdbHHytFR" HorizontalAlignment="Center" />
+                    <ui:Hyperlink Icon="Chat48" Content="Discord Server" NavigateUri="https://discord.gg/X3CRTP66VG" HorizontalAlignment="Center" />
                 </StackPanel>
-
 
                 <!--  About Link  -->
                 <StackPanel Grid.Row="1" HorizontalAlignment="Center" />
@@ -159,20 +158,20 @@
                     Width="285"
                     Margin="0,10,0,0"
                     Command="models:GlobalViewModel.OpenWebpageCommand"
-                    CommandParameter="https://bloxstraplabs.com/wiki/"
-                    Icon="BookQuestionMark24"
+                    CommandParameter="https://voidstrap.app"
+                    Icon="WindowInprivateAccount20"
                     IconFilled="False"
                     TabIndex="2">
                     <StackPanel>
                         <TextBlock
                             FontSize="14"
-                            Text="{x:Static resources:Strings.LaunchMenu_Wiki_Title}" />
+                            Text="Website" />
                         <TextBlock
                             Margin="0,2,0,0"
                             Padding="0,0,16,0"
                             FontSize="12"
                             Foreground="Gray"
-                            Text="{x:Static resources:Strings.LaunchMenu_Wiki_Description}" />
+                            Text="Create a Voidstrap Account." />
                     </StackPanel>
                 </ui:CardAction>
             </StackPanel>

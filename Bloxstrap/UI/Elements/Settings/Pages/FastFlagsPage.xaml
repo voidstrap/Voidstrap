@@ -6,6 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
+    xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:settings="clr-namespace:Voidstrap.UI.ViewModels.Settings"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
@@ -58,6 +59,13 @@
             Header="{x:Static resources:Strings.Menu_FastFlags_ManagerEnabled_Title}">
             <ui:ToggleSwitch IsChecked="{Binding UseFastFlagManager, Mode=TwoWay}" />
         </controls:OptionControl>
+
+        <controls:OptionControl 
+    Description="Locks FFlags to default values mostly used for Comp and Ternys." 
+    Header="Lock FFlags">
+            <ui:ToggleSwitch IsChecked="{Binding LockDefault, Mode=TwoWay}" />
+        </controls:OptionControl>
+
 
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Reset_Title}">
             <ui:ToggleSwitch IsChecked="{Binding ResetConfiguration, Mode=TwoWay}" />
@@ -527,6 +535,7 @@ Margin="8,0,8,0" />
                 </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
+
         <TextBlock
             Margin="0,16,0,0"
             FontSize="17.65"

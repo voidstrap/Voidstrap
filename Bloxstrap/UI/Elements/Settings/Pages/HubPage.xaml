@@ -36,7 +36,6 @@
         PlaceholderText="Search Releases..."
         TextChanged="SearchBox_TextChanged" />
 
-        <!-- Releases below (row 1) -->
         <ScrollViewer
         Grid.Row="1"
         VerticalScrollBarVisibility="Auto"

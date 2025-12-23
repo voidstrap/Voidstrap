@@ -224,6 +224,18 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.SkyBoxDataSending = value;
         }
 
+        public bool DarkTextures2
+        {
+            get => App.Settings.Prop.DarkTextures2;
+            set => App.Settings.Prop.DarkTextures2 = value;
+        }
+
+        public bool EnableLuaScripting
+        {
+            get => App.Settings.Prop.EnableLuaScripting;
+            set => App.Settings.Prop.EnableLuaScripting = value;
+        }
+
         public FontModPresetTask TextFontTask { get; } = new();
 
         private void OpenCompatSettings()

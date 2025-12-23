@@ -1,7 +1,13 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.SharpZipLib.Zip;
+//#define ENABLE_ROSLYN
+
+using CommunityToolkit.Mvvm.Input;
+using ICSharpCode.SharpZipLib.Zip;
+#if ENABLE_ROSLYN
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+#endif
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -341,6 +347,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             try
             {
+#if ENABLE_ROSLYN
                 var assembly = CompileCSharp(PluginCsCode);
                 if (assembly == null) return;
 
@@ -367,12 +374,17 @@ namespace Voidstrap.UI.ViewModels.Settings
 
                 LoadedPlugins.Add(plugin);
                 SelectedPlugin = plugin;
+#else
+                Frontend.ShowMessageBox("Plugin compilation is currently disabled to reduce application size.");
+#endif
             }
             catch (Exception ex)
             {
                 Frontend.ShowMessageBox($"Error loading plugin: {ex.Message}");
             }
         }
+
+#if ENABLE_ROSLYN
         private Assembly CompileCSharp(string code)
         {
             try
@@ -409,6 +421,8 @@ namespace Voidstrap.UI.ViewModels.Settings
                 return null;
             }
         }
+#endif
+
         #endregion
 
         #region Plugin Save / Load

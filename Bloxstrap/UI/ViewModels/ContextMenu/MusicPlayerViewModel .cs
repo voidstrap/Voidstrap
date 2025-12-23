@@ -43,6 +43,7 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
         public ObservableCollection<TrackItem> FilteredMusicLibrary { get; set; } = new();
         public RelayCommand<TrackItem> DownloadCommand { get; }
 
+
         private void OnDownload(TrackItem track)
         {
             if (track == null || string.IsNullOrEmpty(track.FilePath) || !File.Exists(track.FilePath))
@@ -72,18 +73,33 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             }
         }
 
-        private void UpdateFilteredLibrary()
-        {
-            var query = SearchQuery?.ToLower() ?? string.Empty;
-            var filtered = MusicLibrary
-                .Where(t => (t.Title?.ToLower().Contains(query) ?? false)
-                         || (t.Artist?.ToLower().Contains(query) ?? false))
-                .ToList();
+private CancellationTokenSource? _searchCts;
+private void UpdateFilteredLibrary()
+{
+    _searchCts?.Cancel();
+    _searchCts = new CancellationTokenSource();
+    var token = _searchCts.Token;
+    var query = SearchQuery?.ToLower() ?? string.Empty;
 
-            FilteredMusicLibrary.Clear();
-            foreach (var item in filtered)
-                FilteredMusicLibrary.Add(item);
+    Task.Run(() =>
+    {
+        var filtered = MusicLibrary
+            .Where(t => (t.Title?.ToLower().Contains(query) ?? false)
+                     || (t.Artist?.ToLower().Contains(query) ?? false))
+            .ToList();
+
+        if (!token.IsCancellationRequested)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                FilteredMusicLibrary.Clear();
+                foreach (var item in filtered)
+                    FilteredMusicLibrary.Add(item);
+            });
         }
+    }, token);
+}
+
 
         private static readonly MediaPlayer _player = new();
         private static bool _playerInitialized;

@@ -1,14 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
+		<DebugType>none</DebugType>
+		<DebugSymbols>false</DebugSymbols>
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.8.1</Version>
-		<FileVersion>1.0.8.1</FileVersion>
+		<Version>1.0.8.2</Version>
+		<FileVersion>1.0.8.2</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -27,8 +29,15 @@
 
 		<!-- Optimization -->
 		<PublishTrimmed>false</PublishTrimmed>
-		<PublishReadyToRun>false</PublishReadyToRun>
-		<EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+		<PublishReadyToRun>true</PublishReadyToRun>
+		<TieredCompilation>true</TieredCompilation>
+		<TieredCompilationQuickJit>true</TieredCompilationQuickJit>
+		<TieredPGO>true</TieredPGO>
+		
+		<!-- Startup Speed -->
+		<OptimizeImplicitlyTriggeredBuild>true</OptimizeImplicitlyTriggeredBuild>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		
 		<DebugType>None</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 	</PropertyGroup>
@@ -123,15 +132,15 @@
 		<PackageReference Include="AvalonEdit" Version="6.3.1.120" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
-		<PackageReference Include="Dropbox.Api" Version="7.0.0" />
 		<PackageReference Include="Markdig" Version="0.42.0" />
-		<PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" />
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3537.50" />
+		<!-- <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" /> -->
+
 		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.205">
 			<!--<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>-->
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NLua" Version="1.7.3" />
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
 		<PackageReference Include="SharpCompress" Version="0.42.1" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />
@@ -143,8 +152,8 @@
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.10" />
 		<PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
 		<PackageReference Include="XamlAnimatedGif" Version="2.3.1" />
-		<PackageReference Include="YoutubeExplode" Version="6.5.5" />
-		<PackageReference Include="YoutubeExplode.Converter" Version="6.5.5" />
+		<!-- <PackageReference Include="YoutubeExplode" Version="6.5.5" />
+		<PackageReference Include="YoutubeExplode.Converter" Version="6.5.5" /> -->
 	</ItemGroup>
 
 	<ItemGroup>

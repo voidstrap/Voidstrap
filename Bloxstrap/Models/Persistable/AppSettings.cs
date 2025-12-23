@@ -61,7 +61,13 @@ namespace Voidstrap.Models.Persistable
         public string BufferSizeKbtes { get; set; } = "2048";
         public string SkyboxName { get; set; } = "Default";
         public string FontName { get; set; } = "Default";
+        public string LastServerSave { get; set; } = "112757576021097";
         public bool SkyBoxDataSending { get; set; } = false;
+
+        public bool DarkTextures2 { get; set; } = false;
+
+        public bool ExclusiveFullscreen { get; set; } = false;
+        public bool LockDefault { get; set; } = false;
         public bool GameWIP { get; set; } = false;
         public bool ForceRobloxLanguage { get; set; } = true;
 
@@ -110,5 +116,8 @@ namespace Voidstrap.Models.Persistable
         public bool IsGameEnabled { get; set; } = false;
         public bool IsBetterServersEnabled { get; set; } = false;
         public bool OverClockGPU { get; set; } = false;
+        
+        // Lua Scripting
+        public bool EnableLuaScripting { get; set; } = false;
     }
 }

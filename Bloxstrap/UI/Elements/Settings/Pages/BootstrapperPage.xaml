@@ -50,6 +50,10 @@
             Message="{x:Static resources:Strings.Menu_Behaviour_AnselBanner}"
             Severity="Informational" />
 
+        <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
+            <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
+        </controls:OptionControl>
+
         <!-- Multi-instance Option -->
         <controls:OptionControl 
             x:Name="AllowMultipleInstancesOption"

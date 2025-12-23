@@ -28,6 +28,7 @@ namespace Voidstrap.UI.Elements.Settings
         private readonly Random _snowRandom = new();
         private readonly List<Snowflake> _snowflakes = new();
         private readonly DispatcherTimer _snowTimer;
+        private readonly DispatcherTimer _visibilityTimer = new DispatcherTimer();
 
         public MainWindow(bool showAlreadyRunningWarning)
         {
@@ -35,6 +36,10 @@ namespace Voidstrap.UI.Elements.Settings
             InitializeViewModel();
             InitializeWindowState();
             UpdateButtonContent();
+            // shi finna be laggy :sob:
+            _visibilityTimer.Interval = TimeSpan.FromSeconds(0.8);
+            _visibilityTimer.Tick += (s, e) => UpdateFastFlagEditorVisibility();
+            _visibilityTimer.Start();
             _snowTimer = new DispatcherTimer(DispatcherPriority.Background)
             {
                 Interval = TimeSpan.FromMilliseconds(50)
@@ -49,6 +54,17 @@ namespace Voidstrap.UI.Elements.Settings
                 _ = ShowAlreadyRunningSnackbarAsync();
         }
 
+        private void UpdateFastFlagEditorVisibility()
+        {
+            if (FastFlagEditorNavItem == null)
+                return;
+
+            var shouldBeVisible = !App.Settings.Prop.LockDefault;
+            if (FastFlagEditorNavItem.Visibility == (shouldBeVisible ? Visibility.Visible : Visibility.Collapsed))
+                return;
+
+            FastFlagEditorNavItem.Visibility = shouldBeVisible ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
@@ -341,10 +357,32 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            // Save Lua script when Save button is clicked
+            SaveLuaScript();
         }
 
 
         private void Button_Click_2(object sender, RoutedEventArgs e) { }
+
+        private void SaveLuaScript()
+        {
+            try
+            {
+                // Find the ModsPage in the navigation
+                var modsPage = RootNavigation?.Items
+                    .OfType<Wpf.Ui.Controls.NavigationItem>()
+                    .FirstOrDefault(item => item.PageType == typeof(Pages.ModsPage));
+
+                if (modsPage != null && RootFrame.Content is Pages.ModsPage page)
+                {
+                    page.SaveCurrentLuaScript();
+                }
+            }
+            catch (Exception ex)
+            {
+                App.Logger?.WriteLine("MainWindow::SaveLuaScript", $"Error saving Lua script: {ex.Message}");
+            }
+        }
 
         #endregion
     }

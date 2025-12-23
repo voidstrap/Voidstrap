@@ -38,13 +38,21 @@
          alt="Stars Badge"
          style="border-radius: 12px; box-shadow: 0 0 12px #FFD700;">
   </a>
-<a href="https://discord.gg/WNbdjP36" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord server">
+<a href="https://discord.gg/dfA9PdWgcV" target="_blank" rel="noopener noreferrer" aria-label="Join our Discord server">
   <img
     src="https://img.shields.io/discord/1327967202015580223?style=for-the-badge&logo=discord&logoColor=white&label=Discord&color=4d3dff"
     alt="Discord Badge"
     style="border-radius: 12px; box-shadow: 0 0 12px #4d3dff;"
   >
 </a>
+<a href="https://voidstrap.app" target="_blank" rel="noopener noreferrer" aria-label="Visit our website">
+  <img
+    src="https://img.shields.io/badge/Website-voidstrap.app-8f2bff?style=for-the-badge&logo=google-chrome&logoColor=white"
+    alt="Website Badge"
+    style="border-radius: 12px; box-shadow: 0 0 12px #8f2bff;"
+  >
+</a>
+
 
 </p>
 

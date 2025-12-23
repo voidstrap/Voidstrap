@@ -19,7 +19,7 @@
                            IsExpanded="True">
 
             <StackPanel Margin="8">
-                <controls:MarkdownTextBlock MarkdownText="**Why Dono?**" Margin="0,0,0,6"/>
+                <controls:MarkdownTextBlock MarkdownText="**Why Donate?**" Margin="0,0,0,6"/>
                 <controls:MarkdownTextBlock
                     MarkdownText="My projects are not about money, so I will never force you to pay. I have never received money from any of my projects!"
                     Margin="0,0,0,6"/>
@@ -37,6 +37,19 @@
 
             <Button Height="100" Width="200" Margin="8"
                     Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1640060086">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 25R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
                     CommandParameter="https://www.roblox.com/game-pass/1634970203">
                 <StackPanel>
                     <Image Height="50"
@@ -49,6 +62,19 @@
             </Button>
 
             <Button Height="100" Width="200" Margin="8"
+        Command="{Binding OpenUrlCommand}"
+        CommandParameter="https://www.roblox.com/game-pass/1640713700">
+                <StackPanel>
+                    <Image Height="50"
+               Stretch="Uniform"
+               Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 80R"
+                   HorizontalAlignment="Center"
+                   Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
                     Command="{Binding OpenUrlCommand}"
                     CommandParameter="https://www.roblox.com/game-pass/1635786271">
                 <StackPanel>
@@ -56,6 +82,19 @@
                            Stretch="Uniform"
                            Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
                     <TextBlock Text="Donate 300R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1640123943">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 500R"
                                HorizontalAlignment="Center"
                                Margin="0,6,0,0"/>
                 </StackPanel>
@@ -82,6 +121,19 @@
                            Stretch="Uniform"
                            Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
                     <TextBlock Text="Donate 1500R"
+                               HorizontalAlignment="Center"
+                               Margin="0,6,0,0"/>
+                </StackPanel>
+            </Button>
+
+            <Button Height="100" Width="200" Margin="8"
+                    Command="{Binding OpenUrlCommand}"
+                    CommandParameter="https://www.roblox.com/game-pass/1640153823">
+                <StackPanel>
+                    <Image Height="50"
+                           Stretch="Uniform"
+                           Source="https://www.pngall.com/wp-content/uploads/17/Roblox-Cash-Icon-Illustration-PNG.png"/>
+                    <TextBlock Text="Donate 2000R"
                                HorizontalAlignment="Center"
                                Margin="0,6,0,0"/>
                 </StackPanel>

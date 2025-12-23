@@ -321,7 +321,6 @@ namespace Voidstrap
                 FastFlags.Load();
                 Settings.Load();
                 TrimTimer();
-
                 var rpcVm = new RPCCustomizerViewModel();
                 if (rpcVm.AutoStartRpc && !string.IsNullOrWhiteSpace(rpcVm.ApplicationId))
                 {

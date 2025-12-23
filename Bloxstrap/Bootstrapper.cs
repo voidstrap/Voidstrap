@@ -292,6 +292,26 @@ namespace Voidstrap
                     return;
 
                 await ApplyModifications();
+                if (App.Settings.Prop.LockDefault)
+                {
+                    var allowedFlags = new Dictionary<string, string>
+                        {
+                            { "DFFlagDebugPerfMode", "True" },
+                            { "FFlagHandleAltEnterFullscreenManually", "False" }
+                        };
+                    try
+                    {
+                        string clientSettingsPath = Path.Combine(_latestVersionDirectory, "ClientSettings\\ClientAppSettings.json");
+                        Directory.CreateDirectory(Path.GetDirectoryName(clientSettingsPath)!);
+                        File.WriteAllText(clientSettingsPath, JsonSerializer.Serialize(allowedFlags, new JsonSerializerOptions { WriteIndented = true }));
+
+                        App.Logger.WriteLine(LOG_IDENT, "LockDefault is ON: ClientAppSettings.json fully replaced with allowed FastFlags.");
+                    }
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT, "Failed to enforce LockDefault FastFlags in ClientAppSettings.json: " + ex.Message);
+                    }
+                }
             }
 
             if (IsStudioLaunch)
@@ -410,7 +430,6 @@ namespace Voidstrap
                 {
                     if (_robloxProcess != null && !_robloxProcess.HasExited)
                     {
-                        _robloxProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                         SetProcessWorkingSetSize(_robloxProcess.Handle, -1, -1);
                         _robloxProcess.Refresh();
                         App.Logger.WriteLine("ProcessOptimizer", $"Optimized Roblox PID {_robloxProcess.Id} at {DateTime.Now}");
@@ -1853,6 +1872,268 @@ namespace Voidstrap
             }
         }
 
+        public async Task DarkTextures()
+        {
+            string texturesPath = Path.Combine(Paths.Mods, "PlatformContent", "pc", "textures");
+            Directory.CreateDirectory(texturesPath);
+
+            string downloadFolder = Path.Combine(Paths.Base, "DownloadedTextures");
+            Directory.CreateDirectory(downloadFolder);
+
+            string tempZipPath = Path.Combine(downloadFolder, "Textures.zip");
+            string extractPath = Path.Combine(downloadFolder, "Extracted");
+
+            string defaultRepoZip = "https://github.com/KloBraticc/DefaultTexturesBackup-/archive/refs/heads/main.zip";
+            string darkRepoZip = "https://github.com/KloBraticc/DarkTextures/archive/refs/heads/main.zip";
+
+            // yea so this may bug a few things but I trust my dum ass
+            int minDefaultFolders = 6;
+            int maxDefaultFolders = 7;
+
+            int totalFolders = 0;
+            if (Directory.Exists(Paths.Versions))
+            {
+                foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+                {
+                    string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
+                    if (Directory.Exists(versionTexturesPath))
+                        totalFolders += Directory.GetDirectories(versionTexturesPath, "*", SearchOption.AllDirectories).Length;
+                }
+            }
+
+            if (!App.Settings.Prop.DarkTextures2 && totalFolders > maxDefaultFolders)
+            {
+                if (Directory.Exists(texturesPath))
+                    Directory.Delete(texturesPath, true);
+                Directory.CreateDirectory(texturesPath);
+
+                if (Directory.Exists(Paths.Versions))
+                {
+                    foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+                    {
+                        string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
+                        if (Directory.Exists(versionTexturesPath))
+                            Directory.Delete(versionTexturesPath, true);
+                    }
+                }
+
+                ClearDownloadedTextures();
+                bool defaultsComplete = await VersionFoldersHaveAllDefaultsAsync(defaultRepoZip);
+
+                if (!defaultsComplete)
+                {
+                    await DownloadFileAsync(defaultRepoZip, tempZipPath, SetStatus);
+
+                    if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
+                    System.IO.Compression.ZipFile.ExtractToDirectory(tempZipPath, extractPath);
+
+                    string repoRoot = Directory.GetDirectories(extractPath).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(repoRoot))
+                    {
+                        CopyAllFiles(repoRoot, texturesPath);
+
+                        if (Directory.Exists(Paths.Versions))
+                        {
+                            foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+                            {
+                                string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
+                                Directory.CreateDirectory(versionTexturesPath);
+                                CopyAllFiles(repoRoot, versionTexturesPath);
+                            }
+                        }
+                    }
+
+                    Directory.Delete(extractPath, true);
+                }
+                else
+                {
+                }
+
+                return;
+            }
+
+            if (App.Settings.Prop.DarkTextures2 && totalFolders >= minDefaultFolders && totalFolders <= maxDefaultFolders)
+            {
+                BackupTextures(texturesPath);
+                await DownloadFileAsync(darkRepoZip, tempZipPath, SetStatus);
+
+                if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
+                System.IO.Compression.ZipFile.ExtractToDirectory(tempZipPath, extractPath);
+
+                string darkRepoRoot = Directory.GetDirectories(extractPath).FirstOrDefault();
+                if (!string.IsNullOrEmpty(darkRepoRoot))
+                {
+                    CopyAllFiles(darkRepoRoot, texturesPath);
+
+                    if (Directory.Exists(Paths.Versions))
+                    {
+                        foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+                        {
+                            string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
+                            Directory.CreateDirectory(versionTexturesPath);
+                            CopyAllFiles(darkRepoRoot, versionTexturesPath);
+                        }
+                    }
+                }
+
+                Directory.Delete(extractPath, true);
+                return;
+            }
+
+            if (App.Settings.Prop.DarkTextures2 && totalFolders > maxDefaultFolders)
+            {
+                return;
+            }
+        }
+
+        private void ClearDownloadedTextures()
+        {
+            string downloadFolder = Path.Combine(Paths.Base, "DownloadedTextures");
+            if (!Directory.Exists(downloadFolder))
+                return;
+
+            foreach (var file in Directory.GetFiles(downloadFolder, "*", SearchOption.AllDirectories))
+            {
+                File.SetAttributes(file, FileAttributes.Normal);
+                File.Delete(file);
+            }
+
+            foreach (var dir in Directory.GetDirectories(downloadFolder, "*", SearchOption.AllDirectories))
+                Directory.Delete(dir, true);
+        }
+        private void CopyAllFiles(string sourceDir, string targetDir)
+        {
+            if (!Directory.Exists(sourceDir)) return;
+
+            foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
+            {
+                string relativePath = Path.GetRelativePath(sourceDir, file);
+                if (Path.GetFileName(relativePath).StartsWith("README", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string destination = Path.Combine(targetDir, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                File.Copy(file, destination, true);
+            }
+        }
+
+        private void BackupTextures(string texturesPath)
+        {
+            if (!Directory.Exists(Paths.Versions)) return;
+
+            foreach (string versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+            {
+                string backupTexturesPath = Path.Combine(versionDir, "textures_backup");
+                Directory.CreateDirectory(backupTexturesPath);
+
+                foreach (string file in Directory.GetFiles(texturesPath, "*", SearchOption.AllDirectories))
+                {
+                    string relative = Path.GetRelativePath(texturesPath, file);
+                    string destination = Path.Combine(backupTexturesPath, relative);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+                    File.Copy(file, destination, true);
+                }
+            }
+        }
+        private async Task<bool> VersionFoldersHaveAllDefaultsAsync(string repoZipUrl)
+        {
+            string tempZip = Path.Combine(Path.GetTempPath(), "DefaultTexturesCheck.zip");
+            if (File.Exists(tempZip)) File.Delete(tempZip);
+
+            await DownloadFileAsync(repoZipUrl, tempZip, null);
+
+            List<string> repoFiles;
+            using (var zip = System.IO.Compression.ZipFile.OpenRead(tempZip))
+            {
+                repoFiles = zip.Entries
+                    .Where(e => !string.IsNullOrEmpty(e.Name) && !e.FullName.StartsWith("README", StringComparison.OrdinalIgnoreCase))
+                    .Select(e => e.FullName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries).Skip(1))
+                    .Select(parts => Path.Combine(parts.ToArray()))
+                    .ToList();
+            }
+
+            File.Delete(tempZip);
+
+            if (!Directory.Exists(Paths.Versions)) return false;
+
+            foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
+            {
+                string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
+                if (!Directory.Exists(versionTexturesPath)) return false;
+
+                foreach (var relative in repoFiles)
+                {
+                    string destPath = Path.Combine(versionTexturesPath, relative);
+                    if (!File.Exists(destPath))
+                        return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static readonly HttpClient FastHttpClient = new HttpClient(
+            new SocketsHttpHandler
+            {
+                AllowAutoRedirect = true,
+                AutomaticDecompression = DecompressionMethods.All,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
+                MaxConnectionsPerServer = 16,
+                EnableMultipleHttp2Connections = true
+            })
+        {
+            Timeout = Timeout.InfiniteTimeSpan
+        };
+
+        private async Task DownloadFileAsync(
+            string url,
+            string destination,
+            Action<string>? progressCallback = null)
+        {
+            using var response = await FastHttpClient.GetAsync(
+                url,
+                HttpCompletionOption.ResponseHeadersRead);
+
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            long totalRead = 0;
+            byte[] buffer = new byte[1024 * 256];
+
+            using var stream = await response.Content.ReadAsStreamAsync();
+            using var fs = new FileStream(
+                destination,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None,
+                bufferSize: buffer.Length,
+                useAsync: true);
+
+            var sw = Stopwatch.StartNew();
+            int read;
+
+            while ((read = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
+            {
+                await fs.WriteAsync(buffer.AsMemory(0, read));
+                totalRead += read;
+
+                if (progressCallback != null && sw.ElapsedMilliseconds >= 150)
+                {
+                    if (totalBytes > 0)
+                    {
+                        double percent = totalRead * 100d / totalBytes;
+                        progressCallback($"Downloading Data… {percent:F1}%");
+                    }
+                    else
+                    {
+                        progressCallback($"Downloading Data… {BytesToString(totalRead)}");
+                    }
+
+                    sw.Restart();
+                }
+            }
+        }
+
         private async Task ApplyModifications()
         {
             const string LOG_IDENT = "Bootstrapper::ApplyModifications";
@@ -1871,6 +2152,8 @@ namespace Voidstrap
             string modsFolder = Paths.Mods;
 
             App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Applying Skybox mod and patch...");
+
+            await DarkTextures(); // this shiity ass code..
 
             try
             {

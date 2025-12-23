@@ -12,9 +12,9 @@
     xmlns:media="clr-namespace:System.Windows.Media.Animation;assembly=PresentationCore"
     Title="{x:Static resources:Strings.Menu_Title}"
     Width="1185"
-    Height="720"
+    Height="750"
     MinWidth="1185"
-    MinHeight="720"
+    MinHeight="750"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel, IsDesignTimeCreatable=True}"
     AllowsTransparency="True"
     WindowStyle="None"
@@ -248,8 +248,9 @@
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" PageType="{x:Type pages:IntegrationsPage}" />
                     <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" PageType="{x:Type pages:BehaviourPage}" />
                     <ui:NavigationItem Content="Modifications" Icon="WrenchScrewdriver20" PageType="{x:Type pages:ModsPage}" />
+                    <ui:NavigationItem Content="Server Browser" Icon="ServerMultiple20" PageType="{x:Type pages:ServerBrowserPage}" />
                     <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" PageType="{x:Type pages:FastFlagsPage}" />
-                    <ui:NavigationItem Content="FastFlag Editor"
+                    <ui:NavigationItem x:Name="FastFlagEditorNavItem" Content="FastFlag Editor"
                                        Icon="Flag28"
                                        PageType="{x:Type pages:FastFlagEditorPage}"
                                        Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -262,7 +263,7 @@
                 <ui:NavigationFluent.Footer>
                     <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
                     <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:HubPage}" />
-                    <ui:NavigationItem Content="Dono" Icon="MoneyHand24" PageType="{x:Type pages:DonoPage}" />
+                    <ui:NavigationItem Content="Donate" Icon="MoneyHand24" PageType="{x:Type pages:DonoPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48"
                                        Command="{Binding OpenAboutCommand, Mode=OneTime}" />

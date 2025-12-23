@@ -148,25 +148,44 @@ namespace Voidstrap.UI.ViewModels.Settings
         private void LoadAvailableResolutions()
         {
             List<DisplayMode> modes = new();
+
             DEVMODE devMode = new();
             devMode.dmSize = (ushort)Marshal.SizeOf(typeof(DEVMODE));
 
             int modeIndex = 0;
             while (EnumDisplaySettings(null, modeIndex++, ref devMode))
             {
-                if (devMode.dmPelsWidth == 0 || devMode.dmPelsHeight == 0)
+                if (devMode.dmPelsWidth == 0 ||
+                    devMode.dmPelsHeight == 0 ||
+                    devMode.dmDisplayFrequency == 0)
                     continue;
 
-                var existing = modes.FirstOrDefault(m => m.Width == devMode.dmPelsWidth && m.Height == devMode.dmPelsHeight);
-                if (existing == null)
-                    modes.Add(new DisplayMode { Width = (int)devMode.dmPelsWidth, Height = (int)devMode.dmPelsHeight, RefreshRate = (int)devMode.dmDisplayFrequency });
-                else if (devMode.dmDisplayFrequency > existing.RefreshRate)
-                    existing.RefreshRate = (int)devMode.dmDisplayFrequency;
+                bool exists = modes.Any(m =>
+                    m.Width == devMode.dmPelsWidth &&
+                    m.Height == devMode.dmPelsHeight &&
+                    m.RefreshRate == devMode.dmDisplayFrequency);
+
+                if (!exists)
+                {
+                    modes.Add(new DisplayMode
+                    {
+                        Width = (int)devMode.dmPelsWidth,
+                        Height = (int)devMode.dmPelsHeight,
+                        RefreshRate = (int)devMode.dmDisplayFrequency
+                    });
+                }
             }
 
             AvailableResolutions.Clear();
-            foreach (var m in modes.OrderBy(m => m.Width).ThenBy(m => m.Height))
-                AvailableResolutions.Add(m);
+
+            foreach (var mode in modes
+                .OrderBy(m => m.Width)
+                .ThenBy(m => m.Height)
+                .ThenBy(m => m.RefreshRate))
+            {
+                AvailableResolutions.Add(mode);
+            }
+
             if (EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode))
             {
                 SelectedResolution = AvailableResolutions.FirstOrDefault(m =>

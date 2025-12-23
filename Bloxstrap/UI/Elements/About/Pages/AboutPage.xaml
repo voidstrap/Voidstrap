@@ -91,13 +91,13 @@
                 Margin="0,0,8,8"
                 Content="{x:Static resources:Strings.Menu_About_ReportIssue}"
                 Icon="BookExclamationMark24"
-                NavigateUri="https://github.com/midaskira/Voidstrap/issues" />
+                NavigateUri="https://github.com/Voidstrap/Voidstrap/issues" />
             <ui:Anchor
                 Margin="0,0,0,8"
                 Click="Anchor_Click"
                 Content="{x:Static resources:Strings.Menu_About_DiscordServer}"
                 Icon="Chat48"
-                NavigateUri="https://discord.gg/Gnu7ZuVh3z" />
+                NavigateUri="https://discord.gg/X3CRTP66VG" />
         </WrapPanel>
 
         <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">

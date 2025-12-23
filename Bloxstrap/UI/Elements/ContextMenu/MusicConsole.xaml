@@ -78,8 +78,7 @@
                                  MinWidth="240"
                                  Padding="6,0" />
                     </DockPanel>
-
-                    <!-- 🎶 Music Library -->
+                    
                     <ScrollViewer Grid.Row="1"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">
@@ -154,7 +153,6 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Left: Track List -->
                     <ScrollViewer Grid.Column="0"
                                   VerticalScrollBarVisibility="Auto"
                                   HorizontalScrollBarVisibility="Disabled">

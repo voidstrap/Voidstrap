@@ -17,9 +17,6 @@
         <TextBlock Text="Customize Roblox Game Settings"
                    FontSize="14"/>
 
-        <!-- ========================================================= -->
-        <!-- USER INTERFACE -->
-        <!-- ========================================================= -->
         <TextBlock Margin="0,8,0,0" Text="User Interface"
                    FontSize="16" FontWeight="Medium"/>
 

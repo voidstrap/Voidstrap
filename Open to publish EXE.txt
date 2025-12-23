@@ -1,4 +1,4 @@
-dotnet publish --configuration Release --self-contained true -r win-x64 /p:PublishSingleFile=true --output "C:\Users\freew\Documents\GitHub\Voidstrap\Voidstrap"
+dotnet publish --configuration Release --self-contained true -r win-x64 /p:PublishSingleFile=true --output "C:\Users\freew\Downloads\Voidstrap-Backs-main\Voidstrap-Backs-main\Voidstrap"
 dotnet build .\Voidstrap.sln --configuration Release
 dotnet publish .\Bloxstrap\Bloxstrap.csproj --configuration Release --self-contained true -r win-x64 /p:PublishSingleFile=true
 

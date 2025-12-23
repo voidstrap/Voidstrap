@@ -44,6 +44,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
+        public bool ExclusiveFullscreen
+        {
+            get => App.Settings.Prop.ExclusiveFullscreen;
+            set => App.Settings.Prop.ExclusiveFullscreen = value;
+        }
+
         private void LoadCpuOptions()
         {
             try
