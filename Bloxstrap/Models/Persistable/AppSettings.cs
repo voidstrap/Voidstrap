@@ -64,9 +64,10 @@ namespace Voidstrap.Models.Persistable
         public string LastServerSave { get; set; } = "112757576021097";
         public bool SkyBoxDataSending { get; set; } = false;
 
-        public bool DarkTextures2 { get; set; } = false;
+        public bool FFlagRPCDisplayer { get; set; } = true;
 
         public bool ExclusiveFullscreen { get; set; } = false;
+        public bool Crosshair { get; set; } = false;
         public bool LockDefault { get; set; } = false;
         public bool GameWIP { get; set; } = false;
         public bool ForceRobloxLanguage { get; set; } = true;

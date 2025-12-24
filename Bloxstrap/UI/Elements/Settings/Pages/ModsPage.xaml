@@ -4,14 +4,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dmodels="clr-namespace:Voidstrap.UI.ViewModels.Settings"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
+    xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:settings="clr-namespace:Voidstrap.UI.ViewModels.Settings"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
     Title="ModsPage"
-    d:DesignHeight="1500"
+    d:DataContext="{d:DesignInstance Type=settings:ModsViewModel}"
+    d:DesignHeight="4000"
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
@@ -80,13 +81,107 @@
             <TabItem Header="Preset Mod" FontWeight="Medium" >
                 <StackPanel Margin="12,12,12,12" Height="Auto">
 
-                    <!--  Presets Section  -->
                     <TextBlock
             FontSize="20"
             FontWeight="Bold"
+            Margin="0,0,0,16"
             Text="{x:Static resources:Strings.Common_Presets}" />
+                    <ui:CardExpander IsExpanded="False" Header="Custom Crosshair">
+                        <StackPanel>
 
-                    <!--  Option Controls  -->
+                            <ui:CardAction 
+            Grid.Row="0" 
+            Grid.Column="0"  
+            Icon="CursorHover24" 
+            Command="models:GlobalViewModel.OpenWebpageCommand" 
+            CommandParameter="https://discord.com/channels/1327967202015580223/1453208164030873814">
+
+                                <StackPanel>
+                                    <TextBlock 
+                    FontSize="14" 
+                    Text="Crosshair Codes" 
+                    FontWeight="Medium" />
+
+                                    <TextBlock 
+                    Margin="0,2,0,0" 
+                    FontSize="12" 
+                    Text="Post or Share your Crosshair Codes with others!" 
+                    Padding="0,0,16,0"  
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                    TextWrapping="Wrap" />
+                                </StackPanel>
+                            </ui:CardAction>
+
+                            <controls:OptionControl Header="Crosshair">
+                                <ui:ToggleSwitch IsChecked="{Binding Crosshair, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Cursor Shape" Description="Select crosshair shape.">
+                                <ComboBox Width="160"
+                      ItemsSource="{Binding CrosshairShapes}"
+                      SelectedItem="{Binding SelectedShape, Mode=TwoWay}" />
+                            </controls:OptionControl>
+                            
+                            <controls:OptionControl Header="Cursor Color" Description="Set the main cursor color (HEX).">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBox Width="120"
+                         Text="{Binding CursorColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ui:Button Content="Pick" Command="{Binding PickCursorColorCommand}" Margin="4,0,0,0"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Cursor Outline" Description="Set the cursor outline color (HEX).">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBox Width="120"
+                         Text="{Binding CursorOutlineColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ui:Button Content="Pick" Command="{Binding PickOutlineColorCommand}" Margin="4,0,0,0"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Cursor Size" Description="Adjust the cursor size.">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Slider Width="200" Minimum="4" Maximum="64" Value="{Binding CursorSize, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CursorSize}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Line Thickness" Description="Adjust crosshair thickness.">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Slider Width="200" Minimum="1" Maximum="10" Value="{Binding CrosshairThickness, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CrosshairThickness}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Center Gap" Description="Gap from the center.">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Slider Width="200" Minimum="0" Maximum="32" Value="{Binding Gap, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding Gap}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Opacity" Description="Adjust crosshair opacity.">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <Slider Width="200" Minimum="0.1" Maximum="1.0" Value="{Binding CursorOpacity, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CursorOpacity}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Preview" Description="Live preview of your crosshair.">
+                                <Border Width="208" Height="208" BorderThickness="1" BorderBrush="Gray" CornerRadius="4">
+                                    <Image Source="{Binding CursorPreview}" Stretch="Uniform"/>
+                                </Border>
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Cursor Code" Description="Share or import crosshair codes.">
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBox Width="220" Text="{Binding CursorCode, Mode=TwoWay}" />
+                                    <ui:Button Content="Generate" Command="{Binding GenerateCursorCodeCommand}" Margin="4,0,0,0"/>
+                                    <ui:Button Content="Apply" Command="{Binding ApplyCursorCodeCommand}" Margin="4,0,0,0"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+                        </StackPanel>
+                    </ui:CardExpander>
+
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Description}" Header="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Title}">
                         <ui:ToggleSwitch IsChecked="{Binding OldAvatarBackgroundTask.NewState, Mode=TwoWay}" />
                     </controls:OptionControl>
@@ -97,10 +192,6 @@
 
                     <controls:OptionControl Description="Attempt to recreate Fullbright without FFlags. Not effective when Lighting FFlags are used." Header="FullBright">
                         <ui:ToggleSwitch IsChecked="{Binding Fullbright, Mode=TwoWay}" />
-                    </controls:OptionControl>
-
-                    <controls:OptionControl Description="Attempt to add back Dark Textures Mod. Works best in Rivals." Header="Dark Textures">
-                        <ui:ToggleSwitch IsChecked="{Binding DarkTextures2, Mode=TwoWay}" />
                     </controls:OptionControl>
 
                     <controls:OptionControl Description="Attempts to add potato graphics to certain Roblox games." Header="Potato graphics">
@@ -141,7 +232,7 @@
                     </controls:OptionControl>
 
                     <controls:OptionControl 
-    Header="Skybox Manager (BETA)"
+    Header="Skybox Manager"
     Description="Select a Custom Roblox Skybox to use. Works best in Rivals.">
 
                         <StackPanel Orientation="Vertical">
@@ -559,91 +650,6 @@
 
                     <TextBlock x:Name="DownloadStatusText" TextWrapping="Wrap" Foreground="{StaticResource TextFillColorSecondaryBrush}" FontWeight="Bold" Margin="0,0,0,32"/>
 
-                </StackPanel>
-            </TabItem>
-
-            <TabItem Header="Lua Scripting" FontWeight="Medium">
-                <StackPanel Margin="12,12,12,12" Height="Auto">
-                    <TextBlock
-                        FontSize="20"
-                        FontWeight="Bold"
-                        Text="Lua Scripting" />
-                    
-                    <TextBlock
-                        Margin="0,4,0,12"
-                        FontSize="12"
-                        Foreground="{StaticResource TextFillColorSecondaryBrush}"
-                        Text="Write Lua scripts that execute when Roblox launches. The script is saved to autoexecute.lua in your Voidstrap directory."
-                        TextWrapping="Wrap" />
-
-
-                    <Grid Margin="0,8,0,8">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        
-                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                            <TextBlock 
-                                FontSize="14" 
-                                FontWeight="Medium"
-                                Text="Enable Lua Scripting" />
-                            <TextBlock 
-                                Margin="0,2,0,0"
-                                FontSize="12" 
-                                Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                                Text="Toggle to enable or disable Lua script execution on game launch."
-                                TextWrapping="Wrap" />
-
-                        </StackPanel>
-                        
-                        <ui:ToggleSwitch 
-                            Grid.Column="1" 
-                            VerticalAlignment="Center"
-                            Margin="8,0,0,0"
-                            IsChecked="{Binding EnableLuaScripting, Mode=TwoWay}" />
-                    </Grid>
-
-
-                    <TextBlock
-                        Margin="0,16,0,4"
-                        FontSize="14"
-                        FontWeight="SemiBold"
-                        Text="Lua Script Editor" />
-
-                    <Border
-                        Background="{DynamicResource ControlFillColorDefaultBrush}"
-                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
-                        BorderThickness="1"
-                        CornerRadius="8"
-                        Padding="4"
-                        Height="400">
-                        <avalonEdit:TextEditor
-                            x:Name="LuaScriptEditor"
-                            FontFamily="Consolas"
-                            FontSize="13"
-                            ShowLineNumbers="True"
-                            SyntaxHighlighting="Lua"
-                            Background="#1E1E1E"
-                            Foreground="#D4D4D4"
-                            LineNumbersForeground="#858585"
-                            VerticalScrollBarVisibility="Auto"
-                            HorizontalScrollBarVisibility="Auto" />
-                    </Border>
-
-                    <TextBlock
-                        Margin="0,12,0,4"
-                        FontSize="12"
-                        Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                        Text="Example: Call ExampleFunction() in your Lua script to test. It returns true."
-                        TextWrapping="Wrap" />
-
-                    <ui:Button
-                        Margin="0,8,0,0"
-                        Content="Save Script"
-                        Icon="Save24"
-                        Click="SaveLuaScript_Click"
-                        HorizontalAlignment="Left" />
                 </StackPanel>
             </TabItem>
         </TabControl>

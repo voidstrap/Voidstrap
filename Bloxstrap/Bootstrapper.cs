@@ -528,7 +528,7 @@ namespace Voidstrap
                                     break;
                                 }
                             }
-                            catch {}
+                            catch { }
                             await Task.Delay(100, ctsWatcher.Token).ConfigureAwait(false);
                         }
                     }, ctsWatcher.Token);
@@ -708,7 +708,7 @@ namespace Voidstrap
                                         continue;
                                     }
                                 }
-                                catch {}
+                                catch { }
                                 try
                                 {
                                     handler.Kill(entireProcessTree: true);
@@ -779,7 +779,7 @@ namespace Voidstrap
             }
             finally
             {
-                try { StopMemoryAndProcessOptimizer(); } catch {}
+                try { StopMemoryAndProcessOptimizer(); } catch { }
             }
         }
 
@@ -1611,7 +1611,7 @@ namespace Voidstrap
                         App.Logger.WriteLine(LOG_IDENT, $"HTTP error downloading {package.Name}: {httpEx.StatusCode} - {httpEx.Message}");
                         await HandleConnectionError(httpEx).ConfigureAwait(false);
                     }
-                    catch (TaskCanceledException) {}
+                    catch (TaskCanceledException) { }
                     catch (Exception ex)
                     {
                         App.Logger.WriteLine(LOG_IDENT, $"Failed processing package {package.Name}: {ex}");
@@ -1714,9 +1714,15 @@ namespace Voidstrap
             }
         }
 
+        private const string ZipUrl =
+            "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
 
-            private static readonly string PackRepoZip = "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
-            private static readonly string PackFolder = Path.Combine(Paths.Base, "SkyboxPack");
+        private const string CommitApiUrl =
+            "https://api.github.com/repos/KloBraticc/SkyboxPackV2/commits/main";
+
+        private const string VersionFile = "skybox.commit";
+        private static readonly string PackRepoZip = "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
+        private static readonly string PackFolder = Path.Combine(Paths.Base, "SkyboxPack");
         private static readonly HttpClient Http = new HttpClient
         {
             Timeout = TimeSpan.FromMinutes(30)
@@ -1731,74 +1737,101 @@ namespace Voidstrap
         { "9244e00ff9fd6cee0bb40a262bb35d31", "92" },
         { "78cb2e93aee0cdbd79b15a866bc93a54", "78" }
     };
+
+        private async Task<string> GetLatestCommitShaAsync()
+        {
+            using var req = new HttpRequestMessage(HttpMethod.Get, CommitApiUrl);
+            req.Headers.UserAgent.ParseAdd("SkyboxInstaller");
+
+            using var res = await Http.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            using var stream = await res.Content.ReadAsStreamAsync();
+            using var doc = await System.Text.Json.JsonDocument.ParseAsync(stream);
+
+            return doc.RootElement.GetProperty("sha").GetString()!;
+        }
+
+        private string? GetLocalCommit()
+        {
+            string path = Path.Combine(PackFolder, VersionFile);
+            return File.Exists(path) ? File.ReadAllText(path) : null;
+        }
+
+        private void SaveLocalCommit(string sha)
+        {
+            File.WriteAllText(Path.Combine(PackFolder, VersionFile), sha);
+        }
+
         public async Task EnsureSkyboxPackDownloadedAsync()
         {
-            if (Directory.Exists(PackFolder) && Directory.GetDirectories(PackFolder).Length > 0)
-                return;
-
             Directory.CreateDirectory(PackFolder);
-            SetStatus("Installing Skybox Mods...");
+
+            string latestCommit = await GetLatestCommitShaAsync();
+            string? localCommit = GetLocalCommit();
+
+            if (localCommit == latestCommit &&
+                Directory.Exists(PackFolder) &&
+                Directory.GetFiles(PackFolder, "*", SearchOption.AllDirectories).Length > 0)
+            {
+                return;
+            }
+
+            SetStatus("Updating Skybox Pack...");
 
             string tempZipPath = Path.Combine(Path.GetTempPath(), "SkyboxPackV2.zip");
-            using (var response = await Http.GetAsync(PackRepoZip, HttpCompletionOption.ResponseHeadersRead))
+
+            using (var response = await Http.GetAsync(ZipUrl, HttpCompletionOption.ResponseHeadersRead))
             {
                 response.EnsureSuccessStatusCode();
+
                 var totalBytes = response.Content.Headers.ContentLength ?? -1L;
                 long totalRead = 0;
                 var buffer = new byte[262144];
+                var lastUpdate = Stopwatch.StartNew();
 
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None, buffer.Length, true))
+                using var stream = await response.Content.ReadAsStreamAsync();
+                using var fs = new FileStream(tempZipPath, FileMode.Create, FileAccess.Write, FileShare.None, buffer.Length, true);
+
+                int read;
+                while ((read = await stream.ReadAsync(buffer)) > 0)
                 {
-                    int read;
-                    var lastUpdate = Stopwatch.StartNew();
+                    await fs.WriteAsync(buffer.AsMemory(0, read));
+                    totalRead += read;
 
-                    while ((read = await stream.ReadAsync(buffer)) > 0)
+                    if (lastUpdate.ElapsedMilliseconds > 200)
                     {
-                        await fs.WriteAsync(buffer.AsMemory(0, read));
-                        totalRead += read;
+                        SetStatus(totalBytes > 0
+                            ? $"Downloading Skybox Data... {totalRead * 100.0 / totalBytes:F1}%"
+                            : $"Downloading Skybox Data... {BytesToString(totalRead)}");
 
-                        if (lastUpdate.ElapsedMilliseconds > 200)
-                        {
-                            if (totalBytes > 0)
-                            {
-                                double percent = totalRead * 100.0 / totalBytes;
-                                SetStatus($"Downloading Skybox Data... {percent:F1}%");
-                            }
-                            else
-                            {
-                                SetStatus($"Downloading Skybox Data... {BytesToString(totalRead)}");
-                            }
-                            lastUpdate.Restart();
-                        }
+                        lastUpdate.Restart();
                     }
                 }
             }
-                    using (var zip = System.IO.Compression.ZipFile.OpenRead(tempZipPath))
-            {
-                int totalFiles = zip.Entries.Count(e => !string.IsNullOrEmpty(e.Name));
-                int extractedFiles = 0;
 
+            Directory.Delete(PackFolder, true);
+            Directory.CreateDirectory(PackFolder);
+
+            using (var zip = System.IO.Compression.ZipFile.OpenRead(tempZipPath))
+            {
                 foreach (var entry in zip.Entries)
                 {
                     if (string.IsNullOrEmpty(entry.Name)) continue;
-                    string[] parts = entry.FullName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
-                    string relativePath = Path.Combine(parts.Skip(1).ToArray());
-                    string entryDest = Path.Combine(PackFolder, relativePath);
 
-                    Directory.CreateDirectory(Path.GetDirectoryName(entryDest)!);
+                    var parts = entry.FullName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+                    var relativePath = Path.Combine(parts.Skip(1).ToArray());
+                    var destPath = Path.Combine(PackFolder, relativePath);
 
-                    using (var entryStream = entry.Open())
-                    using (var fs = new FileStream(entryDest, FileMode.Create, FileAccess.Write, FileShare.None, 81920, true))
-                    {
-                        await entryStream.CopyToAsync(fs);
-                    }
+                    Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
 
-                    extractedFiles++;
-                    SetStatus($"Extracting Skybox Pack... {extractedFiles}/{totalFiles}");
+                    using var entryStream = entry.Open();
+                    using var fs = new FileStream(destPath, FileMode.Create, FileAccess.Write);
+                    await entryStream.CopyToAsync(fs);
                 }
             }
 
+            SaveLocalCommit(latestCommit);
             File.Delete(tempZipPath);
         }
 
@@ -1813,31 +1846,31 @@ namespace Voidstrap
         }
 
         public static async Task ApplySkyboxAsync(string skyboxName, string modsFolder)
+        {
+            string sourceFolder = Path.Combine(PackFolder, skyboxName);
+            if (!Directory.Exists(sourceFolder))
+                throw new DirectoryNotFoundException($"Skybox '{skyboxName}' not found in PackFolder.");
+
+            string skyboxPath = Path.Combine(modsFolder, "PlatformContent", "pc", "textures", "sky");
+            if (Directory.Exists(skyboxPath))
             {
-                string sourceFolder = Path.Combine(PackFolder, skyboxName);
-                if (!Directory.Exists(sourceFolder))
-                    throw new DirectoryNotFoundException($"Skybox '{skyboxName}' not found in PackFolder.");
-
-                string skyboxPath = Path.Combine(modsFolder, "PlatformContent", "pc", "textures", "sky");
-                if (Directory.Exists(skyboxPath))
-                {
-                    foreach (var file in Directory.GetFiles(skyboxPath, "*.*", SearchOption.AllDirectories))
-                        File.SetAttributes(file, FileAttributes.Normal);
-                    Directory.Delete(skyboxPath, true);
-                }
-
-                Directory.CreateDirectory(skyboxPath);
-
-                foreach (var file in Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories))
-                {
-                    string relative = Path.GetRelativePath(sourceFolder, file);
-                    string dest = Path.Combine(skyboxPath, relative);
-                    Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
-                    File.Copy(file, dest, true);
-                }
-
-                await Task.CompletedTask;
+                foreach (var file in Directory.GetFiles(skyboxPath, "*.*", SearchOption.AllDirectories))
+                    File.SetAttributes(file, FileAttributes.Normal);
+                Directory.Delete(skyboxPath, true);
             }
+
+            Directory.CreateDirectory(skyboxPath);
+
+            foreach (var file in Directory.GetFiles(sourceFolder, "*.*", SearchOption.AllDirectories))
+            {
+                string relative = Path.GetRelativePath(sourceFolder, file);
+                string dest = Path.Combine(skyboxPath, relative);
+                Directory.CreateDirectory(Path.GetDirectoryName(dest)!);
+                File.Copy(file, dest, true);
+            }
+
+            await Task.CompletedTask;
+        }
 
         public static async Task ApplySkyboxPatchToRobloxStorageAsync()
         {
@@ -1872,268 +1905,6 @@ namespace Voidstrap
             }
         }
 
-        public async Task DarkTextures()
-        {
-            string texturesPath = Path.Combine(Paths.Mods, "PlatformContent", "pc", "textures");
-            Directory.CreateDirectory(texturesPath);
-
-            string downloadFolder = Path.Combine(Paths.Base, "DownloadedTextures");
-            Directory.CreateDirectory(downloadFolder);
-
-            string tempZipPath = Path.Combine(downloadFolder, "Textures.zip");
-            string extractPath = Path.Combine(downloadFolder, "Extracted");
-
-            string defaultRepoZip = "https://github.com/KloBraticc/DefaultTexturesBackup-/archive/refs/heads/main.zip";
-            string darkRepoZip = "https://github.com/KloBraticc/DarkTextures/archive/refs/heads/main.zip";
-
-            // yea so this may bug a few things but I trust my dum ass
-            int minDefaultFolders = 6;
-            int maxDefaultFolders = 7;
-
-            int totalFolders = 0;
-            if (Directory.Exists(Paths.Versions))
-            {
-                foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-                {
-                    string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
-                    if (Directory.Exists(versionTexturesPath))
-                        totalFolders += Directory.GetDirectories(versionTexturesPath, "*", SearchOption.AllDirectories).Length;
-                }
-            }
-
-            if (!App.Settings.Prop.DarkTextures2 && totalFolders > maxDefaultFolders)
-            {
-                if (Directory.Exists(texturesPath))
-                    Directory.Delete(texturesPath, true);
-                Directory.CreateDirectory(texturesPath);
-
-                if (Directory.Exists(Paths.Versions))
-                {
-                    foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-                    {
-                        string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
-                        if (Directory.Exists(versionTexturesPath))
-                            Directory.Delete(versionTexturesPath, true);
-                    }
-                }
-
-                ClearDownloadedTextures();
-                bool defaultsComplete = await VersionFoldersHaveAllDefaultsAsync(defaultRepoZip);
-
-                if (!defaultsComplete)
-                {
-                    await DownloadFileAsync(defaultRepoZip, tempZipPath, SetStatus);
-
-                    if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
-                    System.IO.Compression.ZipFile.ExtractToDirectory(tempZipPath, extractPath);
-
-                    string repoRoot = Directory.GetDirectories(extractPath).FirstOrDefault();
-                    if (!string.IsNullOrEmpty(repoRoot))
-                    {
-                        CopyAllFiles(repoRoot, texturesPath);
-
-                        if (Directory.Exists(Paths.Versions))
-                        {
-                            foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-                            {
-                                string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
-                                Directory.CreateDirectory(versionTexturesPath);
-                                CopyAllFiles(repoRoot, versionTexturesPath);
-                            }
-                        }
-                    }
-
-                    Directory.Delete(extractPath, true);
-                }
-                else
-                {
-                }
-
-                return;
-            }
-
-            if (App.Settings.Prop.DarkTextures2 && totalFolders >= minDefaultFolders && totalFolders <= maxDefaultFolders)
-            {
-                BackupTextures(texturesPath);
-                await DownloadFileAsync(darkRepoZip, tempZipPath, SetStatus);
-
-                if (Directory.Exists(extractPath)) Directory.Delete(extractPath, true);
-                System.IO.Compression.ZipFile.ExtractToDirectory(tempZipPath, extractPath);
-
-                string darkRepoRoot = Directory.GetDirectories(extractPath).FirstOrDefault();
-                if (!string.IsNullOrEmpty(darkRepoRoot))
-                {
-                    CopyAllFiles(darkRepoRoot, texturesPath);
-
-                    if (Directory.Exists(Paths.Versions))
-                    {
-                        foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-                        {
-                            string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
-                            Directory.CreateDirectory(versionTexturesPath);
-                            CopyAllFiles(darkRepoRoot, versionTexturesPath);
-                        }
-                    }
-                }
-
-                Directory.Delete(extractPath, true);
-                return;
-            }
-
-            if (App.Settings.Prop.DarkTextures2 && totalFolders > maxDefaultFolders)
-            {
-                return;
-            }
-        }
-
-        private void ClearDownloadedTextures()
-        {
-            string downloadFolder = Path.Combine(Paths.Base, "DownloadedTextures");
-            if (!Directory.Exists(downloadFolder))
-                return;
-
-            foreach (var file in Directory.GetFiles(downloadFolder, "*", SearchOption.AllDirectories))
-            {
-                File.SetAttributes(file, FileAttributes.Normal);
-                File.Delete(file);
-            }
-
-            foreach (var dir in Directory.GetDirectories(downloadFolder, "*", SearchOption.AllDirectories))
-                Directory.Delete(dir, true);
-        }
-        private void CopyAllFiles(string sourceDir, string targetDir)
-        {
-            if (!Directory.Exists(sourceDir)) return;
-
-            foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
-            {
-                string relativePath = Path.GetRelativePath(sourceDir, file);
-                if (Path.GetFileName(relativePath).StartsWith("README", StringComparison.OrdinalIgnoreCase))
-                    continue;
-
-                string destination = Path.Combine(targetDir, relativePath);
-                Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-                File.Copy(file, destination, true);
-            }
-        }
-
-        private void BackupTextures(string texturesPath)
-        {
-            if (!Directory.Exists(Paths.Versions)) return;
-
-            foreach (string versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-            {
-                string backupTexturesPath = Path.Combine(versionDir, "textures_backup");
-                Directory.CreateDirectory(backupTexturesPath);
-
-                foreach (string file in Directory.GetFiles(texturesPath, "*", SearchOption.AllDirectories))
-                {
-                    string relative = Path.GetRelativePath(texturesPath, file);
-                    string destination = Path.Combine(backupTexturesPath, relative);
-                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
-                    File.Copy(file, destination, true);
-                }
-            }
-        }
-        private async Task<bool> VersionFoldersHaveAllDefaultsAsync(string repoZipUrl)
-        {
-            string tempZip = Path.Combine(Path.GetTempPath(), "DefaultTexturesCheck.zip");
-            if (File.Exists(tempZip)) File.Delete(tempZip);
-
-            await DownloadFileAsync(repoZipUrl, tempZip, null);
-
-            List<string> repoFiles;
-            using (var zip = System.IO.Compression.ZipFile.OpenRead(tempZip))
-            {
-                repoFiles = zip.Entries
-                    .Where(e => !string.IsNullOrEmpty(e.Name) && !e.FullName.StartsWith("README", StringComparison.OrdinalIgnoreCase))
-                    .Select(e => e.FullName.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries).Skip(1))
-                    .Select(parts => Path.Combine(parts.ToArray()))
-                    .ToList();
-            }
-
-            File.Delete(tempZip);
-
-            if (!Directory.Exists(Paths.Versions)) return false;
-
-            foreach (var versionDir in Directory.GetDirectories(Paths.Versions, "version-*"))
-            {
-                string versionTexturesPath = Path.Combine(versionDir, "PlatformContent", "pc", "textures");
-                if (!Directory.Exists(versionTexturesPath)) return false;
-
-                foreach (var relative in repoFiles)
-                {
-                    string destPath = Path.Combine(versionTexturesPath, relative);
-                    if (!File.Exists(destPath))
-                        return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static readonly HttpClient FastHttpClient = new HttpClient(
-            new SocketsHttpHandler
-            {
-                AllowAutoRedirect = true,
-                AutomaticDecompression = DecompressionMethods.All,
-                PooledConnectionLifetime = TimeSpan.FromMinutes(5),
-                MaxConnectionsPerServer = 16,
-                EnableMultipleHttp2Connections = true
-            })
-        {
-            Timeout = Timeout.InfiniteTimeSpan
-        };
-
-        private async Task DownloadFileAsync(
-            string url,
-            string destination,
-            Action<string>? progressCallback = null)
-        {
-            using var response = await FastHttpClient.GetAsync(
-                url,
-                HttpCompletionOption.ResponseHeadersRead);
-
-            response.EnsureSuccessStatusCode();
-
-            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
-            long totalRead = 0;
-            byte[] buffer = new byte[1024 * 256];
-
-            using var stream = await response.Content.ReadAsStreamAsync();
-            using var fs = new FileStream(
-                destination,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: buffer.Length,
-                useAsync: true);
-
-            var sw = Stopwatch.StartNew();
-            int read;
-
-            while ((read = await stream.ReadAsync(buffer.AsMemory(0, buffer.Length))) > 0)
-            {
-                await fs.WriteAsync(buffer.AsMemory(0, read));
-                totalRead += read;
-
-                if (progressCallback != null && sw.ElapsedMilliseconds >= 150)
-                {
-                    if (totalBytes > 0)
-                    {
-                        double percent = totalRead * 100d / totalBytes;
-                        progressCallback($"Downloading Data… {percent:F1}%");
-                    }
-                    else
-                    {
-                        progressCallback($"Downloading Data… {BytesToString(totalRead)}");
-                    }
-
-                    sw.Restart();
-                }
-            }
-        }
-
         private async Task ApplyModifications()
         {
             const string LOG_IDENT = "Bootstrapper::ApplyModifications";
@@ -2152,8 +1923,6 @@ namespace Voidstrap
             string modsFolder = Paths.Mods;
 
             App.Logger.WriteLine("Bootstrapper::ApplyModifications", "Applying Skybox mod and patch...");
-
-            await DarkTextures(); // this shiity ass code..
 
             try
             {
@@ -2340,7 +2109,7 @@ namespace Voidstrap
                 App.Logger.WriteLine(LOG_IDENT, "Failed to update client! " + ex.Message);
             }
         }
- 
+
         private async Task DownloadPackage(Package package)
         {
             string LOG_IDENT = $"Bootstrapper::DownloadPackage.{package.Name}";
@@ -2696,7 +2465,7 @@ namespace Voidstrap
                 if (progressCts != null)
                 {
                     progressCts.Cancel();
-                    try { await progressTask; } catch {}
+                    try { await progressTask; } catch { }
                     progressCts.Dispose();
                 }
             }

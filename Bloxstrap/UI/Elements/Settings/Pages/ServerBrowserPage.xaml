@@ -30,14 +30,12 @@
 
             <TextBlock Margin="20,0,8,0" VerticalAlignment="Center" FontSize="14" Foreground="{StaticResource TextFillColorSecondaryBrush}" Text="Servers Details:" />
 
-            <!-- Server Limit Dropdown -->
             <ComboBox
         x:Name="ServerLimitComboBox"
         Width="100"
         Height="34"
-        SelectedIndex="3"
+        SelectedIndex="2"
         SelectionChanged="ServerLimitComboBox_SelectionChanged">
-                <ComboBoxItem Content="5" />
                 <ComboBoxItem Content="10" />
                 <ComboBoxItem Content="25" />
                 <ComboBoxItem Content="50" />

@@ -9,8 +9,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.8.2</Version>
-		<FileVersion>1.0.8.2</FileVersion>
+		<Version>1.0.8.3</Version>
+		<FileVersion>1.0.8.3</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>

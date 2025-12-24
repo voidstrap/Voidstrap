@@ -7,6 +7,11 @@ using Wpf.Ui.Hardware;
 
 namespace Wpf.Ui.Animations
 {
+    public static class AnimationState
+    {
+        public static bool IsLoading { get; set; }
+    }
+
     internal static class Easings
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -51,6 +56,12 @@ namespace Wpf.Ui.Animations
 
         private void OnRendering(object? sender, EventArgs e)
         {
+            if (AnimationState.IsLoading)
+            {
+                Stop();
+                return;
+            }
+
             var elapsed = _watch.Elapsed.TotalMilliseconds;
             var t = elapsed / _durationMs;
 
@@ -88,6 +99,7 @@ namespace Wpf.Ui.Animations
         {
             if (type == TransitionType.None ||
                 element is not FrameworkElement fe ||
+                AnimationState.IsLoading ||
                 !HardwareAcceleration.IsSupported(
                     HardwareAcceleration.RenderingTier.PartialAcceleration))
             {
@@ -141,7 +153,6 @@ namespace Wpf.Ui.Animations
             animator.Start();
         }
 
-
         private static void Slide(
             FrameworkElement element,
             double offsetX,
@@ -182,7 +193,6 @@ namespace Wpf.Ui.Animations
 
             animator.Start();
         }
-
 
         private static double Lerp(double from, double to, double t)
             => from + (to - from) * t;

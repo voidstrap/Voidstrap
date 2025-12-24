@@ -143,6 +143,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.GameWIP = value;
         }
 
+        public bool FFlagAmountRPC
+        {
+            get => App.Settings.Prop.FFlagRPCDisplayer;
+            set => App.Settings.Prop.FFlagRPCDisplayer = value;
+        }
+
         public bool ServerUptimeBetterBLOXcuzitsbetterXD
         {
             get => App.Settings.Prop.ServerUptimeBetterBLOXcuzitsbetterXD;

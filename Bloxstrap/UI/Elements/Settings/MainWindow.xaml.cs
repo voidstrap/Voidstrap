@@ -368,12 +368,11 @@ namespace Voidstrap.UI.Elements.Settings
         {
             try
             {
-                // Find the ModsPage in the navigation
                 var modsPage = RootNavigation?.Items
                     .OfType<Wpf.Ui.Controls.NavigationItem>()
-                    .FirstOrDefault(item => item.PageType == typeof(Pages.ModsPage));
+                    .FirstOrDefault(item => item.PageType == typeof(Pages.BehaviourPage));
 
-                if (modsPage != null && RootFrame.Content is Pages.ModsPage page)
+                if (modsPage != null && RootFrame.Content is Pages.BehaviourPage page)
                 {
                     page.SaveCurrentLuaScript();
                 }

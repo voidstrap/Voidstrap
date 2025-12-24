@@ -14,6 +14,7 @@ using Voidstrap.Integrations;
 using Voidstrap.RobloxInterfaces;
 using Voidstrap.UI.ViewModels.Settings;
 using Wpf.Ui.Controls;
+using Wpf.Ui.Mvvm.Interfaces;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
@@ -30,65 +31,21 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         public ModsPage()
         {
+            SetupViewModel();
             InitializeComponent();
             InitializePreview();
-            ViewModel = new ModsViewModel();
-            DataContext = ViewModel;
 
             GradientAngleTextBox.Text = "0.0";
             IncludeModificationsCheckBox.IsChecked = true;
 
             ViewModel.GradientStops.Add(new GradientStopViewModel { Offset = 0, ColorHex = "#FFFFFF" });
-
-            // Load Lua script from file
-            LoadLuaScript();
         }
 
-        private void LoadLuaScript()
+        private void SetupViewModel()
         {
-            try
-            {
-                string luaScriptPath = Path.Combine(Paths.Base, "autoexecute.lua");
-                if (File.Exists(luaScriptPath))
-                {
-                    string luaScript = File.ReadAllText(luaScriptPath);
-                    LuaScriptEditor.Text = luaScript;
-                }
-                else
-                {
-                    // Set default example script
-                    LuaScriptEditor.Text = "-- Lua Script Example\n-- This script executes when Roblox launches\n\n-- Call the example function\nlocal result = ExampleFunction()\nprint(\"ExampleFunction returned: \" .. tostring(result))";
-                }
-            }
-            catch (Exception ex)
-            {
-                App.Logger?.WriteLine("ModsPage::LoadLuaScript", $"Error loading Lua script: {ex.Message}");
-            }
+            ViewModel = new ModsViewModel();
+            DataContext = ViewModel;
         }
-
-        private void SaveLuaScript_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                string luaScriptPath = Path.Combine(Paths.Base, "autoexecute.lua");
-                string luaScript = LuaScriptEditor.Text;
-                
-                File.WriteAllText(luaScriptPath, luaScript);
-                
-                App.Logger?.WriteLine("ModsPage::SaveLuaScript", $"Lua script saved to {luaScriptPath}");
-            }
-            catch (Exception ex)
-            {
-                App.Logger?.WriteLine("ModsPage::SaveLuaScript", $"Error saving Lua script: {ex.Message}");
-                Frontend.ShowMessageBox($"Error saving Lua script: {ex.Message}", MessageBoxImage.Error);
-            }
-        }
-
-        public void SaveCurrentLuaScript()
-        {
-            SaveLuaScript_Click(null!, null!);
-        }
-
 
         private async void ModGenerator_Click(object sender, RoutedEventArgs e)
         {

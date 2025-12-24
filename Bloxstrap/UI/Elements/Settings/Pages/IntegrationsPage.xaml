@@ -145,7 +145,7 @@
                 </controls:OptionControl>
                 <controls:OptionControl
             Header="Game WIP"
-            Description="Displays your Roblox Games In works - [BETA],[ALPHA],[TESTING],[PREVIEW]"
+            Description="Displays your Roblox Games In works [BETA],[ALPHA],[TESTING],[PREVIEW]"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
                     <ui:ToggleSwitch
                 Background="{DynamicResource SystemAccentBrush}"
@@ -158,6 +158,14 @@
                     <ui:ToggleSwitch
                 Background="{DynamicResource SystemAccentBrush}"
                 IsChecked="{Binding GameIconChecked, Mode=TwoWay}" />
+                </controls:OptionControl>
+                <controls:OptionControl
+            Header="FFlag Amount"
+            Description="Displays your Roblox FFlag Amount on RPC."
+            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+                    <ui:ToggleSwitch
+                Background="{DynamicResource SystemAccentBrush}"
+                IsChecked="{Binding FFlagAmountRPC, Mode=TwoWay}" />
                 </controls:OptionControl>
                 <controls:OptionControl
             Header="Server Status"

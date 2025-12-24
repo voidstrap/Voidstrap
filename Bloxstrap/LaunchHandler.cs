@@ -5,10 +5,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using Voidstrap.Integrations;
+using Voidstrap.UI.Elements.Dialogs;
+using Voidstrap.UI.ViewModels.Settings;
 using Windows.Win32;
 using Windows.Win32.Foundation;
-using Voidstrap.UI.Elements.Dialogs;
-using Voidstrap.Integrations;
 
 namespace Voidstrap
 {
@@ -283,7 +284,7 @@ namespace Voidstrap
 
             if (App.Settings.Prop.ExclusiveFullscreen)
                 Task.Run(() => RobloxFullscreen.WaitAndTriggerFullscreen());
-            
+
             if (App.Settings.Prop.EnableLuaScripting)
                 Task.Run(() => LuaScriptManager.WaitForRobloxAndExecuteScript());
 

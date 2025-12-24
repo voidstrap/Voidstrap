@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
+using NAudio.Midi;
 using System;
 using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Windows;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
@@ -21,6 +23,11 @@ namespace Voidstrap.UI.ViewModels.Settings
 {
     public class ModsViewModel : NotifyPropertyChangedViewModel
     {
+        public ICommand PickCursorColorCommand { get; }
+        public ICommand PickOutlineColorCommand { get; }
+        public ICommand GenerateCursorCodeCommand { get; }
+        public ICommand ApplyCursorCodeCommand { get; }
+
         private void OpenModsFolder() => Process.Start("explorer.exe", Paths.Mods);
 
         private static readonly Dictionary<string, byte[]> FontHeaders = new()
@@ -38,7 +45,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
             else
             {
-                var dialog = new OpenFileDialog { Filter = $"{Strings.Menu_FontFiles}|*.ttf;*.otf;*.ttc" };
+                var dialog = new Microsoft.Win32.OpenFileDialog { Filter = $"{Strings.Menu_FontFiles}|*.ttf;*.otf;*.ttc" };
 
                 if (dialog.ShowDialog() != true) return;
 
@@ -126,7 +133,6 @@ namespace Voidstrap.UI.ViewModels.Settings
                 }
             }
         }
-
 
         public ICommand OpenModsFolderCommand => new RelayCommand(OpenModsFolder);
 
@@ -224,16 +230,10 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.SkyBoxDataSending = value;
         }
 
-        public bool DarkTextures2
+        public bool Crosshair
         {
-            get => App.Settings.Prop.DarkTextures2;
-            set => App.Settings.Prop.DarkTextures2 = value;
-        }
-
-        public bool EnableLuaScripting
-        {
-            get => App.Settings.Prop.EnableLuaScripting;
-            set => App.Settings.Prop.EnableLuaScripting = value;
+            get => App.Settings.Prop.Crosshair;
+            set => App.Settings.Prop.Crosshair = value;
         }
 
         public FontModPresetTask TextFontTask { get; } = new();
@@ -371,7 +371,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         private void AddCustomFile(string[] targetFiles, string targetDir, string dialogTitle, string filter, string failureText, Action postAction = null!)
         {
-            var dialog = new OpenFileDialog
+            var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Filter = filter,
                 Title = dialogTitle
@@ -577,15 +577,203 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand DeleteIBeamCursorCommand => new RelayCommand(() => DeleteCursorImage("IBeamCursor.png"));
         public ICommand DeleteShiftlockCursorCommand => new RelayCommand(() => DeleteCursorImage("MouseLockedCursor.png"));
 
+        private CrosshairShape _selectedShape = CrosshairShape.Cross;
+        private string _cursorColorHex = "#00FF00";
+        private string _cursorOutlineColorHex = "#000000";
+        private int _cursorSize = 20;
+        private int _crosshairThickness = 2;
+        private int _gap = 4;
+        private double _cursorOpacity = 1.0;
+        private string _cursorCode;
+        private ImageSource _cursorPreview;
+
+        private readonly string _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Voidstrap");
+        private readonly string _file;
+
         public ModsViewModel()
         {
+            _file = Path.Combine(_dir, "crosshair.ini");
+            Directory.CreateDirectory(_dir);
+
+            LoadIni();
+
+            PickCursorColorCommand = new RelayCommand(() => PickColor(true));
+            PickOutlineColorCommand = new RelayCommand(() => PickColor(false));
+            GenerateCursorCodeCommand = new RelayCommand(GenerateCode);
+            ApplyCursorCodeCommand = new RelayCommand(ApplyCode);
+
+            UpdatePreview();
             _ = LoadSkyboxPacksFromGithub();
             LoadCustomCursorSets();
             LoadCursorPathsForSelectedSet();
             NotifyCursorVisibilities();
         }
-        #endregion
 
+        public enum CrosshairShape { Cross, Dot, Circle }
+        public CrosshairShape[] CrosshairShapes => new[] { CrosshairShape.Cross, CrosshairShape.Dot, CrosshairShape.Circle };
+
+        public CrosshairShape SelectedShape
+        {
+            get => _selectedShape;
+            set { SetProperty(ref _selectedShape, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public string CursorColorHex
+        {
+            get => _cursorColorHex;
+            set { SetProperty(ref _cursorColorHex, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public string CursorOutlineColorHex
+        {
+            get => _cursorOutlineColorHex;
+            set { SetProperty(ref _cursorOutlineColorHex, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public int CursorSize
+        {
+            get => _cursorSize;
+            set { SetProperty(ref _cursorSize, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public int CrosshairThickness
+        {
+            get => _crosshairThickness;
+            set { SetProperty(ref _crosshairThickness, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public int Gap
+        {
+            get => _gap;
+            set { SetProperty(ref _gap, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public double CursorOpacity
+        {
+            get => _cursorOpacity;
+            set { SetProperty(ref _cursorOpacity, value); SaveIni(); UpdatePreview(); }
+        }
+
+        public string CursorCode
+        {
+            get => _cursorCode;
+            set => SetProperty(ref _cursorCode, value);
+        }
+
+        public ImageSource CursorPreview
+        {
+            get => _cursorPreview;
+            set => SetProperty(ref _cursorPreview, value);
+        }
+
+        private void PickColor(bool main)
+        {
+            using var dlg = new ColorDialog();
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+            var hex = $"#{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
+            if (main) CursorColorHex = hex;
+            else CursorOutlineColorHex = hex;
+        }
+
+        public void GenerateCode()
+        {
+            CursorCode = $"VXH:{SelectedShape}|{CursorColorHex}|{CursorOutlineColorHex}|{CursorSize}|{CrosshairThickness}|{Gap}|{CursorOpacity}";
+        }
+
+        public void ApplyCode()
+        {
+            if (string.IsNullOrWhiteSpace(CursorCode) || !CursorCode.StartsWith("VXH:")) return;
+
+            var parts = CursorCode.Substring(4).Split('|');
+            if (parts.Length < 7) return;
+
+            SelectedShape = Enum.Parse<CrosshairShape>(parts[0]);
+            CursorColorHex = parts[1];
+            CursorOutlineColorHex = parts[2];
+            CursorSize = int.Parse(parts[3]);
+            CrosshairThickness = int.Parse(parts[4]);
+            Gap = int.Parse(parts[5]);
+            CursorOpacity = double.Parse(parts[6]);
+        }
+
+        private void UpdatePreview()
+        {
+            int previewSize = 64;
+            double center = previewSize / 2.0;
+
+            var visual = new DrawingVisual();
+            using (var dc = visual.RenderOpen())
+            {
+                var mainBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(CursorColorHex)) { Opacity = CursorOpacity };
+                var outlineBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(CursorOutlineColorHex)) { Opacity = CursorOpacity };
+
+                double previewScale = 0.6;
+                double scaledSize = CursorSize * previewScale;
+                double scaledGap = Gap * previewScale;
+                double scaledThickness = CrosshairThickness * previewScale;
+                var pen = new Pen(outlineBrush, scaledThickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+
+                switch (SelectedShape)
+                {
+                    case CrosshairShape.Cross:
+                        dc.DrawLine(pen,
+                            new Point(center - scaledSize / 2, center),
+                            new Point(center + scaledSize / 2, center));
+                        dc.DrawLine(pen,
+                            new Point(center, center - scaledSize / 2),
+                            new Point(center, center + scaledSize / 2));
+                        break;
+
+                    case CrosshairShape.Dot:
+                        double dotRadius = scaledSize / 2;
+                        dc.DrawEllipse(mainBrush, pen, new Point(center, center), dotRadius, dotRadius);
+                        break;
+
+                    case CrosshairShape.Circle:
+                        double circleRadius = (scaledSize / 2) - scaledGap;
+                        if (circleRadius < 1) circleRadius = 1;
+                        dc.DrawEllipse(null, pen, new Point(center, center), circleRadius, circleRadius);
+                        break;
+                }
+            }
+
+            var bmp = new RenderTargetBitmap(previewSize, previewSize, 96, 96, PixelFormats.Pbgra32);
+            bmp.Render(visual);
+
+            CursorPreview = bmp;
+        }
+
+        private void SaveIni()
+        {
+            IniFile.Write(_file, new()
+            {
+                ["Shape"] = SelectedShape.ToString(),
+                ["Color"] = CursorColorHex,
+                ["Outline"] = CursorOutlineColorHex,
+                ["Size"] = CursorSize.ToString(),
+                ["Thickness"] = CrosshairThickness.ToString(),
+                ["Gap"] = Gap.ToString(),
+                ["Opacity"] = CursorOpacity.ToString()
+            });
+        }
+
+        private void LoadIni()
+        {
+            if (!File.Exists(_file)) return;
+
+            var ini = IniFile.Read(_file);
+            if (ini.Count == 0) return;
+
+            SelectedShape = Enum.Parse<CrosshairShape>(ini.GetValueOrDefault("Shape", "Cross"));
+            CursorColorHex = ini.GetValueOrDefault("Color", "#00FF00");
+            CursorOutlineColorHex = ini.GetValueOrDefault("Outline", "#000000");
+            CursorSize = int.Parse(ini.GetValueOrDefault("Size", "20"));
+            CrosshairThickness = int.Parse(ini.GetValueOrDefault("Thickness", "2"));
+            Gap = int.Parse(ini.GetValueOrDefault("Gap", "4"));
+            CursorOpacity = double.Parse(ini.GetValueOrDefault("Opacity", "1.0"));
+        }
+
+        #endregion
         #region Button Logic
         private void LoadCustomCursorSets()
         {
@@ -865,7 +1053,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (SelectedCustomCursorSet is null)
                 return;
 
-            var dialog = new SaveFileDialog
+            var dialog = new Microsoft.Win32.SaveFileDialog
             {
                 FileName = $"{SelectedCustomCursorSet.Name}.zip",
                 Filter = $"{Strings.FileTypes_ZipArchive}|*.zip"
@@ -923,7 +1111,7 @@ namespace Voidstrap.UI.ViewModels.Settings
                 return;
             }
 
-            var dialog = new OpenFileDialog
+            var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = "Import Cursor Set",
                 Filter = $"{Strings.FileTypes_ZipArchive}|*.zip",
@@ -1062,7 +1250,7 @@ namespace Voidstrap.UI.ViewModels.Settings
                 return;
             }
 
-            var dialog = new OpenFileDialog
+            var dialog = new Microsoft.Win32.OpenFileDialog
             {
                 Title = dialogTitle,
                 Filter = "PNG files (*.png)|*.png",

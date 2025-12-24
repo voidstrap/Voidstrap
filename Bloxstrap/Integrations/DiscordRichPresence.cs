@@ -190,6 +190,32 @@ namespace Voidstrap.Integrations
             }
         }
 
+        private int LoadFlags()
+        {
+            try
+            {
+                string modsPath = Path.Combine(Paths.Mods, "ClientSettings");
+                string settingsFile = Path.Combine(modsPath, "ClientAppSettings.json");
+
+                if (!File.Exists(settingsFile))
+                {
+                    return 0;
+                }
+
+                string json = File.ReadAllText(settingsFile);
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json, options);
+                int totalFlags = dict?.Count ?? 0;
+
+                return totalFlags;
+            }
+            catch (Exception ex)
+            {
+                return -1;
+            }
+        }
+
         public async Task<bool> SetCurrentGame()
         {
             const string LOG_IDENT = "DiscordRichPresence";
@@ -209,6 +235,13 @@ namespace Voidstrap.Integrations
             var placeId = activity.PlaceId;
             bool teleported = _previousPlaceId.HasValue && _previousPlaceId.Value != placeId;
             _previousPlaceId = placeId;
+
+            int totalFlags = 0;
+
+            if (App.Settings.Prop.FFlagRPCDisplayer)
+            {
+                totalFlags = LoadFlags();
+            }
 
             if (activity.UniverseDetails is null)
             {
@@ -239,7 +272,6 @@ namespace Voidstrap.Integrations
                 ? App.Settings.Prop.CustomGameName!
                 : cleanName.Length < 2 ? cleanName + "\x2800\x2800\x2800" : cleanName;
 
-
             if (teleported)
                 universeName = $"Teleported to {universeName}";
 
@@ -255,13 +287,19 @@ namespace Voidstrap.Integrations
             if (App.Settings.Prop.GameStatusChecked) detailsParts.Add(serverPrivacy);
             if (App.Settings.Prop.ServerLocationGame) detailsParts.Add(serverLocation);
             string details = string.Join(" • ", detailsParts);
-
             if (!string.IsNullOrEmpty(betaTag))
                 details = $"{details} {betaTag}";
 
             string state = App.Settings.Prop.GameCreatorChecked
                 ? $"by {universe.Data.Creator.Name}{(universe.Data.Creator.HasVerifiedBadge ? " ☑️" : "")}"
                 : "";
+
+            if (App.Settings.Prop.FFlagRPCDisplayer)
+            {
+                state = string.IsNullOrWhiteSpace(state)
+                    ? $"FFlags: {totalFlags}"
+                    : $"{state} • FFlags: {totalFlags}";
+            }
 
             string largeImageKey = !string.IsNullOrWhiteSpace(App.Settings.Prop.UseCustomIcon)
                 ? App.Settings.Prop.UseCustomIcon
@@ -305,7 +343,7 @@ namespace Voidstrap.Integrations
                 ProcessRPCMessage(msg, false);
 
             UpdatePresence();
-            App.Logger.WriteLine(LOG_IDENT, $"Updated presence for {details}");
+            App.Logger.WriteLine(LOG_IDENT, $"Updated presence for {details} with FFlags: {totalFlags}");
             return true;
         }
 

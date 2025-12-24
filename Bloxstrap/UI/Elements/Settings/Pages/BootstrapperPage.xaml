@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:avalonEdit="http://icsharpcode.net/sharpdevelop/avalonedit"
     xmlns:local="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.Settings"
@@ -15,133 +16,225 @@
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
-
-    <StackPanel Margin="0,0,14,14">
-
-        <!-- Description -->
+    <StackPanel>
         <TextBlock
             Margin="0,0,0,8"
             FontSize="14"
             Foreground="{StaticResource TextFillColorSecondaryBrush}"
             Text="{x:Static resources:Strings.Menu_Behaviour_Description}" />
+    
+    <TabControl Margin="0,0,14,14">
+        <TabItem Header="General">
+            <StackPanel Margin="10">
 
-        <controls:OptionControl 
-            x:Name="ConfirmLaunchOption"
-            Header="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Title}" 
-            Description="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Description}">
-            <ui:ToggleSwitch IsChecked="{Binding ConfirmLaunches, Mode=TwoWay}" />
-        </controls:OptionControl>
+                <controls:OptionControl 
+                    x:Name="ConfirmLaunchOption"
+                    Header="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Title}" 
+                    Description="{x:Static resources:Strings.Menu_Behaviour_ConfirmLaunches_Description}">
+                    <ui:ToggleSwitch IsChecked="{Binding ConfirmLaunches, Mode=TwoWay}" />
+                </controls:OptionControl>
 
-        <!-- Force Roblox Language -->
-        <controls:OptionControl
-            Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Title}"
-            Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
-            HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
-            <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <!-- Informational Banner -->
-        <ui:InfoBar
-            x:Name="AnselBanner"
-            Margin="0,5,0,-5"
-            Padding="4"
-            IsClosable="True"
-            IsOpen="False"
-            Message="{x:Static resources:Strings.Menu_Behaviour_AnselBanner}"
-            Severity="Informational" />
-
-        <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
-            <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <!-- Multi-instance Option -->
-        <controls:OptionControl 
-            x:Name="AllowMultipleInstancesOption"
-            Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}" 
-            Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}">
-            <ui:ToggleSwitch IsChecked="{Binding MultiInstanceLaunchingEnabled, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-            Header="Allow cross-game teleportation"
-            Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
-            IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
-            <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl 
-            Header="Disable RobloxCrashHandler" 
-            Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
-            <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
-            <ui:CardExpander.Header>
-                <StackPanel>
-                    <TextBlock FontSize="14" Text="Optimizations" />
-                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="Roblox optimization features" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                </StackPanel>
-            </ui:CardExpander.Header>
-            <StackPanel>
-                <ui:CardControl Margin="0,8,0,0" 
-                Header="Some features may not work on all devices. Use them with caution.">
-                    <Image HorizontalAlignment="Center" Source="pack://application:,,,/Resources/MessageBox/Warning.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" />
-                </ui:CardControl>
-                
                 <controls:OptionControl
-    Header="Set CPU cores for Roblox"
-    Description="{Binding CpuSummary}">
-                    <ComboBox Grid.Column="1"
-              Margin="8,0,8,0"
-              Padding="10,5,10,5"
-              Width="200"
-              ItemsSource="{Binding CpuOptions}"
-              SelectedItem="{Binding SelectedCpuPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                </controls:OptionControl>
-                <controls:OptionControl Header="Trim Roblox Memory" Description="Cuts Roblox's memory in half to help with RAM usage. Useful for multi-account use.">
-                    <ui:ToggleSwitch IsChecked="{Binding MultiAccount, Mode=TwoWay}" />
-                </controls:OptionControl>
-                <controls:OptionControl Header="DX12 Features" Description="DX12-like features for Roblox (simulated, not actual DX12).">
-                    <ui:ToggleSwitch IsChecked="{Binding DX12Likely, Mode=TwoWay}" />
-                </controls:OptionControl>
-                <controls:OptionControl Header="Optimize Roblox" Description="Optimizes Roblox based on your current CPU, GPU, and memory.">
-                    <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
+                    Header="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Title}"
+                    Description="{x:Static resources:Strings.Menu_Behaviour_ForceRobloxLanguage_Description}"
+                    HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/Information-on-Roblox-app-localisation">
+                    <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
                 </controls:OptionControl>
 
-                <controls:OptionControl Header="Help Roblox Connect to Better Servers" 
-                        Description="Helps Roblox run networking smoother. Doesn’t choose the best server, just improves connection.">
-                    <ui:ToggleSwitch IsChecked="{Binding IsBetterServersEnabled, Mode=TwoWay}" />
+                <ui:InfoBar
+                    x:Name="AnselBanner"
+                    Margin="0,5,0,-5"
+                    Padding="4"
+                    IsClosable="True"
+                    IsOpen="False"
+                    Message="{x:Static resources:Strings.Menu_Behaviour_AnselBanner}"
+                    Severity="Informational" />
+
+                <controls:OptionControl 
+                    x:Name="AllowMultipleInstancesOption"
+                    Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}" 
+                    Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}">
+                    <ui:ToggleSwitch IsChecked="{Binding MultiInstanceLaunchingEnabled, Mode=TwoWay}" />
                 </controls:OptionControl>
+
+                <controls:OptionControl
+                    Header="Allow cross-game teleportation"
+                    Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
+                    IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
+                    <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+                <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
+                    <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+                  Header="Disable RobloxCrashHandler" 
+                  Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
+                    <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+
+                <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+                    <ui:CardExpander.Header>
+                        <StackPanel>
+                            <TextBlock FontSize="14" Text="Cleaner" />
+                            <TextBlock Margin="0,2,0,0" FontSize="12" Text="Voidstrap will remove old data to save on space" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                    </ui:CardExpander.Header>
+                    <StackPanel>
+                        <controls:OptionControl Header="When should the files get deleted" Description="Files older than the set amount will be deleted.">
+                            <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding CleanerOptions, Mode=OneTime}" Text="{Binding CleanerOption, Mode=TwoWay}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </controls:OptionControl>
+                        <controls:OptionControl Header="Cache" Description="When should the set amount be deleted.">
+                            <ui:ToggleSwitch IsChecked="{Binding CleanerCache, Mode=TwoWay}" />
+                        </controls:OptionControl>
+                        <controls:OptionControl Header="Logs" Description="Old log files will be deleted.">
+                            <ui:ToggleSwitch IsChecked="{Binding CleanerLogs, Mode=TwoWay}" />
+                        </controls:OptionControl>
+                        <controls:OptionControl Header="Voidstrap logs" Description="Voidstrap logs will be deleted.">
+                            <ui:ToggleSwitch IsChecked="{Binding CleanerVoidstrap, Mode=TwoWay}" />
+                        </controls:OptionControl>
+                    </StackPanel>
+                </ui:CardExpander>
+
+                <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+                    <ui:CardExpander.Header>
+                        <StackPanel>
+                            <TextBlock FontSize="14" Text="Optimizations" />
+                            <TextBlock Margin="0,2,0,0" FontSize="12" Text="Roblox optimization features" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                        </StackPanel>
+                    </ui:CardExpander.Header>
+                    <StackPanel>
+                        <ui:CardControl Margin="0,8,0,0" Header="Some features may not work on all devices. Use them with caution.">
+                            <Image HorizontalAlignment="Center" Source="pack://application:,,,/Resources/MessageBox/Warning.png" RenderOptions.BitmapScalingMode="HighQuality" Width="20" />
+                        </ui:CardControl>
+
+                        <controls:OptionControl Header="Set CPU cores for Roblox" Description="{Binding CpuSummary}">
+                            <ComboBox Grid.Column="1"
+                                    Margin="8,0,8,0"
+                                    Padding="10,5,10,5"
+                                    Width="200"
+                                    ItemsSource="{Binding CpuOptions}"
+                                    SelectedItem="{Binding SelectedCpuPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                        </controls:OptionControl>
+
+                        <controls:OptionControl Header="Trim Roblox Memory" Description="Cuts Roblox's memory in half to help with RAM usage. Useful for multi-account use.">
+                            <ui:ToggleSwitch IsChecked="{Binding MultiAccount, Mode=TwoWay}" />
+                        </controls:OptionControl>
+
+                        <controls:OptionControl Header="DX12 Features" Description="DX12-like features for Roblox (simulated, not actual DX12).">
+                            <ui:ToggleSwitch IsChecked="{Binding DX12Likely, Mode=TwoWay}" />
+                        </controls:OptionControl>
+
+                        <controls:OptionControl Header="Optimize Roblox" Description="Optimizes Roblox based on your current CPU, GPU, and memory.">
+                            <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
+                        </controls:OptionControl>
+
+                        <controls:OptionControl Header="Help Roblox Connect to Better Servers" 
+                                              Description="Helps Roblox run networking smoother. Doesn’t choose the best server, just improves connection.">
+                            <ui:ToggleSwitch IsChecked="{Binding IsBetterServersEnabled, Mode=TwoWay}" />
+                        </controls:OptionControl>
+                    </StackPanel>
+                </ui:CardExpander>
             </StackPanel>
-        </ui:CardExpander>
+        </TabItem>
 
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
-            <ui:CardExpander.Header>
-                <StackPanel>
-                    <TextBlock FontSize="14" Text="Cleaner" />
-                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="Voidstrap will remove old data to save on space" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+            <TabItem Header="Lua Scripting" FontWeight="Medium">
+                <StackPanel Margin="12,12,12,12" Height="Auto">
+                    <TextBlock
+                        FontSize="20"
+                        FontWeight="Bold"
+                        Text="Lua Scripting" />
+
+                    <TextBlock
+                        Margin="0,4,0,12"
+                        FontSize="12"
+                        Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                            Text="
+Voidstrap autoexecute scripts allow you to run custom Lua scripts when Roblox launches. 
+This feature is intended for personal automation and legitimate purposes only. 
+Voidstrap is NOT a cheat, hack, or exploit tool, and should NOT be used to gain unfair advantage in games. 
+Scripts are saved to autoexecute.lua in your Voidstrap directory. Use responsibly. No this is not a cheat as it doesn't even touch Robloxs memory!"
+                        TextWrapping="Wrap" />
+
+
+                    <Grid Margin="0,8,0,8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock 
+                                FontSize="14" 
+                                FontWeight="Medium"
+                                Text="Enable Lua Scripting" />
+                            <TextBlock 
+                                Margin="0,2,0,0"
+                                FontSize="12" 
+                                Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                                Text="Toggle to enable or disable Lua script execution on game launch."
+                                TextWrapping="Wrap" />
+
+                        </StackPanel>
+
+                        <ui:ToggleSwitch 
+                            Grid.Column="1" 
+                            VerticalAlignment="Center"
+                            Margin="8,0,0,0"
+                            IsChecked="{Binding EnableLuaScripting, Mode=TwoWay}" />
+                    </Grid>
+
+
+                    <TextBlock
+                        Margin="0,16,0,4"
+                        FontSize="14"
+                        FontWeight="SemiBold"
+                        Text="Lua Script Editor" />
+
+                    <Border
+                        Background="{DynamicResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{DynamicResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="8"
+                        Padding="4"
+                        Height="400">
+                        <avalonEdit:TextEditor
+                            x:Name="LuaScriptEditor"
+                            FontFamily="Consolas"
+                            FontSize="13"
+                            ShowLineNumbers="True"
+                            SyntaxHighlighting="Lua"
+                            Background="#1E1E1E"
+                            Foreground="#D4D4D4"
+                            LineNumbersForeground="#858585"
+                            VerticalScrollBarVisibility="Auto"
+                            HorizontalScrollBarVisibility="Auto" />
+                    </Border>
+
+                    <TextBlock
+                        Margin="0,12,0,4"
+                        FontSize="12"
+                        Foreground="{StaticResource TextFillColorTertiaryBrush}"
+                        Text="Example: Call ExampleFunction() in your Lua script to test. It returns true."
+                        TextWrapping="Wrap" />
+
+                    <ui:Button
+                        Margin="0,8,0,0"
+                        Content="Save Script"
+                        Icon="Save24"
+                        Click="SaveLuaScript_Click"
+                        HorizontalAlignment="Left" />
                 </StackPanel>
-            </ui:CardExpander.Header>
-            <StackPanel>
-                <controls:OptionControl Header="When should the files get deleted" Description="Files older than the set amount will be deleted.">
-                    <ComboBox Width="200" Padding="10,5,10,5" ItemsSource="{Binding CleanerOptions, Mode=OneTime}" Text="{Binding CleanerOption, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </controls:OptionControl>
-                <controls:OptionControl Header="Cache" Description="When should the set amount be deleted.">
-                    <ui:ToggleSwitch IsChecked="{Binding CleanerCache, Mode=TwoWay}" />
-                </controls:OptionControl>
-                <controls:OptionControl Header="Logs" Description="Old log files will be deleted.">
-                    <ui:ToggleSwitch IsChecked="{Binding CleanerLogs, Mode=TwoWay}" />
-                </controls:OptionControl>
-                <controls:OptionControl Header="Voidstrap logs" Description="Voidstrap logs will be deleted.">
-                    <ui:ToggleSwitch IsChecked="{Binding CleanerVoidstrap, Mode=TwoWay}" />
-                </controls:OptionControl>
-            </StackPanel>
-        </ui:CardExpander>
+            </TabItem>
+        </TabControl>
     </StackPanel>
 </ui:UiPage>

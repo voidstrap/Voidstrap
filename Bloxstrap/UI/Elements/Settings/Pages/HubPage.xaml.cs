@@ -20,7 +20,7 @@ using ProcessStartInfo = System.Diagnostics.ProcessStartInfo;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    public partial class HubPage : UiPage
+    public partial class HubPage
     {
         private static readonly Uri ReleasesApiUri =
             new("https://api.github.com/repos/voidstrap/Voidstrap/releases");

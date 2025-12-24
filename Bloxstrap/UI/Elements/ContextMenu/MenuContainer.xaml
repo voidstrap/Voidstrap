@@ -61,6 +61,18 @@
                     </Grid>
                 </MenuItem.Header>
             </MenuItem>
+            <MenuItem x:Name="FlagsMenuItem" IsEnabled="False">
+                <MenuItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Grid.Column="0" Symbol="Flag24"/>
+                        <TextBlock x:Name="FlagsTextBlock" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0" Text="Flags: 0" />
+                    </Grid>
+                </MenuItem.Header>
+            </MenuItem>
             <MenuItem IsEnabled="False">
                 <MenuItem.Header>
                     <Grid>
@@ -94,6 +106,18 @@
                         </Grid.ColumnDefinitions>
                         <ui:SymbolIcon Grid.Column="0" Symbol="ClipboardLink24"/>
                         <TextBlock Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0" Text="{x:Static resources:Strings.ContextMenu_CopyDeeplinkInvite}" />
+                    </Grid>
+                </MenuItem.Header>
+            </MenuItem>
+            <MenuItem x:Name="JoinClosestServerMenuItem" Click="JoinClosestServerMenuItem_Click" Visibility="Collapsed">
+                <MenuItem.Header>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="24"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <ui:SymbolIcon Grid.Column="0" Symbol="Rocket24"/>
+                        <TextBlock x:Name="JoinClosestServerTextBlock" Grid.Column="1" VerticalAlignment="Center" Margin="4,0,0,0" Text="Join Closest Server"/>
                     </Grid>
                 </MenuItem.Header>
             </MenuItem>

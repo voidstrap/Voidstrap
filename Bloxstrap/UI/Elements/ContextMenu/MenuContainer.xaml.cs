@@ -5,6 +5,9 @@ using System.Windows.Interop;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Voidstrap.Integrations;
+using Voidstrap.UI.Elements.Crosshair;
+using Voidstrap.UI.Elements.Settings.Pages;
+using Voidstrap.UI.ViewModels.Settings;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
@@ -19,6 +22,9 @@ namespace Voidstrap.UI.Elements.ContextMenu
         // i wouldve gladly done this as mvvm but turns out that data binding just does not work with menuitems for some reason so idk this sucks
 
         private readonly Watcher _watcher;
+
+        private DispatcherTimer closestServerTimer;
+        private Server? lastClosestServer;
 
         private ActivityWatcher? _activityWatcher => _watcher.ActivityWatcher;
 
@@ -53,12 +59,49 @@ namespace Voidstrap.UI.Elements.ContextMenu
             return text.Substring(0, take) + dots;
         }
 
+        private void LoadFlags()
+        {
+            try
+            {
+                string modsPath = Path.Combine(Paths.Mods, "ClientSettings");
+                string settingsFile = Path.Combine(modsPath, "ClientAppSettings.json");
+
+                if (!File.Exists(settingsFile))
+                {
+                    Dispatcher.Invoke(() => FlagsTextBlock.Text = "Flags: 0");
+                    return;
+                }
+
+                string json = File.ReadAllText(settingsFile);
+
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var dict = JsonSerializer.Deserialize<Dictionary<string, string>>(json, options);
+
+                int totalFlags = dict?.Count ?? 0;
+
+                Dispatcher.Invoke(() => FlagsTextBlock.Text = $"Flags: {totalFlags}");
+            }
+            catch (Exception ex)
+            {
+                Dispatcher.Invoke(() => FlagsTextBlock.Text = "Flags: Error");
+                Debug.WriteLine($"Error loading flags: {ex.Message}");
+            }
+        }
 
         public MenuContainer(Watcher watcher)
         {
             InitializeComponent();
             StartPlayTimeTimer();
             _watcher = watcher;
+
+            closestServerTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(10) };
+            closestServerTimer.Tick += async (_, _) =>
+            {
+                if (_activityWatcher?.Data != null)
+                    await UpdateClosestServerMenuItemText();
+            };
+            closestServerTimer.Start();
+
 
             if (_activityWatcher is not null)
             {
@@ -138,6 +181,162 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 _serverInformationWindow.Activate();
         }
 
+        private async Task UpdateClosestServerMenuItemText()
+        {
+            if (_activityWatcher?.Data == null)
+            {
+                JoinClosestServerMenuItem.Visibility = Visibility.Collapsed;
+                return;
+            }
+
+            JoinClosestServerMenuItem.Visibility = Visibility.Visible;
+            string placeId = _activityWatcher.Data.PlaceId.ToString();
+
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+                string url = $"https://games.roblox.com/v1/games/{placeId}/servers/Public?limit=100";
+
+                HttpResponseMessage response;
+                try
+                {
+                    response = await http.GetAsync(url);
+                }
+                catch (HttpRequestException)
+                {
+                    if (lastClosestServer != null)
+                    {
+                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                    }
+                    else
+                    {
+                        JoinClosestServerTextBlock.Text = "Error Fetching Servers";
+                    }
+                    return;
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    if (lastClosestServer != null)
+                    {
+                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                    }
+                    else
+                    {
+                        JoinClosestServerTextBlock.Text = "Rate Limited";
+                    }
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var serverResponse = JsonSerializer.Deserialize<ServerResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var lowest = serverResponse?.Data?.OrderBy(s => s.Ping).FirstOrDefault();
+
+                if (lowest != null)
+                {
+                    lastClosestServer = lowest;
+                    JoinClosestServerTextBlock.Text = $"Join Closest ({lowest.Ping}ms)";
+                }
+                else
+                {
+                    JoinClosestServerTextBlock.Text = "No Servers Detected";
+                }
+            }
+            catch
+            {
+                if (lastClosestServer != null)
+                {
+                    JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                }
+                else
+                {
+                    JoinClosestServerTextBlock.Text = "Error Fetching Servers";
+                }
+            }
+        }
+
+        private async void JoinClosestServerMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (_activityWatcher?.Data == null)
+            {
+                Frontend.ShowMessageBox("No active game detected.");
+                return;
+            }
+
+            string placeId = _activityWatcher.Data.PlaceId.ToString();
+
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(15) };
+                string url = $"https://games.roblox.com/v1/games/{placeId}/servers/Public?limit=100";
+                var response = await http.GetAsync(url);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.TooManyRequests)
+                {
+                    if (lastClosestServer != null)
+                    {
+                        JoinServer(lastClosestServer.Id, placeId);
+                    }
+                    else
+                    {
+                        Frontend.ShowMessageBox("Rate limited and no cached server available.");
+                    }
+                    return;
+                }
+
+                var json = await response.Content.ReadAsStringAsync();
+                var serverResponse = JsonSerializer.Deserialize<ServerResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                var lowest = serverResponse?.Data?.OrderBy(s => s.Ping).FirstOrDefault();
+
+                if (lowest != null)
+                {
+                    lastClosestServer = lowest;
+                    JoinServer(lowest.Id, placeId);
+                }
+                else if (lastClosestServer != null)
+                {
+                    JoinServer(lastClosestServer.Id, placeId);
+                }
+                else
+                {
+                    Frontend.ShowMessageBox("No servers available.");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (lastClosestServer != null)
+                {
+                    JoinServer(lastClosestServer.Id, placeId);
+                }
+                else
+                {
+                    Frontend.ShowMessageBox($"Failed to join server:\n{ex.Message}");
+                }
+            }
+        }
+
+        private void JoinServer(string serverId, string placeId)
+        {
+            try
+            {
+                _watcher?.KillRobloxProcess();
+                Process.Start(new ProcessStartInfo(
+                    $"roblox://experiences/start?placeId={placeId}&serverId={serverId}")
+                {
+                    UseShellExecute = true
+                });
+                Application.Current.Shutdown();
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox($"Failed to join server:\n{ex.Message}");
+            }
+        }
+
         public void ActivityWatcher_OnLogOpen(object? sender, EventArgs e) => 
             Dispatcher.Invoke(() => LogTracerMenuItem.Visibility = Visibility.Visible);
 
@@ -146,13 +345,26 @@ namespace Voidstrap.UI.Elements.ContextMenu
             if (_activityWatcher is null)
                 return;
 
-            Dispatcher.Invoke(() =>
+            if (App.Settings.Prop.Crosshair)
+            {
+                var crosshairVM = new ModsViewModel();
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    var crosshairWindow = new CrosshairWindow(crosshairVM);
+                    App.Current.Resources["CrosshairWindow"] = crosshairWindow;
+                });
+            }
+
+            Dispatcher.InvokeAsync(async () =>
             {
                 if (_activityWatcher.Data.ServerType == ServerType.Public)
                     InviteDeeplinkMenuItem.Visibility = Visibility.Visible;
 
                 ServerDetailsMenuItem.Visibility = Visibility.Visible;
                 GamePassDetailsMenuItem.Visibility = Visibility.Visible;
+                JoinClosestServerMenuItem.Visibility = Visibility.Visible;
+                await UpdateClosestServerMenuItemText();
 
                 if (App.FastFlags.GetPreset("Players.LogLevel") == "trace")
                 {
@@ -160,15 +372,29 @@ namespace Voidstrap.UI.Elements.ContextMenu
                     ChatLogsMenuItem.Visibility = Visibility.Visible;
                 }
             });
+
             _ = UpdateCurrentGameIconAsync(_activityWatcher.Data);
         }
 
         public void ActivityWatcher_OnGameLeave(object? sender, EventArgs e)
         {
+            if (App.Settings.Prop.Crosshair)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (App.Current.Resources["CrosshairWindow"] is CrosshairWindow window)
+                    {
+                        window.Close();
+                        App.Current.Resources.Remove("CrosshairWindow");
+                    }
+                });
+            }
+
             Dispatcher.Invoke(() => {
                 InviteDeeplinkMenuItem.Visibility = Visibility.Collapsed;
                 ServerDetailsMenuItem.Visibility = Visibility.Collapsed;
                 GamePassDetailsMenuItem.Visibility = Visibility.Collapsed;
+                JoinClosestServerMenuItem.Visibility = Visibility.Collapsed;
 
                 if (App.FastFlags.GetPreset("Players.LogLevel") == "trace")
                 {
@@ -214,6 +440,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
             int exStyle = PInvoke.GetWindowLong(hWnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE);
             exStyle |= 0x00000080; //NativeMethods.WS_EX_TOOLWINDOW;
             PInvoke.SetWindowLong(hWnd, WINDOW_LONG_PTR_INDEX.GWL_EXSTYLE, exStyle);
+            LoadFlags();
         }
 
         private void Window_Closed(object sender, EventArgs e) => App.Logger.WriteLine("MenuContainer::Window_Closed", "Context menu container closed");

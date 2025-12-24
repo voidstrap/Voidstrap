@@ -1,0 +1,11 @@
+﻿<Window x:Class="Voidstrap.UI.Elements.Crosshair.CrosshairWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStyle="None"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Loaded="CrosshairWindow_Loaded">
+    <Canvas x:Name="CrosshairCanvas" Width="200" Height="200"/>
+</Window>
