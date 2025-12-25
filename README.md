@@ -100,7 +100,6 @@
 ### ⚙️ FastFlags & Config  
 - **Settings Backup/Restore** – Save and reload configs or flags.  
 - **FFlag Import/Export & History** – Track and revert changes easily.  
-- **FFlag Bypass Toggler** – Enable/disable the FFlag bypass.  
 - **Support for Invalid/Custom Flags** – Apply unofficial flags.  
 - **Remove Splash Warnings / Skip Startup** – Streamlined launch.  
 - **System Spec Check** – See your PC specs in-app.  
