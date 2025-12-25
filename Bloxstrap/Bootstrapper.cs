@@ -43,6 +43,7 @@ using System.Windows;
 using System.Windows.Forms;
 using System.Windows.Media.Animation;
 using System.Windows.Shell;
+using System.Windows.Threading;
 using Voidstrap.AppData;
 using Voidstrap.Integrations;
 using Voidstrap.RobloxInterfaces;
@@ -87,6 +88,7 @@ namespace Voidstrap
         private System.Timers.Timer? _memoryClearTimer;
         private CancellationTokenSource? _optimizationCts;
         private Process? _fflagRunnerProcess;
+        private DispatcherTimer? _memoryCleanerTimer;
 
         private bool _mustUpgrade => String.IsNullOrEmpty(AppData.State.VersionGuid) || !File.Exists(AppData.ExecutablePath);
         private bool _noConnection = false;
@@ -569,6 +571,40 @@ namespace Voidstrap
                         !App.Settings.Prop.SelectedCpuPriority.Equals("Automatic", StringComparison.OrdinalIgnoreCase))
                     {
                         StartCpuLimitWatcher();
+                    }
+
+                    if (App.Settings.Prop.CleanRobloxNumber > 0)
+                    {
+                        _memoryCleanerTimer?.Stop();
+                        _memoryCleanerTimer = new DispatcherTimer
+                        {
+                            Interval = TimeSpan.FromSeconds(App.Settings.Prop.CleanRobloxNumber)
+                        };
+
+                        _memoryCleanerTimer.Tick += (_, __) =>
+                        {
+                            try
+                            {
+                                RobloxMemoryCleaner.CleanAllRobloxMemory();
+                                App.Logger?.WriteLine("MemoryCleaner",
+                                    $"Roblox memory cleaned at {DateTime.Now:T}");
+                            }
+                            catch (Exception ex)
+                            {
+                                App.Logger?.WriteLine("MemoryCleaner", $"Error cleaning memory: {ex.Message}");
+                            }
+                        };
+
+                        _memoryCleanerTimer.Start();
+
+                        App.Logger?.WriteLine("MemoryCleaner",
+                            $"Memory cleaner started with interval {App.Settings.Prop.CleanRobloxNumber}s");
+                    }
+                    else
+                    {
+                        _memoryCleanerTimer?.Stop();
+                        _memoryCleanerTimer = null;
+                        App.Logger?.WriteLine("MemoryCleaner", "Memory cleaner disabled (Never)");
                     }
 
                     if (App.Settings.Prop?.OptimizeRoblox == true)

@@ -236,6 +236,33 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.Crosshair = value;
         }
 
+        public bool FPSCounter
+        {
+            get => App.Settings.Prop.FPSCounter;
+            set
+            {
+                App.Settings.Prop.FPSCounter = value;
+            }
+        }
+
+        public bool CPUTempCounter
+        {
+            get => App.Settings.Prop.CPUTempCounter;
+            set
+            {
+                App.Settings.Prop.CPUTempCounter = value;
+            }
+        }
+
+        public bool CurrentTimeDisplay
+        {
+            get => App.Settings.Prop.CurrentTimeDisplay;
+            set
+            {
+                App.Settings.Prop.CurrentTimeDisplay = value;
+            }
+        }
+
         public FontModPresetTask TextFontTask { get; } = new();
 
         private void OpenCompatSettings()
@@ -704,42 +731,97 @@ namespace Voidstrap.UI.ViewModels.Settings
             var visual = new DrawingVisual();
             using (var dc = visual.RenderOpen())
             {
-                var mainBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(CursorColorHex)) { Opacity = CursorOpacity };
-                var outlineBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(CursorOutlineColorHex)) { Opacity = CursorOpacity };
+                var mainBrush = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString(CursorColorHex))
+                { Opacity = CursorOpacity };
+
+                var outlineBrush = new SolidColorBrush(
+                    (Color)ColorConverter.ConvertFromString(CursorOutlineColorHex))
+                { Opacity = CursorOpacity };
 
                 double previewScale = 0.6;
-                double scaledSize = CursorSize * previewScale;
-                double scaledGap = Gap * previewScale;
-                double scaledThickness = CrosshairThickness * previewScale;
-                var pen = new Pen(outlineBrush, scaledThickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+                double size = CursorSize * previewScale;
+                double gap = Gap * previewScale;
+                double thickness = Math.Max(1, CrosshairThickness * previewScale);
+                double innerThickness = Math.Max(1, thickness * 0.5);
 
                 switch (SelectedShape)
                 {
                     case CrosshairShape.Cross:
-                        dc.DrawLine(pen,
-                            new Point(center - scaledSize / 2, center),
-                            new Point(center + scaledSize / 2, center));
-                        dc.DrawLine(pen,
-                            new Point(center, center - scaledSize / 2),
-                            new Point(center, center + scaledSize / 2));
-                        break;
+                        {
+
+                            dc.DrawLine(new Pen(outlineBrush, thickness),
+                                new Point(center - size / 2, center),
+                                new Point(center + size / 2, center));
+
+                            dc.DrawLine(new Pen(mainBrush, innerThickness),
+                                new Point(center - size / 2, center),
+                                new Point(center + size / 2, center));
+
+
+                            dc.DrawLine(new Pen(outlineBrush, thickness),
+                                new Point(center, center - size / 2),
+                                new Point(center, center + size / 2));
+
+                            dc.DrawLine(new Pen(mainBrush, innerThickness),
+                                new Point(center, center - size / 2),
+                                new Point(center, center + size / 2));
+                            break;
+                        }
 
                     case CrosshairShape.Dot:
-                        double dotRadius = scaledSize / 2;
-                        dc.DrawEllipse(mainBrush, pen, new Point(center, center), dotRadius, dotRadius);
-                        break;
+                        {
+                            double radius = size / 2;
+
+                            dc.DrawEllipse(
+                                outlineBrush,
+                                null,
+                                new Point(center, center),
+                                radius,
+                                radius);
+
+                            double innerRadius = radius - thickness;
+                            if (innerRadius < 1) innerRadius = 1;
+
+                            dc.DrawEllipse(
+                                mainBrush,
+                                null,
+                                new Point(center, center),
+                                innerRadius,
+                                innerRadius);
+                            break;
+                        }
 
                     case CrosshairShape.Circle:
-                        double circleRadius = (scaledSize / 2) - scaledGap;
-                        if (circleRadius < 1) circleRadius = 1;
-                        dc.DrawEllipse(null, pen, new Point(center, center), circleRadius, circleRadius);
-                        break;
+                        {
+                            double radius = (size / 2) - gap;
+                            if (radius < 1) radius = 1;
+
+                            dc.DrawEllipse(
+                                outlineBrush,
+                                null,
+                                new Point(center, center),
+                                radius,
+                                radius);
+
+                            double innerRadius = radius - thickness;
+                            if (innerRadius < 1) innerRadius = 1;
+
+                            dc.DrawEllipse(
+                                mainBrush,
+                                null,
+                                new Point(center, center),
+                                innerRadius,
+                                innerRadius);
+                            break;
+                        }
                 }
             }
 
-            var bmp = new RenderTargetBitmap(previewSize, previewSize, 96, 96, PixelFormats.Pbgra32);
-            bmp.Render(visual);
+            var bmp = new RenderTargetBitmap(
+                previewSize, previewSize, 96, 96, PixelFormats.Pbgra32);
 
+            bmp.Render(visual);
             CursorPreview = bmp;
         }
 

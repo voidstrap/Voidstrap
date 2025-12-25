@@ -380,7 +380,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
 
             var theme = ParseXmlAttribute<Theme>(xmlElement, "Theme", Theme.Default);
             if (theme == Theme.Default)
-                theme = App.Settings.Prop.Theme;
+                theme = App.Settings.Prop.Theme2;
 
             var wpfUiTheme = theme.GetFinal() == Theme.Dark ? Wpf.Ui.Appearance.ThemeType.Dark : Wpf.Ui.Appearance.ThemeType.Light;
 

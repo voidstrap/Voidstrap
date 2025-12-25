@@ -5,6 +5,8 @@ using System.Management;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Controls;
+using System.Windows.Threading;
 using Voidstrap.AppData;
 using Voidstrap.RobloxInterfaces;
 
@@ -16,10 +18,14 @@ namespace Voidstrap.UI.ViewModels.Settings
         private static readonly ConcurrentDictionary<string, (string Url, DateTime Expiry)> _gameIconCache = new();
         private static readonly ConcurrentDictionary<string, Task<string>> _ongoingRequests = new();
         private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
+        private DispatcherTimer? _memoryCleanerTimer;
+        public List<string> MemoryCleanerIntervals => _intervals.Keys.ToList();
+
         public BehaviourViewModel()
         {
             CleanerItems = new List<string>(App.Settings.Prop.CleanerDirectories);
             LoadCpuOptions();
+            SelectedMemoryCleanerInterval = _intervals.FirstOrDefault(x => x.Value == App.Settings.Prop.CleanRobloxNumber).Key ?? "Never";
         }
 
         private string _cpuModelName;
@@ -235,6 +241,31 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.ForceRobloxLanguage;
             set => App.Settings.Prop.ForceRobloxLanguage = value;
+        }
+
+        private readonly Dictionary<string, int> _intervals = new()
+{
+    { "Never", 0 },
+    { "5s", 5 }, { "10s", 10 }, { "15s", 15 }, { "30s", 30 },
+    { "1m", 60 }, { "2m", 120 }, { "5m", 300 }, { "10m", 600 },
+    { "15m", 900 }, { "30m", 1800 }
+};
+
+
+        private string _selectedMemoryCleanerInterval = "Never";
+        public string SelectedMemoryCleanerInterval
+        {
+            get => _selectedMemoryCleanerInterval;
+            set
+            {
+                if (_selectedMemoryCleanerInterval != value)
+                {
+                    _selectedMemoryCleanerInterval = value;
+                    OnPropertyChanged(nameof(SelectedMemoryCleanerInterval));
+                    if (_intervals.TryGetValue(value, out int seconds))
+                        App.Settings.Prop.CleanRobloxNumber = seconds;
+                }
+            }
         }
 
         public bool RenameClientToEurotrucks2

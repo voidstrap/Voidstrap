@@ -34,12 +34,12 @@
                      UriSource="pack://application:,,,/Voidstrap.ico" />
         <media:QuadraticEase x:Key="QuadEaseOut" EasingMode="EaseInOut" />
         <LinearGradientBrush x:Key="LightningBrush"
-                             StartPoint="0,0"
-                             EndPoint="1,0">
+                     StartPoint="0,0"
+                     EndPoint="1,0">
             <GradientStop Color="#00000000" Offset="0.0"/>
-            <GradientStop Color="#AA8A2BE2" Offset="0.45"/>
-            <GradientStop Color="#FFD18CFF" Offset="0.5"/>
-            <GradientStop Color="#AA8A2BE2" Offset="0.55"/>
+            <GradientStop Color="#AAFFFFFF" Offset="0.45"/>
+            <GradientStop Color="#FFFFFFFF" Offset="0.5"/>
+            <GradientStop Color="#AAFFFFFF" Offset="0.55"/>
             <GradientStop Color="#00000000" Offset="1.0"/>
         </LinearGradientBrush>
 
@@ -123,11 +123,11 @@
 
 
         <Grid x:Name="IntroOverlay"
-              Grid.RowSpan="3"
-              Panel.ZIndex="999"
-              Background="#CC06030B"
-              Opacity="1"
-              RenderTransformOrigin="0.5,0.5">
+      Grid.RowSpan="3"
+      Panel.ZIndex="999"
+      Background="#CC0A0A0A"
+      Opacity="1"
+      RenderTransformOrigin="0.5,0.5">
 
             <Grid.RenderTransform>
                 <ScaleTransform x:Name="IntroScaleTransform"

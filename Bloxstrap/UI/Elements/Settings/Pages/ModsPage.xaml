@@ -182,6 +182,24 @@
                         </StackPanel>
                     </ui:CardExpander>
 
+                    <ui:CardExpander Margin="0,8,0,0" IsExpanded="False" Header="Custom UI Mods">
+                        <StackPanel>
+                            
+                            <controls:OptionControl Header="Windows FPS Counter" Description="Displays your computer's FPS.">
+                                <ui:ToggleSwitch IsChecked="{Binding FPSCounter, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="CPU Temp" Description="Displays your CPU temperature.">
+                                <ui:ToggleSwitch IsChecked="{Binding CPUTempCounter, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+                            <controls:OptionControl Header="Current Time" Description="Displays the current system time.">
+                                <ui:ToggleSwitch IsChecked="{Binding CurrentTimeDisplay, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+                        </StackPanel>
+                    </ui:CardExpander>
+
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Description}" Header="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Title}">
                         <ui:ToggleSwitch IsChecked="{Binding OldAvatarBackgroundTask.NewState, Mode=TwoWay}" />
                     </controls:OptionControl>

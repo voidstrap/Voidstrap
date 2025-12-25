@@ -16,7 +16,7 @@ namespace Voidstrap.Models.Persistable
         public List<string> CleanerDirectories { get; set; } = new List<string>();
         public string BootstrapperTitle { get; set; } = App.ProjectName;
         public string BootstrapperIconCustomLocation { get; set; } = "";
-        public Theme Theme { get; set; } = Theme.Voidstrap;
+        public Theme Theme2 { get; set; } = Theme.Dark;
         public string? SelectedCustomTheme { get; set; } = null;
 
         public bool CheckForUpdates { get; set; } = true;
@@ -26,6 +26,8 @@ namespace Voidstrap.Models.Persistable
         public int TotalPhysicalCores { get; set; } = Environment.ProcessorCount;
         public bool IsChannelEnabled { get; set; } = false;
         public bool UpdateRoblox { get; set; } = true;
+
+        public int CleanRobloxNumber = 0;
         public bool DisableCrash { get; set; } = false;
         public int CpuCoreLimit { get; set; } = Environment.ProcessorCount;
         public string ShiftlockCursorSelectedPath { get; set; } = "";
@@ -52,7 +54,7 @@ namespace Voidstrap.Models.Persistable
         public bool MultiInstanceLaunching { get; set; } = false;
         public bool EnableCustomStatusDisplay { get; set; } = true;
         public bool RenameClientToEuroTrucks2 { get; set; } = false;
-        public bool SnowWOWSOCOOLWpfSnowbtw { get; set; } = false;
+        public bool SnowWOWSOCOOLWpfSnowbtw2 { get; set; } = true;
 
         public string ClientPath { get; set; } = Path.Combine(Paths.Base, "Roblox", "Player");
 
@@ -66,6 +68,11 @@ namespace Voidstrap.Models.Persistable
 
         public bool FFlagRPCDisplayer { get; set; } = true;
 
+        public bool FPSCounter { get; set; } = false;
+
+        public bool CPUTempCounter { get; set; } = false;
+
+        public bool CurrentTimeDisplay { get; set; } = false;
         public bool ExclusiveFullscreen { get; set; } = false;
         public bool Crosshair { get; set; } = false;
         public bool LockDefault { get; set; } = false;

@@ -14,16 +14,18 @@ public static class RobloxMemoryCleaner
         "Roblox",
         "RobloxStudioBeta"
     };
+
     public static void CleanAllRobloxMemory()
     {
         int totalTrimmed = 0;
+
         foreach (string procName in RobloxProcesses)
         {
-            Process[] procs = null;
+            Process[] processes = Array.Empty<Process>();
             try
             {
-                procs = Process.GetProcessesByName(procName);
-                foreach (var proc in procs)
+                processes = Process.GetProcessesByName(procName);
+                foreach (var proc in processes)
                 {
                     try
                     {
@@ -37,22 +39,17 @@ public static class RobloxMemoryCleaner
                             totalTrimmed++;
                         }
                     }
-                    catch {}
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to trim {proc.ProcessName}:{proc.Id} - {ex.Message}");
+                    }
                     finally
                     {
-                        try { proc.Dispose(); } catch { }
+                        proc.Dispose();
                     }
                 }
             }
-            catch {}
-            finally
-            {
-                if (procs != null)
-                {
-                    foreach (var p in procs)
-                        try { p.Dispose(); } catch { }
-                }
-            }
+            catch { }
         }
 
         if (totalTrimmed == 0)

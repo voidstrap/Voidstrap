@@ -91,6 +91,7 @@
 - **Memory / GPU Optimizer (BETA)** – “Optimize Roblox” & “Trim Roblox Memory” improve performance.  
 - **Custom RPC Editor** – Design your own Discord Rich Presence for Voidstrap.
 - **Music Player with Browser** – Built-in browser and music player. 
+- **Plugins Page (EARLY ACCESS)** – Manage experimental plugins.
 
 ### ⚙️ FastFlags & Config  
 - **Settings Backup/Restore** – Save and reload configs or flags.  

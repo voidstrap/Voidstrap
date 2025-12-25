@@ -65,8 +65,8 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool Snowww
         {
-            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
-            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
+            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2;
+            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2 = value;
         }
 
         #region Properties
@@ -75,10 +75,10 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public Theme Theme
         {
-            get => App.Settings.Prop.Theme;
+            get => App.Settings.Prop.Theme2;
             set
             {
-                App.Settings.Prop.Theme = value;
+                App.Settings.Prop.Theme2 = value;
                 ((MainWindow)Window.GetWindow(_page)!).ApplyTheme();
             }
         }

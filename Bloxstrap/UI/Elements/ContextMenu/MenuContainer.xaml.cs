@@ -6,7 +6,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Voidstrap.Integrations;
 using Voidstrap.UI.Elements.Crosshair;
+using Voidstrap.UI.Elements.FPS;
 using Voidstrap.UI.Elements.Settings.Pages;
+using Voidstrap.UI.ViewModels;
 using Voidstrap.UI.ViewModels.Settings;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -356,6 +358,28 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 });
             }
 
+            if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CPUTempCounter || App.Settings.Prop.CurrentTimeDisplay)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (App.Current.Resources["OverlayWindow"] is Voidstrap.UI.Elements.Overlay.OverlayWindow existing)
+                    {
+                        if (existing.IsLoaded)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            App.Current.Resources.Remove("OverlayWindow");
+                        }
+                    }
+
+                    var overlay = new Voidstrap.UI.Elements.Overlay.OverlayWindow();
+                    overlay.Show();
+                    App.Current.Resources["OverlayWindow"] = overlay;
+                });
+            }
+
             Dispatcher.InvokeAsync(async () =>
             {
                 if (_activityWatcher.Data.ServerType == ServerType.Public)
@@ -378,7 +402,6 @@ namespace Voidstrap.UI.Elements.ContextMenu
 
         public void ActivityWatcher_OnGameLeave(object? sender, EventArgs e)
         {
-            if (App.Settings.Prop.Crosshair)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -388,8 +411,17 @@ namespace Voidstrap.UI.Elements.ContextMenu
                         App.Current.Resources.Remove("CrosshairWindow");
                     }
                 });
-            }
+                }
 
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (App.Current.Resources["OverlayWindow"] is Voidstrap.UI.Elements.Overlay.OverlayWindow overlay)
+                    {
+                        overlay.Close();
+                        App.Current.Resources.Remove("OverlayWindow");
+                    }
+                });
+            
             Dispatcher.Invoke(() => {
                 InviteDeeplinkMenuItem.Visibility = Visibility.Collapsed;
                 ServerDetailsMenuItem.Visibility = Visibility.Collapsed;

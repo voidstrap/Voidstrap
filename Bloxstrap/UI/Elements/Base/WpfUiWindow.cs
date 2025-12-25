@@ -28,7 +28,7 @@ namespace Voidstrap.UI.Elements.Base
         /// </summary>
         public void ApplyTheme()
         {
-            var finalThemeEnum = App.Settings.Prop.Theme.GetFinal();
+            var finalThemeEnum = App.Settings.Prop.Theme2.GetFinal();
             var currentTheme = finalThemeEnum == Enums.Theme.Light ? ThemeType.Light : ThemeType.Dark;
 
             if (_lastAppliedTheme == currentTheme)

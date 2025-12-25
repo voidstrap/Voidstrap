@@ -164,7 +164,7 @@ namespace Voidstrap.UI.Elements.Editor
 
         private void LoadHighlightingTheme()
         {
-            string name = $"Editor-Theme-{App.Settings.Prop.Theme.GetFinal()}.xshd";
+            string name = $"Editor-Theme-{App.Settings.Prop.Theme2.GetFinal()}.xshd";
             using Stream xmlStream = Resource.GetStream(name);
             using XmlReader reader = XmlReader.Create(xmlStream);
             UIXML.SyntaxHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);

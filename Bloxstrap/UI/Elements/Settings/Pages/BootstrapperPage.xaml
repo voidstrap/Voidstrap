@@ -138,11 +138,17 @@
                             <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
                         </controls:OptionControl>
 
-                        <controls:OptionControl Header="Help Roblox Connect to Better Servers" 
-                                              Description="Helps Roblox run networking smoother. Doesn’t choose the best server, just improves connection.">
-                            <ui:ToggleSwitch IsChecked="{Binding IsBetterServersEnabled, Mode=TwoWay}" />
-                        </controls:OptionControl>
-                    </StackPanel>
+                            <controls:OptionControl Header="Roblox Memory Cleaner"
+                        Description="Select how often Roblox memory should be cleaned.">
+                                <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                                    <TextBlock VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <ComboBox Width="150"
+                  ItemsSource="{Binding MemoryCleanerIntervals}"
+                  SelectedItem="{Binding SelectedMemoryCleanerInterval, Mode=TwoWay}"/>
+                                </StackPanel>
+                            </controls:OptionControl>
+
+                        </StackPanel>
                 </ui:CardExpander>
             </StackPanel>
         </TabItem>
