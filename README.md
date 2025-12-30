@@ -2,7 +2,7 @@
 
 **Voidstrap** is a modern, powerful fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), built to give you **maximum control, performance, and customization** for your **Roblox** experience.
 
-Designed with a refined UI, improved stability, and advanced tooling, Voidstrap puts you in charge of how Roblox runs — not the other way around.
+Designed with a refined UI, improved stability, and advanced tooling, Voidstrap puts you in charge of how Roblox runs, not the other way around.
 
 <p align="center">
   <img
