@@ -150,11 +150,6 @@
             <ui:ToggleSwitch IsChecked="{Binding UpdateRoblox, Mode=TwoWay}" />
         </controls:OptionControl>
 
-
-        <controls:OptionControl Description="Uses Nvidia Profile Inspector Filters that Optimize Roblox." Header="Nvidia Filters">
-            <ui:ToggleSwitch IsChecked="{Binding PotatoQuality, Mode=TwoWay}" />
-        </controls:OptionControl>
-
         <controls:OptionControl
     Header="Resolution Changer"
     Description="Select a resolution for your primary monitor">

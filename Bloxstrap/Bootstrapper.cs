@@ -372,54 +372,99 @@ namespace Voidstrap
 
             try
             {
-                App.Logger.WriteLine(LOG_IDENT, $"Fetching client version info for channel: {Deployment.Channel}");
+                App.Logger.WriteLine(LOG_IDENT,
+                    $"Fetching client version info for channel: {Deployment.Channel}");
+
                 ClientVersion clientVersion;
 
-                string jsonText;
-
-                try
+                using (var response = await App.HttpClient.GetAsync(
+                    Deployment.GetInfoUrl(Deployment.Channel),
+                    HttpCompletionOption.ResponseHeadersRead))
                 {
-                    jsonText = await App.HttpClient.GetStringAsync(Deployment.GetInfoUrl(Deployment.Channel));
-                    if (jsonText.TrimStart().StartsWith("<"))
+                    if (!response.IsSuccessStatusCode)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, "❌ Got HTML instead of JSON — likely 403 or 404 error.");
-                        throw new Exception("Invalid JSON: Received HTML from server");
+                        App.Logger.WriteLine(LOG_IDENT,
+                            $"❌ HTTP {(int)response.StatusCode} ({response.StatusCode})");
+
+                        if (response.StatusCode == HttpStatusCode.Forbidden)
+                        {
+                            App.Logger.WriteLine(LOG_IDENT,
+                                "403 Forbidden — switching to default channel.");
+
+                            Deployment.Channel = Deployment.DefaultChannel;
+                            clientVersion = await Deployment.GetInfo(Deployment.Channel);
+                            goto VersionInfoOK;
+                        }
+
+                        throw new HttpRequestException(
+                            $"Bad HTTP status: {response.StatusCode}");
                     }
+
+                    var mediaType = response.Content.Headers.ContentType?.MediaType;
+                    if (mediaType != "application/json")
+                    {
+                        var preview = await response.Content.ReadAsStringAsync();
+                        App.Logger.WriteLine(LOG_IDENT,
+                            $"❌ Expected JSON but got '{mediaType}'. Preview:\n" +
+                            preview[..Math.Min(300, preview.Length)]);
+
+                        throw new Exception("Invalid response content-type");
+                    }
+
+                    var jsonText = await response.Content.ReadAsStringAsync();
+
                     clientVersion = JsonSerializer.Deserialize<ClientVersion>(jsonText)
                         ?? throw new Exception("ClientVersion JSON was null.");
                 }
-                catch (HttpRequestException ex) when (ex.StatusCode == HttpStatusCode.Forbidden)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"403 on {Deployment.Channel} — switching to default channel.");
-                    Deployment.Channel = Deployment.DefaultChannel;
-                    clientVersion = await Deployment.GetInfo(Deployment.Channel);
-                }
-                catch (JsonException ex)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Invalid JSON during GetInfo(): {ex.Message}");
-                    throw;
-                }
+
+            VersionInfoOK:
 
                 _latestVersionGuid = clientVersion.VersionGuid;
-                _latestVersionDirectory = Path.Combine(Paths.Versions, _latestVersionGuid);
-                string pkgManifestUrl = $"https://setup.rbxcdn.com/{_latestVersionGuid}-rbxPkgManifest.txt";
-                App.Logger.WriteLine(LOG_IDENT, $"Downloading manifest from {pkgManifestUrl}");
+                _latestVersionDirectory =
+                    Path.Combine(Paths.Versions, _latestVersionGuid);
 
-                var pkgManifestData = await App.HttpClient.GetStringAsync(pkgManifestUrl);
+                var pkgManifestUrl =
+                    $"https://setup.rbxcdn.com/{_latestVersionGuid}-rbxPkgManifest.txt";
 
-                if (pkgManifestData.TrimStart().StartsWith("<"))
+                App.Logger.WriteLine(LOG_IDENT,
+                    $"Downloading manifest from {pkgManifestUrl}");
+
+                using (var manifestResp = await App.HttpClient.GetAsync(
+                    pkgManifestUrl,
+                    HttpCompletionOption.ResponseHeadersRead))
                 {
-                    App.Logger.WriteLine(LOG_IDENT, "❌ Manifest returned HTML — skipping manifest parse.");
-                    _versionPackageManifest = new("");
-                    return;
-                }
+                    if (!manifestResp.IsSuccessStatusCode)
+                    {
+                        App.Logger.WriteLine(LOG_IDENT,
+                            $"❌ Manifest HTTP {(int)manifestResp.StatusCode} ({manifestResp.StatusCode})");
 
-                _versionPackageManifest = new(pkgManifestData);
-                App.Logger.WriteLine(LOG_IDENT, $"Manifest successfully downloaded with {_versionPackageManifest.Count} entries.");
+                        _versionPackageManifest = new("");
+                        return;
+                    }
+
+                    var manifestText =
+                        await manifestResp.Content.ReadAsStringAsync();
+
+                    if (manifestText.TrimStart().StartsWith("<"))
+                    {
+                        App.Logger.WriteLine(LOG_IDENT,
+                            "❌ Manifest returned HTML — skipping parse.");
+
+                        _versionPackageManifest = new("");
+                        return;
+                    }
+
+                    _versionPackageManifest = new(manifestText);
+
+                    App.Logger.WriteLine(LOG_IDENT,
+                        $"Manifest downloaded with {_versionPackageManifest.Count} entries.");
+                }
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(LOG_IDENT, $"Critical failure in GetLatestVersionInfo: {ex}");
+                App.Logger.WriteLine(LOG_IDENT,
+                    $"❌ Critical failure in GetLatestVersionInfo:\n{ex}");
+
                 _versionPackageManifest = new("");
             }
         }
@@ -573,39 +618,7 @@ namespace Voidstrap
                         StartCpuLimitWatcher();
                     }
 
-                    if (App.Settings.Prop.CleanRobloxNumber > 0)
-                    {
-                        _memoryCleanerTimer?.Stop();
-                        _memoryCleanerTimer = new DispatcherTimer
-                        {
-                            Interval = TimeSpan.FromSeconds(App.Settings.Prop.CleanRobloxNumber)
-                        };
-
-                        _memoryCleanerTimer.Tick += (_, __) =>
-                        {
-                            try
-                            {
-                                RobloxMemoryCleaner.CleanAllRobloxMemory();
-                                App.Logger?.WriteLine("MemoryCleaner",
-                                    $"Roblox memory cleaned at {DateTime.Now:T}");
-                            }
-                            catch (Exception ex)
-                            {
-                                App.Logger?.WriteLine("MemoryCleaner", $"Error cleaning memory: {ex.Message}");
-                            }
-                        };
-
-                        _memoryCleanerTimer.Start();
-
-                        App.Logger?.WriteLine("MemoryCleaner",
-                            $"Memory cleaner started with interval {App.Settings.Prop.CleanRobloxNumber}s");
-                    }
-                    else
-                    {
-                        _memoryCleanerTimer?.Stop();
-                        _memoryCleanerTimer = null;
-                        App.Logger?.WriteLine("MemoryCleaner", "Memory cleaner disabled (Never)");
-                    }
+                    RestartMemoryCleanerFromJson();
 
                     if (App.Settings.Prop?.OptimizeRoblox == true)
                     {
@@ -817,6 +830,56 @@ namespace Voidstrap
             {
                 try { StopMemoryAndProcessOptimizer(); } catch { }
             }
+        }
+
+        private void RestartMemoryCleanerFromJson()
+        {
+            var settings = VoidstrapRobloxSettingsManager.Load();
+            int seconds = settings.MemoryCleanerIntervalSeconds;
+
+            _memoryCleanerTimer?.Stop();
+            _memoryCleanerTimer = null;
+
+            if (seconds <= 0)
+            {
+                App.Logger?.WriteLine(
+                    "MemoryCleaner",
+                    "Memory cleaner disabled (Never)"
+                );
+                return;
+            }
+
+            _memoryCleanerTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(seconds)
+            };
+
+            _memoryCleanerTimer.Tick += (_, __) =>
+            {
+                try
+                {
+                    RobloxMemoryCleaner.CleanAllRobloxMemory();
+
+                    App.Logger?.WriteLine(
+                        "MemoryCleaner",
+                        $"Roblox memory cleaned at {DateTime.Now:T}"
+                    );
+                }
+                catch (Exception ex)
+                {
+                    App.Logger?.WriteLine(
+                        "MemoryCleaner",
+                        $"Error cleaning memory: {ex}"
+                    );
+                }
+            };
+
+            _memoryCleanerTimer.Start();
+
+            App.Logger?.WriteLine(
+                "MemoryCleaner",
+                $"Memory cleaner started with interval {seconds}s"
+            );
         }
 
         private void HandleFullBright()

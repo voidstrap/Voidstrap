@@ -3,67 +3,133 @@ using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Windows.Forms;
 
-public class RobloxFullscreen
+public static class RobloxFullscreen
 {
+    private const int GWL_STYLE = -16;
+
+    private const uint WS_CAPTION = 0x00C00000;
+    private const uint WS_THICKFRAME = 0x00040000;
+    private const uint WS_MINIMIZE = 0x20000000;
+    private const uint WS_MAXIMIZE = 0x01000000;
+    private const uint WS_SYSMENU = 0x00080000;
+
+    private const uint SWP_NOZORDER = 0x0004; // whys this needed again gulp ANT!!
+    private const uint SWP_FRAMECHANGED = 0x0020;
+    private const uint SWP_SHOWWINDOW = 0x0040;
+
+    private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
+
+    [DllImport("user32.dll")]
+    private static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+    [DllImport("user32.dll")]
+    private static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetWindowPos(
+        IntPtr hWnd,
+        IntPtr hWndInsertAfter,
+        int X,
+        int Y,
+        int cx,
+        int cy,
+        uint uFlags);
+
     [DllImport("user32.dll")]
     private static extern bool SetForegroundWindow(IntPtr hWnd);
 
     [DllImport("user32.dll")]
-    private static extern bool IsWindowVisible(IntPtr hWnd);
+    private static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
 
-    [DllImport("user32.dll")]
-    private static extern void keybd_event(byte bVk, byte bScan, uint dwFlags, int dwExtraInfo);
-
-
-    private const byte VK_MENU = 0x12;
-    private const byte VK_RETURN = 0x0D;
-    private const uint KEYEVENTF_KEYUP = 0x0002;
-
-    public static void WaitAndTriggerFullscreen()
+    public static void WaitAndForceBorderlessFullscreen()
     {
-        const string LOG_IDENT = "RobloxFullscreen::WaitAndTriggerAltEnter";
-
+        const string LOG = "RobloxFullscreen";
         string processName = Voidstrap.App.RobloxPlayerAppName.Split('.')[0];
-        Voidstrap.App.Logger.WriteLine(LOG_IDENT, $"Waiting for {processName} to start and become visible...");
+
+        Voidstrap.App.Logger.WriteLine(LOG, $"Waiting for {processName} window…");
 
         var sw = Stopwatch.StartNew();
+
         while (sw.Elapsed.TotalSeconds < 60)
         {
-            Process[] processes = Process.GetProcessesByName(processName);
+            var roblox = Process.GetProcessesByName(processName)
+                .FirstOrDefault(p => p.MainWindowHandle != IntPtr.Zero);
 
-            if (processes.Length > 0)
+            if (roblox != null)
             {
-                Process roblox = processes[0];
-                roblox.Refresh();
-
-                if (roblox.MainWindowHandle != IntPtr.Zero && IsWindowVisible(roblox.MainWindowHandle))
-                {
-                    Voidstrap.App.Logger.WriteLine(LOG_IDENT, "Found visible Roblox window, triggering Alt+Enter");
-
-                    SetForegroundWindow(roblox.MainWindowHandle);
-                    Thread.Sleep(500);
-
-                    SendAltEnter();
-                    Voidstrap.App.Logger.WriteLine(LOG_IDENT, "Alt+Enter triggered");
-                    return;
-                }
+                ForceBorderlessFullscreen(roblox.MainWindowHandle);
+                return;
             }
 
-            Thread.Sleep(500);
+            Thread.Sleep(400);
         }
 
-        Voidstrap.App.Logger.WriteLine(LOG_IDENT, "Timed out waiting for Roblox window");
+        Voidstrap.App.Logger.WriteLine(LOG, "Timed out waiting for Roblox window");
     }
 
-    private static void SendAltEnter()
+    private static void ForceBorderlessFullscreen(IntPtr hwnd)
     {
-        keybd_event(VK_MENU, 0, 0, 0);
+        const string LOG = "RobloxFullscreen";
 
-        keybd_event(VK_RETURN, 0, 0, 0);
+        var screen = Screen.FromHandle(hwnd).Bounds;
+        var sw = Stopwatch.StartNew();
 
-        keybd_event(VK_RETURN, 0, KEYEVENTF_KEYUP, 0);
+        while (sw.Elapsed.TotalSeconds < 15)
+        {
+            SetForegroundWindow(hwnd);
 
-        keybd_event(VK_MENU, 0, KEYEVENTF_KEYUP, 0);
+            int style = GetWindowLong(hwnd, GWL_STYLE);
+
+            style &= unchecked((int)~(
+                WS_CAPTION |
+                WS_THICKFRAME |
+                WS_MINIMIZE |
+                WS_MAXIMIZE |
+                WS_SYSMENU));
+
+            SetWindowLong(hwnd, GWL_STYLE, style);
+
+            SetWindowPos(
+                hwnd,
+                HWND_TOPMOST,
+                screen.X,
+                screen.Y,
+                screen.Width,
+                screen.Height,
+                SWP_FRAMECHANGED | SWP_SHOWWINDOW);
+
+            Thread.Sleep(250);
+
+            if (IsFullscreen(hwnd, screen))
+            {
+                Voidstrap.App.Logger.WriteLine(LOG, "Borderless fullscreen confirmed");
+                return;
+            }
+        }
+
+        Voidstrap.App.Logger.WriteLine(LOG, "Failed to enforce fullscreen");
+    }
+
+    private static bool IsFullscreen(IntPtr hwnd, System.Drawing.Rectangle screen)
+    {
+        if (!GetWindowRect(hwnd, out RECT r))
+            return false;
+
+        int width = r.Right - r.Left;
+        int height = r.Bottom - r.Top;
+
+        return Math.Abs(width - screen.Width) <= 5 &&
+               Math.Abs(height - screen.Height) <= 5;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct RECT
+    {
+        public int Left;
+        public int Top;
+        public int Right;
+        public int Bottom;
     }
 }

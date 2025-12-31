@@ -14,7 +14,7 @@ namespace Voidstrap.Models.SettingTasks
                 return null;
 
             using var fileStream = File.OpenRead(_filePath);
-            string hash = MD5Hash.Stringify(App.MD5Provider.ComputeHash(fileStream));
+            string hash = Convert.ToHexString(App.ComputeSha256(fileStream));
 
             return EmojiTypeEx.Hashes.Where(x => x.Value == hash);
         }

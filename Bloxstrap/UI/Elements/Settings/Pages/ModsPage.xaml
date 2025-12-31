@@ -8,6 +8,7 @@
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
     xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
+    xmlns:conv="clr-namespace:Voidstrap.Converters"
     xmlns:settings="clr-namespace:Voidstrap.UI.ViewModels.Settings"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="ModsPage"
@@ -16,6 +17,11 @@
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
+
+    <Page.Resources>
+        <conv:EnumToVisibilityConverter x:Key="EnumToVisibilityConverter"/>
+        <conv:EnumNotEqualsVisibilityConverter x:Key="EnumNotEqualsVisibilityConverter"/>
+    </Page.Resources>
 
     <StackPanel Margin="0,0,14,14">
         <TextBlock
@@ -89,25 +95,25 @@
                     <ui:CardExpander IsExpanded="False" Header="Custom Crosshair">
                         <StackPanel>
 
-                            <ui:CardAction 
-            Grid.Row="0" 
-            Grid.Column="0"  
-            Icon="CursorHover24" 
-            Command="models:GlobalViewModel.OpenWebpageCommand" 
+                            <ui:CardAction
+            Grid.Row="0"
+            Grid.Column="0"
+            Icon="CursorHover24"
+            Command="models:GlobalViewModel.OpenWebpageCommand"
             CommandParameter="https://discord.com/channels/1327967202015580223/1453208164030873814">
 
                                 <StackPanel>
-                                    <TextBlock 
-                    FontSize="14" 
-                    Text="Crosshair Codes" 
+                                    <TextBlock
+                    FontSize="14"
+                    Text="Crosshair Codes"
                     FontWeight="Medium" />
 
-                                    <TextBlock 
-                    Margin="0,2,0,0" 
-                    FontSize="12" 
-                    Text="Post or Share your Crosshair Codes with others!" 
-                    Padding="0,0,16,0"  
-                    Foreground="{DynamicResource TextFillColorTertiaryBrush}" 
+                                    <TextBlock
+                    Margin="0,2,0,0"
+                    FontSize="12"
+                    Text="Post or Share your Crosshair Codes with others!"
+                    Padding="0,0,16,0"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                     TextWrapping="Wrap" />
                                 </StackPanel>
                             </ui:CardAction>
@@ -121,62 +127,125 @@
                       ItemsSource="{Binding CrosshairShapes}"
                       SelectedItem="{Binding SelectedShape, Mode=TwoWay}" />
                             </controls:OptionControl>
-                            
-                            <controls:OptionControl Header="Cursor Color" Description="Set the main cursor color (HEX).">
-                                <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBox Width="120"
-                         Text="{Binding CursorColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <ui:Button Content="Pick" Command="{Binding PickCursorColorCommand}" Margin="4,0,0,0"/>
+
+                            <controls:OptionControl
+            Header="GIF Crosshair"
+            Description="Use an animated GIF URL as your crosshair."
+            Visibility="{Binding SelectedShape, Converter={StaticResource EnumToVisibilityConverter}, ConverterParameter=Image}">
+
+                                <StackPanel>
+                                    <TextBox
+                    Width="260"
+                    Text="{Binding ImageUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
                                 </StackPanel>
                             </controls:OptionControl>
 
-                            <controls:OptionControl Header="Cursor Outline" Description="Set the cursor outline color (HEX).">
+                            <controls:OptionControl
+            Header="Cursor Color"
+            Description="Set the main cursor color (HEX)."
+            Visibility="{Binding SelectedShape, Converter={StaticResource EnumNotEqualsVisibilityConverter}, ConverterParameter=Image}">
+
+                                <StackPanel Orientation="Horizontal" Margin="0,2">
+                                    <TextBox Width="120"
+                         Text="{Binding CursorColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                                    <ui:Button Content="Pick"
+                           Command="{Binding PickCursorColorCommand}"
+                           Margin="4,0,0,0" />
+                                </StackPanel>
+                            </controls:OptionControl>
+                            
+                            <controls:OptionControl
+            Header="Cursor Outline"
+            Description="Set the cursor outline color (HEX)."
+            Visibility="{Binding SelectedShape, Converter={StaticResource EnumNotEqualsVisibilityConverter}, ConverterParameter=Image}">
+
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
                                     <TextBox Width="120"
                          Text="{Binding CursorOutlineColorHex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                    <ui:Button Content="Pick" Command="{Binding PickOutlineColorCommand}" Margin="4,0,0,0"/>
+                                    <ui:Button Content="Pick"
+                           Command="{Binding PickOutlineColorCommand}"
+                           Margin="4,0,0,0" />
                                 </StackPanel>
                             </controls:OptionControl>
 
                             <controls:OptionControl Header="Cursor Size" Description="Adjust the cursor size.">
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Slider Width="200" Minimum="4" Maximum="64" Value="{Binding CursorSize, Mode=TwoWay}" />
-                                    <TextBlock Text="{Binding CursorSize}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <Slider Width="200"
+                        Minimum="4"
+                        Maximum="64"
+                        Value="{Binding CursorSize, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CursorSize}"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center" />
                                 </StackPanel>
                             </controls:OptionControl>
 
-                            <controls:OptionControl Header="Line Thickness" Description="Adjust crosshair thickness.">
+                            <controls:OptionControl
+            Header="Line Thickness"
+            Description="Adjust crosshair thickness."
+            Visibility="{Binding SelectedShape, Converter={StaticResource EnumNotEqualsVisibilityConverter}, ConverterParameter=Image}">
+
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Slider Width="200" Minimum="1" Maximum="10" Value="{Binding CrosshairThickness, Mode=TwoWay}" />
-                                    <TextBlock Text="{Binding CrosshairThickness}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <Slider Width="200"
+                        Minimum="1"
+                        Maximum="10"
+                        Value="{Binding CrosshairThickness, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CrosshairThickness}"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center" />
                                 </StackPanel>
                             </controls:OptionControl>
 
-                            <controls:OptionControl Header="Center Gap" Description="Gap from the center.">
+                            <controls:OptionControl
+            Header="Center Gap"
+            Description="Gap from the center."
+            Visibility="{Binding SelectedShape, Converter={StaticResource EnumNotEqualsVisibilityConverter}, ConverterParameter=Image}">
+
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Slider Width="200" Minimum="0" Maximum="32" Value="{Binding Gap, Mode=TwoWay}" />
-                                    <TextBlock Text="{Binding Gap}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <Slider Width="200"
+                        Minimum="0"
+                        Maximum="32"
+                        Value="{Binding Gap, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding Gap}"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center" />
                                 </StackPanel>
                             </controls:OptionControl>
 
                             <controls:OptionControl Header="Opacity" Description="Adjust crosshair opacity.">
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <Slider Width="200" Minimum="0.1" Maximum="1.0" Value="{Binding CursorOpacity, Mode=TwoWay}" />
-                                    <TextBlock Text="{Binding CursorOpacity}" Margin="8,0,0,0" VerticalAlignment="Center"/>
+                                    <Slider Width="200"
+                        Minimum="0.1"
+                        Maximum="1.0"
+                        Value="{Binding CursorOpacity, Mode=TwoWay}" />
+                                    <TextBlock Text="{Binding CursorOpacity}"
+                           Margin="8,0,0,0"
+                           VerticalAlignment="Center" />
                                 </StackPanel>
                             </controls:OptionControl>
 
                             <controls:OptionControl Header="Preview" Description="Live preview of your crosshair.">
-                                <Border Width="208" Height="208" BorderThickness="1" BorderBrush="Gray" CornerRadius="4">
-                                    <Image Source="{Binding CursorPreview}" Stretch="Uniform"/>
+                                <Border Width="208"
+                    Height="208"
+                    BorderThickness="1"
+                    BorderBrush="Gray"
+                    CornerRadius="4">
+                                    <Image Source="{Binding CursorPreview}"
+                       Stretch="Uniform" />
                                 </Border>
                             </controls:OptionControl>
 
                             <controls:OptionControl Header="Cursor Code" Description="Share or import crosshair codes.">
                                 <StackPanel Orientation="Horizontal" Margin="0,2">
-                                    <TextBox Width="220" Text="{Binding CursorCode, Mode=TwoWay}" />
-                                    <ui:Button Content="Generate" Command="{Binding GenerateCursorCodeCommand}" Margin="4,0,0,0"/>
-                                    <ui:Button Content="Apply" Command="{Binding ApplyCursorCodeCommand}" Margin="4,0,0,0"/>
+                                    <TextBox Width="220"
+                         Text="{Binding CursorCode, Mode=TwoWay}" />
+                                    <ui:Button Content="Generate"
+                           Command="{Binding GenerateCursorCodeCommand}"
+                           Margin="4,0,0,0" />
+                                    <ui:Button Content="Apply"
+                           Command="{Binding ApplyCursorCodeCommand}"
+                           Margin="4,0,0,0" />
                                 </StackPanel>
                             </controls:OptionControl>
                         </StackPanel>
@@ -197,8 +266,27 @@
                                 <ui:ToggleSwitch IsChecked="{Binding CurrentTimeDisplay, Mode=TwoWay}" />
                             </controls:OptionControl>
 
+                            <controls:OptionControl Header="Server Ping" Description="Displays your Servers Ping (Ms)">
+                                <ui:ToggleSwitch IsChecked="{Binding ServerPingDisplay, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+                            <controls:OptionControl 
+    Header="Lighting Changer (BETA)" 
+Description="Adds a Experimental overlay-based lighting changer. Customize your Roblox lighting."
+>
+                                <ui:ToggleSwitch IsChecked="{Binding MotionBlurOverlayEnabled, Mode=TwoWay}" />
+                            </controls:OptionControl>
+
+
+                            <controls:OptionControl 
+    Header="FPS Smoother (WIP)" 
+Description="Adds Smoother Effect to your Screen as a Overlay. This is in the works (WIP)"
+>
+                                <ui:ToggleSwitch IsChecked="{Binding MotionBlurOverlay2, Mode=TwoWay}" />
+                            </controls:OptionControl>
                         </StackPanel>
                     </ui:CardExpander>
+                    
 
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Description}" Header="{x:Static resources:Strings.Menu_Mods_Presets_OldAvatarEditor_Title}">
                         <ui:ToggleSwitch IsChecked="{Binding OldAvatarBackgroundTask.NewState, Mode=TwoWay}" />

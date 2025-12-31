@@ -23,7 +23,8 @@ namespace Voidstrap.Models.Entities
             ResourceIdentifier = resource;
 
             using var stream = ResourceStream;
-            ResourceHash = App.MD5Provider.ComputeHash(stream);
+            stream.Position = 0;
+            ResourceHash = App.ComputeSha256(stream);
         }
 
         public bool HashMatches()
@@ -32,7 +33,8 @@ namespace Voidstrap.Models.Entities
                 return false;
 
             using var fileStream = FileStream;
-            var fileHash = App.MD5Provider.ComputeHash(fileStream);
+            fileStream.Position = 0;
+            var fileHash = App.ComputeSha256(fileStream);
 
             return fileHash.SequenceEqual(ResourceHash);
         }

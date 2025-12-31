@@ -1,6 +1,8 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Management;
 using System.Net.Http;
 using System.Text.Json;
@@ -9,6 +11,8 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using Voidstrap.AppData;
 using Voidstrap.RobloxInterfaces;
+using static VoidstrapRobloxSettingsManager;
+
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
@@ -18,15 +22,14 @@ namespace Voidstrap.UI.ViewModels.Settings
         private static readonly ConcurrentDictionary<string, (string Url, DateTime Expiry)> _gameIconCache = new();
         private static readonly ConcurrentDictionary<string, Task<string>> _ongoingRequests = new();
         private static readonly TimeSpan CacheDuration = TimeSpan.FromHours(1);
-        private DispatcherTimer? _memoryCleanerTimer;
-        public List<string> MemoryCleanerIntervals => _intervals.Keys.ToList();
 
         public BehaviourViewModel()
         {
             CleanerItems = new List<string>(App.Settings.Prop.CleanerDirectories);
             LoadCpuOptions();
-            SelectedMemoryCleanerInterval = _intervals.FirstOrDefault(x => x.Value == App.Settings.Prop.CleanRobloxNumber).Key ?? "Never";
+            LoadSettings();
         }
+
 
         private string _cpuModelName;
         public string CpuModelName
@@ -243,17 +246,23 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.ForceRobloxLanguage = value;
         }
 
-        private readonly Dictionary<string, int> _intervals = new()
-{
-    { "Never", 0 },
-    { "5s", 5 }, { "10s", 10 }, { "15s", 15 }, { "30s", 30 },
-    { "1m", 60 }, { "2m", 120 }, { "5m", 300 }, { "10m", 600 },
-    { "15m", 900 }, { "30m", 1800 }
-};
+        public ObservableCollection<MemoryCleanerInterval> MemoryCleanerIntervals { get; }
+            = new()
+            {
+        new() { Name = "Never", Seconds = 0 },
+        new() { Name = "Every 30 seconds", Seconds = 30 },
+        new() { Name = "Every 1 minute", Seconds = 60 },
+        new() { Name = "Every 2 minutes", Seconds = 120 },
+        new() { Name = "Every 5 minutes", Seconds = 300 },
+        new() { Name = "Every 10 minutes", Seconds = 600 },
+        new() { Name = "Every 15 minutes", Seconds = 900 },
+        new() { Name = "Every 20 minutes", Seconds = 1200 },
+        new() { Name = "Every 25 minutes", Seconds = 1500 },
+        new() { Name = "Every 30 minutes", Seconds = 1800 },
+            };
 
-
-        private string _selectedMemoryCleanerInterval = "Never";
-        public string SelectedMemoryCleanerInterval
+        private MemoryCleanerInterval _selectedMemoryCleanerInterval;
+        public MemoryCleanerInterval SelectedMemoryCleanerInterval
         {
             get => _selectedMemoryCleanerInterval;
             set
@@ -262,10 +271,30 @@ namespace Voidstrap.UI.ViewModels.Settings
                 {
                     _selectedMemoryCleanerInterval = value;
                     OnPropertyChanged(nameof(SelectedMemoryCleanerInterval));
-                    if (_intervals.TryGetValue(value, out int seconds))
-                        App.Settings.Prop.CleanRobloxNumber = seconds;
+                    SaveSettings();
                 }
             }
+        }
+
+        private void LoadSettings()
+        {
+            var settings = VoidstrapRobloxSettingsManager.Load();
+
+            SelectedMemoryCleanerInterval =
+                MemoryCleanerIntervals.FirstOrDefault(x =>
+                    x.Seconds == settings.MemoryCleanerIntervalSeconds)
+                ?? MemoryCleanerIntervals[0];
+        }
+
+        private void SaveSettings()
+        {
+            var settings = new VoidstrapRobloxSettings
+            {
+                MemoryCleanerIntervalSeconds =
+                    SelectedMemoryCleanerInterval?.Seconds ?? 0
+            };
+
+            VoidstrapRobloxSettingsManager.Save(settings);
         }
 
         public bool RenameClientToEurotrucks2
@@ -350,6 +379,12 @@ namespace Voidstrap.UI.ViewModels.Settings
                 }
                 OnPropertyChanged(nameof(CleanerVoidstrap));
             }
+        }
+
+        public class MemoryCleanerInterval
+        {
+            public string Name { get; set; } = string.Empty;
+            public int Seconds { get; set; }
         }
     }
 }

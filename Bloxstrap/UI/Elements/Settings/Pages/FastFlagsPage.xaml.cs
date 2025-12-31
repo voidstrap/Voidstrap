@@ -9,21 +9,179 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using Voidstrap.Integrations;
 using Voidstrap.UI.ViewModels.Settings;
+using System.Net.Http;
+using System.Text.Json;
+using System.Collections.ObjectModel;
 using Wpf.Ui.Mvvm.Contracts;
+using System.Diagnostics;
+using System.Windows.Navigation;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
     public partial class FastFlagsPage
     {
         private bool _initialLoad = false;
+        private bool _isLoading = true;
+        public ObservableCollection<FFlagItem> FFlags { get; } = new();
 
         private FastFlagsViewModel _viewModel = null!;
+        private static readonly string SavedFilePath =
+            Path.Combine(Paths.Base, "Settings.ini");
+
 
         public FastFlagsPage()
         {
             SetupViewModel();
             InitializeComponent();
+            Loaded += FastFlagsPage_Loaded;
+            Loaded += async (_, _) => await LoadFFlagsAsync();
+        }
+
+        private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
+        {
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = e.Uri.AbsoluteUri,
+                UseShellExecute = true
+            });
+            e.Handled = true;
+        }
+
+        private async Task LoadFFlagsAsync()
+        {
+            const string url =
+                "https://raw.githubusercontent.com/LeventGameing/allowlist/main/allowlist.json";
+
+            try
+            {
+                using HttpClient client = new();
+                string json = await client.GetStringAsync(url);
+
+                var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+
+                FFlags.Clear();
+
+                foreach (var kv in dict)
+                {
+                    FFlags.Add(new FFlagItem
+                    {
+                        Name = kv.Key,
+                        Value = kv.Value.ToString()
+                    });
+                }
+
+                DataGrid.ItemsSource = FFlags;
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox(
+                    $"Failed to load FFlags:\n{ex.Message}");
+            }
+        }
+
+        public class FFlagItem
+        {
+            public string Name { get; set; }
+            public string Value { get; set; }
+        }
+        private void FastFlagsPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            _isLoading = true;
+        }
+
+        private bool IsVulkanSelected()
+        {
+            if (_viewModel?.SelectedRenderingMode == null)
+                return false;
+            string modeText = _viewModel.SelectedRenderingMode.ToString();
+
+            return modeText.Contains("Vulkan", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private void ProfileComboBox_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is not ComboBox comboBox)
+                return;
+
+            LoadSavedProfile(comboBox);
+
+            Dispatcher.BeginInvoke(() =>
+            {
+                _isLoading = false;
+            }, System.Windows.Threading.DispatcherPriority.Background);
+        }
+
+        private void SaveProfile(string profile)
+        {
+            try
+            {
+                Directory.CreateDirectory(Paths.Base);
+
+                File.WriteAllText(SavedFilePath, profile);
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox(
+                    $"SAVE FAILED\n\n{ex}\n\nPath:\n{SavedFilePath}");
+            }
+        }
+
+        private void LoadSavedProfile(ComboBox comboBox)
+        {
+            string profile = File.Exists(SavedFilePath)
+                ? File.ReadAllText(SavedFilePath).Trim()
+                : "Default Settings";
+
+            foreach (ComboBoxItem item in comboBox.Items)
+            {
+                if (item.Content?.ToString() == profile)
+                {
+                    comboBox.SelectedItem = item;
+                    return;
+                }
+            }
+
+            comboBox.SelectedIndex = comboBox.Items.Count - 1;
+        }
+
+        private async void ProfileComboBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (_isLoading)
+                return;
+
+            if (IsVulkanSelected())
+            {
+                Frontend.ShowMessageBox(
+                    "Profile Inspector FFlags cannot be used while Vulkan is enabled.\n\n" +
+                    "Please switch the Rendering Mode to Direct3D."
+                );
+                return;
+            }
+
+            if (sender is not ComboBox comboBox ||
+                comboBox.SelectedItem is not ComboBoxItem selectedItem)
+                return;
+
+            string selectedProfile = selectedItem.Content?.ToString();
+            if (string.IsNullOrWhiteSpace(selectedProfile))
+                return;
+
+            bool success = selectedProfile switch
+            {
+                "Default Settings" => await NvidiaProfileManager.ApplyDefaultSettings(),
+                "Blur Settings" => await NvidiaProfileManager.ApplyBlurSettings(),
+                "Without Settings" => await NvidiaProfileManager.ApplyWithoutSettings(),
+                _ => false
+            };
+
+            if (!success)
+            {
+                return;
+            }
+
+            SaveProfile(selectedProfile);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

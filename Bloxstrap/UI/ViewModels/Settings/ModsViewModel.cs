@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using System.Windows.Threading;
 using System.Xml.Linq;
 using Voidstrap;
 using Voidstrap.AppData;
@@ -228,6 +229,30 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.SkyBoxDataSending;
             set => App.Settings.Prop.SkyBoxDataSending = value;
+        }
+
+        public bool MotionBlurOverlay2
+        {
+            get => App.Settings.Prop.MotionBlurOverlay2;
+            set => App.Settings.Prop.MotionBlurOverlay2 = value;
+        }
+
+        public bool ServerPingDisplay
+        {
+            get => App.Settings.Prop.ServerPingCounter;
+            set => App.Settings.Prop.ServerPingCounter = value;
+        }
+
+        public bool ServerDetailsDisplay
+        {
+            get => App.Settings.Prop.ShowServerDetailsUI;
+            set => App.Settings.Prop.ShowServerDetailsUI = value;
+        }
+
+        public bool MotionBlurOverlayEnabled
+        {
+            get => App.Settings.Prop.MotionBlurOverlay;
+            set => App.Settings.Prop.MotionBlurOverlay = value;
         }
 
         public bool Crosshair
@@ -614,7 +639,11 @@ namespace Voidstrap.UI.ViewModels.Settings
         private string _cursorCode;
         private ImageSource _cursorPreview;
 
-        private readonly string _dir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Voidstrap");
+        private bool _useImageCrosshair;
+        private string _imageUrl;
+
+        private readonly string _dir =
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Voidstrap");
         private readonly string _file;
 
         public ModsViewModel()
@@ -629,20 +658,58 @@ namespace Voidstrap.UI.ViewModels.Settings
             GenerateCursorCodeCommand = new RelayCommand(GenerateCode);
             ApplyCursorCodeCommand = new RelayCommand(ApplyCode);
 
-            UpdatePreview();
+            System.Windows.Application.Current.Dispatcher.BeginInvoke(
+                DispatcherPriority.Loaded,
+                new Action(UpdatePreview));
             _ = LoadSkyboxPacksFromGithub();
             LoadCustomCursorSets();
             LoadCursorPathsForSelectedSet();
             NotifyCursorVisibilities();
         }
 
-        public enum CrosshairShape { Cross, Dot, Circle }
-        public CrosshairShape[] CrosshairShapes => new[] { CrosshairShape.Cross, CrosshairShape.Dot, CrosshairShape.Circle };
+        public enum CrosshairShape
+        {
+            Cross,
+            Dot,
+            Circle,
+            Image
+        }
+
+        public CrosshairShape[] CrosshairShapes =>
+            new[] { CrosshairShape.Cross, CrosshairShape.Dot, CrosshairShape.Circle, CrosshairShape.Image };
 
         public CrosshairShape SelectedShape
         {
             get => _selectedShape;
-            set { SetProperty(ref _selectedShape, value); SaveIni(); UpdatePreview(); }
+            set
+            {
+                if (!SetProperty(ref _selectedShape, value)) return;
+                UseImageCrosshair = value == CrosshairShape.Image;
+                SaveIni();
+                UpdatePreview();
+            }
+        }
+
+        public bool UseImageCrosshair
+        {
+            get => _useImageCrosshair;
+            set
+            {
+                if (!SetProperty(ref _useImageCrosshair, value)) return;
+                SaveIni();
+                UpdatePreview();
+            }
+        }
+
+        public string ImageUrl
+        {
+            get => _imageUrl;
+            set
+            {
+                if (!SetProperty(ref _imageUrl, value)) return;
+                SaveIni();
+                UpdatePreview();
+            }
         }
 
         public string CursorColorHex
@@ -697,22 +764,58 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             using var dlg = new ColorDialog();
             if (dlg.ShowDialog() != DialogResult.OK) return;
+
             var hex = $"#{dlg.Color.R:X2}{dlg.Color.G:X2}{dlg.Color.B:X2}";
             if (main) CursorColorHex = hex;
             else CursorOutlineColorHex = hex;
         }
 
+        private ImageSource LoadImageFromUrl(string url)
+        {
+            try
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.UriSource = new Uri(url, UriKind.Absolute);
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                bmp.EndInit();
+                bmp.Freeze();
+                return bmp;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         public void GenerateCode()
         {
-            CursorCode = $"VXH:{SelectedShape}|{CursorColorHex}|{CursorOutlineColorHex}|{CursorSize}|{CrosshairThickness}|{Gap}|{CursorOpacity}";
+            if (SelectedShape == CrosshairShape.Image && !string.IsNullOrWhiteSpace(ImageUrl))
+            {
+                CursorCode = $"VXH:IMAGE|{ImageUrl}|{CursorSize}|{CursorOpacity}";
+                return;
+            }
+
+            CursorCode =
+                $"VXH:{SelectedShape}|{CursorColorHex}|{CursorOutlineColorHex}|{CursorSize}|{CrosshairThickness}|{Gap}|{CursorOpacity}";
         }
 
         public void ApplyCode()
         {
-            if (string.IsNullOrWhiteSpace(CursorCode) || !CursorCode.StartsWith("VXH:")) return;
+            if (string.IsNullOrWhiteSpace(CursorCode) || !CursorCode.StartsWith("VXH:"))
+                return;
 
             var parts = CursorCode.Substring(4).Split('|');
-            if (parts.Length < 7) return;
+
+            if (parts[0] == "IMAGE")
+            {
+                SelectedShape = CrosshairShape.Image;
+                ImageUrl = parts[1];
+                CursorSize = int.Parse(parts[2]);
+                CursorOpacity = double.Parse(parts[3]);
+                return;
+            }
 
             SelectedShape = Enum.Parse<CrosshairShape>(parts[0]);
             CursorColorHex = parts[1];
@@ -725,106 +828,150 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         private void UpdatePreview()
         {
-            int previewSize = 64;
-            double center = previewSize / 2.0;
+            if (System.Windows.Application.Current == null)
+                return;
 
-            var visual = new DrawingVisual();
-            using (var dc = visual.RenderOpen())
+            System.Windows.Application.Current.Dispatcher.Invoke(() =>
             {
-                var mainBrush = new SolidColorBrush(
-                    (Color)ColorConverter.ConvertFromString(CursorColorHex))
-                { Opacity = CursorOpacity };
-
-                var outlineBrush = new SolidColorBrush(
-                    (Color)ColorConverter.ConvertFromString(CursorOutlineColorHex))
-                { Opacity = CursorOpacity };
-
-                double previewScale = 0.6;
-                double size = CursorSize * previewScale;
-                double gap = Gap * previewScale;
-                double thickness = Math.Max(1, CrosshairThickness * previewScale);
-                double innerThickness = Math.Max(1, thickness * 0.5);
-
-                switch (SelectedShape)
+                try
                 {
-                    case CrosshairShape.Cross:
+                    const int sizePx = 128;
+                    double center = sizePx / 2.0;
+
+                    if (SelectedShape == CrosshairShape.Image && !string.IsNullOrWhiteSpace(ImageUrl))
+                    {
+                        var img = LoadImageFromUrl(ImageUrl);
+                        if (img != null)
                         {
-
-                            dc.DrawLine(new Pen(outlineBrush, thickness),
-                                new Point(center - size / 2, center),
-                                new Point(center + size / 2, center));
-
-                            dc.DrawLine(new Pen(mainBrush, innerThickness),
-                                new Point(center - size / 2, center),
-                                new Point(center + size / 2, center));
-
-
-                            dc.DrawLine(new Pen(outlineBrush, thickness),
-                                new Point(center, center - size / 2),
-                                new Point(center, center + size / 2));
-
-                            dc.DrawLine(new Pen(mainBrush, innerThickness),
-                                new Point(center, center - size / 2),
-                                new Point(center, center + size / 2));
-                            break;
+                            CursorPreview = img;
+                            return;
                         }
+                    }
 
-                    case CrosshairShape.Dot:
+                    var visual = new DrawingVisual();
+
+                    using (var dc = visual.RenderOpen())
+                    {
+                        dc.DrawRectangle(
+                            Brushes.Transparent,
+                            null,
+                            new Rect(0, 0, sizePx, sizePx)
+                        );
+
+                        var mainColor = (Color)ColorConverter.ConvertFromString(CursorColorHex);
+                        var outlineColor = (Color)ColorConverter.ConvertFromString(CursorOutlineColorHex);
+
+                        var mainBrush = new SolidColorBrush(mainColor)
                         {
-                            double radius = size / 2;
+                            Opacity = CursorOpacity
+                        };
+                        mainBrush.Freeze();
 
-                            dc.DrawEllipse(
-                                outlineBrush,
-                                null,
-                                new Point(center, center),
-                                radius,
-                                radius);
-
-                            double innerRadius = radius - thickness;
-                            if (innerRadius < 1) innerRadius = 1;
-
-                            dc.DrawEllipse(
-                                mainBrush,
-                                null,
-                                new Point(center, center),
-                                innerRadius,
-                                innerRadius);
-                            break;
-                        }
-
-                    case CrosshairShape.Circle:
+                        var outlineBrush = new SolidColorBrush(outlineColor)
                         {
-                            double radius = (size / 2) - gap;
-                            if (radius < 1) radius = 1;
+                            Opacity = CursorOpacity
+                        };
+                        outlineBrush.Freeze();
 
-                            dc.DrawEllipse(
-                                outlineBrush,
-                                null,
-                                new Point(center, center),
-                                radius,
-                                radius);
+                        double scale = 0.75;
+                        double size = CursorSize * scale;
+                        double gap = Gap * scale;
+                        double thickness = Math.Max(1, CrosshairThickness * scale);
 
-                            double innerRadius = radius - thickness;
-                            if (innerRadius < 1) innerRadius = 1;
+                        var mainPen = new Pen(mainBrush, thickness)
+                        {
+                            StartLineCap = PenLineCap.Round,
+                            EndLineCap = PenLineCap.Round,
+                            LineJoin = PenLineJoin.Round
+                        };
+                        mainPen.Freeze();
 
-                            dc.DrawEllipse(
-                                mainBrush,
-                                null,
-                                new Point(center, center),
-                                innerRadius,
-                                innerRadius);
-                            break;
+                        var outlinePen = new Pen(outlineBrush, thickness + 2)
+                        {
+                            StartLineCap = PenLineCap.Round,
+                            EndLineCap = PenLineCap.Round,
+                            LineJoin = PenLineJoin.Round
+                        };
+                        outlinePen.Freeze();
+
+                        switch (SelectedShape)
+                        {
+                            case CrosshairShape.Cross:
+                                {
+                                    dc.DrawLine(outlinePen,
+                                        new Point(center - size, center),
+                                        new Point(center - gap, center));
+
+                                    dc.DrawLine(outlinePen,
+                                        new Point(center + gap, center),
+                                        new Point(center + size, center));
+
+                                    dc.DrawLine(mainPen,
+                                        new Point(center - size, center),
+                                        new Point(center - gap, center));
+
+                                    dc.DrawLine(mainPen,
+                                        new Point(center + gap, center),
+                                        new Point(center + size, center));
+
+                                    dc.DrawLine(outlinePen,
+                                        new Point(center, center - size),
+                                        new Point(center, center - gap));
+
+                                    dc.DrawLine(outlinePen,
+                                        new Point(center, center + gap),
+                                        new Point(center, center + size));
+
+                                    dc.DrawLine(mainPen,
+                                        new Point(center, center - size),
+                                        new Point(center, center - gap));
+
+                                    dc.DrawLine(mainPen,
+                                        new Point(center, center + gap),
+                                        new Point(center, center + size));
+                                    break;
+                                }
+
+                            case CrosshairShape.Dot:
+                                {
+                                    double r = size / 3;
+                                    dc.DrawEllipse(outlineBrush, null,
+                                        new Point(center, center), r + 2, r + 2);
+                                    dc.DrawEllipse(mainBrush, null,
+                                        new Point(center, center), r, r);
+                                    break;
+                                }
+
+                            case CrosshairShape.Circle:
+                                {
+                                    double r = size / 2;
+                                    dc.DrawEllipse(null, outlinePen,
+                                        new Point(center, center), r, r);
+                                    dc.DrawEllipse(null, mainPen,
+                                        new Point(center, center), r - 2, r - 2);
+                                    break;
+                                }
                         }
+                    }
+
+                    var bmp = new RenderTargetBitmap(
+                        sizePx,
+                        sizePx,
+                        96,
+                        96,
+                        PixelFormats.Pbgra32);
+
+                    bmp.Render(visual);
+                    bmp.Freeze();
+
+                    CursorPreview = bmp;
                 }
-            }
-
-            var bmp = new RenderTargetBitmap(
-                previewSize, previewSize, 96, 96, PixelFormats.Pbgra32);
-
-            bmp.Render(visual);
-            CursorPreview = bmp;
+                catch
+                {
+                    CursorPreview = null;
+                }
+            });
         }
-
         private void SaveIni()
         {
             IniFile.Write(_file, new()
@@ -835,7 +982,8 @@ namespace Voidstrap.UI.ViewModels.Settings
                 ["Size"] = CursorSize.ToString(),
                 ["Thickness"] = CrosshairThickness.ToString(),
                 ["Gap"] = Gap.ToString(),
-                ["Opacity"] = CursorOpacity.ToString()
+                ["Opacity"] = CursorOpacity.ToString(),
+                ["ImageUrl"] = ImageUrl ?? ""
             });
         }
 
@@ -844,8 +992,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (!File.Exists(_file)) return;
 
             var ini = IniFile.Read(_file);
-            if (ini.Count == 0) return;
-
             SelectedShape = Enum.Parse<CrosshairShape>(ini.GetValueOrDefault("Shape", "Cross"));
             CursorColorHex = ini.GetValueOrDefault("Color", "#00FF00");
             CursorOutlineColorHex = ini.GetValueOrDefault("Outline", "#000000");
@@ -853,6 +999,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             CrosshairThickness = int.Parse(ini.GetValueOrDefault("Thickness", "2"));
             Gap = int.Parse(ini.GetValueOrDefault("Gap", "4"));
             CursorOpacity = double.Parse(ini.GetValueOrDefault("Opacity", "1.0"));
+            ImageUrl = ini.GetValueOrDefault("ImageUrl", "");
         }
 
         #endregion

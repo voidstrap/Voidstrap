@@ -66,12 +66,151 @@
             <ui:ToggleSwitch IsChecked="{Binding LockDefault, Mode=TwoWay}" />
         </controls:OptionControl>
 
+        <controls:OptionControl
+    Header="NVIDIA Profile Inspector FFlags"
+    Description="Use Profile Inspector FFlags, which can help improve performance. NVIDIA GPUs only.">
+
+            <ComboBox Loaded="ProfileComboBox_Loaded"
+              SelectionChanged="ProfileComboBox2_SelectionChanged">
+                <ComboBoxItem Content="Default Settings"/>
+                <ComboBoxItem Content="Blur Settings"/>
+                <ComboBoxItem Content="Without Settings"/>
+            </ComboBox>
+        </controls:OptionControl>
 
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Reset_Title}">
             <ui:ToggleSwitch IsChecked="{Binding ResetConfiguration, Mode=TwoWay}" />
         </controls:OptionControl>
+    
+        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+            <ui:CardExpander.Header>
+                <StackPanel>
+                    <TextBlock
+                Margin="0,0,0,0"
+                FontSize="12"
+                Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                Text="Check the AllowList to see if the FastFlags you are using are officially included."></TextBlock>
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel>
 
-        
+                <TextBlock
+            Margin="5,0,0,5"
+            FontSize="12"
+            Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+            <Hyperlink
+                NavigateUri="https://raw.githubusercontent.com/LeventGameing/allowlist/main/allowlist.json"
+                RequestNavigate="Hyperlink_RequestNavigate">
+                View the AllowList JSON
+            </Hyperlink>
+                </TextBlock>
+                <Border
+Grid.Row="4"
+Height="300"
+CornerRadius="8"
+Background="{DynamicResource ControlFillColorPrimaryBrush}"
+BorderBrush="{DynamicResource ControlElevationBorderBrush}"
+BorderThickness="1"
+SnapsToDevicePixels="True"
+ClipToBounds="True"
+Effect="{DynamicResource ControlElevationShadow}">
+
+                <DataGrid
+    x:Name="DataGrid"
+    AutoGenerateColumns="False"
+    CanUserAddRows="False"
+    CanUserDeleteRows="False"
+    CanUserReorderColumns="False"
+    GridLinesVisibility="None"
+    HeadersVisibility="Column"
+    RowHeight="32"
+    AlternatingRowBackground="{DynamicResource ControlFillColorSecondaryBrush}"
+    Background="Transparent"
+    BorderThickness="0"
+    HorizontalGridLinesBrush="{DynamicResource ControlElevationBorderBrush}"
+    VerticalGridLinesBrush="{DynamicResource ControlElevationBorderBrush}"
+    Margin="0"
+    ScrollViewer.VerticalScrollBarVisibility="Auto"
+    ScrollViewer.HorizontalScrollBarVisibility="Auto"
+    ScrollViewer.CanContentScroll="True">
+
+                    <DataGrid.ColumnHeaderStyle>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
+                            <Setter Property="Height" Value="32" />
+                            <Setter Property="Padding" Value="10,0,10,0" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource ControlElevationBorderBrush}" />
+                            <Setter Property="BorderThickness" Value="0 0 1 1" />
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Setter Property="FontWeight" Value="Medium" />
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridColumnHeader">
+                                        <Border
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}"
+                            CornerRadius="6,6,0,0">
+                                            <ContentPresenter
+                                Margin="{TemplateBinding Padding}"
+                                VerticalAlignment="Center"
+                                HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" />
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </DataGrid.ColumnHeaderStyle>
+
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="Padding" Value="8,0,8,0"/>
+                            <Setter Property="Background" Value="Transparent"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="DataGridCell">
+                                        <Border
+                            Background="{TemplateBinding Background}"
+                            CornerRadius="4"
+                            Margin="1,0">
+                                            <ContentPresenter VerticalAlignment="Center"/>
+                                        </Border>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Foreground"
+                            Value="{DynamicResource TextOnAccentFillColorPrimaryBrush}" />
+                                    <Setter Property="Background"
+                            Value="{DynamicResource SystemAccentColorSecondaryBrush}" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+
+                    <DataGrid.Columns>
+                        <DataGridTextColumn
+            Width="2*"
+            Binding="{Binding Name}"
+            Header="{x:Static resources:Strings.Common_Name}" />
+
+                        <DataGridTextColumn
+            Width="*"
+            Binding="{Binding Value}"
+            Header="{x:Static resources:Strings.Common_Value}" />
+                    </DataGrid.Columns>
+
+                </DataGrid>
+            </Border>
+            </StackPanel>
+        </ui:CardExpander>
+
+
         <TextBlock Margin="0,16,0,0"
             FontSize="17.65"
             FontWeight="Medium"

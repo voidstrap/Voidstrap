@@ -138,14 +138,18 @@
                             <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
                         </controls:OptionControl>
 
-                            <controls:OptionControl Header="Roblox Memory Cleaner"
-                        Description="Select how often Roblox memory should be cleaned.">
+                            <controls:OptionControl
+    Header="Roblox Memory Cleaner"
+    Description="Select how often Roblox memory should be cleaned.">
+
                                 <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                                    <TextBlock VerticalAlignment="Center" Margin="0,0,5,0"/>
-                                    <ComboBox Width="150"
-                  ItemsSource="{Binding MemoryCleanerIntervals}"
-                  SelectedItem="{Binding SelectedMemoryCleanerInterval, Mode=TwoWay}"/>
+                                    <ComboBox
+    ItemsSource="{Binding MemoryCleanerIntervals}"
+    DisplayMemberPath="Name"
+    SelectedItem="{Binding SelectedMemoryCleanerInterval, Mode=TwoWay}" />
+
                                 </StackPanel>
+
                             </controls:OptionControl>
 
                         </StackPanel>
@@ -153,12 +157,9 @@
             </StackPanel>
         </TabItem>
 
-            <TabItem Header="Lua Scripting" FontWeight="Medium">
+            <TabItem Header="Lua" FontWeight="Medium">
                 <StackPanel Margin="12,12,12,12" Height="Auto">
-                    <TextBlock
-                        FontSize="20"
-                        FontWeight="Bold"
-                        Text="Lua Scripting" />
+
 
                     <TextBlock
                         Margin="0,4,0,12"
@@ -182,12 +183,12 @@ Scripts are saved to autoexecute.lua in your Voidstrap directory. Use responsibl
                             <TextBlock 
                                 FontSize="14" 
                                 FontWeight="Medium"
-                                Text="Enable Lua Scripting" />
+                                Text="Enable Lua" />
                             <TextBlock 
                                 Margin="0,2,0,0"
                                 FontSize="12" 
                                 Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                                Text="Toggle to enable or disable Lua script execution on game launch."
+                                Text="Toggle to enable or disable Lua on game launch."
                                 TextWrapping="Wrap" />
 
                         </StackPanel>

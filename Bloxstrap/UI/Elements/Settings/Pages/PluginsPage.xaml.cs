@@ -17,6 +17,6 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             InitializeComponent();
             DataContext = new PluginsViewModel();
         }
-        }
+    }
 }
 

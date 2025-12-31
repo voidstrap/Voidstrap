@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using RobloxLightingOverlay;
+using RobloxLightingOverlay.Effects;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -13,6 +15,8 @@ using Voidstrap.UI.ViewModels.Settings;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
+using Wpf.Ui.Appearance;
+using RobloxLightingOverlay;
 
 namespace Voidstrap.UI.Elements.ContextMenu
 {
@@ -46,6 +50,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
 
         private TimeSpan playTime = TimeSpan.Zero;
         private DispatcherTimer playTimer;
+        private Watcher watcher;
 
         private static string TrimWithThreeDots(string text, int maxChars = 18)
         {
@@ -208,7 +213,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 {
                     if (lastClosestServer != null)
                     {
-                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms)";
                     }
                     else
                     {
@@ -221,7 +226,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 {
                     if (lastClosestServer != null)
                     {
-                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                        JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms)";
                     }
                     else
                     {
@@ -250,7 +255,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
             {
                 if (lastClosestServer != null)
                 {
-                    JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms) [cached]";
+                    JoinClosestServerTextBlock.Text = $"Join Closest ({lastClosestServer.Ping}ms)";
                 }
                 else
                 {
@@ -347,6 +352,39 @@ namespace Voidstrap.UI.Elements.ContextMenu
             if (_activityWatcher is null)
                 return;
 
+            if (App.Settings.Prop.MotionBlurOverlay)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (RobloxLightingOverlay.OverlayManager.UI == null)
+                    {
+                        RobloxLightingOverlay.OverlayManager.Start();
+                    }
+                    else
+                    {
+                        RobloxLightingOverlay.OverlayManager.UI.Show();
+                        RobloxLightingOverlay.OverlayManager.UI.Activate();
+                    }
+                });
+            }
+
+            if (App.Settings.Prop.MotionBlurOverlay2)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (!MotionBlurManager.IsEnabled)
+                        MotionBlurManager.Start();
+                });
+            }
+            else
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (MotionBlurManager.IsEnabled)
+                        MotionBlurManager.Stop();
+                });
+            }
+
             if (App.Settings.Prop.Crosshair)
             {
                 var crosshairVM = new ModsViewModel();
@@ -358,7 +396,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 });
             }
 
-            if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CPUTempCounter || App.Settings.Prop.CurrentTimeDisplay)
+            if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CPUTempCounter || App.Settings.Prop.CurrentTimeDisplay || App.Settings.Prop.ServerPingCounter || App.Settings.Prop.ShowServerDetailsUI)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
@@ -402,27 +440,32 @@ namespace Voidstrap.UI.Elements.ContextMenu
 
         public void ActivityWatcher_OnGameLeave(object? sender, EventArgs e)
         {
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Application.Current.Dispatcher.Invoke(() =>
+                if (App.Current.Resources["CrosshairWindow"] is CrosshairWindow crosshair)
                 {
-                    if (App.Current.Resources["CrosshairWindow"] is CrosshairWindow window)
-                    {
-                        window.Close();
-                        App.Current.Resources.Remove("CrosshairWindow");
-                    }
-                });
+                    crosshair.Close();
+                    App.Current.Resources.Remove("CrosshairWindow");
                 }
 
-                Application.Current.Dispatcher.Invoke(() =>
+                if (App.Current.Resources["OverlayWindow"] is Voidstrap.UI.Elements.Overlay.OverlayWindow overlay)
                 {
-                    if (App.Current.Resources["OverlayWindow"] is Voidstrap.UI.Elements.Overlay.OverlayWindow overlay)
-                    {
-                        overlay.Close();
-                        App.Current.Resources.Remove("OverlayWindow");
-                    }
-                });
-            
-            Dispatcher.Invoke(() => {
+                    overlay.Close();
+                    App.Current.Resources.Remove("OverlayWindow");
+                }
+
+                if (RobloxLightingOverlay.OverlayManager.UI != null)
+                {
+                    RobloxLightingOverlay.OverlayManager.UI.Close();
+                    RobloxLightingOverlay.OverlayManager.UI = null;
+                }
+
+                if (RobloxLightingOverlay.OverlayManager.Overlay != null)
+                {
+                    RobloxLightingOverlay.OverlayManager.Overlay.Close();
+                    RobloxLightingOverlay.OverlayManager.Overlay = null;
+                }
+
                 InviteDeeplinkMenuItem.Visibility = Visibility.Collapsed;
                 ServerDetailsMenuItem.Visibility = Visibility.Collapsed;
                 GamePassDetailsMenuItem.Visibility = Visibility.Collapsed;

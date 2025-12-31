@@ -51,7 +51,18 @@ namespace Voidstrap
 
         public static bool IsStudioVisible => !String.IsNullOrEmpty(App.State.Prop.Studio.VersionGuid);
 
-        public static readonly MD5 MD5Provider = MD5.Create();
+        public static byte[] ComputeSha256(byte[] data)
+        {
+            using var sha = SHA256.Create();
+            return sha.ComputeHash(data);
+        }
+
+        public static byte[] ComputeSha256(Stream stream)
+        {
+            using var sha = SHA256.Create();
+            return sha.ComputeHash(stream);
+        }
+
 
         public static readonly Logger Logger = new();
 
@@ -68,8 +79,7 @@ namespace Voidstrap
         public static readonly FastFlagManager FastFlags = new();
 
         public static readonly GBSEditor GlobalSettings = new();
-        private static readonly MD5 mD5 = MD5.Create();
-        private static MD5? _md5Provider = mD5;
+
         private CancellationTokenSource? _memoryTrimCts;
 
         private static HttpClient? _httpClient;

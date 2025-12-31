@@ -55,63 +55,6 @@ namespace Voidstrap.UI.Elements.Settings
                 _ = ShowAlreadyRunningSnackbarAsync();
         }
 
-        private async Task PlayChristmasSoundFromDrive()
-        {
-            try
-            {
-                string fileName = "christmas_intro.mp3";
-                string localPath = System.IO.Path.Combine(Paths.Base, fileName);
-
-                if (!File.Exists(localPath))
-                {
-                    using var client = new HttpClient();
-                    var driveUrl = "https://drive.google.com/uc?export=download&id=13lqy31k6vQe9Nwv0kL55KV6RqmJMI9-v";
-                    var bytes = await client.GetByteArrayAsync(driveUrl);
-                    await File.WriteAllBytesAsync(localPath, bytes);
-                }
-
-                if (_christmasPlayer == null)
-                {
-                    _christmasPlayer = new MediaPlayer();
-                }
-
-                _christmasPlayer.Volume = 0.4;
-                _christmasPlayer.Open(new Uri(localPath, UriKind.Absolute));
-                _christmasPlayer.Play();
-
-                var totalPlayTime = TimeSpan.FromSeconds(7);
-                var fadeDuration = TimeSpan.FromSeconds(1.5);
-                double initialVolume = _christmasPlayer.Volume;
-
-                var startTime = DateTime.Now;
-
-                EventHandler? renderingHandler = null;
-                renderingHandler = (_, __) =>
-                {
-                    var elapsed = DateTime.Now - startTime;
-
-                    if (elapsed >= totalPlayTime - fadeDuration)
-                    {
-                        double fadeProgress = (elapsed.TotalMilliseconds - (totalPlayTime - fadeDuration).TotalMilliseconds) / fadeDuration.TotalMilliseconds;
-                        _christmasPlayer.Volume = Math.Max(0, initialVolume * (1 - fadeProgress));
-                    }
-
-                    if (elapsed >= totalPlayTime)
-                    {
-                        _christmasPlayer.Stop();
-                        _christmasPlayer.Volume = initialVolume;
-                        CompositionTarget.Rendering -= renderingHandler!;
-                    }
-                };
-
-                CompositionTarget.Rendering += renderingHandler;
-            }
-            catch (Exception ex)
-            {
-                App.Logger?.WriteLine("ChristmasSound", ex.Message);
-            }
-        }
-
         private void UpdateFastFlagEditorVisibility()
         {
             if (FastFlagEditorNavItem == null)
@@ -126,9 +69,8 @@ namespace Voidstrap.UI.Elements.Settings
 
         private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
-            await PlayChristmasSoundFromDrive();
             InitializeNavigation();
-            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2)
+            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
             {
                 InitSnow();
                 _snowTimer.Start();
@@ -250,7 +192,7 @@ namespace Voidstrap.UI.Elements.Settings
         protected override void OnActivated(EventArgs e)
         {
             base.OnActivated(e);
-            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2)
+            if (App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw)
                 _snowTimer.Start();
         }
 

@@ -5,7 +5,7 @@
     <!-- Editor Theme Colors -->
     <SolidColorBrush x:Key="NewTextEditorBackground" Color="#CC1E1E1E" />
     <!-- 80% opaque dark -->
-    <SolidColorBrush x:Key="NewTextEditorForeground" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="NewTextEditorForeground" Color="#FF1C1C1C" />
     <!-- Pure white -->
     <SolidColorBrush x:Key="NewTextEditorLink" Color="#FF3897E8" />
 

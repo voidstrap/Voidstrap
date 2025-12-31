@@ -23,7 +23,6 @@
     mc:Ignorable="d">
 
     <Grid>
-        <!-- Main layout definition -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,1" EndPoint="1,0" SpreadMethod="Pad">
                 <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}" />

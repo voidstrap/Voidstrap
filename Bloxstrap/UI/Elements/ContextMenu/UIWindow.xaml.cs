@@ -3,7 +3,12 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -12,31 +17,61 @@ using System.Windows.Threading;
 
 namespace Voidstrap.UI.Elements.Overlay
 {
+    // REQUIRED BY LIBREHARDWAREMONITOR
+    public sealed class UpdateVisitor : IVisitor
+    {
+        public void VisitComputer(IComputer computer) => computer.Traverse(this);
+
+        public void VisitHardware(IHardware hardware)
+        {
+            hardware.Update();
+            foreach (var sub in hardware.SubHardware)
+                sub.Accept(this);
+        }
+
+        public void VisitSensor(ISensor sensor) { }
+        public void VisitParameter(IParameter parameter) { }
+    }
+
     public class OverlayWindow : Window, INotifyPropertyChanged
     {
         private int _frames;
         private int _fps;
-        private readonly Stopwatch _fpsStopwatch;
+        private readonly Stopwatch _fpsStopwatch = Stopwatch.StartNew();
 
-        private double _cpuTemp;
         private readonly Computer _computer;
+        private double _cpuTemp;
 
-        private readonly TextBlock _fpsTextBlock;
-        private readonly TextBlock _cpuTextBlock;
-        private readonly TextBlock _timeTextBlock;
+        private TextBlock _fpsTextBlock;
+        private TextBlock _cpuTextBlock;
+        private TextBlock _pingTextBlock;
+        private TextBlock _locationTextBlock;
+        private TextBlock _timeTextBlock;
 
         private readonly DispatcherTimer _updateTimer;
+
         private readonly bool _showFPS = App.Settings.Prop.FPSCounter;
         private readonly bool _showCPU = App.Settings.Prop.CPUTempCounter;
+        private readonly bool _showPing = App.Settings.Prop.ServerPingCounter;
         private readonly bool _showTime = App.Settings.Prop.CurrentTimeDisplay;
+        private readonly bool _showLocation = App.Settings.Prop.ShowServerDetailsUI;
+
+        private string _serverIp;
+        private string _lastServerIp;
+        private bool _locationFetching;
+        private string _serverLocation = "Location: --";
+
+        private static readonly HttpClient Http = new()
+        {
+            Timeout = TimeSpan.FromSeconds(4)
+        };
 
         public OverlayWindow()
         {
-            Width = 220;
-            Height = 80;
+            Width = 260;
+            Height = 150;
 
-            var screenWidth = SystemParameters.PrimaryScreenWidth;
-            Left = screenWidth - Width - -85;
+            Left = SystemParameters.PrimaryScreenWidth - Width - -95;
             Top = 10;
 
             AllowsTransparency = true;
@@ -49,35 +84,58 @@ namespace Voidstrap.UI.Elements.Overlay
 
             if (_showFPS)
             {
-                _fpsTextBlock = new TextBlock { FontSize = 16, FontWeight = FontWeights.SemiBold, Foreground = Brushes.Lime };
+                _fpsTextBlock = CreateTextBlock(Brushes.Lime);
                 panel.Children.Add(_fpsTextBlock);
             }
 
             if (_showCPU)
             {
-                _cpuTextBlock = new TextBlock { FontSize = 16, FontWeight = FontWeights.SemiBold, Foreground = Brushes.Orange };
+                _cpuTextBlock = CreateTextBlock(Brushes.Orange);
                 panel.Children.Add(_cpuTextBlock);
+            }
+
+            if (_showPing)
+            {
+                _pingTextBlock = CreateTextBlock(Brushes.LightSkyBlue);
+                panel.Children.Add(_pingTextBlock);
+            }
+
+            if (_showLocation)
+            {
+                _locationTextBlock = CreateTextBlock(Brushes.LightGreen);
+                _locationTextBlock.Text = _serverLocation;
+                panel.Children.Add(_locationTextBlock);
             }
 
             if (_showTime)
             {
-                _timeTextBlock = new TextBlock { FontSize = 16, FontWeight = FontWeights.SemiBold, Foreground = Brushes.Cyan };
+                _timeTextBlock = CreateTextBlock(Brushes.Cyan);
                 panel.Children.Add(_timeTextBlock);
             }
 
             Content = panel;
 
-            _fpsStopwatch = Stopwatch.StartNew();
             CompositionTarget.Rendering += OnRendering;
 
-            _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
-            _updateTimer.Tick += (_, __) => UpdateCpuAndTime();
+            _updateTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2)
+            };
+            _updateTimer.Tick += async (_, __) => await UpdateStatsAsync();
             _updateTimer.Start();
 
             Loaded += (_, __) => MakeClickThrough();
             Closing += (_, __) => CompositionTarget.Rendering -= OnRendering;
-            _computer = new Computer { IsCpuEnabled = true };
+
+            // 🔥 FIXED HARDWARE INIT
+            _computer = new Computer
+            {
+                IsCpuEnabled = true,
+                IsMotherboardEnabled = true
+            };
+
             _computer.Open();
+            _computer.Accept(new UpdateVisitor());
         }
 
         private void OnRendering(object sender, EventArgs e)
@@ -90,9 +148,7 @@ namespace Voidstrap.UI.Elements.Overlay
                     _fps = _frames;
                     _frames = 0;
                     _fpsStopwatch.Restart();
-
                     _fpsTextBlock.Text = $"FPS: {_fps}";
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(_fps)));
                 }
             }
 
@@ -100,70 +156,174 @@ namespace Voidstrap.UI.Elements.Overlay
             {
                 if (IsVisible) Hide();
             }
-            else
+            else if (!IsVisible)
             {
-                if (!IsVisible) Show();
+                Show();
             }
         }
 
-        private void UpdateCpuAndTime()
+        private async Task UpdateStatsAsync()
         {
             if (_showCPU)
             {
                 _cpuTemp = GetCpuTemperature();
-                _cpuTextBlock.Text = $"CPU Temp: {_cpuTemp:0}°C";
+                _cpuTextBlock.Text = double.IsNaN(_cpuTemp)
+                    ? "CPU Temp: --"
+                    : $"CPU Temp: {_cpuTemp:0}°C";
             }
 
             if (_showTime)
-            {
                 _timeTextBlock.Text = DateTime.Now.ToString("h:mm tt");
+
+            if (_showPing)
+            {
+                _serverIp = GetRobloxServerIp();
+
+                if (!string.IsNullOrEmpty(_serverIp))
+                {
+                    int ping = await PingServerAsync(_serverIp);
+                    _pingTextBlock.Text = ping > 0 ? $"Ping: {ping} ms" : "Ping: --";
+
+                    if (_showLocation && !_locationFetching && _serverIp != _lastServerIp)
+                    {
+                        _lastServerIp = _serverIp;
+                        _locationFetching = true;
+                        _locationTextBlock.Text = "Location: --";
+
+                        _ = Task.Run(async () =>
+                        {
+                            string loc = await GetServerLocationAsync(_serverIp);
+                            Dispatcher.Invoke(() =>
+                            {
+                                _serverLocation = loc;
+                                _locationTextBlock.Text = loc;
+                                _locationFetching = false;
+                            });
+                        });
+                    }
+                }
+                else
+                {
+                    _pingTextBlock.Text = "Ping: --";
+                }
             }
         }
 
+        // 🔥 CPU TEMP FIX (NO MORE 0°C)
         private double GetCpuTemperature()
         {
             try
             {
-                var temps = _computer.Hardware
-                    .Where(h => h.HardwareType == HardwareType.Cpu)
-                    .SelectMany(h => { h.Update(); return h.Sensors; })
-                    .Where(s => s.SensorType == SensorType.Temperature)
-                    .Select(s => s.Value ?? 0);
+                _computer.Accept(new UpdateVisitor());
 
-                return temps.Any() ? temps.Average() : 0;
+                foreach (var hw in _computer.Hardware)
+                {
+                    if (hw.HardwareType != HardwareType.Cpu)
+                        continue;
+
+                    var package = hw.Sensors.FirstOrDefault(s =>
+                        s.SensorType == SensorType.Temperature &&
+                        s.Name.Contains("Package", StringComparison.OrdinalIgnoreCase) &&
+                        s.Value.HasValue);
+
+                    if (package?.Value != null)
+                        return package.Value.Value;
+
+                    var cores = hw.Sensors
+                        .Where(s =>
+                            s.SensorType == SensorType.Temperature &&
+                            s.Value.HasValue &&
+                            s.Name.Contains("Core", StringComparison.OrdinalIgnoreCase))
+                        .Select(s => s.Value.Value);
+
+                    if (cores.Any())
+                        return cores.Max();
+                }
+
+                return double.NaN;
             }
             catch
             {
-                return 0;
+                return double.NaN;
             }
         }
+
+        private string GetRobloxServerIp()
+        {
+            try
+            {
+                return IPGlobalProperties.GetIPGlobalProperties()
+                    .GetActiveTcpConnections()
+                    .FirstOrDefault(c =>
+                        c.State == TcpState.Established &&
+                        !IPAddress.IsLoopback(c.RemoteEndPoint.Address))
+                    ?.RemoteEndPoint.Address.ToString();
+            }
+            catch { return null; }
+        }
+
+        private async Task<int> PingServerAsync(string ip)
+        {
+            try
+            {
+                using var ping = new Ping();
+                var reply = await ping.SendPingAsync(ip, 1000);
+                return reply.Status == IPStatus.Success ? (int)reply.RoundtripTime : -1;
+            }
+            catch { return -1; }
+        }
+
+        private async Task<string> GetServerLocationAsync(string ip)
+        {
+            try
+            {
+                string json = await Http.GetStringAsync($"https://ipinfo.io/{ip}/json");
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                string city = root.TryGetProperty("city", out var c) ? c.GetString() : null;
+                string country = root.TryGetProperty("country", out var co) ? co.GetString() : null;
+
+                return !string.IsNullOrEmpty(city)
+                    ? $"Location: {city} {CountryToFlag(country)}"
+                    : "Location: Unknown";
+            }
+            catch { return "Location: Unknown"; }
+        }
+
+        private string CountryToFlag(string cc)
+        {
+            if (string.IsNullOrEmpty(cc) || cc.Length != 2) return "";
+            int o = 0x1F1E6;
+            return char.ConvertFromUtf32(o + cc[0] - 'A') +
+                   char.ConvertFromUtf32(o + cc[1] - 'A');
+        }
+
+        private TextBlock CreateTextBlock(Brush color) => new()
+        {
+            FontSize = 16,
+            FontWeight = FontWeights.SemiBold,
+            Foreground = color
+        };
 
         private void MakeClickThrough()
         {
             var hwnd = new WindowInteropHelper(this).Handle;
-            int style = GetWindowLong(hwnd, GWL_EXSTYLE);
-            SetWindowLong(hwnd, GWL_EXSTYLE, style | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW);
+            int style = GetWindowLong(hwnd, -20);
+            SetWindowLong(hwnd, -20, style | 0x20 | 0x80);
         }
 
         private bool IsRobloxForeground()
         {
             IntPtr hwnd = GetForegroundWindow();
-            if (hwnd == IntPtr.Zero) return false;
             GetWindowThreadProcessId(hwnd, out uint pid);
             try
             {
-                var p = Process.GetProcessById((int)pid);
-                return p.ProcessName.Equals("RobloxPlayerBeta", StringComparison.OrdinalIgnoreCase);
+                return Process.GetProcessById((int)pid)
+                    .ProcessName.Equals("RobloxPlayerBeta", StringComparison.OrdinalIgnoreCase);
             }
-            catch
-            {
-                return false;
-            }
+            catch { return false; }
         }
-
-        private const int GWL_EXSTYLE = -20;
-        private const int WS_EX_TRANSPARENT = 0x20;
-        private const int WS_EX_TOOLWINDOW = 0x80;
 
         [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")] private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);

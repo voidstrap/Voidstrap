@@ -1,11 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_LastSelectedProfileId>C:\Users\freew\Documents\GitHub\Voidstrap\Bloxstrap\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
-    <ActiveDebugProfile>Voidstrap (Launch)</ActiveDebugProfile>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+    <_LastSelectedProfileId>C:\Users\freew\Documents\Voidstrap-Backs-main\Voidstrap-Backs-main\Bloxstrap\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="UI\Elements\Bootstrapper\Base\WinFormsDialogBase.cs">

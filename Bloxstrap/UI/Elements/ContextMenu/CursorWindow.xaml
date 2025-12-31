@@ -5,7 +5,6 @@
         Background="Transparent"
         WindowStyle="None"
         Topmost="True"
-        ShowInTaskbar="False"
-        Loaded="CrosshairWindow_Loaded">
+        ShowInTaskbar="False">
     <Canvas x:Name="CrosshairCanvas" Width="200" Height="200"/>
 </Window>

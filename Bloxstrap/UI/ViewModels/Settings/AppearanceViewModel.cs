@@ -65,8 +65,8 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         public bool Snowww
         {
-            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2;
-            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw2 = value;
+            get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
+            set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
         }
 
         #region Properties

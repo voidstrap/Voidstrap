@@ -1,30 +1,32 @@
-﻿using System.Windows.Forms;
-
+﻿using System;
+using System.Windows.Forms;
 using Voidstrap.UI.Elements.Bootstrapper.Base;
 
 namespace Voidstrap.UI.Elements.Bootstrapper
 {
     // https://youtu.be/h0_AL95Sc3o?t=48
-
-    // a bit hacky, but this is actually a hidden form
-    // since taskdialog is part of winforms, it can't really be properly used without a form
-    // for example, cross-threaded calls to ui controls can't really be done outside of a form
+    // Hidden WinForms host for TaskDialog
 
     public partial class VistaDialog : WinFormsDialogBase
     {
-        private TaskDialogPage _dialogPage;
+        private TaskDialogPage _dialogPage = null!;
 
-        protected sealed override string _message
+        public sealed override string Message
         {
-            get => _dialogPage.Heading ?? "";
-            set => _dialogPage.Heading = value;
-        }
-
-        protected sealed override ProgressBarStyle _progressStyle
-        {
+            get => _dialogPage?.Heading ?? string.Empty;
             set
             {
-                if (_dialogPage.ProgressBar is null)
+                if (_dialogPage != null)
+                    _dialogPage.Heading = value;
+            }
+        }
+
+        public sealed override ProgressBarStyle ProgressStyle
+        {
+            get => ProgressBarStyle.Continuous;
+            set
+            {
+                if (_dialogPage?.ProgressBar is null)
                     return;
 
                 _dialogPage.ProgressBar.State = value switch
@@ -37,55 +39,56 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             }
         }
 
-        protected sealed override int _progressMaximum
+        public sealed override int ProgressMaximum
         {
-            get => _dialogPage.ProgressBar?.Maximum ?? 0;
+            get => _dialogPage?.ProgressBar?.Maximum ?? 0;
             set
             {
-                if (_dialogPage.ProgressBar is null)
-                    return;
-
-                _dialogPage.ProgressBar.Maximum = value;
+                if (_dialogPage?.ProgressBar != null)
+                    _dialogPage.ProgressBar.Maximum = value;
             }
         }
 
-        protected sealed override int _progressValue
+        public sealed override int ProgressValue
         {
-            get => _dialogPage.ProgressBar?.Value ?? 0;
+            get => _dialogPage?.ProgressBar?.Value ?? 0;
             set
             {
-                if (_dialogPage.ProgressBar is null)
-                    return;
-
-                _dialogPage.ProgressBar.Value = value;
+                if (_dialogPage?.ProgressBar != null)
+                    _dialogPage.ProgressBar.Value = value;
             }
         }
 
-        protected sealed override bool _cancelEnabled
+        public sealed override bool CancelEnabled
         {
-            get => _dialogPage.Buttons[0].Enabled;
-            set => _dialogPage.Buttons[0].Enabled = value;
+            get => _dialogPage?.Buttons.Count > 0 && _dialogPage.Buttons[0].Enabled;
+            set
+            {
+                if (_dialogPage?.Buttons.Count > 0)
+                    _dialogPage.Buttons[0].Enabled = value;
+            }
         }
 
         public VistaDialog()
         {
             InitializeComponent();
 
-            _dialogPage = new TaskDialogPage()
+            _dialogPage = new TaskDialogPage
             {
-                Icon = new TaskDialogIcon(App.Settings.Prop.BootstrapperIcon.GetIcon()),
+                Icon = new TaskDialogIcon(
+                    App.Settings.Prop.BootstrapperIcon.GetIcon()),
                 Caption = App.Settings.Prop.BootstrapperTitle,
                 RightToLeftLayout = Locale.RightToLeft,
 
                 Buttons = { TaskDialogButton.Cancel },
-                ProgressBar = new TaskDialogProgressBar()
+                ProgressBar = new TaskDialogProgressBar
                 {
                     State = TaskDialogProgressBarState.Marquee
                 }
             };
 
-            _message = "Please wait...";
-            _cancelEnabled = false;
+            Message = "Please wait...";
+            CancelEnabled = false;
 
             _dialogPage.Buttons[0].Click += ButtonCancel_Click;
 
@@ -94,47 +97,45 @@ namespace Voidstrap.UI.Elements.Bootstrapper
 
         public override void ShowSuccess(string message, Action? callback)
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(ShowSuccess, message, callback);
+                Invoke(ShowSuccess, message, callback);
+                return;
             }
-            else
+
+            TaskDialogPage successDialog = new()
             {
-                TaskDialogPage successDialog = new()
-                {
-                    Icon = TaskDialogIcon.ShieldSuccessGreenBar,
-                    Caption = App.Settings.Prop.BootstrapperTitle,
-                    Heading = message,
-                    Buttons = { TaskDialogButton.OK }
-                };
+                Icon = TaskDialogIcon.ShieldSuccessGreenBar,
+                Caption = App.Settings.Prop.BootstrapperTitle,
+                Heading = message,
+                Buttons = { TaskDialogButton.OK }
+            };
 
-                successDialog.Buttons[0].Click += (_, _) =>
-                {
-                    if (callback is not null)
-                        callback();
+            successDialog.Buttons[0].Click += (_, _) =>
+            {
+                callback?.Invoke();
+                App.Terminate();
+            };
 
-                    App.Terminate();
-                };
-
-                _dialogPage.Navigate(successDialog);
-                _dialogPage = successDialog;
-            }
+            _dialogPage.Navigate(successDialog);
+            _dialogPage = successDialog;
         }
 
         public override void CloseBootstrapper()
         {
-            if (this.InvokeRequired)
+            if (InvokeRequired)
             {
-                this.Invoke(CloseBootstrapper);
+                Invoke(CloseBootstrapper);
+                return;
             }
-            else
-            {
-                _dialogPage.BoundDialog?.Close();
-                base.CloseBootstrapper();
-            }
+
+            _dialogPage.BoundDialog?.Close();
+            base.CloseBootstrapper();
         }
 
-
-        private void VistaDialog_Load(object sender, EventArgs e) => TaskDialog.ShowDialog(_dialogPage);
+        private void VistaDialog_Load(object sender, EventArgs e)
+        {
+            TaskDialog.ShowDialog(_dialogPage);
+        }
     }
 }

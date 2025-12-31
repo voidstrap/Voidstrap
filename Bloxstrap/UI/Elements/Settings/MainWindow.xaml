@@ -32,7 +32,8 @@
     <base:WpfUiWindow.Resources>
         <BitmapImage x:Key="AppIconImage"
                      UriSource="pack://application:,,,/Voidstrap.ico" />
-        <media:QuadraticEase x:Key="QuadEaseOut" EasingMode="EaseInOut" />
+        <media:CubicEase x:Key="SmoothEaseOut" EasingMode="EaseOut" />
+        <media:QuinticEase x:Key="UltraSmoothEaseOut" EasingMode="EaseOut" />
         <LinearGradientBrush x:Key="LightningBrush"
                      StartPoint="0,0"
                      EndPoint="1,0">
@@ -46,11 +47,13 @@
         <Storyboard x:Key="LightningStoryboard"
                     RepeatBehavior="Forever">
             <DoubleAnimation
-                Storyboard.TargetName="LightningTranslate"
-                Storyboard.TargetProperty="X"
-                From="-900"
-                To="1800"
-                Duration="0:0:1"/>
+    Storyboard.TargetName="LightningTranslate"
+    Storyboard.TargetProperty="X"
+    From="-900"
+    To="1800"
+    Duration="0:0:1.2"
+    EasingFunction="{StaticResource SmoothEaseOut}" />
+
 
             <DoubleAnimation
                 Storyboard.TargetName="LightningLayer"
@@ -62,40 +65,50 @@
                 RepeatBehavior="Forever"/>
         </Storyboard>
         <Storyboard x:Key="IntroStoryboard">
-            <DoubleAnimation
-        Storyboard.TargetName="IntroScaleTransform"
-        Storyboard.TargetProperty="ScaleX"
-        From="0.96"
-        To="1.0"
-        Duration="0:0:0.8"
-        EasingFunction="{StaticResource QuadEaseOut}" />
 
-            <DoubleAnimation
+            <!-- Scale X -->
+            <DoubleAnimationUsingKeyFrames
         Storyboard.TargetName="IntroScaleTransform"
-        Storyboard.TargetProperty="ScaleY"
-        From="0.96"
-        To="1.0"
-        Duration="0:0:0.8"
-        EasingFunction="{StaticResource QuadEaseOut}" />
+        Storyboard.TargetProperty="ScaleX">
+                <EasingDoubleKeyFrame Value="0.96" KeyTime="0:0:0" />
+                <EasingDoubleKeyFrame Value="1.015" KeyTime="0:0:0.55"
+                              EasingFunction="{StaticResource UltraSmoothEaseOut}" />
+                <EasingDoubleKeyFrame Value="1.0" KeyTime="0:0:0.9"
+                              EasingFunction="{StaticResource SmoothEaseOut}" />
+            </DoubleAnimationUsingKeyFrames>
 
+            <!-- Scale Y -->
+            <DoubleAnimationUsingKeyFrames
+        Storyboard.TargetName="IntroScaleTransform"
+        Storyboard.TargetProperty="ScaleY">
+                <EasingDoubleKeyFrame Value="0.96" KeyTime="0:0:0" />
+                <EasingDoubleKeyFrame Value="1.015" KeyTime="0:0:0.55"
+                              EasingFunction="{StaticResource UltraSmoothEaseOut}" />
+                <EasingDoubleKeyFrame Value="1.0" KeyTime="0:0:0.9"
+                              EasingFunction="{StaticResource SmoothEaseOut}" />
+            </DoubleAnimationUsingKeyFrames>
+
+            <!-- Overlay fade -->
             <DoubleAnimation
         Storyboard.TargetName="IntroOverlay"
         Storyboard.TargetProperty="Opacity"
         From="1.0"
         To="0.0"
-        BeginTime="0:0:0.7"
-        Duration="0:0:0.6"
-        FillBehavior="Stop"
-        EasingFunction="{StaticResource QuadEaseOut}" />
+        BeginTime="0:0:0.6"
+        Duration="0:0:0.8"
+        EasingFunction="{StaticResource SmoothEaseOut}"
+        FillBehavior="Stop" />
 
+            <!-- Lightning fade -->
             <DoubleAnimation
         Storyboard.TargetName="LightningLayer"
         Storyboard.TargetProperty="Opacity"
         To="0"
-        BeginTime="0:0:0.7"
-        Duration="0:0:0.6"
-        FillBehavior="Stop"
-        EasingFunction="{StaticResource QuadEaseOut}" />
+        BeginTime="0:0:0.6"
+        Duration="0:0:0.8"
+        EasingFunction="{StaticResource SmoothEaseOut}"
+        FillBehavior="Stop" />
+
         </Storyboard>
     </base:WpfUiWindow.Resources>
 
@@ -320,6 +333,7 @@
                                    VerticalAlignment="Center"
                                    FontSize="14"
                                    Text="{x:Static resources:Strings.Menu_TestMode}" />
+
                     </StackPanel>
                 </StatusBarItem>
 

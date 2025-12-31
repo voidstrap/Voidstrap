@@ -10,8 +10,8 @@
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="{x:Static resources:Strings.Installer_Title}"
-    Width="640"
-    Height="400"
+    Width="680"
+    Height="430"
     MinWidth="640"
     MinHeight="400"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel,

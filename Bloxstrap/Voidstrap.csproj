@@ -4,13 +4,13 @@
 		<DebugType>none</DebugType>
 		<DebugSymbols>false</DebugSymbols>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net8.0-windows7.0</TargetFramework>
+		<TargetFramework>net10.0-windows7.0</TargetFramework>
 		<Nullable>enable</Nullable>
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.8.4</Version>
-		<FileVersion>1.0.8.4</FileVersion>
+		<Version>1.0.8.5</Version>
+		<FileVersion>1.0.8.5</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -40,6 +40,7 @@
 		
 		<DebugType>None</DebugType>
 		<DebugSymbols>false</DebugSymbols>
+		<StartupObject></StartupObject>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -52,12 +53,10 @@
 	
 
 	<ItemGroup>
-		<None Remove="Assets\ChristmasUpdate.png" />
 		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="Assets\ChristmasUpdate.png" />
 		<Resource Include="Voidstrap.ico" />
 		<Resource Include="Resources\Checkmark.ico" />
 		<Resource Include="Resources\CrossMark.ico" />
@@ -147,8 +146,11 @@
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
 		<PackageReference Include="SharpCompress" Version="0.42.1" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />
+		<PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Desktop" Version="4.2.0" />
 		<PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
 		<PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
+		<PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
 		<PackageReference Include="SharpZipLib" Version="1.4.2" />
 		<PackageReference Include="System.IO.Compression.ZipFile" Version="4.3.0" />
 		<PackageReference Include="System.Management" Version="9.0.9" />

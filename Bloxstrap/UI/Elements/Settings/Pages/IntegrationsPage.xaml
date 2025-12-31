@@ -46,13 +46,6 @@
         </controls:OptionControl>
 
         <controls:OptionControl
-            Description="Displays BetterBLOX server uptime, only works in games that are in the datacenter."
-            Header="Server Uptime"
-            IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding ServerUptimeBetterBLOXcuzitsbetterXD, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
             Description="{x:Static resources:Strings.Menu_Integrations_PlayerMessageLogs_Description}"
             Header="{x:Static resources:Strings.Menu_Integrations_PlayerMessageLogs_Title}"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">

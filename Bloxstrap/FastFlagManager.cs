@@ -20,6 +20,7 @@ namespace Voidstrap
             // Activity watcher
             { "Players.LogLevel", "FStringDebugLuaLogLevel" },
             { "Players.LogPattern", "FStringDebugLuaLogPattern" },
+
             { "Instances.WndCheck", "FLogWndProcessCheck" },
             { "Rendering.FRMQualityOverride", "DFIntDebugFRMQualityLevelOverride" },
 
@@ -785,8 +786,6 @@ public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dict
         {
             return Prop.Keys.Any(key => key.StartsWith("FastFlag"));
         }
-
-
 
         public void DeleteBackup(string Backup)
         {

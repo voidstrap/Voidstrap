@@ -1,60 +1,88 @@
+using System.ComponentModel;
 using System.Windows.Forms;
-
 using Voidstrap.UI.Elements.Bootstrapper.Base;
 
 namespace Voidstrap.UI.Elements.Bootstrapper
 {
     // https://youtu.be/3K9oCEMHj2s?t=35
-
     public partial class LegacyDialog2011 : WinFormsDialogBase
     {
-        protected override string _message
+        public override string Message
         {
-            get => labelMessage.Text;
-            set => labelMessage.Text = value;
+            get => labelMessage?.Text ?? string.Empty;
+            set
+            {
+                if (labelMessage != null)
+                    labelMessage.Text = value;
+            }
         }
 
-        protected override ProgressBarStyle _progressStyle
+        public override ProgressBarStyle ProgressStyle
         {
-            get => ProgressBar.Style;
-            set => ProgressBar.Style = value;
+            get => ProgressBar?.Style ?? ProgressBarStyle.Continuous;
+            set
+            {
+                if (ProgressBar != null)
+                    ProgressBar.Style = value;
+            }
         }
 
-        protected override int _progressMaximum
+        public override int ProgressMaximum
         {
-            get => ProgressBar.Maximum;
-            set => ProgressBar.Maximum = value;
+            get => ProgressBar?.Maximum ?? 0;
+            set
+            {
+                if (ProgressBar != null)
+                    ProgressBar.Maximum = value;
+            }
         }
 
-        protected override int _progressValue
+        public override int ProgressValue
         {
-            get => ProgressBar.Value;
-            set => ProgressBar.Value = value;
+            get => ProgressBar?.Value ?? 0;
+            set
+            {
+                if (ProgressBar != null)
+                    ProgressBar.Value = value;
+            }
         }
 
-        protected override bool _cancelEnabled
+        public override bool CancelEnabled
         {
-            get => this.buttonCancel.Enabled;
-            set => this.buttonCancel.Enabled = this.buttonCancel.Visible = value;
+            get => buttonCancel?.Enabled ?? false;
+            set
+            {
+                if (buttonCancel != null)
+                {
+                    buttonCancel.Enabled = value;
+                    buttonCancel.Visible = value;
+                }
+            }
         }
 
         public LegacyDialog2011()
         {
             InitializeComponent();
 
-            this.IconBox.BackgroundImage = App.Settings.Prop.BootstrapperIcon.GetIcon().ToBitmap();
-            this.buttonCancel.Text = Strings.Common_Cancel;
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+
+            IconBox.BackgroundImage =
+                App.Settings.Prop.BootstrapperIcon.GetIcon().ToBitmap();
+
+            buttonCancel.Text = Strings.Common_Cancel;
 
             ScaleWindow();
             SetupDialog();
 
-            this.ProgressBar.RightToLeft = this.RightToLeft;
-            this.ProgressBar.RightToLeftLayout = this.RightToLeftLayout;
+            ProgressBar.RightToLeft = RightToLeft;
+            ProgressBar.RightToLeftLayout = RightToLeftLayout;
         }
 
-        private void LegacyDialog2011_Load(object sender, EventArgs e)
+        private void LegacyDialog2011_Load(object sender, System.EventArgs e)
         {
-            this.Activate();
+            if (!DesignMode)
+                Activate();
         }
     }
 }

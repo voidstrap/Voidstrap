@@ -52,9 +52,15 @@ namespace Voidstrap.Models.Persistable
         public bool BackgroundUpdatesEnabled { get; set; } = true;
         public bool VoidNotify { get; set; } = true;
         public bool MultiInstanceLaunching { get; set; } = false;
+        public bool ServerPingCounter { get; set; } = false;
+        public bool ShowServerDetailsUI { get; set; } = false;
         public bool EnableCustomStatusDisplay { get; set; } = true;
         public bool RenameClientToEuroTrucks2 { get; set; } = false;
-        public bool SnowWOWSOCOOLWpfSnowbtw2 { get; set; } = true;
+        public bool SnowWOWSOCOOLWpfSnowbtw { get; set; } = false;
+
+        public bool MotionBlurOverlay { get; set; } = false;
+
+        public bool MotionBlurOverlay2 { get; set; } = false;
 
         public string ClientPath { get; set; } = Path.Combine(Paths.Base, "Roblox", "Player");
 
