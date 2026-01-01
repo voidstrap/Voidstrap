@@ -74,7 +74,6 @@ Designed with a refined UI, improved stability, and advanced tooling, Voidstrap 
 - Memory & GPU optimizer *(BETA)*  
 - Custom Discord RPC editor  
 - Built-in music player & browser  
-- Plugin system *(early access)*  
 
 ---
 
