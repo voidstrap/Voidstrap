@@ -30,18 +30,47 @@ namespace Voidstrap.Integrations
             if (File.Exists(NvidiaInspectorExe))
                 return true;
 
+            string zipPath = Path.Combine(NvidiaInspectorDir, "nvidiaProfileInspector.zip");
+
             try
             {
                 Directory.CreateDirectory(NvidiaInspectorDir);
-                string zipPath = Path.Combine(NvidiaInspectorDir, "nvidiaProfileInspector.zip");
 
-                using var response = await App.HttpClient.GetAsync(NVIDIA_INSPECTOR_URL);
-                response.EnsureSuccessStatusCode();
+                foreach (var p in Process.GetProcessesByName("nvidiaProfileInspector"))
+                {
+                    try
+                    {
+                        p.Kill();
+                        p.WaitForExit(3000);
+                    }
+                    catch { }
+                }
 
-                await using var fs = File.Create(zipPath);
-                await response.Content.CopyToAsync(fs);
+                if (File.Exists(zipPath))
+                {
+                    try { File.Delete(zipPath); } catch { }
+                }
 
+                using (var response = await App.HttpClient.GetAsync(
+                    NVIDIA_INSPECTOR_URL,
+                    HttpCompletionOption.ResponseHeadersRead))
+                {
+                    response.EnsureSuccessStatusCode();
+
+                    using (var fs = new FileStream(
+                        zipPath,
+                        FileMode.Create,
+                        FileAccess.Write,
+                        FileShare.None))
+                    {
+                        await response.Content.CopyToAsync(fs);
+                        await fs.FlushAsync();
+                    }
+                }
+
+                await Task.Delay(100);
                 ZipFile.ExtractToDirectory(zipPath, NvidiaInspectorDir, true);
+
                 File.Delete(zipPath);
 
                 return true;
@@ -54,7 +83,6 @@ namespace Voidstrap.Integrations
                 return false;
             }
         }
-
         private static async Task<string?> EnsureProfileDownloaded(string profileName)
         {
             Directory.CreateDirectory(NipProfilesDir);
@@ -63,14 +91,27 @@ namespace Voidstrap.Integrations
             if (File.Exists(localPath))
                 return localPath;
 
-            using var response = await App.HttpClient.GetAsync(GITHUB_RAW_BASE + profileName);
-            if (!response.IsSuccessStatusCode)
+            try
+            {
+                using var response = await App.HttpClient.GetAsync(GITHUB_RAW_BASE + profileName);
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                using var fs = new FileStream(
+                    localPath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None);
+
+                await response.Content.CopyToAsync(fs);
+                await fs.FlushAsync();
+
+                return localPath;
+            }
+            catch
+            {
                 return null;
-
-            await using var fs = File.Create(localPath);
-            await response.Content.CopyToAsync(fs);
-
-            return localPath;
+            }
         }
 
         private static async Task<bool> DragDropImportWithDetection(string profilePath)
@@ -100,6 +141,7 @@ namespace Voidstrap.Integrations
                     if (process.MainWindowHandle != IntPtr.Zero)
                         return true;
                 }
+
                 return false;
             }
             catch
@@ -118,11 +160,7 @@ namespace Voidstrap.Integrations
             });
 
             Frontend.ShowMessageBox(
-                "NVIDIA Profile Inspector has been opened so you can fix this manually. " +
-                "In the top-right search box, type Roblox VR. Select the profile named Roblox VR. " +
-                "Click the red Delete Profile (❌) button in the top toolbar. " +
-                "Then click Apply Changes in the top-right corner. " +
-                "After that, completely close NVIDIA Profile Inspector. ",
+                "NVIDIA Profile Inspector opened.\r\n\r\n• Search for: Roblox VR\r\n• Select the profile\r\n• Click the ❌ Delete Profile button\r\n• Click Apply Changes\r\n• Close NVIDIA Profile Inspector completely",
                 System.Windows.MessageBoxImage.Warning);
 
             await Task.Delay(1000);
@@ -143,23 +181,19 @@ namespace Voidstrap.Integrations
             }
 
             if (await DragDropImportWithDetection(profilePath))
-            {
                 return true;
-            }
 
             await ManualDeleteRobloxVR();
 
             if (await DragDropImportWithDetection(profilePath))
-            {
                 return true;
-            }
 
             Frontend.ShowMessageBox(
-                $"NVIDIA Profile Inspector failed to load the {displayName} profile.\n\n" +
-                "Possible reasons:\n" +
-                "• UAC was denied\n" +
-                "• NVIDIA driver locked the profile\n" +
-                "• Inspector was blocked by antivirus",
+                $"Failed to apply {displayName} profile.\n\n" +
+                "Possible causes:\n" +
+                "• UAC denied\n" +
+                "• NVIDIA driver lock\n" +
+                "• Antivirus interference",
                 System.Windows.MessageBoxImage.Error);
 
             return false;

@@ -49,6 +49,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             e.Handled = true;
         }
 
+        private static readonly HttpClient _httpClient = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(10)
+        };
+
         private async Task LoadFFlagsAsync()
         {
             const string url =
@@ -56,28 +61,56 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             try
             {
-                using HttpClient client = new();
-                string json = await client.GetStringAsync(url);
+                string json = await _httpClient.GetStringAsync(url).ConfigureAwait(false);
 
-                var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-
-                FFlags.Clear();
-
-                foreach (var kv in dict)
-                {
-                    FFlags.Add(new FFlagItem
+                var dict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(
+                    json,
+                    new JsonSerializerOptions
                     {
-                        Name = kv.Key,
-                        Value = kv.Value.ToString()
+                        PropertyNameCaseInsensitive = true
                     });
-                }
 
-                DataGrid.ItemsSource = FFlags;
+                if (dict == null)
+                    throw new InvalidOperationException("FFlags JSON returned null.");
+
+                await Dispatcher.InvokeAsync(() =>
+                {
+                    FFlags.Clear();
+
+                    foreach (var kv in dict)
+                    {
+                        FFlags.Add(new FFlagItem
+                        {
+                            Name = kv.Key,
+                            Value = kv.Value.ValueKind switch
+                            {
+                                JsonValueKind.String => kv.Value.GetString(),
+                                JsonValueKind.Number => kv.Value.GetRawText(),
+                                JsonValueKind.True => "true",
+                                JsonValueKind.False => "false",
+                                _ => kv.Value.GetRawText()
+                            }
+                        });
+                    }
+
+                    DataGrid.ItemsSource = null;
+                    DataGrid.ItemsSource = FFlags;
+                });
+            }
+            catch (HttpRequestException ex)
+            {
+                Frontend.ShowMessageBox(
+                    $"Network error while loading FFlags:\n{ex.Message}");
+            }
+            catch (JsonException ex)
+            {
+                Frontend.ShowMessageBox(
+                    $"Invalid FFlags JSON format:\n{ex.Message}");
             }
             catch (Exception ex)
             {
                 Frontend.ShowMessageBox(
-                    $"Failed to load FFlags:\n{ex.Message}");
+                    $"Failed to load FFlags:\n{ex}");
             }
         }
 

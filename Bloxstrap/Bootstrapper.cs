@@ -187,7 +187,7 @@ namespace Voidstrap
                 }
             }
 
-            Frontend.ShowMessageBox($"{message}\n\nYou can retry later or continue offline.",
+            Frontend.ShowMessageBox($"This has been a bug for a while try switching your channel in settings or relaunching.",
                 MessageBoxImage.Warning, MessageBoxButton.OK);
         }
 
