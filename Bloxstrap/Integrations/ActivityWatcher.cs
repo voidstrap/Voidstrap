@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static Voidstrap.Models.Persistable.AppSettings;
 
 namespace Voidstrap.Integrations
 {
@@ -30,6 +32,50 @@ namespace Voidstrap.Integrations
         private const string GameMessageEntryPattern = @"\[VoidstrapRPC\] (.*)";
         private const string GamePlayerJoinLeavePattern = @"(added|removed): (.*) (.*[0-9])";
         private const string GameMessageLogPattern = @"Success Text: (.*)";
+        private const int ENUM_CURRENT_SETTINGS = -1;
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool EnumDisplaySettings(
+            string? deviceName,
+            int modeNum,
+            ref DEVMODE devMode);
+
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        private struct DEVMODE
+        {
+            private const int CCHDEVICENAME = 32;
+            private const int CCHFORMNAME = 32;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = CCHDEVICENAME)]
+            public string dmDeviceName;
+
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+
+            public int dmPositionX;
+            public int dmPositionY;
+            public int dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = CCHFORMNAME)]
+            public string dmFormName;
+
+            public short dmLogPixels;
+            public int dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+            public int dmDisplayFlags;
+            public int dmDisplayFrequency;
+        }
 
         private int _logEntriesRead = 0;
         private bool _teleportMarker = false;
@@ -43,6 +89,9 @@ namespace Voidstrap.Integrations
         public event EventHandler<ActivityData.UserLog>? OnNewPlayerRequest;
         public event EventHandler<ActivityData.UserMessage>? OnNewMessageRequest;
         public event EventHandler<Message>? OnRPCMessage;
+        private static ResolutionSetting? _originalResolution;
+        private static bool _resolutionApplied = false;
+
 
         private DateTime LastRPCRequest;
 
@@ -129,6 +178,9 @@ namespace Voidstrap.Integrations
             if (entry.Contains(GameLeavingEntry))
             {
                 App.Logger.WriteLine(LOG_IDENT, "User is back into the desktop app");
+
+                RestoreOriginalResolution();
+
                 OnAppClose?.Invoke(this, EventArgs.Empty);
 
                 if (Data.PlaceId != 0 && !InGame)
@@ -208,6 +260,9 @@ namespace Voidstrap.Integrations
 
                     InGame = true;
                     Data.TimeJoined = DateTime.Now;
+
+                    ApplyInGameResolutionIfNeeded();
+
                     OnGameJoin?.Invoke(this, EventArgs.Empty);
                 }
             }
@@ -217,6 +272,9 @@ namespace Voidstrap.Integrations
                 if (entry.Contains(GameDisconnectedEntry))
                 {
                     App.Logger.WriteLine(LOG_IDENT, $"Disconnected from Game ({Data.JobId})");
+
+                    RestoreOriginalResolution();
+
                     Data.TimeLeft = DateTime.Now;
                     History.Insert(0, Data);
 
@@ -299,6 +357,78 @@ namespace Voidstrap.Integrations
                     OnNewMessageRequest?.Invoke(this, messageLog);
                 }
             }
+        }
+
+        private void RestoreOriginalResolution()
+        {
+            if (!_resolutionApplied || _originalResolution is null)
+                return;
+
+            App.Logger.WriteLine(
+                "ActivityWatcher",
+                "Restoring original desktop resolution"
+            );
+
+            InGameResolutionApplier.Apply(_originalResolution);
+
+            _resolutionApplied = false;
+            _originalResolution = null;
+        }
+
+        private static ResolutionSetting GetCurrentResolution()
+        {
+            DEVMODE devMode = new();
+            devMode.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
+
+            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
+
+            return new ResolutionSetting
+            {
+                Width = devMode.dmPelsWidth,
+                Height = devMode.dmPelsHeight,
+                RefreshRate = devMode.dmDisplayFrequency
+            };
+        }
+
+        private void ApplyInGameResolutionIfNeeded()
+        {
+            if (_resolutionApplied)
+                return;
+
+            var settings = App.Settings.Prop;
+
+            if (!settings.UsePlaceId)
+                return;
+
+            if (settings.InGameResolution is null)
+                return;
+
+            if (settings.MatchUniverseId)
+            {
+                if (Data.UniverseId == 0)
+                    return;
+
+                if (settings.TargetUniverseId != Data.UniverseId)
+                    return;
+            }
+            else
+            {
+                if (!long.TryParse(settings.PlaceId, out long targetPlaceId))
+                    return;
+
+                if (Data.PlaceId != targetPlaceId)
+                    return;
+            }
+
+            App.Logger.WriteLine(
+                "ActivityWatcher",
+                $"Applying in-game resolution (Universe={Data.UniverseId}, Place={Data.PlaceId})"
+            );
+
+            _originalResolution ??= GetCurrentResolution();
+            _resolutionApplied = true;
+
+            InGameResolutionApplier.Apply(settings.InGameResolution);
         }
 
         public void Dispose()

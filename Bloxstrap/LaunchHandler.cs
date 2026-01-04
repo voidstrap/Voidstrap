@@ -283,8 +283,9 @@ namespace Voidstrap
             }
 
             if (App.Settings.Prop.ExclusiveFullscreen)
-                Task.Run(() => RobloxFullscreen.WaitAndForceBorderlessFullscreen()); // renamed goooffball for better idfk why did I rename this again... ANT I NEED YOUR HELP BRO
-
+            {
+                _ = Task.Run(RobloxFullscreen.WaitAndForceExclusiveFullscreen);
+            } // redid again cuz of a bug
 
             if (App.Settings.Prop.EnableLuaScripting)
                 Task.Run(() => LuaScriptManager.WaitForRobloxAndExecuteScript());

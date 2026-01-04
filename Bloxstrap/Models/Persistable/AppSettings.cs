@@ -18,7 +18,6 @@ namespace Voidstrap.Models.Persistable
         public string BootstrapperIconCustomLocation { get; set; } = "";
         public Theme Theme2 { get; set; } = Theme.Dark;
         public string? SelectedCustomTheme { get; set; } = null;
-
         public bool CheckForUpdates { get; set; } = true;
         public string SelectedCpuPriority { get; set; } = "Automatic";
         public int MaxCpuCores { get; set; } = Environment.ProcessorCount;
@@ -48,6 +47,8 @@ namespace Voidstrap.Models.Persistable
         public bool FixTeleports { get; set; } = false;
         public bool ConfirmLaunches { get; set; } = true;
         public bool HasLaunchedGame { get; set; } = false;
+        public bool UsePlaceId { get; set; } = false;
+        public string PlaceId { get; set; } = "";
         public bool OptimizeRoblox { get; set; } = false;
         public bool BackgroundUpdatesEnabled { get; set; } = true;
         public bool VoidNotify { get; set; } = true;
@@ -128,10 +129,21 @@ namespace Voidstrap.Models.Persistable
 
         public string LaunchGameID { get; set; } = "";
         public bool IsGameEnabled { get; set; } = false;
+        public bool MatchUniverseId { get; set; } = true;
+        public long? TargetUniverseId { get; set; }
         public bool IsBetterServersEnabled { get; set; } = false;
         public bool OverClockGPU { get; set; } = false;
         
         // Lua Scripting
         public bool EnableLuaScripting { get; set; } = false;
+
+        public ResolutionSetting? InGameResolution { get; set; }
+
+        public class ResolutionSetting
+        {
+            public int Width { get; set; }
+            public int Height { get; set; }
+            public int RefreshRate { get; set; }
+        }
     }
 }

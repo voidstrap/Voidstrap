@@ -9,6 +9,7 @@
     xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:settings="clr-namespace:Voidstrap.UI.ViewModels.Settings"
+    xmlns:conv="clr-namespace:Voidstrap.Converters"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="FastFlagsPage"
     d:DataContext="{d:DesignInstance Type=settings:FastFlagsViewModel}"
@@ -17,6 +18,11 @@
     Loaded="Window_Loaded"
     Scrollable="True"
     mc:Ignorable="d">
+
+    <ui:UiPage.Resources>
+        <conv:CustomVisibilityConverter x:Key="CustomVisibilityConverter"/>
+    </ui:UiPage.Resources>
+
     <StackPanel Margin="0,0,14,14">
         <TextBlock
             Margin="0,0,0,16"
@@ -54,28 +60,38 @@
         </ui:CardAction>
 
         <controls:OptionControl
+    Header="NVIDIA FFlags Editor (BETA)"
+    Description="Edit NVIDIA Profile Inspector FFlags. NVIDIA GPUs only.">
+            <StackPanel>
+
+                <ui:Button
+            VerticalAlignment="Top"
+            Content="Open Editor"
+            Icon="Edit24"
+            Click="OpenCustomEditor_Click"/>
+
+                <TextBlock>
+            <Hyperlink NavigateUri="https://discord.com/channels/1327967202015580223/1456965691054755911"
+                       RequestNavigate="Hyperlink_RequestNavigate">
+                How to Setup?
+            </Hyperlink>
+                </TextBlock>
+
+            </StackPanel>
+        </controls:OptionControl>
+
+        <controls:OptionControl
             Height="73"
             Description="{x:Static resources:Strings.Menu_FastFlags_ManagerEnabled_Description}"
             Header="{x:Static resources:Strings.Menu_FastFlags_ManagerEnabled_Title}">
             <ui:ToggleSwitch IsChecked="{Binding UseFastFlagManager, Mode=TwoWay}" />
         </controls:OptionControl>
+        
 
         <controls:OptionControl 
     Description="Locks FFlags to default values mostly used for Comp and Ternys." 
     Header="Lock FFlags">
             <ui:ToggleSwitch IsChecked="{Binding LockDefault, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-    Header="NVIDIA Profile Inspector FFlags"
-    Description="Use Profile Inspector FFlags, which can help improve performance. NVIDIA GPUs only.">
-
-            <ComboBox Loaded="ProfileComboBox_Loaded"
-              SelectionChanged="ProfileComboBox2_SelectionChanged">
-                <ComboBoxItem Content="Default Settings"/>
-                <ComboBoxItem Content="Blur Settings"/>
-                <ComboBoxItem Content="Without Settings"/>
-            </ComboBox>
         </controls:OptionControl>
 
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Reset_Title}">

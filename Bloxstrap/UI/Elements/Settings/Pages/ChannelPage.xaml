@@ -163,6 +163,29 @@
             </StackPanel>
         </controls:OptionControl>
 
+        <controls:OptionControl
+    Header="Resolution Changer (In-Game)"
+    Description="Change resolution when entering a specific Roblox PlaceId">
+
+            <StackPanel>
+
+                <CheckBox
+            Content="Apply Resolution PlaceID"
+            IsChecked="{Binding UsePlaceId, Mode=TwoWay}"/>
+
+                <TextBox
+            Width="220"
+            Text="{Binding PlaceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            IsEnabled="{Binding UsePlaceId}"/>
+
+                <ComboBox
+   ItemsSource="{Binding AvailableResolutionsInGame}"
+   SelectedItem="{Binding SelectedResolutionInGame, Mode=TwoWay}"
+   DisplayMemberPath="DisplayName"
+   Width="220" Margin="0,8,0,0"/>
+
+            </StackPanel>
+        </controls:OptionControl>
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>

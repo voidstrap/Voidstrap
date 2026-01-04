@@ -5,7 +5,7 @@ using System.Windows.Media.Imaging;
 
 namespace RobloxLightingOverlay
 {
-    public static class DesktopCapture
+    public static class DesktopCapture // shi I deleted this I think not needed :skull:
     {
         public static WriteableBitmap CaptureScreen(int width, int height)
         {

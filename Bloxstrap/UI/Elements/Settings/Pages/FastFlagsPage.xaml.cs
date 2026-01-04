@@ -1,35 +1,88 @@
-﻿using System;
+﻿using Markdig.Extensions.CustomContainers;
+using System;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics;
 using System.IO;
 using System.Management;
+using System.Net.Http;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Navigation;
+using System.Windows.Threading;
 using Voidstrap.Integrations;
 using Voidstrap.UI.ViewModels.Settings;
-using System.Net.Http;
-using System.Text.Json;
-using System.Collections.ObjectModel;
 using Wpf.Ui.Mvvm.Contracts;
-using System.Diagnostics;
-using System.Windows.Navigation;
 
 namespace Voidstrap.UI.Elements.Settings.Pages
 {
-    public partial class FastFlagsPage
+    public partial class FastFlagsPage // meowr
     {
         private bool _initialLoad = false;
         private bool _isLoading = true;
         public ObservableCollection<FFlagItem> FFlags { get; } = new();
+        public ObservableCollection<NvidiaFFlag> CustomFFlags { get; } = new();
 
         private FastFlagsViewModel _viewModel = null!;
         private static readonly string SavedFilePath =
             Path.Combine(Paths.Base, "Settings.ini");
 
+        private string _editorBaseProfile = "Default Settings";
+        private bool _editorModified;
+
+        public class NvidiaFFlag : INotifyPropertyChanged, IDataErrorInfo
+        {
+            private string _name = string.Empty;
+            private string _value = string.Empty;
+
+            public string Name
+            {
+                get => _name;
+                set
+                {
+                    _name = value;
+                    OnPropertyChanged(nameof(Name));
+                }
+            }
+
+            public string Value
+            {
+                get => _value;
+                set
+                {
+                    _value = value;
+                    OnPropertyChanged(nameof(Value));
+                }
+            }
+
+            public string Error => null;
+
+            public string this[string columnName]
+            {
+                get
+                {
+                    if (columnName == nameof(Name) && string.IsNullOrWhiteSpace(Name))
+                        return "Flag name is required";
+
+                    if (columnName == nameof(Value) && string.IsNullOrWhiteSpace(Value))
+                        return "Value is required";
+
+                    return null;
+                }
+            }
+
+            public event PropertyChangedEventHandler? PropertyChanged;
+            protected void OnPropertyChanged(string prop)
+                => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(prop));
+        }
 
         public FastFlagsPage()
         {
@@ -119,102 +172,37 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             public string Name { get; set; }
             public string Value { get; set; }
         }
+
         private void FastFlagsPage_Loaded(object sender, RoutedEventArgs e)
         {
             _isLoading = true;
+        }
+
+        private void OpenCustomEditor_Click(object sender, RoutedEventArgs e)
+        {
+            if (IsVulkanSelected())
+            {
+                Frontend.ShowMessageBox(
+                    "Some FFlags may not work while Vulkan Rendering Mode is enabled in the NVIDIA FFlags Editor.\n\n" +
+                    "Please switch to DirectX/Direct3D Rendering Mode."
+                );
+            }
+
+            string basePreset = "Default Settings";
+
+            if (ProfileComboBox.SelectedItem is ComboBoxItem item)
+                basePreset = item.Content?.ToString() ?? basePreset;
+
+            NavigationService.Navigate(new NvidiaFFlagEditorPage());
         }
 
         private bool IsVulkanSelected()
         {
             if (_viewModel?.SelectedRenderingMode == null)
                 return false;
+
             string modeText = _viewModel.SelectedRenderingMode.ToString();
-
             return modeText.Contains("Vulkan", StringComparison.OrdinalIgnoreCase);
-        }
-
-        private void ProfileComboBox_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (sender is not ComboBox comboBox)
-                return;
-
-            LoadSavedProfile(comboBox);
-
-            Dispatcher.BeginInvoke(() =>
-            {
-                _isLoading = false;
-            }, System.Windows.Threading.DispatcherPriority.Background);
-        }
-
-        private void SaveProfile(string profile)
-        {
-            try
-            {
-                Directory.CreateDirectory(Paths.Base);
-
-                File.WriteAllText(SavedFilePath, profile);
-            }
-            catch (Exception ex)
-            {
-                Frontend.ShowMessageBox(
-                    $"SAVE FAILED\n\n{ex}\n\nPath:\n{SavedFilePath}");
-            }
-        }
-
-        private void LoadSavedProfile(ComboBox comboBox)
-        {
-            string profile = File.Exists(SavedFilePath)
-                ? File.ReadAllText(SavedFilePath).Trim()
-                : "Default Settings";
-
-            foreach (ComboBoxItem item in comboBox.Items)
-            {
-                if (item.Content?.ToString() == profile)
-                {
-                    comboBox.SelectedItem = item;
-                    return;
-                }
-            }
-
-            comboBox.SelectedIndex = comboBox.Items.Count - 1;
-        }
-
-        private async void ProfileComboBox2_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (_isLoading)
-                return;
-
-            if (IsVulkanSelected())
-            {
-                Frontend.ShowMessageBox(
-                    "Profile Inspector FFlags cannot be used while Vulkan is enabled.\n\n" +
-                    "Please switch the Rendering Mode to Direct3D."
-                );
-                return;
-            }
-
-            if (sender is not ComboBox comboBox ||
-                comboBox.SelectedItem is not ComboBoxItem selectedItem)
-                return;
-
-            string selectedProfile = selectedItem.Content?.ToString();
-            if (string.IsNullOrWhiteSpace(selectedProfile))
-                return;
-
-            bool success = selectedProfile switch
-            {
-                "Default Settings" => await NvidiaProfileManager.ApplyDefaultSettings(),
-                "Blur Settings" => await NvidiaProfileManager.ApplyBlurSettings(),
-                "Without Settings" => await NvidiaProfileManager.ApplyWithoutSettings(),
-                _ => false
-            };
-
-            if (!success)
-            {
-                return;
-            }
-
-            SaveProfile(selectedProfile);
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)

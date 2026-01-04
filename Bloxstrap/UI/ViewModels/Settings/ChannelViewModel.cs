@@ -18,6 +18,7 @@ using Voidstrap.AppData;
 using Voidstrap.RobloxInterfaces;
 using Voidstrap.UI.Elements.ContextMenu;
 using Wpf.Ui.Appearance;
+using static Voidstrap.Models.Persistable.AppSettings;
 
 namespace Voidstrap.UI.ViewModels.Settings
 {
@@ -72,6 +73,8 @@ namespace Voidstrap.UI.ViewModels.Settings
         private CancellationTokenSource? _loadChannelCts;
 
         public ObservableCollection<int> CpuLimitOptions { get; set; }
+        public ObservableCollection<DisplayMode> AvailableResolutionsInGame { get; } = new();
+
 
         private bool _showLoadingError;
         private bool _showChannelWarning;
@@ -108,6 +111,34 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         _selectedPriority = App.Settings.Prop.PriorityLimit ?? "Normal";
             _ = LoadChannelDeployInfoSafeAsync(App.Settings.Prop.Channel);
+        }
+
+        public bool UsePlaceId
+        {
+            get => App.Settings.Prop.UsePlaceId;
+            set
+            {
+                if (App.Settings.Prop.UsePlaceId != value)
+                {
+                    App.Settings.Prop.UsePlaceId = value;
+                    OnPropertyChanged(nameof(UsePlaceId));
+                    App.Settings.Save();
+                }
+            }
+        }
+
+        public string PlaceId
+        {
+            get => App.Settings.Prop.PlaceId;
+            set
+            {
+                if (App.Settings.Prop.PlaceId != value)
+                {
+                    App.Settings.Prop.PlaceId = value;
+                    OnPropertyChanged(nameof(PlaceId));
+                    App.Settings.Save();
+                }
+            }
         }
 
         public ObservableCollection<DisplayMode> AvailableResolutions { get; } = new();
@@ -168,12 +199,53 @@ namespace Voidstrap.UI.ViewModels.Settings
                 AvailableResolutions.Add(mode);
             }
 
+            AvailableResolutionsInGame.Clear();
+
+            foreach (var mode in AvailableResolutions)
+            {
+                AvailableResolutionsInGame.Add(mode);
+            }
+
             if (EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode))
             {
                 SelectedResolution = AvailableResolutions.FirstOrDefault(m =>
                     m.Width == devMode.dmPelsWidth &&
                     m.Height == devMode.dmPelsHeight &&
                     m.RefreshRate == devMode.dmDisplayFrequency);
+            }
+        }
+
+        public DisplayMode? SelectedResolutionInGame
+        {
+            get
+            {
+                var r = App.Settings.Prop.InGameResolution;
+                if (r == null)
+                    return null;
+
+                return AvailableResolutionsInGame.FirstOrDefault(m =>
+                    m.Width == r.Width &&
+                    m.Height == r.Height &&
+                    m.RefreshRate == r.RefreshRate);
+            }
+            set
+            {
+                if (value == null)
+                {
+                    App.Settings.Prop.InGameResolution = null;
+                }
+                else
+                {
+                    App.Settings.Prop.InGameResolution = new ResolutionSetting
+                    {
+                        Width = value.Width,
+                        Height = value.Height,
+                        RefreshRate = value.RefreshRate
+                    };
+                }
+
+                OnPropertyChanged(nameof(SelectedResolutionInGame));
+                App.Settings.Save();
             }
         }
 

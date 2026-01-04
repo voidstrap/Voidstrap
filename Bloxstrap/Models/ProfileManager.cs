@@ -1,144 +1,299 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Runtime.InteropServices;
+using System.Linq;
+using System.Security;
+using System.Text;
 using System.Threading.Tasks;
-using Voidstrap;
+using System.Xml.Linq;
+using Voidstrap.Models;
 
 namespace Voidstrap.Integrations
 {
     public static class NvidiaProfileManager
     {
         private const string NVIDIA_INSPECTOR_URL =
-            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.3/nvidiaProfileInspector.zip";
+            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.29/nvidiaProfileInspector.zip";
 
-        private const string GITHUB_RAW_BASE =
-            "https://raw.githubusercontent.com/KloBraticc/VoidstrapResources/main/NvidiaProfiles/";
-
-        private static readonly string NvidiaInspectorDir =
+        private static readonly string InspectorDir =
             Path.Combine(Paths.Integrations, "NvidiaProfileInspector");
 
-        private static readonly string NvidiaInspectorExe =
-            Path.Combine(NvidiaInspectorDir, "nvidiaProfileInspector.exe");
+        private static readonly string InspectorExe =
+            Path.Combine(InspectorDir, "nvidiaProfileInspector.exe");
 
-        private static readonly string NipProfilesDir =
-            Path.Combine(Paths.Base, "NipProfiles");
+        private static readonly Encoding Utf16Bom =
+            new UnicodeEncoding(false, true);
 
-        private static async Task<bool> EnsureNvidiaInspectorDownloaded()
+        public static string EmptyNipTemplate() =>
+@"<?xml version=""1.0"" encoding=""utf-16""?>
+<ArrayOfProfile>
+  <Profile>
+    <ProfileName>Voidstrap</ProfileName>
+    <Executeables>
+      <string>robloxplayerbeta.exe</string>
+    </Executeables>
+    <Settings />
+  </Profile>
+</ArrayOfProfile>";
+
+        public static void SaveToNip(
+            string path,
+            IEnumerable<NvidiaEditorEntry> entries)
         {
-            if (File.Exists(NvidiaInspectorExe))
+            Directory.CreateDirectory(Path.GetDirectoryName(path)!);
+
+            var unique = entries
+                .Where(e => !string.IsNullOrWhiteSpace(e.Name))
+                .GroupBy(e => (e.SettingId, e.Name))
+                .Select(g => g.Last())
+                .ToList();
+
+            var settings = new XElement("Settings");
+
+            foreach (var e in unique)
+            {
+                if (!TryNormalizeSettingId(e.SettingId, out string fixedId))
+                    continue;
+
+                settings.Add(
+                    new XElement("ProfileSetting",
+                        new XElement("SettingNameInfo",
+                            SecurityElement.Escape(e.Name)),
+                        new XElement("SettingID", fixedId),
+                        new XElement("SettingValue",
+                            SecurityElement.Escape(e.Value ?? "0")),
+                        new XElement("ValueType",
+                            NormalizeValueType(e.ValueType))
+                    )
+                );
+            }
+
+            var doc = new XDocument(
+                new XDeclaration("1.0", "utf-16", null),
+                new XElement("ArrayOfProfile",
+                    new XElement("Profile",
+                        new XElement("ProfileName", "Voidstrap"),
+                        new XElement("Executeables",
+                            new XElement("string", "robloxplayerbeta.exe")),
+                        settings
+                    )
+                )
+            );
+
+            File.WriteAllText(path, doc.ToString(), Utf16Bom);
+        }
+
+        public static List<NvidiaEditorEntry> LoadFromNip(string path)
+        {
+            var results = new List<NvidiaEditorEntry>();
+
+            if (!File.Exists(path))
+                return results;
+
+            XDocument doc;
+            try
+            {
+                doc = XDocument.Load(path);
+            }
+            catch
+            {
+                return results;
+            }
+
+            foreach (var node in doc.Descendants("ProfileSetting"))
+            {
+                string name = node.Element("SettingNameInfo")?.Value;
+                string id = node.Element("SettingID")?.Value;
+                string value = node.Element("SettingValue")?.Value;
+                string type = node.Element("ValueType")?.Value;
+
+                if (!TryNormalizeSettingId(id, out string fixedId))
+                    continue;
+
+                results.Add(new NvidiaEditorEntry
+                {
+                    Name = string.IsNullOrWhiteSpace(name)
+                        ? $"Setting {fixedId}"
+                        : name,
+                    SettingId = fixedId,
+                    Value = value ?? "0",
+                    ValueType = NormalizeValueType(type)
+                });
+            }
+
+            return results;
+        }
+
+        private static bool TryNormalizeSettingId(
+            string? raw,
+            out string result)
+        {
+            result = null!;
+            if (string.IsNullOrWhiteSpace(raw))
+                return false;
+
+            raw = raw.Trim();
+
+            if (raw.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+            {
+                if (!ulong.TryParse(raw[2..],
+                        System.Globalization.NumberStyles.HexNumber,
+                        null,
+                        out ulong hex))
+                    return false;
+
+                hex = Math.Min(hex, uint.MaxValue);
+                result = $"0x{hex:X}";
+                return true;
+            }
+
+            if (ulong.TryParse(raw, out ulong dec))
+            {
+                dec = Math.Min(dec, uint.MaxValue);
+                result = dec.ToString();
+                return true;
+            }
+
+            return false;
+        }
+
+        private static string NormalizeValueType(string? type)
+        {
+            return type?.ToLowerInvariant() switch
+            {
+                "string" => "String",
+                "binary" => "Binary",
+                "boolean" => "Boolean",
+                "hex" => "Hex",
+                _ => "Dword"
+            };
+        }
+
+        public static async Task<bool> ApplyNipFile(string nipPath)
+        {
+            if (!File.Exists(nipPath))
+                return false;
+
+            if (!await EnsureInspectorDownloaded())
+                return false;
+
+            if (await DragDropImport(nipPath))
                 return true;
 
-            string zipPath = Path.Combine(NvidiaInspectorDir, "nvidiaProfileInspector.zip");
+            await Task.Delay(1000);
+            if (await DragDropImport(nipPath))
+                return true;
+
+            await ShowManualDeleteDialog();
+            return await DragDropImport(nipPath);
+        }
+
+        private static async Task WaitForFileUnlock(string path)
+        {
+            for (int i = 0; i < 20; i++)
+            {
+                try
+                {
+                    using (File.Open(path, FileMode.Open, FileAccess.Read, FileShare.None))
+                        return;
+                }
+                catch (IOException)
+                {
+                    await Task.Delay(100);
+                }
+            }
+        }
+
+        private static void SafeDelete(string path)
+        {
+            try
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+            catch
+            {
+            }
+        }
+
+        private static async Task<bool> EnsureInspectorDownloaded()
+        {
+            if (File.Exists(InspectorExe))
+                return true;
+
+            string zipPath = Path.Combine(InspectorDir, "nvidiaProfileInspector.zip");
+            string tempZipPath = Path.Combine(InspectorDir, "nvidiaProfileInspector.tmp.zip");
 
             try
             {
-                Directory.CreateDirectory(NvidiaInspectorDir);
+                Directory.CreateDirectory(InspectorDir);
 
-                foreach (var p in Process.GetProcessesByName("nvidiaProfileInspector"))
-                {
-                    try
-                    {
-                        p.Kill();
-                        p.WaitForExit(3000);
-                    }
-                    catch { }
-                }
-
-                if (File.Exists(zipPath))
-                {
-                    try { File.Delete(zipPath); } catch { }
-                }
+                SafeDelete(zipPath);
+                SafeDelete(tempZipPath);
 
                 using (var response = await App.HttpClient.GetAsync(
                     NVIDIA_INSPECTOR_URL,
-                    HttpCompletionOption.ResponseHeadersRead))
+                    System.Net.Http.HttpCompletionOption.ResponseHeadersRead))
                 {
                     response.EnsureSuccessStatusCode();
 
-                    using (var fs = new FileStream(
-                        zipPath,
+                    await using (var fs = new FileStream(
+                        tempZipPath,
                         FileMode.Create,
                         FileAccess.Write,
                         FileShare.None))
                     {
                         await response.Content.CopyToAsync(fs);
-                        await fs.FlushAsync();
+                        await fs.FlushAsync(CancellationToken.None);
                     }
                 }
 
-                await Task.Delay(100);
-                ZipFile.ExtractToDirectory(zipPath, NvidiaInspectorDir, true);
+                await WaitForFileUnlock(tempZipPath);
 
-                File.Delete(zipPath);
+                ZipFile.ExtractToDirectory(tempZipPath, InspectorDir, true);
 
-                return true;
+                SafeDelete(tempZipPath);
+
+                return File.Exists(InspectorExe);
             }
             catch (Exception ex)
             {
                 Frontend.ShowMessageBox(
                     "Failed to download NVIDIA Profile Inspector:\n\n" + ex.Message,
                     System.Windows.MessageBoxImage.Error);
+
+                SafeDelete(zipPath);
+                SafeDelete(tempZipPath);
                 return false;
             }
         }
-        private static async Task<string?> EnsureProfileDownloaded(string profileName)
-        {
-            Directory.CreateDirectory(NipProfilesDir);
-            string localPath = Path.Combine(NipProfilesDir, profileName);
 
-            if (File.Exists(localPath))
-                return localPath;
-
-            try
-            {
-                using var response = await App.HttpClient.GetAsync(GITHUB_RAW_BASE + profileName);
-                if (!response.IsSuccessStatusCode)
-                    return null;
-
-                using var fs = new FileStream(
-                    localPath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None);
-
-                await response.Content.CopyToAsync(fs);
-                await fs.FlushAsync();
-
-                return localPath;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static async Task<bool> DragDropImportWithDetection(string profilePath)
+        private static async Task<bool> DragDropImport(string path)
         {
             try
             {
-                var psi = new ProcessStartInfo
+                using var p = Process.Start(new ProcessStartInfo
                 {
-                    FileName = NvidiaInspectorExe,
-                    Arguments = $"\"{profilePath}\"",
+                    FileName = InspectorExe,
+                    Arguments = $"\"{path}\"",
                     UseShellExecute = true,
                     Verb = "runas"
-                };
+                });
 
-                using var process = Process.Start(psi);
-                if (process == null)
+                if (p == null)
                     return false;
 
                 for (int i = 0; i < 50; i++)
                 {
                     await Task.Delay(100);
+                    p.Refresh();
 
-                    if (process.HasExited)
+                    if (p.HasExited)
                         return false;
 
-                    process.Refresh();
-                    if (process.MainWindowHandle != IntPtr.Zero)
+                    if (p.MainWindowHandle != IntPtr.Zero)
                         return true;
                 }
 
@@ -150,62 +305,54 @@ namespace Voidstrap.Integrations
             }
         }
 
-        private static async Task ManualDeleteRobloxVR()
+        private static async Task ShowManualDeleteDialog()
         {
+            var driverResult = Frontend.ShowMessageBox(
+                "Would you like to install or update to the latest NVIDIA Game Ready Drivers?\n\n" +
+                "Recommended for resets on NIP files or fixing bugs with NIP files.\n\n" +
+                "If not, click No to continue with the setup.",
+                System.Windows.MessageBoxImage.Question,
+                System.Windows.MessageBoxButton.YesNo);
+
+            if (driverResult == System.Windows.MessageBoxResult.Yes)
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://www.nvidia.com/Download/index.aspx",
+                        UseShellExecute = true
+                    });
+                }
+                catch
+                {
+                    Frontend.ShowMessageBox(
+                        "Failed to open NVIDIA driver download page.",
+                        System.Windows.MessageBoxImage.Error);
+                }
+
+                return;
+            }
+
             Process.Start(new ProcessStartInfo
             {
-                FileName = NvidiaInspectorExe,
+                FileName = InspectorExe,
                 UseShellExecute = true,
                 Verb = "runas"
             });
 
             Frontend.ShowMessageBox(
-                "NVIDIA Profile Inspector opened.\r\n\r\n• Search for: Roblox VR\r\n• Select the profile\r\n• Click the ❌ Delete Profile button\r\n• Click Apply Changes\r\n• Close NVIDIA Profile Inspector completely",
-                System.Windows.MessageBoxImage.Warning);
+                "NVIDIA Profile Inspector Opened.\n\n" +
+                "• Search for: Roblox VR\n" +
+                "• Select the profile\n" +
+                "• Click ❌ Delete Profile\n" +
+                "• Click Apply Changes\n" +
+                "• Close NVIDIA Profile Inspector\n" +
+                "• Click OK",
+                System.Windows.MessageBoxImage.Warning
+            );
 
             await Task.Delay(1000);
         }
-
-        private static async Task<bool> ApplyProfile(string nipName, string displayName)
-        {
-            if (!await EnsureNvidiaInspectorDownloaded())
-                return false;
-
-            string? profilePath = await EnsureProfileDownloaded(nipName);
-            if (profilePath == null)
-            {
-                Frontend.ShowMessageBox(
-                    $"Failed to download {displayName} profile.",
-                    System.Windows.MessageBoxImage.Error);
-                return false;
-            }
-
-            if (await DragDropImportWithDetection(profilePath))
-                return true;
-
-            await ManualDeleteRobloxVR();
-
-            if (await DragDropImportWithDetection(profilePath))
-                return true;
-
-            Frontend.ShowMessageBox(
-                $"Failed to apply {displayName} profile.\n\n" +
-                "Possible causes:\n" +
-                "• UAC denied\n" +
-                "• NVIDIA driver lock\n" +
-                "• Antivirus interference",
-                System.Windows.MessageBoxImage.Error);
-
-            return false;
-        }
-
-        public static Task<bool> ApplyBlurSettings()
-            => ApplyProfile("VoidsTrap_Blur.nip", "Blur");
-
-        public static Task<bool> ApplyWithoutSettings()
-            => ApplyProfile("VoidsTrap_Without.nip", "Without");
-
-        public static Task<bool> ApplyDefaultSettings()
-            => ApplyProfile("VoidsTrap_Default.nip", "Default");
     }
 }
