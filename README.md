@@ -131,7 +131,7 @@ With a clean, modern UI, useful tools, and performance improvements, Voidstrap l
 
 ## 🤝 Community and Support
 
-* **Discord:** [Join the Voidstrap Server](https://discord.gg/H87yAbEDJa)
+* **Discord:** [Join the Voidstrap Server](https://discord.gg/dfA9PdWgcV)
 * **Issues & Feature Requests:** [GitHub Issues](https://github.com/voidstrap/Voidstrap/issues)
 * **Support the Project:** Star the repository
 
