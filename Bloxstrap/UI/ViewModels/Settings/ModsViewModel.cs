@@ -269,16 +269,6 @@ namespace Voidstrap.UI.ViewModels.Settings
                 App.Settings.Prop.FPSCounter = value;
             }
         }
-
-        public bool CPUTempCounter
-        {
-            get => App.Settings.Prop.CPUTempCounter;
-            set
-            {
-                App.Settings.Prop.CPUTempCounter = value;
-            }
-        }
-
         public bool CurrentTimeDisplay
         {
             get => App.Settings.Prop.CurrentTimeDisplay;

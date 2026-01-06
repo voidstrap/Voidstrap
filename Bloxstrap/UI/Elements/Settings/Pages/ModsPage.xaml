@@ -258,10 +258,6 @@
                                 <ui:ToggleSwitch IsChecked="{Binding FPSCounter, Mode=TwoWay}" />
                             </controls:OptionControl>
 
-                            <controls:OptionControl Header="CPU Temp" Description="Displays your CPU temperature.">
-                                <ui:ToggleSwitch IsChecked="{Binding CPUTempCounter, Mode=TwoWay}" />
-                            </controls:OptionControl>
-
                             <controls:OptionControl Header="Current Time" Description="Displays the current system time.">
                                 <ui:ToggleSwitch IsChecked="{Binding CurrentTimeDisplay, Mode=TwoWay}" />
                             </controls:OptionControl>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-16"?>
+<ArrayOfProfile>
+  <Profile>
+    <ProfileName>Voidstrap</ProfileName>
+    <Executeables>
+      <string>robloxplayerbeta.exe</string>
+    </Executeables>
+    <Settings>
+    </Settings>
+  </Profile>
+</ArrayOfProfile>

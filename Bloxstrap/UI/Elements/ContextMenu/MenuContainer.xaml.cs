@@ -396,7 +396,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 });
             }
 
-            if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CPUTempCounter || App.Settings.Prop.CurrentTimeDisplay || App.Settings.Prop.ServerPingCounter || App.Settings.Prop.ShowServerDetailsUI)
+            if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CurrentTimeDisplay || App.Settings.Prop.ServerPingCounter || App.Settings.Prop.ShowServerDetailsUI)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {

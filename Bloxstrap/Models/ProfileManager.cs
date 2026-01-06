@@ -4,9 +4,10 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Security;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Voidstrap.Models;
 
@@ -15,10 +16,10 @@ namespace Voidstrap.Integrations
     public static class NvidiaProfileManager
     {
         private const string NVIDIA_INSPECTOR_URL =
-            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.29/nvidiaProfileInspector.zip";
+            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.30/nvidiaProfileInspector.zip";
 
         private static readonly string InspectorDir =
-            Path.Combine(Paths.Integrations, "NvidiaProfileInspector");
+            Path.Combine(Paths.Integrations);
 
         private static readonly string InspectorExe =
             Path.Combine(InspectorDir, "nvidiaProfileInspector.exe");
@@ -34,7 +35,8 @@ namespace Voidstrap.Integrations
     <Executeables>
       <string>robloxplayerbeta.exe</string>
     </Executeables>
-    <Settings />
+    <Settings>
+    </Settings>
   </Profile>
 </ArrayOfProfile>";
 
@@ -59,13 +61,10 @@ namespace Voidstrap.Integrations
 
                 settings.Add(
                     new XElement("ProfileSetting",
-                        new XElement("SettingNameInfo",
-                            SecurityElement.Escape(e.Name)),
+                        new XElement("SettingNameInfo", e.Name),
                         new XElement("SettingID", fixedId),
-                        new XElement("SettingValue",
-                            SecurityElement.Escape(e.Value ?? "0")),
-                        new XElement("ValueType",
-                            NormalizeValueType(e.ValueType))
+                        new XElement("ValueType", NormalizeValueType(e.ValueType)),
+                        new XElement("SettingValue", e.Value ?? "0")
                     )
                 );
             }
@@ -82,7 +81,7 @@ namespace Voidstrap.Integrations
                 )
             );
 
-            File.WriteAllText(path, doc.ToString(), Utf16Bom);
+            WriteUtf16Xml(path, doc);
         }
 
         public static List<NvidiaEditorEntry> LoadFromNip(string path)
@@ -126,9 +125,7 @@ namespace Voidstrap.Integrations
             return results;
         }
 
-        private static bool TryNormalizeSettingId(
-            string? raw,
-            out string result)
+        private static bool TryNormalizeSettingId(string? raw, out string result)
         {
             result = null!;
             if (string.IsNullOrWhiteSpace(raw))
@@ -138,20 +135,19 @@ namespace Voidstrap.Integrations
 
             if (raw.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
             {
-                if (!ulong.TryParse(raw[2..],
+                if (!uint.TryParse(
+                        raw.AsSpan(2),
                         System.Globalization.NumberStyles.HexNumber,
                         null,
-                        out ulong hex))
+                        out uint hex))
                     return false;
 
-                hex = Math.Min(hex, uint.MaxValue);
-                result = $"0x{hex:X}";
+                result = hex.ToString();
                 return true;
             }
 
-            if (ulong.TryParse(raw, out ulong dec))
+            if (uint.TryParse(raw, out uint dec))
             {
-                dec = Math.Min(dec, uint.MaxValue);
                 result = dec.ToString();
                 return true;
             }
@@ -169,6 +165,20 @@ namespace Voidstrap.Integrations
                 "hex" => "Hex",
                 _ => "Dword"
             };
+        }
+
+        private static void WriteUtf16Xml(string path, XDocument doc)
+        {
+            using var writer = XmlWriter.Create(
+                path,
+                new XmlWriterSettings
+                {
+                    Encoding = Utf16Bom,
+                    Indent = true,
+                    OmitXmlDeclaration = false
+                });
+
+            doc.Save(writer);
         }
 
         public static async Task<bool> ApplyNipFile(string nipPath)
@@ -213,9 +223,7 @@ namespace Voidstrap.Integrations
                 if (File.Exists(path))
                     File.Delete(path);
             }
-            catch
-            {
-            }
+            catch { }
         }
 
         private static async Task<bool> EnsureInspectorDownloaded()
@@ -239,21 +247,18 @@ namespace Voidstrap.Integrations
                 {
                     response.EnsureSuccessStatusCode();
 
-                    await using (var fs = new FileStream(
+                    await using var fs = new FileStream(
                         tempZipPath,
                         FileMode.Create,
                         FileAccess.Write,
-                        FileShare.None))
-                    {
-                        await response.Content.CopyToAsync(fs);
-                        await fs.FlushAsync(CancellationToken.None);
-                    }
+                        FileShare.None);
+
+                    await response.Content.CopyToAsync(fs);
+                    await fs.FlushAsync(CancellationToken.None);
                 }
 
                 await WaitForFileUnlock(tempZipPath);
-
                 ZipFile.ExtractToDirectory(tempZipPath, InspectorDir, true);
-
                 SafeDelete(tempZipPath);
 
                 return File.Exists(InspectorExe);
@@ -296,13 +301,10 @@ namespace Voidstrap.Integrations
                     if (p.MainWindowHandle != IntPtr.Zero)
                         return true;
                 }
+            }
+            catch { }
 
-                return false;
-            }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
 
         private static async Task ShowManualDeleteDialog()
@@ -316,21 +318,11 @@ namespace Voidstrap.Integrations
 
             if (driverResult == System.Windows.MessageBoxResult.Yes)
             {
-                try
+                Process.Start(new ProcessStartInfo
                 {
-                    Process.Start(new ProcessStartInfo
-                    {
-                        FileName = "https://www.nvidia.com/Download/index.aspx",
-                        UseShellExecute = true
-                    });
-                }
-                catch
-                {
-                    Frontend.ShowMessageBox(
-                        "Failed to open NVIDIA driver download page.",
-                        System.Windows.MessageBoxImage.Error);
-                }
-
+                    FileName = "https://www.nvidia.com/Download/index.aspx",
+                    UseShellExecute = true
+                });
                 return;
             }
 

@@ -193,7 +193,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             if (ProfileComboBox.SelectedItem is ComboBoxItem item)
                 basePreset = item.Content?.ToString() ?? basePreset;
 
-            NavigationService.Navigate(new NvidiaFFlagEditorPage());
+            NavigationService.Navigate(new NvidiaFastFlagsPage());
         }
 
         private bool IsVulkanSelected()

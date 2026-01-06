@@ -77,8 +77,6 @@ namespace Voidstrap.Models.Persistable
 
         public bool FPSCounter { get; set; } = false;
 
-        public bool CPUTempCounter { get; set; } = false;
-
         public bool CurrentTimeDisplay { get; set; } = false;
         public bool ExclusiveFullscreen { get; set; } = false;
         public bool Crosshair { get; set; } = false;

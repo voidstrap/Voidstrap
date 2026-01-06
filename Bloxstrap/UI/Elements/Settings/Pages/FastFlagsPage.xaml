@@ -46,39 +46,17 @@
         </controls:OptionControl>
 
         <ui:CardAction
-            Command="models:GlobalViewModel.OpenWebpageCommand"
-            CommandParameter="https://fastflags.space/help/how/"
-            Icon="BookQuestionMark24">
+            Click="OpenCustomEditor_Click"
+            Icon="Flag24">
             <StackPanel>
-                <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Help}" />
+                <TextBlock FontSize="14" Text="NVIDIA FFlags" />
                 <TextBlock
                     Margin="0,2,0,0"
                     Padding="0,0,16,0"
                     FontSize="12"
-                    Text="{x:Static resources:Strings.Menu_FastFlags_Help_Description}" />
+                    Text="Edit NVIDIA Profile Inspector FFlags. NVIDIA GPUs only." />
             </StackPanel>
         </ui:CardAction>
-
-        <controls:OptionControl
-    Header="NVIDIA FFlags Editor (BETA)"
-    Description="Edit NVIDIA Profile Inspector FFlags. NVIDIA GPUs only.">
-            <StackPanel>
-
-                <ui:Button
-            VerticalAlignment="Top"
-            Content="Open Editor"
-            Icon="Edit24"
-            Click="OpenCustomEditor_Click"/>
-
-                <TextBlock>
-            <Hyperlink NavigateUri="https://discord.com/channels/1327967202015580223/1456965691054755911"
-                       RequestNavigate="Hyperlink_RequestNavigate">
-                How to Setup?
-            </Hyperlink>
-                </TextBlock>
-
-            </StackPanel>
-        </controls:OptionControl>
 
         <controls:OptionControl
             Height="73"
@@ -816,6 +794,5 @@ Margin="8,0,8,0" />
                  Value="0"
                  Visibility="Collapsed"/>
         </StackPanel>
-
     </StackPanel>
 </ui:UiPage>

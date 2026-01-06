@@ -1,5 +1,4 @@
-﻿using LibreHardwareMonitor.Hardware;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -17,33 +16,13 @@ using System.Windows.Threading;
 
 namespace Voidstrap.UI.Elements.Overlay
 {
-    // REQUIRED BY LIBREHARDWAREMONITOR
-    public sealed class UpdateVisitor : IVisitor
-    {
-        public void VisitComputer(IComputer computer) => computer.Traverse(this);
-
-        public void VisitHardware(IHardware hardware)
-        {
-            hardware.Update();
-            foreach (var sub in hardware.SubHardware)
-                sub.Accept(this);
-        }
-
-        public void VisitSensor(ISensor sensor) { }
-        public void VisitParameter(IParameter parameter) { }
-    }
-
     public class OverlayWindow : Window, INotifyPropertyChanged
     {
         private int _frames;
         private int _fps;
         private readonly Stopwatch _fpsStopwatch = Stopwatch.StartNew();
 
-        private readonly Computer _computer;
-        private double _cpuTemp;
-
         private TextBlock _fpsTextBlock;
-        private TextBlock _cpuTextBlock;
         private TextBlock _pingTextBlock;
         private TextBlock _locationTextBlock;
         private TextBlock _timeTextBlock;
@@ -51,7 +30,6 @@ namespace Voidstrap.UI.Elements.Overlay
         private readonly DispatcherTimer _updateTimer;
 
         private readonly bool _showFPS = App.Settings.Prop.FPSCounter;
-        private readonly bool _showCPU = App.Settings.Prop.CPUTempCounter;
         private readonly bool _showPing = App.Settings.Prop.ServerPingCounter;
         private readonly bool _showTime = App.Settings.Prop.CurrentTimeDisplay;
         private readonly bool _showLocation = App.Settings.Prop.ShowServerDetailsUI;
@@ -61,15 +39,30 @@ namespace Voidstrap.UI.Elements.Overlay
         private bool _locationFetching;
         private string _serverLocation = "Location: --";
 
-        private static readonly HttpClient Http = new()
+        private static readonly HttpClient Http;
+
+        static OverlayWindow()
         {
-            Timeout = TimeSpan.FromSeconds(4)
-        };
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+
+            Http = new HttpClient(new HttpClientHandler
+            {
+                AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate
+            })
+            {
+                Timeout = TimeSpan.FromSeconds(4)
+            };
+
+            Http.DefaultRequestHeaders.UserAgent.ParseAdd(
+                "Voidstrap/1.0 (+https://github.com/voidstrap)"
+            );
+            Http.DefaultRequestHeaders.Accept.ParseAdd("application/json");
+        }
 
         public OverlayWindow()
         {
             Width = 260;
-            Height = 150;
+            Height = 140;
 
             Left = SystemParameters.PrimaryScreenWidth - Width - -95;
             Top = 10;
@@ -86,12 +79,6 @@ namespace Voidstrap.UI.Elements.Overlay
             {
                 _fpsTextBlock = CreateTextBlock(Brushes.Lime);
                 panel.Children.Add(_fpsTextBlock);
-            }
-
-            if (_showCPU)
-            {
-                _cpuTextBlock = CreateTextBlock(Brushes.Orange);
-                panel.Children.Add(_cpuTextBlock);
             }
 
             if (_showPing)
@@ -126,16 +113,6 @@ namespace Voidstrap.UI.Elements.Overlay
 
             Loaded += (_, __) => MakeClickThrough();
             Closing += (_, __) => CompositionTarget.Rendering -= OnRendering;
-
-            // 🔥 FIXED HARDWARE INIT
-            _computer = new Computer
-            {
-                IsCpuEnabled = true,
-                IsMotherboardEnabled = true
-            };
-
-            _computer.Open();
-            _computer.Accept(new UpdateVisitor());
         }
 
         private void OnRendering(object sender, EventArgs e)
@@ -164,87 +141,39 @@ namespace Voidstrap.UI.Elements.Overlay
 
         private async Task UpdateStatsAsync()
         {
-            if (_showCPU)
-            {
-                _cpuTemp = GetCpuTemperature();
-                _cpuTextBlock.Text = double.IsNaN(_cpuTemp)
-                    ? "CPU Temp: --"
-                    : $"CPU Temp: {_cpuTemp:0}°C";
-            }
-
             if (_showTime)
                 _timeTextBlock.Text = DateTime.Now.ToString("h:mm tt");
 
-            if (_showPing)
+            if (!_showPing)
+                return;
+
+            _serverIp = GetRobloxServerIp();
+
+            if (string.IsNullOrEmpty(_serverIp))
             {
-                _serverIp = GetRobloxServerIp();
+                _pingTextBlock.Text = "Ping: --";
+                return;
+            }
 
-                if (!string.IsNullOrEmpty(_serverIp))
+            int ping = await PingServerAsync(_serverIp);
+            _pingTextBlock.Text = ping > 0 ? $"Ping: {ping} ms" : "Ping: --";
+
+            if (_showLocation && !_locationFetching && _serverIp != _lastServerIp)
+            {
+                _lastServerIp = _serverIp;
+                _locationFetching = true;
+                _locationTextBlock.Text = "Location: --";
+
+                _ = Task.Run(async () =>
                 {
-                    int ping = await PingServerAsync(_serverIp);
-                    _pingTextBlock.Text = ping > 0 ? $"Ping: {ping} ms" : "Ping: --";
-
-                    if (_showLocation && !_locationFetching && _serverIp != _lastServerIp)
+                    string loc = await GetServerLocationAsync(_serverIp);
+                    Dispatcher.Invoke(() =>
                     {
-                        _lastServerIp = _serverIp;
-                        _locationFetching = true;
-                        _locationTextBlock.Text = "Location: --";
-
-                        _ = Task.Run(async () =>
-                        {
-                            string loc = await GetServerLocationAsync(_serverIp);
-                            Dispatcher.Invoke(() =>
-                            {
-                                _serverLocation = loc;
-                                _locationTextBlock.Text = loc;
-                                _locationFetching = false;
-                            });
-                        });
-                    }
-                }
-                else
-                {
-                    _pingTextBlock.Text = "Ping: --";
-                }
-            }
-        }
-
-        // 🔥 CPU TEMP FIX (NO MORE 0°C)
-        private double GetCpuTemperature()
-        {
-            try
-            {
-                _computer.Accept(new UpdateVisitor());
-
-                foreach (var hw in _computer.Hardware)
-                {
-                    if (hw.HardwareType != HardwareType.Cpu)
-                        continue;
-
-                    var package = hw.Sensors.FirstOrDefault(s =>
-                        s.SensorType == SensorType.Temperature &&
-                        s.Name.Contains("Package", StringComparison.OrdinalIgnoreCase) &&
-                        s.Value.HasValue);
-
-                    if (package?.Value != null)
-                        return package.Value.Value;
-
-                    var cores = hw.Sensors
-                        .Where(s =>
-                            s.SensorType == SensorType.Temperature &&
-                            s.Value.HasValue &&
-                            s.Name.Contains("Core", StringComparison.OrdinalIgnoreCase))
-                        .Select(s => s.Value.Value);
-
-                    if (cores.Any())
-                        return cores.Max();
-                }
-
-                return double.NaN;
-            }
-            catch
-            {
-                return double.NaN;
+                        _serverLocation = loc;
+                        _locationTextBlock.Text = loc;
+                        _locationFetching = false;
+                    });
+                });
             }
         }
 
@@ -259,7 +188,10 @@ namespace Voidstrap.UI.Elements.Overlay
                         !IPAddress.IsLoopback(c.RemoteEndPoint.Address))
                     ?.RemoteEndPoint.Address.ToString();
             }
-            catch { return null; }
+            catch
+            {
+                return null;
+            }
         }
 
         private async Task<int> PingServerAsync(string ip)
@@ -270,14 +202,21 @@ namespace Voidstrap.UI.Elements.Overlay
                 var reply = await ping.SendPingAsync(ip, 1000);
                 return reply.Status == IPStatus.Success ? (int)reply.RoundtripTime : -1;
             }
-            catch { return -1; }
+            catch
+            {
+                return -1;
+            }
         }
 
         private async Task<string> GetServerLocationAsync(string ip)
         {
             try
             {
-                string json = await Http.GetStringAsync($"https://ipinfo.io/{ip}/json");
+                using var res = await Http.GetAsync($"https://ipinfo.io/{ip}/json");
+                if (!res.IsSuccessStatusCode)
+                    return "Location: Unknown";
+
+                string json = await res.Content.ReadAsStringAsync();
                 using var doc = JsonDocument.Parse(json);
                 var root = doc.RootElement;
 
@@ -288,18 +227,23 @@ namespace Voidstrap.UI.Elements.Overlay
                     ? $"Location: {city} {CountryToFlag(country)}"
                     : "Location: Unknown";
             }
-            catch { return "Location: Unknown"; }
+            catch
+            {
+                return "Location: Unknown";
+            }
         }
 
-        private string CountryToFlag(string cc)
+        private static string CountryToFlag(string cc)
         {
-            if (string.IsNullOrEmpty(cc) || cc.Length != 2) return "";
-            int o = 0x1F1E6;
-            return char.ConvertFromUtf32(o + cc[0] - 'A') +
-                   char.ConvertFromUtf32(o + cc[1] - 'A');
+            if (string.IsNullOrEmpty(cc) || cc.Length != 2)
+                return "";
+
+            int offset = 0x1F1E6;
+            return char.ConvertFromUtf32(offset + cc[0] - 'A') +
+                   char.ConvertFromUtf32(offset + cc[1] - 'A');
         }
 
-        private TextBlock CreateTextBlock(Brush color) => new()
+        private static TextBlock CreateTextBlock(Brush color) => new()
         {
             FontSize = 16,
             FontWeight = FontWeights.SemiBold,
@@ -313,16 +257,20 @@ namespace Voidstrap.UI.Elements.Overlay
             SetWindowLong(hwnd, -20, style | 0x20 | 0x80);
         }
 
-        private bool IsRobloxForeground()
+        private static bool IsRobloxForeground()
         {
             IntPtr hwnd = GetForegroundWindow();
             GetWindowThreadProcessId(hwnd, out uint pid);
+
             try
             {
                 return Process.GetProcessById((int)pid)
                     .ProcessName.Equals("RobloxPlayerBeta", StringComparison.OrdinalIgnoreCase);
             }
-            catch { return false; }
+            catch
+            {
+                return false;
+            }
         }
 
         [DllImport("user32.dll")] private static extern IntPtr GetForegroundWindow();

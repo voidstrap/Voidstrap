@@ -105,7 +105,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             try
             {
                 _internalWrite = true;
-                NvidiaProfileManager.SaveToNip(NipPath, Entries);
+                NvidiaProfileManager.SaveToNip(NipPath, Entries.ToList());
             }
             catch (Exception ex)
             {
@@ -197,7 +197,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             try
             {
-                NvidiaProfileManager.SaveToNip(dialog.FileName, Entries);
+                NvidiaProfileManager.SaveToNip(dialog.FileName, Entries.ToList());
 
                 Frontend.ShowMessageBox(
                     "NVIDIA profile exported successfully.",
@@ -349,16 +349,15 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
         }
 
-        private FastFlagsPage _fastFlagsPage;
-
         private void BackButton(object sender, RoutedEventArgs e)
         {
-            _fastFlagsPage ??= new FastFlagsPage();
-            NavigationService.Navigate(_fastFlagsPage);
+            NavigationService.Navigate(new NvidiaFastFlagsPage());
         }
 
         private static void RecreateNipFile()
         {
+            Directory.CreateDirectory(NipDirectory);
+
             File.WriteAllText(
                 NipPath,
         @"<?xml version=""1.0"" encoding=""utf-16""?>
@@ -368,7 +367,8 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     <Executeables>
       <string>robloxplayerbeta.exe</string>
     </Executeables>
-    <Settings />
+    <Settings>
+    </Settings>
   </Profile>
 </ArrayOfProfile>",
                 new UnicodeEncoding(false, true)
