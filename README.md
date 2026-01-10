@@ -32,9 +32,6 @@ With a clean, modern UI, useful tools, and performance improvements, Voidstrap l
   <a href="https://discord.gg/dfA9PdWgcV">
     <img src="https://img.shields.io/discord/1327967202015580223?style=for-the-badge&logo=discord&label=Discord&color=4d3dff" />
   </a>
-  <a href="https://voidstrap.app">
-    <img src="https://img.shields.io/badge/Website-voidstrap.app-8f2bff?style=for-the-badge&logo=google-chrome" />
-  </a>
 </p>
 
 ---
