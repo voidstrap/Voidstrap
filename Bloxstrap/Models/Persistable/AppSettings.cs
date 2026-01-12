@@ -131,9 +131,10 @@ namespace Voidstrap.Models.Persistable
         public long? TargetUniverseId { get; set; }
         public bool IsBetterServersEnabled { get; set; } = false;
         public bool OverClockGPU { get; set; } = false;
-        
-        // Lua Scripting
-        public bool EnableLuaScripting { get; set; } = false;
+        public bool GRADmentFR { get; set; } = false;
+        public bool VoidRPC { get; set; } = true;
+
+        public bool AntiAFK { get; set; } = false;
 
         public ResolutionSetting? InGameResolution { get; set; }
 

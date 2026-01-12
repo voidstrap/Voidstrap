@@ -9,8 +9,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.8.8</Version>
-		<FileVersion>1.0.8.8</FileVersion>
+		<Version>1.0.8.9</Version>
+		<FileVersion>1.0.8.9</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -134,6 +134,7 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
 		<PackageReference Include="Markdig" Version="0.44.0" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3650.58" />
 		<!-- <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" /> -->
 
 		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.264">

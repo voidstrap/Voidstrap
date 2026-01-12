@@ -234,12 +234,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.DX12Like = value;
         }
 
-        public bool EnableLuaScripting
-        {
-            get => App.Settings.Prop.EnableLuaScripting;
-            set => App.Settings.Prop.EnableLuaScripting = value;
-        }
-
         public bool ForceRobloxLanguage
         {
             get => App.Settings.Prop.ForceRobloxLanguage;

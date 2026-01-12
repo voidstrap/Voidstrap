@@ -115,6 +115,12 @@
                 </controls:OptionControl>
 
                 <controls:OptionControl
+    Header="FXAA"
+    Description="Smooths jagged edges (jaggies) across the entire frame with minimal performance impact. FXAA can make edges and fine details appear slightly blurry.">
+                    <ui:ToggleSwitch IsChecked="{Binding EnableFXAA}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
                     Header="Gamma Correction"
                     Description="Adjusts how brightness values are mapped, affecting contrast, shadow detail, and mid-tone visibility.">
                     <ui:ToggleSwitch IsChecked="{Binding EnableGamma}" />

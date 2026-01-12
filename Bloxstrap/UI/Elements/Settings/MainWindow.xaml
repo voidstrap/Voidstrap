@@ -120,14 +120,48 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid.Background>
-            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-                <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
-                <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
-                <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
-                <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
-            </LinearGradientBrush>
-        </Grid.Background>
+        <Grid x:Name="BackgroundLayer"
+      Grid.RowSpan="3"
+      Panel.ZIndex="-10"
+      ClipToBounds="True">
+            
+            <MediaElement x:Name="BackgroundMedia"
+                  Stretch="UniformToFill"
+                  Opacity="1"
+                  IsHitTestVisible="False"
+                  LoadedBehavior="Manual"
+                  UnloadedBehavior="Stop"
+                  Visibility="Collapsed" />
+
+            <Image x:Name="BackgroundImage"
+           Stretch="UniformToFill"
+           Opacity="1"
+           RenderOptions.BitmapScalingMode="HighQuality"
+           IsHitTestVisible="False"
+           Visibility="Visible"/>
+
+            <Border x:Name="GradientLayer">
+                <Border.Background>
+                    <LinearGradientBrush x:Name="MainBackgroundBrush"
+                                 StartPoint="0,0"
+                                 EndPoint="1,1">
+                        <LinearGradientBrush.RelativeTransform>
+                            <TransformGroup>
+                                <RotateTransform x:Name="BackgroundGradientRotate"
+                                         CenterX="0.5"
+                                         CenterY="0.5"/>
+                                <TranslateTransform x:Name="BackgroundGradientTranslate"/>
+                            </TransformGroup>
+                        </LinearGradientBrush.RelativeTransform>
+
+                        <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                        <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                        <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                        <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+        </Grid>
 
         <Canvas x:Name="SnowCanvas"
                 Grid.RowSpan="3"
@@ -239,6 +273,8 @@
                      Icon="pack://application:,,,/Voidstrap.ico" />
 
         <Grid x:Name="RootGrid"
+              MouseMove="RootGrid_MouseMove"
+              MouseLeave="RootGrid_MouseLeave"
               Grid.Row="1"
               Margin="8,12,0,0">
             <Grid.RowDefinitions>
@@ -275,7 +311,7 @@
 
                 <ui:NavigationFluent.Footer>
                     <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
-                    <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:HubPage}" />
+                    <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:ReleasesPage}" />
                     <ui:NavigationItem Content="Donate" Icon="MoneyHand24" PageType="{x:Type pages:DonoPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48"

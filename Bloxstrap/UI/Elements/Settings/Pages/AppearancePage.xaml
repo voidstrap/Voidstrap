@@ -14,11 +14,54 @@
     <StackPanel Margin="0,0,14,14">
         <TextBlock Text="{x:Static resources:Strings.Menu_Appearance_Description}" FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,0,8" />
 
-        <controls:OptionControl
-            Description="Adds Snow to Voidstraps background (Voidstrap Restart Required)"
+        <ui:CardExpander IsExpanded="False">
+            <ui:CardExpander.Header>
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Background" />
+                    <TextBlock Margin="0,2,0,0" FontSize="12" Text="Customize background ui and options" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+            </ui:CardExpander.Header>
+            <StackPanel>
+
+                <controls:OptionControl
+            Description="Adds Snow to Voidstraps background (Restart Required)"
             Header="Background Snow">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding Snowww, Mode=TwoWay}" />
-        </controls:OptionControl>
+                    <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding Snowww, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Description="Adds a Gradient Movement with Cursor (Restart Required)"
+            Header="Gradient Movement">
+                    <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding GRADmentFR, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+    Header="Background Settings" 
+    Description="Import a background image/video/gif and adjust opacity settings.">
+
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="0,5,0,0">
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,5">
+                            <TextBlock Text="Gradient Opacity:" VerticalAlignment="Center" Width="120"/>
+                            <Slider Minimum="0.1" Maximum="1" SmallChange="0.01" LargeChange="0.1" 
+                    Value="{Binding GradientOpacity, Mode=TwoWay}" Width="200"/>
+                            <TextBlock Text="{Binding GradientOpacity, StringFormat={}{0:F2}}" Margin="5,0,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding BlackOverlayOpacity, StringFormat={}{0:F2}}" Margin="5,0,0,0"/>
+                        </StackPanel>
+
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,5">
+                            <ui:Button Content="Import" Command="{Binding ImportBackgroundCommand2}" Margin="0,0,5,0"/>
+                            <ui:Button Content="Remove" Command="{Binding RemoveBackgroundCommand2}" Background="#ff3334"/>
+                        </StackPanel>
+
+                    </StackPanel>
+                </controls:OptionControl>
+
+            </StackPanel>
+        </ui:CardExpander>
 
         <controls:OptionControl
     Header="{x:Static resources:Strings.Menu_Appearance_Global_Theme_Title}"

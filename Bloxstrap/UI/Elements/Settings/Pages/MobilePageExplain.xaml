@@ -1,0 +1,79 @@
+﻿<ui:UiPage
+    x:Class="Voidstrap.UI.Elements.Settings.Pages.MobilePageExplain"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    Title="Mobile Support Explanation"
+    Scrollable="True">
+
+    <StackPanel HorizontalAlignment="Center">
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock
+                FontSize="14"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                Text="Learn how to set up Remote Access for Mobile/Tablet support and what it does." />
+        </StackPanel>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="What is Remote Access for Mobile Support?" Margin="0,0,0,8"/>
+                <TextBlock FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                    Remote Access allows Voidstrap to display Roblox and manage certain tasks from your Windows PC 
+                    directly on your mobile or tablet device. It uses Chrome Remote Desktop to mirror your PC securely.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Why use Mobile Support?" Margin="0,0,0,8"/>
+                <TextBlock FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                    With Mobile Support, you can:
+                    • Access Roblox remotely from mobile devices.
+                    • Control Voidstrap features while away from your PC.
+                    • Use Voidstrap's custom enhancements even on tablets.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="How to set it up correctly" Margin="0,0,0,8"/>
+                <TextBlock FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                    1. Make sure Chrome Remote Desktop Host is installed on your Windows PC.<LineBreak/>
+                    2. Ensure your PC is online and logged in with a Google account.<LineBreak/>
+                    3. Voidstrap will automatically download and run the installer if needed.<LineBreak/>
+                    4. Once installed, Chrome Remote Desktop will open automatically in your browser.<LineBreak/>
+                    5. Follow Chrome Remote Desktop's instructions to link your mobile or tablet device.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Security and Permissions" Margin="0,0,0,8"/>
+                <TextBlock FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                    Remote Access only uses Chrome Remote Desktop to securely mirror your Windows session. 
+                    No additional personal data is accessed. Always make sure to trust the device you link and use a strong Google account password.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold" Text="Tips for a smooth setup" Margin="0,0,0,8"/>
+                <TextBlock FontSize="14" Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap">
+                    • Keep Voidstrap and Roblox running on your PC during setup.<LineBreak/>
+                    • Ensure your mobile device is on the same network or ready to connect via your Google account.<LineBreak/>
+                    • Do not close the installer until the setup completes.<LineBreak/>
+                    • Once done, your mobile/tablet can access Voidstrap seamlessly.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,32">
+            <ui:Button Width="200" FontSize="16" Click="Button_Click" Content="Back" />
+        </StackPanel>
+    </StackPanel>
+</ui:UiPage>

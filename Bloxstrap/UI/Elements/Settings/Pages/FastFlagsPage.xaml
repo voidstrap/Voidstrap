@@ -728,55 +728,6 @@ Margin="8,0,8,0" />
             </StackPanel>
         </ui:CardExpander>
 
-        <ui:CardExpander Margin="0,8,0,0">
-            <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14.4" Text="Profile Lists" />
-                        <TextBlock
-                            Margin="0,2,0,0"
-                            FontSize="12"
-                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                            Text="Some of these lists may be outdated because they have not been fully verified." />
-                    </StackPanel>
-                </Grid>
-            </ui:CardExpander.Header>
-            <StackPanel Margin="0,8,0,0" Orientation="Vertical">
-                <ComboBox x:Name="ProfileComboBox"
-          Margin="0,4,0,0"
-          SelectionChanged="ProfileComboBox_SelectionChanged">
-                    <ComboBoxItem Content="Allfortavion List"/>
-                    <ComboBoxItem Content="Luci Potato - Allow List"/>
-                    <ComboBoxItem Content="VulgoM3"/>
-                    <ComboBoxItem Content="Vitor List"/>
-                    <ComboBoxItem Content="YNR Niffty"/>
-                </ComboBox>
-                <Image x:Name="ProfileImage"
-               Margin="0,8,0,0"
-               Stretch="Uniform" />
-
-                <TextBox x:Name="ProfileTextBox"
-                 Margin="0,8,0,0"
-                 Height="380"
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 IsReadOnly="True"
-                 VerticalScrollBarVisibility="Auto"
-                 FontSize="14"/>
-
-                <Button x:Name="CopyButton"
-                Content="Copy All"
-                Width="100"
-                Margin="0,8,0,0"
-                HorizontalAlignment="Left"
-                Click="CopyButton_Click"/>
-            </StackPanel>
-        </ui:CardExpander>
-
 
         <StackPanel Margin="0,8,0,0">
             <Button Name="CheckSystemButton"

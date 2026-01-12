@@ -31,5 +31,15 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
 
         }
+
+        private void OpenCustomEditor_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new MobilePage());
+        }
+
+        private void OpenMobileExplain_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new MobilePageExplain());
+        }
     }
 }

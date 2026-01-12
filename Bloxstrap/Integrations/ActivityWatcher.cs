@@ -91,8 +91,8 @@ namespace Voidstrap.Integrations
         public event EventHandler<Message>? OnRPCMessage;
         private static ResolutionSetting? _originalResolution;
         private static bool _resolutionApplied = false;
-
-
+        public bool AntiAFK => App.Settings.Prop.AntiAFK;
+        private DateTime _lastRejoinAttempt = DateTime.MinValue;
         private DateTime LastRPCRequest;
 
         public string LogLocation = null!;
@@ -282,6 +282,49 @@ namespace Voidstrap.Integrations
                     Data = new();
 
                     OnGameLeave?.Invoke(this, EventArgs.Empty);
+
+                    if (App.Settings.Prop.AntiAFK && Data.PlaceId != 0 && (DateTime.Now - _lastRejoinAttempt).TotalSeconds > 5)
+                    {
+                        _lastRejoinAttempt = DateTime.Now;
+
+                        Task.Run(() =>
+                        {
+                            const string LOG_IDENT = "ActivityWatcher::AntiAFK";
+                            App.Logger.WriteLine(LOG_IDENT, "Anti-AFK enabled: Attempting auto-rejoin...");
+
+                            try
+                            {
+                                var robloxProcesses = System.Diagnostics.Process.GetProcessesByName("RobloxPlayerBeta");
+                                foreach (var proc in robloxProcesses)
+                                {
+                                    try
+                                    {
+                                        proc.Kill();
+                                        proc.WaitForExit(3000);
+                                        App.Logger.WriteLine(LOG_IDENT, $"Closed Roblox process {proc.Id}");
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        App.Logger.WriteLine(LOG_IDENT, $"Failed to close Roblox process {proc.Id}: {ex.Message}");
+                                    }
+                                }
+
+                                string url = $"https://www.roblox.com/games/{Data.PlaceId}/#/?universeId={Data.UniverseId}";
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                                {
+                                    FileName = url,
+                                    UseShellExecute = true
+                                });
+
+                                App.Logger.WriteLine(LOG_IDENT, $"Opened Roblox URL: {url}");
+                            }
+                            catch (Exception ex)
+                            {
+                                App.Logger.WriteLine(LOG_IDENT, $"Failed to auto-rejoin: {ex}");
+                            }
+                        });
+                    }
+                }
                 }
                 else if (entry.Contains(GameTeleportingEntry))
                 {
@@ -357,7 +400,7 @@ namespace Voidstrap.Integrations
                     OnNewMessageRequest?.Invoke(this, messageLog);
                 }
             }
-        }
+        
 
         private void RestoreOriginalResolution()
         {

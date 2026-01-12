@@ -9,7 +9,7 @@
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.Settings"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
-    Title="ChannelPage"
+    Title="Settings"
     d:DataContext="{d:DesignInstance Type=models:ChannelViewModel}"
     d:DesignHeight="1200"
     d:DesignWidth="800"
@@ -57,7 +57,13 @@
         <controls:OptionControl
             Description="Displays Voidstrap notifications, joined servers, and more."
             Header="App Notifications">
-            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding VoidNotify, Mode=TwoWay}" />
+            <ui:ToggleSwitch IsChecked="{Binding VoidNotify, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl
+            Description="Displays Voidstraps discord RPC."
+            Header="Voidstrap RPC">
+            <ui:ToggleSwitch IsChecked="{Binding VoidRPC, Mode=TwoWay}" />
         </controls:OptionControl>
 
         <controls:OptionControl 

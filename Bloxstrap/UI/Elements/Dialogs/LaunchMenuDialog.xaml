@@ -157,20 +157,20 @@
                     Width="285"
                     Margin="0,10,0,0"
                     Command="models:GlobalViewModel.OpenWebpageCommand"
-                    CommandParameter="https://voidstrap.app"
-                    Icon="WindowInprivateAccount20"
+                    CommandParameter="https://www.roblox.com/communities/36100411/Plexity-Studio#!/about"
+                    Icon="People24"
                     IconFilled="False"
                     TabIndex="2">
                     <StackPanel>
                         <TextBlock
                             FontSize="14"
-                            Text="Website" />
+                            Text="Roblox Group" />
                         <TextBlock
                             Margin="0,2,0,0"
                             Padding="0,0,16,0"
                             FontSize="12"
                             Foreground="Gray"
-                            Text="Create a Voidstrap Account." />
+                            Text="Join our Roblox Group" />
                     </StackPanel>
                 </ui:CardAction>
             </StackPanel>

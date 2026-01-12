@@ -611,6 +611,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.WPFSoftwareRender = !value;
         }
 
+        public bool VoidRPC
+        {
+            get => App.Settings.Prop.VoidRPC;
+            set => App.Settings.Prop.VoidRPC = value;
+        }
+
         private async Task LoadChannelDeployInfoSafeAsync(string channel)
         {
             try

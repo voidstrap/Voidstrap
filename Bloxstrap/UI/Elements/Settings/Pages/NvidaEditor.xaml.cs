@@ -246,7 +246,9 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
                 var loaded = NvidiaProfileManager
                     .LoadFromNip(NipPath)
-                    .DistinctBy(x => $"{x.SettingId}:{x.Name}");
+                    .GroupBy(x => x.SettingId)
+                    .Select(g => g.First())
+                    .ToList();
 
                 foreach (var entry in loaded)
                     Entries.Add(entry);
@@ -273,15 +275,12 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             foreach (var entry in dialog.ResultEntries)
             {
-                if (Entries.Any(x =>
-                    x.SettingId == entry.SettingId &&
-                    x.Name.Equals(entry.Name, StringComparison.OrdinalIgnoreCase)))
-                {
+                if (Entries.Any(x => x.SettingId == entry.SettingId))
                     continue;
-                }
 
                 Entries.Add(entry);
             }
+
             SaveEntries();
         }
 

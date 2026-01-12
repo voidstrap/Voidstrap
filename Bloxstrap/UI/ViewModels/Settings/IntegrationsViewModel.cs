@@ -143,6 +143,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.GameWIP = value;
         }
 
+        public bool AntiAFK
+        {
+            get => App.Settings.Prop.AntiAFK;
+            set => App.Settings.Prop.AntiAFK = value;
+        }
+
         public bool FFlagAmountRPC
         {
             get => App.Settings.Prop.FFlagRPCDisplayer;

@@ -38,6 +38,10 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand RemoveStartupAudioCommand { get; }
 
         private readonly MediaPlayer _audioPlayer = new();
+        private const string FileName = "BackgroundSettings.json";
+        private static readonly string FilePath = Path.Combine(Paths.Base, FileName);
+
+        private BackgroundSettings _settings;
 
         public static class AudioEvents
         {
@@ -49,13 +53,16 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public AppearanceViewModel(Page page)
+        public AppearanceViewModel()
         {
             ImportBackgroundCommand = new RelayCommand(ImportBackground);
             RemoveBackgroundCommand = new RelayCommand(RemoveBackground);
             ImportStartupAudioCommand = new RelayCommand(ImportStartupAudio);
             RemoveStartupAudioCommand = new RelayCommand(RemoveStartupAudio);
-            _page = page;
+            _settings = LoadSettings();
+
+            ImportBackgroundCommand2 = new RelayCommand<object>(ImportFile);
+            RemoveBackgroundCommand2 = new RelayCommand<object>(RemoveFile);
 
             foreach (var entry in BootstrapperIconEx.Selections)
                 Icons.Add(new BootstrapperIconEntry { IconType = entry });
@@ -67,6 +74,110 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw;
             set => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value;
+        }
+
+        public bool GRADmentFR
+        {
+            get => App.Settings.Prop.GRADmentFR;
+            set => App.Settings.Prop.GRADmentFR = value;
+        }
+
+        #region Properties
+
+        public string? BackgroundFilePath
+        {
+            get => _settings.BackgroundFilePath;
+            set
+            {
+                if (_settings.BackgroundFilePath != value)
+                {
+                    _settings.BackgroundFilePath = value;
+                    OnPropertyChanged();
+                    SaveSettings();
+                }
+            }
+        }
+
+        public double GradientOpacity
+        {
+            get => _settings.GradientOpacity;
+            set
+            {
+                if (_settings.GradientOpacity != value)
+                {
+                    _settings.GradientOpacity = value;
+                    OnPropertyChanged();
+                    SaveSettings();
+                }
+            }
+        }
+
+        #endregion
+
+        #region Commands
+
+        public ICommand ImportBackgroundCommand2 { get; }
+        public ICommand RemoveBackgroundCommand2 { get; }
+
+        private void ImportFile(object? _)
+        {
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Image/Video Files|*.png;*.jpg;*.jpeg;*.gif;*.mp4;*.mov",
+                Title = "Select Background File"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                BackgroundFilePath = dialog.FileName;
+            }
+        }
+
+        private void RemoveFile(object? _)
+        {
+            BackgroundFilePath = null;
+        }
+
+        #endregion
+
+        #region JSON Load/Save
+
+        private static BackgroundSettings LoadSettings()
+        {
+            try
+            {
+                if (File.Exists(FilePath))
+                {
+                    string json = File.ReadAllText(FilePath);
+                    return JsonSerializer.Deserialize<BackgroundSettings>(json) ?? new BackgroundSettings();
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to load background settings: {ex.Message}");
+            }
+            return new BackgroundSettings();
+        }
+
+        private void SaveSettings()
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(_settings, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(FilePath, json);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Failed to save background settings: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        public class BackgroundSettings
+        {
+            public string? BackgroundFilePath { get; set; } = null;
+            public double GradientOpacity { get; set; } = 1;
         }
 
         #region Properties

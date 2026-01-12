@@ -24,6 +24,39 @@
             Margin="0,8,0,0"
             FontSize="20"
             FontWeight="Medium"
+            Text="Mobile support" />
+
+        <ui:CardAction
+            Click="OpenCustomEditor_Click"
+            Icon="PhoneAdd24" Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="Mobile Setup" />
+                <TextBlock
+                    Margin="0,2,0,0"
+                    Padding="0,0,16,0"
+                    FontSize="12"
+                    Text="Edit Mobile settings and setup Mobile Support for Windows." />
+            </StackPanel>
+        </ui:CardAction>
+
+        <ui:CardAction
+    Click="OpenMobileExplain_Click"
+    Icon="ChatHelp20"
+    Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="Mobile Setup Explanation" />
+                <TextBlock
+            Margin="0,2,0,0"
+            Padding="0,0,16,0"
+            FontSize="12"
+            Text="Learn what Remote Access for Mobile Support does and how to set it up correctly." />
+            </StackPanel>
+        </ui:CardAction>
+
+        <TextBlock
+            Margin="0,8,0,0"
+            FontSize="20"
+            FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Integrations_ActivityTracking}" />
 
 
@@ -204,6 +237,12 @@
             Header="FPS Unlocker"
             Description="Removes the 240 FPS Limit without using FastFlags.">
             <ui:ToggleSwitch IsChecked="{Binding UncapFPS, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl 
+            Header="Anti AFK"
+            Description="Auto rejoins the game instead of getting kicked for being AFK every 20 minutes.">
+            <ui:ToggleSwitch IsChecked="{Binding AntiAFK, Mode=TwoWay}" />
         </controls:OptionControl>
 
         <controls:OptionControl 

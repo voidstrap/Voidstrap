@@ -287,9 +287,6 @@ namespace Voidstrap
                 _ = Task.Run(RobloxFullscreen.WaitAndForceExclusiveFullscreen);
             } // redid again cuz of a bug
 
-            if (App.Settings.Prop.EnableLuaScripting)
-                Task.Run(() => LuaScriptManager.WaitForRobloxAndExecuteScript());
-
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {
                 App.Logger.WriteLine(LOG_IDENT, "Bootstrapper task has finished");

@@ -55,6 +55,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         private bool _dlssSR;
         private bool _dlssFG;
         private bool _mfaa;
+        private bool _fxaa;
 
         private int _textureLodBias;
         private int _frameRateLimit;
@@ -119,6 +120,11 @@ namespace Voidstrap.UI.ViewModels.Settings
             get => _mfaa;
             set => Set(ref _mfaa, value);
         }
+        public bool EnableFXAA
+        {
+            get => _fxaa;
+            set => Set(ref _fxaa, value);
+        }
 
         public int FrameRateLimit
         {
@@ -164,6 +170,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         private void Load()
         {
             var entries = NvidiaProfileManager.LoadFromNip(NipPath);
+            entries = RemoveDuplicateSettingIds(entries);
 
             SelectedCplLowLatencyMode = ReadEnum(entries, "390467", CplLowLatencyModes, 0);
             BenchMarkOverlayMode = BenchmarkOverlayMap
@@ -181,10 +188,10 @@ namespace Voidstrap.UI.ViewModels.Settings
             BackgroundFrameRateLimit = ReadInt(entries, "277041157", 0);
 
             EnableMFAA = ReadBool(entries, "10011052");
+            EnableFXAA = (ReadBool(entries, "276089202") && ReadBool(entries, "276757595"));
             EnableGamma = !(ReadBool(entries, "276652957") && ReadBool(entries, "545898348"));
 
             TextureLodBias = ReadInt(entries, "7573135", 0);
-
             _originalValues = entries.ToDictionary(x => x.SettingId, x => x.Value);
         }
 
@@ -192,22 +199,16 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         #region Apply
 
-        public async void Apply()
+        public async Task Apply()
         {
             var entries = NvidiaProfileManager.LoadFromNip(NipPath);
+            entries = RemoveDuplicateSettingIds(entries);
 
             ApplyIfChanged(entries, "Frame Rate Limiter", "277041154", FrameRateLimit.ToString());
             ApplyIfChanged(entries, "Background Application Max Frame Rate", "277041157", BackgroundFrameRateLimit.ToString());
 
             ApplyIfChanged(entries, "CPL Low Latency Mode", "390467", CplLowLatencyModes.IndexOf(SelectedCplLowLatencyMode).ToString());
-
-            ApplyIfChanged(
-                entries,
-                "Benchmark Overlay",
-                "2945366",
-                BenchmarkOverlayMap.TryGetValue(BenchMarkOverlayMode, out var v) ? v.ToString() : "0"
-            );
-
+            ApplyIfChanged(entries, "Benchmark Overlay", "2945366", BenchmarkOverlayMap.TryGetValue(BenchMarkOverlayMode, out var v) ? v.ToString() : "0");
             ApplyIfChanged(entries, "FRL Low Latency Mode", "277041152", FrlLowLatencyModes.IndexOf(SelectedFrlLowLatencyMode).ToString());
             ApplyIfChanged(entries, "SILK Smoothness", "9990737", SilkToValue(SelectedSilkSmoothness));
 
@@ -219,10 +220,13 @@ namespace Voidstrap.UI.ViewModels.Settings
             ApplyIfChanged(entries, "Gamma correction", "276652957", gammaValue);
             ApplyIfChanged(entries, "Line gamma", "545898348", gammaValue);
 
+            var FXAAValue = EnableFXAA ? "1" : "0";
+            ApplyIfChanged(entries, "Enable FXAA", "276089202", FXAAValue);
+            ApplyIfChanged(entries, "Antialiasing - Mode", "276757595", FXAAValue);
+
             ApplyIfChanged(entries, "MFAA", "10011052", EnableMFAA ? "1" : "0");
 
             ApplyIfChanged(entries, "Texture filtering - LOD Bias", "7573135", TextureLodBias.ToString());
-
             if (TextureLodBias > 0)
             {
                 ApplyIfChanged(entries, "Texture filtering - Quality", "13510289", "20");
@@ -231,6 +235,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
 
             NvidiaProfileManager.SaveToNip(NipPath, entries);
+            _originalValues = entries.ToDictionary(x => x.SettingId, x => x.Value);
             await NvidiaProfileManager.ApplyNipFile(NipPath);
         }
 
@@ -304,6 +309,14 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (Equals(field, value)) return;
             field = value;
             OnPropertyChanged(name);
+        }
+
+        private static List<NvidiaEditorEntry> RemoveDuplicateSettingIds(List<NvidiaEditorEntry> entries)
+        {
+            return entries
+                .GroupBy(x => x.SettingId)
+                .Select(g => g.First())
+                .ToList();
         }
 
         private void OnPropertyChanged([CallerMemberName] string? name = null)
