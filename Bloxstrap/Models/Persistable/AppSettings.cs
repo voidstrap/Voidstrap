@@ -138,6 +138,13 @@ namespace Voidstrap.Models.Persistable
 
         public ResolutionSetting? InGameResolution { get; set; }
 
+        // SwiftTunnel VPN Settings
+        public bool SwiftTunnelEnabled { get; set; } = false;
+        public bool SwiftTunnelAutoConnect { get; set; } = true;
+        public bool SwiftTunnelSplitTunnel { get; set; } = true;
+        public string SwiftTunnelRegion { get; set; } = "singapore";
+        public bool SwiftTunnelRememberLogin { get; set; } = true;
+
         public class ResolutionSetting
         {
             public int Width { get; set; }

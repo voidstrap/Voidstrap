@@ -295,6 +295,7 @@
 
                 <ui:NavigationFluent.Items>
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" PageType="{x:Type pages:IntegrationsPage}" />
+                    <ui:NavigationItem Content="SwiftTunnel VPN" Icon="Shield20" PageType="{x:Type pages:SwiftTunnelPage}" />
                     <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" PageType="{x:Type pages:BehaviourPage}" />
                     <ui:NavigationItem Content="Modifications" Icon="WrenchScrewdriver20" PageType="{x:Type pages:ModsPage}" />
                     <ui:NavigationItem Content="Server Browser" Icon="ServerMultiple20" PageType="{x:Type pages:ServerBrowserPage}" />

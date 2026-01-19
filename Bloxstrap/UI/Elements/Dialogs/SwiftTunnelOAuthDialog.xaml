@@ -1,0 +1,74 @@
+<base:WpfUiWindow x:Class="Voidstrap.UI.Elements.Dialogs.SwiftTunnelOAuthDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        mc:Ignorable="d"
+        Width="500"
+        Height="650"
+        Title="Sign in to SwiftTunnel"
+        ExtendsContentIntoTitleBar="True"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize">
+    <base:WpfUiWindow.Background>
+        <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+            <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+            <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+            <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+        </LinearGradientBrush>
+    </base:WpfUiWindow.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0"
+                     Padding="8"
+                     x:Name="RootTitleBar"
+                     ShowMinimize="False"
+                     ShowMaximize="False"
+                     CanMaximize="False"
+                     KeyboardNavigation.TabNavigation="None"
+                     Title="Sign in to SwiftTunnel"
+                     Foreground="White" />
+
+        <Grid Grid.Row="1">
+            <!-- Loading overlay -->
+            <Grid x:Name="LoadingOverlay" Visibility="Visible" Panel.ZIndex="10">
+                <Grid.Background>
+                    <SolidColorBrush Color="{DynamicResource WindowBackgroundColorPrimary}" Opacity="0.9" />
+                </Grid.Background>
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ui:ProgressRing IsIndeterminate="True" Width="48" Height="48" />
+                    <TextBlock x:Name="LoadingText"
+                               Text="Loading..."
+                               Margin="0,16,0,0"
+                               FontSize="14"
+                               HorizontalAlignment="Center" />
+                </StackPanel>
+            </Grid>
+
+            <!-- WebView2 for OAuth -->
+            <wv2:WebView2 x:Name="OAuthWebView"
+                          Visibility="Collapsed"
+                          NavigationStarting="OAuthWebView_NavigationStarting"
+                          NavigationCompleted="OAuthWebView_NavigationCompleted" />
+        </Grid>
+
+        <Border Grid.Row="2" Padding="15" Background="{DynamicResource PrimaryBackgroundColor}">
+            <StackPanel Orientation="Horizontal" FlowDirection="LeftToRight" HorizontalAlignment="Right">
+                <Button x:Name="CancelButton"
+                        MinWidth="100"
+                        Content="Cancel"
+                        Click="CancelButton_Click"
+                        Foreground="White" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</base:WpfUiWindow>
