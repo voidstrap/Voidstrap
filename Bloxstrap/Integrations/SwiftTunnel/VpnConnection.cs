@@ -12,9 +12,12 @@ namespace Voidstrap.Integrations.SwiftTunnel
     {
         private bool _initialized;
         private bool _disposed;
+        private bool _splitTunnelEnabled;
+        private CancellationTokenSource? _splitTunnelRefreshCts;
         private readonly object _lock = new();
 
         public event EventHandler<ConnectionState>? StateChanged;
+        public event EventHandler<List<string>>? TunneledProcessesChanged;
 
         /// <summary>
         /// Current connection state
@@ -25,6 +28,16 @@ namespace Voidstrap.Integrations.SwiftTunnel
         /// Last error message
         /// </summary>
         public string? LastError { get; private set; }
+
+        /// <summary>
+        /// Currently tunneled process names
+        /// </summary>
+        public List<string> TunneledProcesses { get; private set; } = new();
+
+        /// <summary>
+        /// Whether split tunneling is active
+        /// </summary>
+        public bool IsSplitTunnelActive => _splitTunnelEnabled;
 
         /// <summary>
         /// Check if VPN is connected
@@ -42,6 +55,36 @@ namespace Voidstrap.Integrations.SwiftTunnel
             ConnectionState.ConfiguringSplitTunnel => true,
             _ => false
         };
+
+        /// <summary>
+        /// Check if split tunnel driver is available on this system
+        /// </summary>
+        public static bool IsSplitTunnelDriverAvailable()
+        {
+            try
+            {
+                return NativeVpn.IsSplitTunnelAvailable();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Get default apps that will be tunneled (Roblox processes)
+        /// </summary>
+        public static List<string> GetDefaultTunnelApps()
+        {
+            try
+            {
+                return NativeVpn.GetDefaultTunnelApps();
+            }
+            catch
+            {
+                return new List<string> { "RobloxPlayerBeta.exe", "RobloxStudioBeta.exe" };
+            }
+        }
 
         /// <summary>
         /// Check if native library is available
@@ -173,6 +216,13 @@ namespace Voidstrap.Integrations.SwiftTunnel
                 {
                     UpdateState(ConnectionState.Connected);
                     App.Logger.WriteLine("VpnConnection", "Connected successfully");
+
+                    // Start split tunnel monitoring if we have apps to tunnel
+                    if (splitTunnelApps != null && splitTunnelApps.Count > 0)
+                    {
+                        StartSplitTunnelMonitoring();
+                    }
+
                     return (true, null);
                 }
                 else
@@ -205,6 +255,25 @@ namespace Voidstrap.Integrations.SwiftTunnel
             try
             {
                 UpdateState(ConnectionState.Disconnecting);
+
+                // Stop split tunnel monitoring first
+                StopSplitTunnelMonitoring();
+
+                // Close split tunnel
+                if (_splitTunnelEnabled)
+                {
+                    try
+                    {
+                        await Task.Run(() => NativeVpn.swifttunnel_split_tunnel_close());
+                        _splitTunnelEnabled = false;
+                        TunneledProcesses.Clear();
+                        App.Logger.WriteLine("VpnConnection", "Split tunnel closed");
+                    }
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine("VpnConnection", $"Error closing split tunnel: {ex.Message}");
+                    }
+                }
 
                 var result = await Task.Run(() => NativeVpn.swifttunnel_disconnect());
 
@@ -292,12 +361,110 @@ namespace Voidstrap.Integrations.SwiftTunnel
             }
         }
 
+        /// <summary>
+        /// Start background monitoring for split tunnel process detection
+        /// </summary>
+        private void StartSplitTunnelMonitoring()
+        {
+            StopSplitTunnelMonitoring();
+
+            _splitTunnelEnabled = true;
+            _splitTunnelRefreshCts = new CancellationTokenSource();
+            var token = _splitTunnelRefreshCts.Token;
+
+            Task.Run(async () =>
+            {
+                App.Logger.WriteLine("VpnConnection", "Split tunnel monitoring started");
+
+                while (!token.IsCancellationRequested && IsConnected)
+                {
+                    try
+                    {
+                        var processes = NativeVpn.RefreshSplitTunnel();
+                        if (processes.Count > 0)
+                        {
+                            var newProcesses = processes.Except(TunneledProcesses).ToList();
+                            if (newProcesses.Count > 0)
+                            {
+                                App.Logger.WriteLine("VpnConnection", $"Now tunneling: {string.Join(", ", newProcesses)}");
+                            }
+                        }
+
+                        TunneledProcesses = processes;
+                        TunneledProcessesChanged?.Invoke(this, processes);
+                    }
+                    catch (Exception ex)
+                    {
+                        App.Logger.WriteLine("VpnConnection", $"Split tunnel refresh error: {ex.Message}");
+                    }
+
+                    // Refresh every 2 seconds to detect new Roblox processes
+                    try
+                    {
+                        await Task.Delay(2000, token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
+                }
+
+                App.Logger.WriteLine("VpnConnection", "Split tunnel monitoring stopped");
+            }, token);
+        }
+
+        /// <summary>
+        /// Stop split tunnel monitoring
+        /// </summary>
+        private void StopSplitTunnelMonitoring()
+        {
+            if (_splitTunnelRefreshCts != null)
+            {
+                _splitTunnelRefreshCts.Cancel();
+                _splitTunnelRefreshCts.Dispose();
+                _splitTunnelRefreshCts = null;
+            }
+        }
+
+        /// <summary>
+        /// Manually refresh split tunnel process detection
+        /// </summary>
+        public List<string> RefreshTunneledProcesses()
+        {
+            if (!_splitTunnelEnabled)
+                return new List<string>();
+
+            try
+            {
+                TunneledProcesses = NativeVpn.RefreshSplitTunnel();
+                return TunneledProcesses;
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("VpnConnection", $"RefreshTunneledProcesses error: {ex.Message}");
+                return TunneledProcesses;
+            }
+        }
+
         public void Dispose()
         {
             if (_disposed)
                 return;
 
             _disposed = true;
+
+            // Stop split tunnel monitoring
+            StopSplitTunnelMonitoring();
+
+            // Close split tunnel if active
+            if (_splitTunnelEnabled)
+            {
+                try
+                {
+                    NativeVpn.swifttunnel_split_tunnel_close();
+                }
+                catch { }
+            }
 
             if (_initialized)
             {

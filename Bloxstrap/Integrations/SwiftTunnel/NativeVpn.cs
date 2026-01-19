@@ -97,6 +97,52 @@ namespace Voidstrap.Integrations.SwiftTunnel
         [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
         public static extern int swifttunnel_is_available();
 
+        // ═══════════════════════════════════════════════════════════════════════════════
+        //  SPLIT TUNNEL API
+        // ═══════════════════════════════════════════════════════════════════════════════
+
+        /// <summary>
+        /// Check if the Mullvad split tunnel driver is available.
+        /// </summary>
+        /// <returns>1 if available, 0 otherwise</returns>
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int swifttunnel_split_tunnel_available();
+
+        /// <summary>
+        /// Configure and enable split tunneling.
+        /// </summary>
+        /// <param name="tunnelIp">The VPN tunnel IP address (e.g., "10.0.0.77")</param>
+        /// <param name="interfaceLuid">The Wintun adapter LUID</param>
+        /// <param name="appsJson">JSON array of app names to tunnel, or null for defaults</param>
+        /// <returns>0 on success, negative error code on failure</returns>
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi)]
+        public static extern int swifttunnel_split_tunnel_configure(
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string tunnelIp,
+            ulong interfaceLuid,
+            [MarshalAs(UnmanagedType.LPUTF8Str)] string? appsJson);
+
+        /// <summary>
+        /// Refresh split tunnel process detection.
+        /// Call this periodically to detect newly started Roblox processes.
+        /// </summary>
+        /// <returns>Pointer to JSON array of currently tunneled process names, or null</returns>
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr swifttunnel_split_tunnel_refresh();
+
+        /// <summary>
+        /// Disable and close split tunneling.
+        /// </summary>
+        /// <returns>0 on success, negative error code on failure</returns>
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int swifttunnel_split_tunnel_close();
+
+        /// <summary>
+        /// Get default apps that will be tunneled (Roblox processes).
+        /// </summary>
+        /// <returns>Pointer to JSON array of app names</returns>
+        [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+        public static extern IntPtr swifttunnel_split_tunnel_get_default_apps();
+
         /// <summary>
         /// Helper method to get string from native pointer and free it
         /// </summary>
@@ -112,6 +158,51 @@ namespace Voidstrap.Integrations.SwiftTunnel
             finally
             {
                 swifttunnel_free_string(ptr);
+            }
+        }
+
+        /// <summary>
+        /// Check if split tunnel driver is available
+        /// </summary>
+        public static bool IsSplitTunnelAvailable() => swifttunnel_split_tunnel_available() == 1;
+
+        /// <summary>
+        /// Get default tunnel apps as a list
+        /// </summary>
+        public static List<string> GetDefaultTunnelApps()
+        {
+            var ptr = swifttunnel_split_tunnel_get_default_apps();
+            var json = GetStringAndFree(ptr);
+            if (string.IsNullOrEmpty(json))
+                return new List<string>();
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        /// <summary>
+        /// Refresh split tunnel and get currently tunneled process names
+        /// </summary>
+        public static List<string> RefreshSplitTunnel()
+        {
+            var ptr = swifttunnel_split_tunnel_refresh();
+            var json = GetStringAndFree(ptr);
+            if (string.IsNullOrEmpty(json))
+                return new List<string>();
+
+            try
+            {
+                return System.Text.Json.JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
+            }
+            catch
+            {
+                return new List<string>();
             }
         }
     }
