@@ -3,72 +3,111 @@ using System.Text.Json.Serialization;
 namespace Voidstrap.Integrations.SwiftTunnel.Models
 {
     /// <summary>
-    /// VPN server information
+    /// VPN server information from API
     /// </summary>
     public class ServerInfo
+    {
+        [JsonPropertyName("region")]
+        public string Region { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("country_code")]
+        public string CountryCode { get; set; } = string.Empty;
+
+        [JsonPropertyName("ip")]
+        public string Ip { get; set; } = string.Empty;
+
+        [JsonPropertyName("port")]
+        public int Port { get; set; } = 51820;
+
+        [JsonPropertyName("phantun_available")]
+        public bool PhantunAvailable { get; set; }
+
+        [JsonPropertyName("phantun_port")]
+        public int? PhantunPort { get; set; }
+
+        /// <summary>
+        /// Measured latency in milliseconds (set locally)
+        /// </summary>
+        [JsonIgnore]
+        public int? Latency { get; set; }
+
+        /// <summary>
+        /// Get the endpoint string (ip:port)
+        /// </summary>
+        public string Endpoint => $"{Ip}:{Port}";
+    }
+
+    /// <summary>
+    /// Gaming region grouping servers
+    /// </summary>
+    public class GamingRegion
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
 
-        [JsonPropertyName("region")]
-        public string Region { get; set; } = string.Empty;
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
 
-        [JsonPropertyName("displayName")]
-        public string DisplayName { get; set; } = string.Empty;
+        [JsonPropertyName("description")]
+        public string Description { get; set; } = string.Empty;
 
-        [JsonPropertyName("countryCode")]
+        [JsonPropertyName("country_code")]
         public string CountryCode { get; set; } = string.Empty;
 
-        [JsonPropertyName("endpoint")]
-        public string Endpoint { get; set; } = string.Empty;
+        [JsonPropertyName("servers")]
+        public List<string> Servers { get; set; } = new();
 
-        [JsonPropertyName("latency")]
-        public int? Latency { get; set; }
-
-        [JsonPropertyName("phantunEnabled")]
-        public bool PhantunEnabled { get; set; }
-
-        [JsonPropertyName("available")]
-        public bool Available { get; set; } = true;
+        /// <summary>
+        /// Best latency among servers in this region (set locally)
+        /// </summary>
+        [JsonIgnore]
+        public int? BestLatency { get; set; }
     }
 
     /// <summary>
-    /// API response wrapper for server list
+    /// API response from /api/vpn/servers
     /// </summary>
     public class ServerListResponse
     {
-        [JsonPropertyName("success")]
-        public bool Success { get; set; }
-
         [JsonPropertyName("servers")]
         public List<ServerInfo> Servers { get; set; } = new();
 
-        [JsonPropertyName("error")]
-        public string? Error { get; set; }
+        [JsonPropertyName("regions")]
+        public List<GamingRegion> Regions { get; set; } = new();
+
+        [JsonPropertyName("version")]
+        public string Version { get; set; } = string.Empty;
     }
 
     /// <summary>
-    /// Gaming regions with pre-defined server info
+    /// Cached server list with timestamp
     /// </summary>
-    public static class GamingRegions
+    public class CachedServerList
     {
-        public static readonly Dictionary<string, ServerInfo> Regions = new()
-        {
-            ["singapore"] = new ServerInfo { Region = "singapore", DisplayName = "Singapore", CountryCode = "SG" },
-            ["mumbai"] = new ServerInfo { Region = "mumbai", DisplayName = "Mumbai", CountryCode = "IN" },
-            ["sydney"] = new ServerInfo { Region = "sydney", DisplayName = "Sydney", CountryCode = "AU" },
-            ["tokyo"] = new ServerInfo { Region = "tokyo", DisplayName = "Tokyo", CountryCode = "JP" },
-            ["germany"] = new ServerInfo { Region = "germany", DisplayName = "Germany", CountryCode = "DE" },
-            ["paris"] = new ServerInfo { Region = "paris", DisplayName = "Paris", CountryCode = "FR" },
-            ["america"] = new ServerInfo { Region = "america", DisplayName = "America", CountryCode = "US" },
-            ["brazil"] = new ServerInfo { Region = "brazil", DisplayName = "Brazil", CountryCode = "BR" }
-        };
+        [JsonPropertyName("data")]
+        public ServerListResponse Data { get; set; } = new();
 
-        public static IEnumerable<ServerInfo> GetAll() => Regions.Values;
+        [JsonPropertyName("cached_at")]
+        public DateTime CachedAt { get; set; }
 
-        public static ServerInfo? GetByRegion(string region)
-        {
-            return Regions.TryGetValue(region.ToLowerInvariant(), out var server) ? server : null;
-        }
+        /// <summary>
+        /// Check if cache is still fresh (1 hour TTL)
+        /// </summary>
+        public bool IsFresh => (DateTime.UtcNow - CachedAt).TotalHours < 1;
+    }
+
+    /// <summary>
+    /// Source of the server list data
+    /// </summary>
+    public enum ServerListSource
+    {
+        Loading,
+        Api,
+        Cache,
+        StaleCache,
+        Error
     }
 }

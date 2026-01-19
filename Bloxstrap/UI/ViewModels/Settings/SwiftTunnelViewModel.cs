@@ -17,6 +17,8 @@ namespace Voidstrap.UI.ViewModels.Settings
         private string _errorMessage = "";
         private bool _isBusy;
         private bool _disposed;
+        private bool _isLoadingRegions;
+        private string? _regionsError;
 
         public SwiftTunnelViewModel()
         {
@@ -33,7 +35,92 @@ namespace Voidstrap.UI.ViewModels.Settings
         private async Task InitializeAsync()
         {
             await _service.InitializeAsync();
+
+            // Load server list dynamically
+            await LoadRegionsAsync();
+
             RefreshAllProperties();
+        }
+
+        private async Task LoadRegionsAsync()
+        {
+            _isLoadingRegions = true;
+            _regionsError = null;
+            OnPropertyChanged(nameof(IsLoadingRegions));
+            OnPropertyChanged(nameof(RegionsError));
+
+            try
+            {
+                var (data, source) = await _service.ApiClient.LoadServerListAsync();
+
+                if (data != null)
+                {
+                    // Update dynamic regions
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        Regions.Clear();
+                        foreach (var region in data.Regions)
+                        {
+                            Regions.Add(new RegionItem
+                            {
+                                Id = region.Id,
+                                Name = region.Name,
+                                CountryCode = region.CountryCode,
+                                Description = region.Description
+                            });
+                        }
+
+                        OnPropertyChanged(nameof(Regions));
+                        OnPropertyChanged(nameof(SelectedRegionItem));
+                        OnPropertyChanged(nameof(ConnectionDetails));
+                    });
+
+                    // Start measuring latencies in background
+                    _ = MeasureLatenciesAsync();
+                }
+                else
+                {
+                    _regionsError = _service.ApiClient.ServerListError ?? "Failed to load regions";
+                }
+            }
+            catch (Exception ex)
+            {
+                _regionsError = ex.Message;
+                App.Logger.WriteLine("SwiftTunnelViewModel", $"Error loading regions: {ex.Message}");
+            }
+            finally
+            {
+                _isLoadingRegions = false;
+                OnPropertyChanged(nameof(IsLoadingRegions));
+                OnPropertyChanged(nameof(RegionsError));
+                OnPropertyChanged(nameof(HasRegionsError));
+            }
+        }
+
+        private async Task MeasureLatenciesAsync()
+        {
+            try
+            {
+                await _service.ApiClient.MeasureAllLatenciesAsync();
+
+                // Update region latencies in UI
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    foreach (var regionItem in Regions)
+                    {
+                        var region = _service.ApiClient.GetRegion(regionItem.Id);
+                        if (region != null)
+                        {
+                            regionItem.Latency = region.BestLatency;
+                        }
+                    }
+                    OnPropertyChanged(nameof(Regions));
+                });
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("SwiftTunnelViewModel", $"Error measuring latencies: {ex.Message}");
+            }
         }
 
         #region Authentication Properties
@@ -124,8 +211,8 @@ namespace Voidstrap.UI.ViewModels.Settings
             get
             {
                 if (!IsConnected) return "";
-                var region = GamingRegions.GetByRegion(SelectedRegion);
-                return region != null ? $"{region.DisplayName} ({region.CountryCode})" : SelectedRegion;
+                var region = _service.ApiClient.GetRegion(SelectedRegion);
+                return region != null ? $"{region.Name} ({region.CountryCode})" : SelectedRegion;
             }
         }
 
@@ -208,16 +295,51 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public Dictionary<string, string> Regions { get; } = new()
+        /// <summary>
+        /// Dynamic regions loaded from API
+        /// </summary>
+        public ObservableCollection<RegionItem> Regions { get; } = new();
+
+        /// <summary>
+        /// Currently selected region item
+        /// </summary>
+        public RegionItem? SelectedRegionItem
         {
-            ["singapore"] = "Singapore",
-            ["mumbai"] = "Mumbai",
-            ["sydney"] = "Sydney",
-            ["tokyo"] = "Tokyo",
-            ["germany"] = "Germany",
-            ["paris"] = "Paris",
-            ["america"] = "America",
-            ["brazil"] = "Brazil"
+            get => Regions.FirstOrDefault(r => r.Id == SelectedRegion);
+            set
+            {
+                if (value != null)
+                {
+                    SelectedRegion = value.Id;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Whether regions are currently loading
+        /// </summary>
+        public bool IsLoadingRegions => _isLoadingRegions;
+
+        /// <summary>
+        /// Error message for regions loading
+        /// </summary>
+        public string? RegionsError => _regionsError;
+
+        /// <summary>
+        /// Whether there's an error loading regions
+        /// </summary>
+        public bool HasRegionsError => !string.IsNullOrEmpty(_regionsError);
+
+        /// <summary>
+        /// Server list source (API, Cache, etc.)
+        /// </summary>
+        public string ServerListSourceText => _service.ApiClient.ServerListSource switch
+        {
+            ServerListSource.Api => "Live",
+            ServerListSource.Cache => "Cached",
+            ServerListSource.StaleCache => "Offline",
+            ServerListSource.Loading => "Loading...",
+            _ => ""
         };
 
         #endregion
@@ -397,9 +519,15 @@ namespace Voidstrap.UI.ViewModels.Settings
             OnPropertyChanged(nameof(CanToggleConnection));
             OnPropertyChanged(nameof(IsEnabled));
             OnPropertyChanged(nameof(SelectedRegion));
+            OnPropertyChanged(nameof(SelectedRegionItem));
             OnPropertyChanged(nameof(AutoConnect));
             OnPropertyChanged(nameof(SplitTunnel));
             OnPropertyChanged(nameof(RememberLogin));
+            OnPropertyChanged(nameof(Regions));
+            OnPropertyChanged(nameof(IsLoadingRegions));
+            OnPropertyChanged(nameof(RegionsError));
+            OnPropertyChanged(nameof(HasRegionsError));
+            OnPropertyChanged(nameof(ServerListSourceText));
         }
 
         #endregion
@@ -414,5 +542,44 @@ namespace Voidstrap.UI.ViewModels.Settings
             _service.AuthStateChanged -= OnAuthStateChanged;
             _service.ConnectionStateChanged -= OnConnectionStateChanged;
         }
+    }
+
+    /// <summary>
+    /// Region item for UI binding
+    /// </summary>
+    public class RegionItem : NotifyPropertyChangedViewModel
+    {
+        private int? _latency;
+
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string CountryCode { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+
+        public int? Latency
+        {
+            get => _latency;
+            set
+            {
+                _latency = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(LatencyText));
+                OnPropertyChanged(nameof(LatencyColor));
+            }
+        }
+
+        public string LatencyText => Latency.HasValue ? $"{Latency}ms" : "...";
+
+        public Brush LatencyColor => Latency switch
+        {
+            null => new SolidColorBrush(Color.FromRgb(158, 158, 158)), // Gray
+            <= 50 => new SolidColorBrush(Color.FromRgb(76, 175, 80)),  // Green - Excellent
+            <= 100 => new SolidColorBrush(Color.FromRgb(139, 195, 74)), // Light green - Good
+            <= 150 => new SolidColorBrush(Color.FromRgb(255, 193, 7)), // Yellow - Okay
+            <= 200 => new SolidColorBrush(Color.FromRgb(255, 152, 0)), // Orange - Poor
+            _ => new SolidColorBrush(Color.FromRgb(244, 67, 54))       // Red - Bad
+        };
+
+        public string DisplayText => $"{Name} ({CountryCode})";
     }
 }
