@@ -123,6 +123,10 @@ namespace Voidstrap.Integrations.SwiftTunnel
 
             App.Logger.WriteLine("SwiftTunnelService", $"Connecting to region: {region}");
 
+            // Find the best server in the selected region based on latency
+            var serverToConnect = await GetBestServerForRegionAsync(region);
+            App.Logger.WriteLine("SwiftTunnelService", $"Best server for region '{region}': {serverToConnect}");
+
             // Get access token
             var accessToken = await _authManager.GetValidAccessTokenAsync();
             if (string.IsNullOrEmpty(accessToken))
@@ -130,8 +134,8 @@ namespace Voidstrap.Integrations.SwiftTunnel
                 return (false, "Failed to get access token");
             }
 
-            // Fetch VPN config from API
-            var (config, error) = await _apiClient.GetVpnConfigAsync(accessToken, region);
+            // Fetch VPN config from API using the best server
+            var (config, error) = await _apiClient.GetVpnConfigAsync(accessToken, serverToConnect);
             if (config == null)
             {
                 return (false, error ?? "Failed to get VPN configuration");
@@ -146,6 +150,54 @@ namespace Voidstrap.Integrations.SwiftTunnel
 
             // Connect
             return await _vpnConnection.ConnectAsync(config, splitTunnelApps);
+        }
+
+        /// <summary>
+        /// Get the best server for a gaming region based on measured latency.
+        /// Falls back to the first server in the region if no latency data exists.
+        /// </summary>
+        private async Task<string> GetBestServerForRegionAsync(string regionId)
+        {
+            // Get all servers in this gaming region
+            var serversInRegion = _apiClient.GetServersInRegion(regionId);
+
+            if (serversInRegion.Count == 0)
+            {
+                // No servers found for region, return the region ID itself
+                // (it might be a direct server ID)
+                App.Logger.WriteLine("SwiftTunnelService", $"No servers found for region '{regionId}', using region ID directly");
+                return regionId;
+            }
+
+            // Find server with lowest latency
+            var bestServer = serversInRegion
+                .Where(s => s.Latency.HasValue)
+                .OrderBy(s => s.Latency!.Value)
+                .FirstOrDefault();
+
+            if (bestServer != null)
+            {
+                App.Logger.WriteLine("SwiftTunnelService",
+                    $"Using server '{bestServer.Region}' ({bestServer.Latency}ms) as best in region '{regionId}'");
+                return bestServer.Region;
+            }
+
+            // No latency data available, measure now
+            App.Logger.WriteLine("SwiftTunnelService", $"No latency data for region '{regionId}', measuring now...");
+
+            var (measuredBest, latency) = await _apiClient.FindBestServerInRegionAsync(regionId);
+            if (measuredBest != null)
+            {
+                App.Logger.WriteLine("SwiftTunnelService",
+                    $"Measured best server: '{measuredBest.Region}' ({latency}ms)");
+                return measuredBest.Region;
+            }
+
+            // Fall back to first server in region
+            var fallback = serversInRegion.First();
+            App.Logger.WriteLine("SwiftTunnelService",
+                $"Could not measure latency, falling back to first server: '{fallback.Region}'");
+            return fallback.Region;
         }
 
         /// <summary>
