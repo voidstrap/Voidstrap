@@ -400,10 +400,10 @@ namespace Voidstrap.Integrations.SwiftTunnel
                         App.Logger.WriteLine("VpnConnection", $"Split tunnel refresh error: {ex.Message}");
                     }
 
-                    // Refresh every 250ms for fast game detection (exclude-all-except mode)
+                    // Refresh every 50ms for instant game detection (exclude-all-except mode)
                     try
                     {
-                        await Task.Delay(250, token);
+                        await Task.Delay(50, token);
                     }
                     catch (TaskCanceledException)
                     {
