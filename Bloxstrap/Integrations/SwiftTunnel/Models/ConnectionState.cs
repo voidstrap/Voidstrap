@@ -10,6 +10,7 @@ namespace Voidstrap.Integrations.SwiftTunnel.Models
         CreatingAdapter,
         Connecting,
         ConfiguringSplitTunnel,
+        ConfiguringRoutes,
         Connected,
         Disconnecting,
         Error

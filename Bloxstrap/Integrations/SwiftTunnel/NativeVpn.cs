@@ -15,8 +15,9 @@ namespace Voidstrap.Integrations.SwiftTunnel
         public const int StateCreatingAdapter = 2;
         public const int StateConnecting = 3;
         public const int StateConfiguringSplitTunnel = 4;
-        public const int StateConnected = 5;
-        public const int StateDisconnecting = 6;
+        public const int StateConfiguringRoutes = 5;
+        public const int StateConnected = 6;
+        public const int StateDisconnecting = 7;
         public const int StateError = -1;
 
         // Return codes

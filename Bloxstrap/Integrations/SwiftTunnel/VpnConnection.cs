@@ -53,6 +53,7 @@ namespace Voidstrap.Integrations.SwiftTunnel
             ConnectionState.CreatingAdapter => true,
             ConnectionState.Connecting => true,
             ConnectionState.ConfiguringSplitTunnel => true,
+            ConnectionState.ConfiguringRoutes => true,
             _ => false
         };
 
@@ -347,6 +348,7 @@ namespace Voidstrap.Integrations.SwiftTunnel
                     NativeVpn.StateCreatingAdapter => ConnectionState.CreatingAdapter,
                     NativeVpn.StateConnecting => ConnectionState.Connecting,
                     NativeVpn.StateConfiguringSplitTunnel => ConnectionState.ConfiguringSplitTunnel,
+                    NativeVpn.StateConfiguringRoutes => ConnectionState.ConfiguringRoutes,
                     NativeVpn.StateConnected => ConnectionState.Connected,
                     NativeVpn.StateDisconnecting => ConnectionState.Disconnecting,
                     NativeVpn.StateError => ConnectionState.Error,
@@ -398,10 +400,10 @@ namespace Voidstrap.Integrations.SwiftTunnel
                         App.Logger.WriteLine("VpnConnection", $"Split tunnel refresh error: {ex.Message}");
                     }
 
-                    // Refresh every 2 seconds to detect new Roblox processes
+                    // Refresh every 250ms for fast game detection (matches native library)
                     try
                     {
-                        await Task.Delay(2000, token);
+                        await Task.Delay(250, token);
                     }
                     catch (TaskCanceledException)
                     {
