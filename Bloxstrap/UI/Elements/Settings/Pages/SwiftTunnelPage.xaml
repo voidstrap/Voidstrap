@@ -1,0 +1,228 @@
+<ui:UiPage
+    x:Class="Voidstrap.UI.Elements.Settings.Pages.SwiftTunnelPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:models="clr-namespace:Voidstrap.UI.ViewModels.Settings"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    x:Name="SwiftTunnelPageView"
+    Title="SwiftTunnel VPN"
+    d:DesignHeight="900"
+    d:DesignWidth="800"
+    Scrollable="True"
+    mc:Ignorable="d">
+    <StackPanel Margin="0,0,14,14">
+        <TextBlock
+            FontSize="14"
+            Foreground="{StaticResource TextFillColorSecondaryBrush}"
+            Text="Low-latency gaming VPN optimized for Roblox with split tunneling support." />
+
+        <!-- Account Section -->
+        <TextBlock
+            Margin="0,16,0,0"
+            FontSize="20"
+            FontWeight="Medium"
+            Text="Account" />
+
+        <!-- Not Signed In State -->
+        <StackPanel x:Name="SignInPanel" Visibility="{Binding IsNotAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ui:Card Margin="0,8,0,0" Padding="16">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Sign in to your SwiftTunnel account to use VPN features." />
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0"
+                                   Text="Email"
+                                   Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                                   Margin="0,0,0,4" />
+                        <ui:TextBox Grid.Row="1" Grid.Column="0"
+                                    x:Name="EmailTextBox"
+                                    Text="{Binding Email, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                    PlaceholderText="your@email.com"
+                                    Margin="0,0,8,0" />
+                    </Grid>
+
+                    <Grid Margin="0,12,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0"
+                                   Text="Password"
+                                   Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                                   Margin="0,0,0,4" />
+                        <ui:PasswordBox Grid.Row="1"
+                                        x:Name="PasswordBox"
+                                        Password="{Binding Password, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                        PlaceholderText="Password" />
+                    </Grid>
+
+                    <TextBlock x:Name="ErrorText"
+                               Text="{Binding ErrorMessage}"
+                               Foreground="#FF5252"
+                               Margin="0,8,0,0"
+                               Visibility="{Binding HasError, Converter={StaticResource BooleanToVisibilityConverter}}"
+                               TextWrapping="Wrap" />
+
+                    <StackPanel Orientation="Horizontal" Margin="0,16,0,0" HorizontalAlignment="Left">
+                        <ui:Button Content="Sign In"
+                                   Command="{Binding SignInCommand}"
+                                   IsEnabled="{Binding CanSignIn}"
+                                   Appearance="Primary"
+                                   Background="{DynamicResource SystemAccentBrush}"
+                                   Margin="0,0,8,0" />
+                        <ui:Button Content="Continue with Google"
+                                   Command="{Binding SignInWithGoogleCommand}"
+                                   IsEnabled="{Binding IsNotBusy}" />
+                    </StackPanel>
+
+                    <TextBlock Margin="0,12,0,0"
+                               Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                               FontSize="12">
+                        <Run Text="Don't have an account? " />
+                        <Hyperlink NavigateUri="https://swifttunnel.net/signup"
+                                   RequestNavigate="Hyperlink_RequestNavigate">
+                            Sign up at swifttunnel.net
+                        </Hyperlink>
+                    </TextBlock>
+                </StackPanel>
+            </ui:Card>
+        </StackPanel>
+
+        <!-- Signed In State -->
+        <StackPanel x:Name="SignedInPanel" Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <ui:Card Margin="0,8,0,0" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" FontWeight="Medium" Text="{Binding UserDisplayName}" />
+                        <TextBlock FontSize="12"
+                                   Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding UserEmail}" />
+                    </StackPanel>
+                    <ui:Button Grid.Column="1"
+                               Content="Sign Out"
+                               Command="{Binding SignOutCommand}"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </ui:Card>
+        </StackPanel>
+
+        <!-- Connection Section (only visible when authenticated) -->
+        <StackPanel Visibility="{Binding IsAuthenticated, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <TextBlock
+                Margin="0,24,0,0"
+                FontSize="20"
+                FontWeight="Medium"
+                Text="Connection" />
+
+            <ui:Card Margin="0,8,0,0" Padding="16">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Connection Status Indicator -->
+                    <Ellipse Grid.Column="0"
+                             Width="12" Height="12"
+                             Margin="0,0,12,0"
+                             VerticalAlignment="Center"
+                             Fill="{Binding ConnectionStatusColor}" />
+
+                    <!-- Status Text -->
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock FontSize="14" FontWeight="Medium" Text="{Binding ConnectionStatusText}" />
+                        <TextBlock FontSize="12"
+                                   Foreground="{StaticResource TextFillColorSecondaryBrush}"
+                                   Text="{Binding ConnectionDetails}"
+                                   Visibility="{Binding IsConnected, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <!-- Connect/Disconnect Button -->
+                    <ui:Button Grid.Column="2"
+                               Content="{Binding ConnectButtonText}"
+                               Command="{Binding ToggleConnectionCommand}"
+                               IsEnabled="{Binding CanToggleConnection}"
+                               Appearance="{Binding ConnectButtonAppearance}"
+                               MinWidth="100"
+                               VerticalAlignment="Center" />
+                </Grid>
+            </ui:Card>
+
+            <!-- VPN Settings -->
+            <TextBlock
+                Margin="0,24,0,0"
+                FontSize="20"
+                FontWeight="Medium"
+                Text="VPN Settings" />
+
+            <controls:OptionControl
+                Header="Server Region"
+                Description="Select your preferred VPN server region for optimal latency."
+                IsEnabled="{Binding IsEnabled}">
+                <ComboBox
+    Width="150"
+    ItemsSource="{Binding Regions}"
+    SelectedItem="{Binding SelectedRegionItem, Mode=TwoWay}"
+    DisplayMemberPath="Name" />
+
+            </controls:OptionControl>
+
+            <controls:OptionControl
+                Header="Auto-Connect"
+                Description="Automatically connect to VPN when Roblox launches through Voidstrap."
+                IsEnabled="{Binding IsEnabled}">
+                <ui:ToggleSwitch
+                    Background="{DynamicResource SystemAccentBrush}"
+                    IsChecked="{Binding AutoConnect, Mode=TwoWay}" />
+            </controls:OptionControl>
+
+            <controls:OptionControl
+                Header="Split Tunneling"
+                Description="Route only Roblox traffic through VPN. Other apps use your regular connection."
+                IsEnabled="{Binding IsEnabled}">
+                <ui:ToggleSwitch
+                    Background="{DynamicResource SystemAccentBrush}"
+                    IsChecked="{Binding SplitTunnel, Mode=TwoWay}" />
+            </controls:OptionControl>
+
+            <controls:OptionControl
+                Header="Remember Login"
+                Description="Save your login session for automatic sign-in next time.">
+                <ui:ToggleSwitch
+                    Background="{DynamicResource SystemAccentBrush}"
+                    IsChecked="{Binding RememberLogin, Mode=TwoWay}" />
+            </controls:OptionControl>
+        </StackPanel>
+
+        <!-- Footer -->
+        <TextBlock
+            Margin="0,24,0,0"
+            FontSize="12"
+            Foreground="{StaticResource TextFillColorSecondaryBrush}"
+            TextWrapping="Wrap">
+            <Run Text="SwiftTunnel provides low-latency VPN servers optimized for Roblox gaming. " />
+            <Hyperlink NavigateUri="https://swifttunnel.net"
+                       RequestNavigate="Hyperlink_RequestNavigate">
+                Learn more
+            </Hyperlink>
+        </TextBlock>
+    </StackPanel>
+</ui:UiPage>

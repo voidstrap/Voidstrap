@@ -1,10 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_LastSelectedProfileId>C:\Users\freew\Documents\Voidstrap-Backs-main\Voidstrap-Backs-main\Bloxstrap\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
-    <ActiveDebugProfile>Voidstrap (Install)</ActiveDebugProfile>
+    <_LastSelectedProfileId>C:\Users\freew\Downloads\Voidstrap-main\Voidstrap-main\Bloxstrap\Properties\PublishProfiles\FolderProfile1.pubxml</_LastSelectedProfileId>
+    <ActiveDebugProfile>Voidstrap (Launch)</ActiveDebugProfile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
   <ItemGroup>
