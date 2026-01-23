@@ -1,0 +1,72 @@
+[package]
+name = "swifttunnel-vpn-native"
+version = "0.1.0"
+edition = "2021"
+authors = ["SwiftTunnel <support@swifttunnel.net>"]
+description = "SwiftTunnel VPN native library with C ABI for integration with external applications"
+
+[lib]
+crate-type = ["cdylib"]
+name = "swifttunnel_vpn"
+
+[dependencies]
+# Windows API (minimal - route-based split tunnel doesn't need WFP)
+windows = { version = "0.58", features = [
+    "Win32_Foundation",
+    "Win32_System_Threading",
+    "Win32_System_ProcessStatus",
+    "Win32_Security",
+    "Win32_System_IO",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_NetworkManagement_Ndis",
+    "Win32_Networking_WinSock",
+] }
+
+# Async runtime
+tokio = { version = "1", features = ["full"] }
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Error handling
+anyhow = "1.0"
+thiserror = "1.0"
+
+# VPN Core - WireGuard userspace implementation
+boringtun = "0.6"
+
+# Wintun virtual network adapter for Windows
+wintun = "0.5"
+
+# Curve25519 key exchange - MUST match boringtun's version exactly
+x25519-dalek = { version = "=2.0.0-rc.3", features = ["static_secrets"] }
+
+# Additional async utilities for VPN packet handling
+futures = "0.3"
+futures-util = "0.3"
+
+# Base64 for key encoding
+base64 = "0.22"
+
+# Once cell for lazy statics
+once_cell = "1.19"
+
+# Parking lot for better mutexes
+parking_lot = "0.12"
+
+# System info for process detection (split tunneling)
+sysinfo = "0.32"
+
+# Directory paths for finding Roblox
+dirs = "5.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true

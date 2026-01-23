@@ -308,9 +308,11 @@ namespace Voidstrap.Integrations.SwiftTunnel
             return new List<string>
             {
                 "RobloxPlayerBeta.exe",
+                "RobloxPlayerLauncher.exe",
                 "RobloxStudioBeta.exe",
-                "RobloxCrashHandler.exe",
-                "RobloxPlayerLauncher.exe"
+                "RobloxStudioLauncherBeta.exe",
+                "RobloxStudioLauncher.exe",
+                "Windows10Universal.exe"
             };
         }
 
