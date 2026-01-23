@@ -1,4 +1,8 @@
 using System.IO;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Voidstrap.Integrations.SwiftTunnel.Models;
@@ -170,8 +174,62 @@ namespace Voidstrap.Integrations.SwiftTunnel
             }
         }
 
-        [System.Runtime.InteropServices.DllImport("kernel32.dll", SetLastError = true)]
+        [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool SetDllDirectory(string lpPathName);
+
+        [DllImport("iphlpapi.dll")]
+        private static extern int ConvertInterfaceIndexToLuid(uint ifIndex, out ulong luid);
+
+        [DllImport("iphlpapi.dll")]
+        private static extern int ConvertInterfaceGuidToLuid(ref Guid guid, out ulong luid);
+
+        private static IPAddress? ParseAssignedIp(string assignedIp)
+        {
+            if (string.IsNullOrWhiteSpace(assignedIp))
+                return null;
+
+            var ipPart = assignedIp.Split('/')[0];
+            return IPAddress.TryParse(ipPart, out var ip) ? ip : null;
+        }
+
+        private static ulong? TryGetAdapterLuid(IPAddress? assignedIp)
+        {
+            NetworkInterface? target = null;
+
+            if (assignedIp != null)
+            {
+                foreach (var ni in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    var props = ni.GetIPProperties();
+                    if (props.UnicastAddresses.Any(ua => ua.Address.Equals(assignedIp)))
+                    {
+                        target = ni;
+                        break;
+                    }
+                }
+            }
+
+            if (target == null)
+            {
+                target = NetworkInterface.GetAllNetworkInterfaces()
+                    .FirstOrDefault(ni =>
+                        ni.Name.Equals("SwiftTunnel", StringComparison.OrdinalIgnoreCase) ||
+                        ni.Description.Contains("SwiftTunnel", StringComparison.OrdinalIgnoreCase) ||
+                        ni.Description.Contains("Wintun", StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (target == null)
+                return null;
+
+            var ipv4Props = target.GetIPProperties().GetIPv4Properties();
+            if (ipv4Props != null && ConvertInterfaceIndexToLuid((uint)ipv4Props.Index, out var luid) == 0)
+                return luid;
+
+            if (Guid.TryParse(target.Id, out var guid) && ConvertInterfaceGuidToLuid(ref guid, out luid) == 0)
+                return luid;
+
+            return null;
+        }
 
         /// <summary>
         /// Connect to VPN server
@@ -215,15 +273,25 @@ namespace Voidstrap.Integrations.SwiftTunnel
 
                 if (result == NativeVpn.Success)
                 {
-                    UpdateState(ConnectionState.Connected);
-                    App.Logger.WriteLine("VpnConnection", "Connected successfully");
-
-                    // Start split tunnel monitoring if we have apps to tunnel
+                    // Configure split tunnel if requested
                     if (splitTunnelApps != null && splitTunnelApps.Count > 0)
                     {
+                        UpdateState(ConnectionState.ConfiguringSplitTunnel);
+
+                        if (!TryConfigureSplitTunnel(config, splitTunnelApps, out var splitTunnelError))
+                        {
+                            LastError = splitTunnelError ?? "Split tunnel configuration failed";
+                            App.Logger.WriteLine("VpnConnection", $"Split tunnel setup failed: {LastError}");
+                            await Task.Run(() => NativeVpn.swifttunnel_disconnect());
+                            UpdateState(ConnectionState.Error);
+                            return (false, LastError);
+                        }
+
                         StartSplitTunnelMonitoring();
                     }
 
+                    UpdateState(ConnectionState.Connected);
+                    App.Logger.WriteLine("VpnConnection", "Connected successfully");
                     return (true, null);
                 }
                 else
@@ -348,7 +416,6 @@ namespace Voidstrap.Integrations.SwiftTunnel
                     NativeVpn.StateCreatingAdapter => ConnectionState.CreatingAdapter,
                     NativeVpn.StateConnecting => ConnectionState.Connecting,
                     NativeVpn.StateConfiguringSplitTunnel => ConnectionState.ConfiguringSplitTunnel,
-                    NativeVpn.StateConfiguringRoutes => ConnectionState.ConfiguringRoutes,
                     NativeVpn.StateConnected => ConnectionState.Connected,
                     NativeVpn.StateDisconnecting => ConnectionState.Disconnecting,
                     NativeVpn.StateError => ConnectionState.Error,
@@ -361,6 +428,46 @@ namespace Voidstrap.Integrations.SwiftTunnel
             {
                 App.Logger.WriteLine("VpnConnection", $"RefreshState error: {ex.Message}");
             }
+        }
+
+        private bool TryConfigureSplitTunnel(VpnConfig config, List<string> splitTunnelApps, out string? error)
+        {
+            error = null;
+
+            if (!NativeVpn.IsSplitTunnelAvailable())
+            {
+                error = "Split tunnel driver not available";
+                return false;
+            }
+
+            var assignedIp = ParseAssignedIp(config.AssignedIp);
+            if (assignedIp == null)
+            {
+                error = $"Invalid assigned IP: {config.AssignedIp}";
+                return false;
+            }
+
+            var luid = TryGetAdapterLuid(assignedIp);
+            if (!luid.HasValue)
+            {
+                error = "Failed to locate SwiftTunnel adapter";
+                return false;
+            }
+
+            var appsJson = JsonSerializer.Serialize(splitTunnelApps);
+            var result = NativeVpn.swifttunnel_split_tunnel_configure(
+                config.AssignedIp,
+                luid.Value,
+                appsJson
+            );
+
+            if (result != NativeVpn.Success)
+            {
+                error = GetLastNativeError() ?? $"Split tunnel configuration failed with code: {result}";
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
