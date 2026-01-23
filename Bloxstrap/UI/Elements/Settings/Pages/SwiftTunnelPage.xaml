@@ -182,7 +182,6 @@
     ItemsSource="{Binding Regions}"
     SelectedItem="{Binding SelectedRegionItem, Mode=TwoWay}"
     DisplayMemberPath="Name" />
-
             </controls:OptionControl>
 
             <controls:OptionControl
