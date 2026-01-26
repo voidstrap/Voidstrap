@@ -15,7 +15,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
     {
         private readonly FluentDialogViewModel _viewModel;
         private bool _isClosing;
-
+        private Window? _mainWindow;
         public Voidstrap.Bootstrapper? Bootstrapper { get; set; }
         public string? CustomBackgroundPath { get; set; }
 
@@ -73,10 +73,23 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             InitializeComponent();
             _viewModel = new FluentDialogViewModel(this, aero);
             DataContext = _viewModel;
-
+            _mainWindow = System.Windows.Application.Current.Windows
+            .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+            .FirstOrDefault();
+            if (App.Settings.Prop.BackgroundWindow)
+            {
+                _mainWindow?.Hide();
+            }
             Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.PlayStartupAudio();
             this.Closed += (s, e) =>
             {
+                _mainWindow = System.Windows.Application.Current.Windows
+                .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+                .FirstOrDefault();
+                if (App.Settings.Prop.BackgroundWindow)
+                {
+                    _mainWindow?.Show();
+                }
                 Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.StopAudio();
             };
             Title = App.Settings.Prop.BootstrapperTitle;

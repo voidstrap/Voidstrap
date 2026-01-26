@@ -16,7 +16,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
     public partial class ByfronDialog : IBootstrapperDialog
     {
         private readonly ByfronDialogViewModel _viewModel;
-
+        private Window? _mainWindow;
         public Voidstrap.Bootstrapper? Bootstrapper { get; set; }
 
         private bool _isClosing;
@@ -122,6 +122,25 @@ namespace Voidstrap.UI.Elements.Bootstrapper
             }
 
             InitializeComponent();
+            _mainWindow = System.Windows.Application.Current.Windows
+            .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+            .FirstOrDefault();
+            if (App.Settings.Prop.BackgroundWindow)
+            {
+                _mainWindow?.Hide();
+            }
+            Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.PlayStartupAudio();
+            this.Closed += (s, e) =>
+            {
+                _mainWindow = System.Windows.Application.Current.Windows
+                .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+                .FirstOrDefault();
+                if (App.Settings.Prop.BackgroundWindow)
+                {
+                    _mainWindow?.Show();
+                }
+                Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.StopAudio();
+            };
         }
         private void Window_Closing(object sender, CancelEventArgs e)
         {

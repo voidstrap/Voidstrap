@@ -17,5 +17,6 @@
         Purple,
         Red,
         Yellow,
+        Custom
     }
 }

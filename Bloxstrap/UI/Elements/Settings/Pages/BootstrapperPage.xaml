@@ -64,6 +64,9 @@
                     <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
                 </controls:OptionControl>
 
+                    <controls:OptionControl Description="Disables Background Window when Launching Roblox" Header="Disable Background Window">
+                     <ui:ToggleSwitch IsChecked="{Binding BackgroundWindow, Mode=TwoWay}" />
+                </controls:OptionControl>
 
                 <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
                     <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
@@ -74,7 +77,6 @@
                   Description="Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.">
                     <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
                 </controls:OptionControl>
-
 
                 <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
                     <ui:CardExpander.Header>

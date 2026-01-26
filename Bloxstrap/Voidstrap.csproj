@@ -9,8 +9,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.8.9</Version>
-		<FileVersion>1.0.8.9</FileVersion>
+		<Version>1.0.9.0</Version>
+		<FileVersion>1.0.9.0</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -159,7 +159,6 @@
 		<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.1" />
 		<PackageReference Include="WpfAnimatedGif" Version="2.0.2" />
 		<PackageReference Include="XamlAnimatedGif" Version="2.3.1" />
-		<PackageReference Include="Supabase" Version="1.1.1" />
 		<!-- <PackageReference Include="YoutubeExplode" Version="6.5.5" />
 		<PackageReference Include="YoutubeExplode.Converter" Version="6.5.5" /> -->
 	</ItemGroup>

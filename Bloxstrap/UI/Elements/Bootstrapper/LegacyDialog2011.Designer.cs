@@ -1,4 +1,5 @@
-﻿using System.Windows.Forms;
+﻿using System.Windows;
+using System.Windows.Forms;
 
 namespace Voidstrap.UI.Elements.Bootstrapper
 {
@@ -8,7 +9,7 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         ///  Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
-
+        private Window? _mainWindow;
         /// <summary>
         ///  Clean up any resources being used.
         /// </summary>
@@ -30,6 +31,25 @@ namespace Voidstrap.UI.Elements.Bootstrapper
         /// </summary>
         private void InitializeComponent()
         {
+            _mainWindow = System.Windows.Application.Current.Windows
+            .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+            .FirstOrDefault();
+            if (App.Settings.Prop.BackgroundWindow)
+            {
+                _mainWindow?.Hide();
+            }
+            Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.PlayStartupAudio();
+            this.Closed += (s, e) =>
+            {
+                _mainWindow = System.Windows.Application.Current.Windows
+                .OfType<Voidstrap.UI.Elements.Settings.MainWindow>()
+                .FirstOrDefault();
+                if (App.Settings.Prop.BackgroundWindow)
+                {
+                    _mainWindow?.Show();
+                }
+                Voidstrap.UI.Elements.Bootstrapper.AudioPlayerHelper.StopAudio();
+            };
             labelMessage = new Label();
             ProgressBar = new ProgressBar();
             IconBox = new PictureBox();

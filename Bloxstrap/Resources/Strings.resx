@@ -573,6 +573,9 @@ If not, then please report this exception through a [GitHub issue]({1}) along wi
   <data name="Enums.Theme.Pink" xml:space="preserve">
     <value>Pink</value>
   </data>
+	<data name="Enums.Theme.Custom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
 	<data name="Enums.Theme.UltraGray" xml:space="preserve">
     <value>UltraGray</value>
   </data>

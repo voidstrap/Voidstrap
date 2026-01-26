@@ -119,6 +119,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.FastFlags.SetPreset("UI.RainbowText", value ? "True" : null);
         }
 
+        public bool RobloxStudioCoreUI
+        {
+            get => App.FastFlags.GetPreset("UI.OLDUIRobloxStudio") == "True";
+            set => App.FastFlags.SetPreset("UI.OLDUIRobloxStudio", value ? "True" : null);
+        }
+
         public bool LockDefault
         {
             get => App.Settings.Prop.LockDefault;
@@ -782,6 +788,42 @@ namespace Voidstrap.UI.ViewModels.Settings
                 {
                     App.FastFlags.SetPreset("Rendering.Distance.Chunks", DistanceRenderings[value]);
                 }
+            }
+        }
+
+        public IReadOnlyDictionary<int, string?> GrassMovementOptions => new Dictionary<int, string?>
+{
+    { 0, "No Movement" },
+    { 1, "Minimal Movement" },
+    { 2, "Medium Movement" },
+    { 3, "High Movement" },
+    { 4, "Ultra Movement" },
+    { 5, "Default Movement" }
+};
+
+        public int SelectedGrassMovementFactor
+        {
+            get
+            {
+                string? flagValue = App.FastFlags.GetPreset("Grass.Movement");
+                if (int.TryParse(flagValue, out int value) && GrassMovementOptions.ContainsKey(value))
+                {
+                    return value;
+                }
+                return 5;
+            }
+            set
+            {
+                if (value == 5)
+                {
+                    App.FastFlags.SetPreset("Grass.Movement", null);
+                }
+                else
+                {
+                    App.FastFlags.SetPreset("Grass.Movement", value.ToString());
+                }
+
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(SelectedGrassMovementFactor)));
             }
         }
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Markup;
 using Wpf.Ui.Appearance;
 using Wpf.Ui.Controls;
 using Wpf.Ui.Mvvm.Contracts;
@@ -29,9 +30,12 @@ namespace Voidstrap.UI.Elements.Base
         public void ApplyTheme()
         {
             var finalThemeEnum = App.Settings.Prop.Theme2.GetFinal();
-            var currentTheme = finalThemeEnum == Enums.Theme.Light ? ThemeType.Light : ThemeType.Dark;
+            bool isCustom = finalThemeEnum == Enums.Theme.Custom;
+            var currentTheme = (finalThemeEnum == Enums.Theme.Light)
+                ? ThemeType.Light
+                : ThemeType.Dark;
 
-            if (_lastAppliedTheme == currentTheme)
+            if (!isCustom && _lastAppliedTheme == currentTheme)
                 return;
 
             _lastAppliedTheme = currentTheme;
@@ -39,18 +43,82 @@ namespace Voidstrap.UI.Elements.Base
             _themeService.SetTheme(currentTheme);
             _themeService.SetSystemAccent();
 
-            var themeName = Enum.GetName(typeof(Enums.Theme), finalThemeEnum);
-            if (themeName != null)
+            ResourceDictionary themeDict = null;
+
+            if (isCustom)
             {
-                var themeUri = new Uri($"pack://application:,,,/UI/Style/{themeName}.xaml");
-                ReplaceThemeDictionary(new ResourceDictionary { Source = themeUri });
+                var customXamlPath = Path.Combine(Paths.Base, "Custom.xaml");
+                var customXshdPath = Path.Combine(Paths.Base, "Editor-Theme-Custom.xshd");
+
+                if (File.Exists(customXamlPath))
+                {
+                    try
+                    {
+                        using var stream = File.OpenRead(customXamlPath);
+                        themeDict = (ResourceDictionary)XamlReader.Load(stream);
+                    }
+                    catch (Exception ex)
+                    {
+                        Frontend.ShowMessageBox(
+                            $"Failed to load Custom.xaml:\n{ex.Message}\nFalling back to Dark theme.",
+                            MessageBoxImage.Warning
+                        );
+                    }
+                }
+
+                if (!File.Exists(customXshdPath))
+                {
+                    _ = Task.Run(async () =>
+                    {
+                        var url = "https://raw.githubusercontent.com/KloBraticc/VoidstrapCustomThemes/main/Editor-Theme-Custom.xshd";
+                        // fixes color issues and crap XSHD
+                        try
+                        {
+                            using var http = new HttpClient();
+                            var xshdContent = await http.GetStringAsync(url);
+
+                            Directory.CreateDirectory(Paths.Base);
+                            await File.WriteAllTextAsync(customXshdPath, xshdContent);
+                        }
+                        catch (Exception ex)
+                        {
+                            Application.Current.Dispatcher.Invoke(() =>
+                            {
+                                Frontend.ShowMessageBox(
+                                    $"Failed to download Custom XSHD file:\n{ex.Message}",
+                                    MessageBoxImage.Warning
+                                );
+                            });
+                        }
+                    });
+                }
             }
+
+            if (themeDict == null)
+            {
+                try
+                {
+                    var themeName = Enum.GetName(typeof(Enums.Theme), finalThemeEnum) ?? "Dark";
+                    var themeUri = new Uri($"pack://application:,,,/UI/Style/{themeName}.xaml", UriKind.Absolute);
+                    themeDict = new ResourceDictionary { Source = themeUri };
+                }
+                catch
+                {
+                    themeDict = new ResourceDictionary
+                    {
+                        Source = new Uri("pack://application:,,,/UI/Style/Dark.xaml", UriKind.Absolute)
+                    };
+                }
+            }
+
+            ReplaceThemeDictionary(themeDict);
+        }
 
 #if QA_BUILD
             BorderBrush = System.Windows.Media.Brushes.Red;
             BorderThickness = new Thickness(4);
 #endif
-        }
+
 
         /// <summary>
         /// Replaces the current theme resource dictionary with a new one.

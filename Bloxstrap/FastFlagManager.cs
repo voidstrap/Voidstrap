@@ -186,6 +186,8 @@ namespace Voidstrap
             // MTU Size
             { "Network.Mtusize","DFIntConnectionMTUSize" },
 
+            { "Grass.Movement","FIntGrassMovementReducedMotionFactor" },
+
             // Dynamic Render Resolution
             { "Rendering.Dynamic.Resolution","DFIntDebugDynamicRenderKiloPixels"},
 
@@ -366,6 +368,8 @@ namespace Voidstrap
 
             // No More Middle
             { "UI.RemoveMiddle", "FFlagUIBloxMoveDetailsPageToLuaApps" },
+
+            { "UI.OLDUIRobloxStudio", "FFlagEnableRibbonPlugin3" },
 
             // Distance Rendering
             { "Rendering.Distance.Chunks", "DFIntDebugRestrictGCDistance" },

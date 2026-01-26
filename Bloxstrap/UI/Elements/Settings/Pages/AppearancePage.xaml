@@ -64,20 +64,28 @@
         </ui:CardExpander>
 
         <controls:OptionControl
+    Loaded="OptionControl_Loaded"
     Header="{x:Static resources:Strings.Menu_Appearance_Global_Theme_Title}"
     Description="Check out some of our built-in custom themes!">
 
-            <ComboBox Width="200"
-              Padding="10,5,10,5"
-              ItemsSource="{Binding Themes, Mode=OneTime}"
-              Text="{Binding Theme, Mode=TwoWay}"
-              SelectionChanged="ThemeComboBox_SelectionChanged">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding Path=., Converter={StaticResource EnumNameConverter}}" />
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <StackPanel VerticalAlignment="Center" Orientation="Vertical" Margin="0,5,0,0">
+                <ComboBox Width="200"
+                  Padding="10,5"
+                  ItemsSource="{Binding BindableThemes}"
+                  SelectedItem="{Binding Theme, Mode=TwoWay}"
+                  SelectionChanged="ThemeComboBox_SelectionChanged"
+                  Margin="0,0,0,10">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource EnumNameConverter}}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+
+                <ui:Button Content="Editor"
+                   HorizontalAlignment="Right"
+                   Click="OpenCustomThemeEditor_Click"/>
+            </StackPanel>
         </controls:OptionControl>
 
         <controls:OptionControl

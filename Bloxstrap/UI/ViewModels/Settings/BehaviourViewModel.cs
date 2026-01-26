@@ -240,6 +240,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.ForceRobloxLanguage = value;
         }
 
+        public bool BackgroundWindow
+        {
+            get => App.Settings.Prop.BackgroundWindow;
+            set => App.Settings.Prop.BackgroundWindow = value;
+        }
+
         public ObservableCollection<MemoryCleanerInterval> MemoryCleanerIntervals { get; }
             = new()
             {

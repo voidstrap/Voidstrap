@@ -504,21 +504,6 @@ namespace Voidstrap
             SetStatus(Strings.Bootstrapper_Status_Starting);
             try
             {
-                // SwiftTunnel VPN auto-connect before Roblox launch
-                if (App.Settings.Prop.SwiftTunnelEnabled && App.Settings.Prop.SwiftTunnelAutoConnect)
-                {
-                    try
-                    {
-                        SetStatus("Connecting to SwiftTunnel VPN...");
-                        await Integrations.SwiftTunnel.SwiftTunnelService.Instance.AutoConnectBeforeLaunchAsync();
-                    }
-                    catch (Exception vpnEx)
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, $"SwiftTunnel auto-connect failed: {vpnEx.Message}");
-                        // Don't block Roblox launch on VPN failure
-                    }
-                }
-
                 HandleFullBright();
                 StartMemoryAndProcessOptimizer();
                 if (_launchMode == LaunchMode.Player && App.Settings.Prop?.ForceRobloxLanguage == true)

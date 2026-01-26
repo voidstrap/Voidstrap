@@ -210,6 +210,29 @@ Effect="{DynamicResource ControlElevationShadow}">
             FontWeight="Medium"
             Text="FastFlags" />
 
+        <controls:OptionControl Description="Changes Roblox Studios core UI back to the OG." Header="Old Roblox Studio UI">
+            <ui:ToggleSwitch IsChecked="{Binding RobloxStudioCoreUI, Mode=TwoWay}" />
+        </controls:OptionControl>
+        
+
+        <controls:OptionControl
+    Description="Reduces or scales grass movement in Roblox for performance or visual comfort."
+    Header="Grass Movement Factor">
+            <ComboBox Width="200"
+              Margin="5,0,0,0"
+              Padding="10,5,10,5"
+              ItemsSource="{Binding GrassMovementOptions}"
+              SelectedValue="{Binding SelectedGrassMovementFactor, Mode=TwoWay}"
+              SelectedValuePath="Key">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Value}" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+        </controls:OptionControl>
+
+
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
                 <Grid>

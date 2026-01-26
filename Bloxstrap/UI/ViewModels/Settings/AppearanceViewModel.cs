@@ -23,6 +23,8 @@ namespace Voidstrap.UI.ViewModels.Settings
     public class AppearanceViewModel : NotifyPropertyChangedViewModel
     {
         private readonly Page _page;
+        public IEnumerable<Theme> BindableThemes =>
+            Themes.Concat(new[] { Theme.Custom }).Distinct();
 
         public ICommand PreviewBootstrapperCommand => new RelayCommand(PreviewBootstrapper);
         public ICommand BrowseCustomIconLocationCommand => new RelayCommand(BrowseCustomIconLocation);

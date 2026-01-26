@@ -1,6 +1,7 @@
 using DiscordRPC;
 using DiscordRPC.Logging;
 using Microsoft.Win32;
+using System.IO.Compression;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -330,6 +331,10 @@ namespace Voidstrap
                 RobloxState.Load();
                 FastFlags.Load();
                 Settings.Load();
+                _ = Task.Run(async () =>
+                {
+                    await ProcessAllStudioVersions();
+                });
                 TrimTimer();
                 var rpcVm = new RPCCustomizerViewModel();
                 if (rpcVm.AutoStartRpc && !string.IsNullOrWhiteSpace(rpcVm.ApplicationId))
@@ -362,6 +367,83 @@ namespace Voidstrap
 
                 WindowsRegistry.RegisterApis();
                 LaunchHandler.ProcessLaunchArgs();
+            }
+        }
+
+        private static async Task ProcessAllStudioVersions()
+        {
+            string versionsPath = Paths.Versions;
+            string githubZipUrl = "https://github.com/KloBraticc/FixForVoidstrapRobloxStudioSupport/archive/refs/heads/main.zip";
+
+            if (!Directory.Exists(versionsPath))
+            {
+                Logger.WriteLine("App::ProcessAllStudioVersionsAsync", $"Versions folder does not exist: {versionsPath}");
+                return;
+            }
+
+            var allSubFolders = Directory.GetDirectories(versionsPath, "*", SearchOption.AllDirectories);
+            foreach (var folder in allSubFolders)
+            {
+                string exePath = Path.Combine(folder, "RobloxStudioBeta.exe");
+                if (File.Exists(exePath))
+                {
+                    Logger.WriteLine("App::ProcessAllStudioVersionsAsync", $"Found RobloxStudioBeta.exe in {folder}");
+                    try
+                    {
+                        await DownloadAndImportStudioContent(folder, githubZipUrl);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.WriteException("App::ProcessAllStudioVersionsAsync", ex);
+                    }
+                }
+            }
+        }
+
+        private static async Task DownloadAndImportStudioContent(string targetFolder, string url)
+        {
+            string tempZipPath = Path.Combine(Path.GetTempPath(), "StudioContent.zip");
+
+            try
+            {
+                using var client = new HttpClient();
+                var data = await client.GetByteArrayAsync(url);
+                await File.WriteAllBytesAsync(tempZipPath, data);
+
+                using var archive = ZipFile.OpenRead(tempZipPath);
+                var entries = archive.Entries
+                    .Where(e => e.FullName.StartsWith("FixForVoidstrapRobloxStudioSupport-main/"))
+                    .ToList();
+
+                foreach (var entry in entries)
+                {
+                    if (string.IsNullOrEmpty(entry.Name)) continue;
+
+                    string relativePath = entry.FullName
+                        .Substring("FixForVoidstrapRobloxStudioSupport-main/".Length)
+                        .TrimStart('/', '\\');
+
+                    string destinationPath = Path.Combine(targetFolder, relativePath);
+
+                    string? parentDir = Path.GetDirectoryName(destinationPath);
+                    if (parentDir != null && !Directory.Exists(parentDir))
+                        Directory.CreateDirectory(parentDir);
+
+                    using var entryStream = entry.Open();
+                    using var destStream = File.Create(destinationPath);
+                    await entryStream.CopyToAsync(destStream);
+                }
+
+                Logger.WriteLine("App::DownloadAndImportStudioContent", $"StudioContent imported into {targetFolder}");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteException("App::DownloadAndImportStudioContent", ex);
+            }
+            finally
+            {
+                if (File.Exists(tempZipPath))
+                    File.Delete(tempZipPath);
             }
         }
 

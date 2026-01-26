@@ -34,7 +34,8 @@ namespace Voidstrap.Extensions
             Theme.Purple,
             Theme.Berry,
             Theme.Red,
-            Theme.Yellow
+            Theme.Yellow,
+            Theme.Custom
         };
     }
 }

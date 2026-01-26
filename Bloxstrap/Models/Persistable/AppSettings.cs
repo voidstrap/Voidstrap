@@ -47,6 +47,7 @@ namespace Voidstrap.Models.Persistable
         public bool FixTeleports { get; set; } = false;
         public bool ConfirmLaunches { get; set; } = true;
         public bool HasLaunchedGame { get; set; } = false;
+        public bool BackgroundWindow { get; set; } = true;
         public bool UsePlaceId { get; set; } = false;
         public string PlaceId { get; set; } = "";
         public bool OptimizeRoblox { get; set; } = false;
@@ -137,12 +138,6 @@ namespace Voidstrap.Models.Persistable
         public bool AntiAFK { get; set; } = false;
 
         public ResolutionSetting? InGameResolution { get; set; }
-
-        public bool SwiftTunnelEnabled { get; set; } = true;
-        public bool SwiftTunnelAutoConnect { get; set; } = true;
-        public bool SwiftTunnelSplitTunnel { get; set; } = true;
-        public string SwiftTunnelRegion { get; set; } = "singapore";
-        public bool SwiftTunnelRememberLogin { get; set; } = true;
 
         public class ResolutionSetting
         {
