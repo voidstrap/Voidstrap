@@ -446,6 +446,9 @@ namespace Voidstrap
             { "Telemetry.Tencent5", "DFFlagPolicyServiceReportIsNotSubjectToChinaPolicies" },
             { "Telemetry.Tencent6", "DFFlagPolicyServiceReportDetailIsNotSubjectToChinaPolicies" },
             { "Telemetry.Tencent7", "DFIntPolicyServiceReportDetailIsNotSubjectToChinaPoliciesHundredthsPercentage" },
+
+            { "Rendering.Nograss1", "FIntFRMMinGrassDistance" },
+            { "Rendering.Nograss2", "FIntFRMMaxGrassDistance" },
         };
 
         public static IReadOnlyDictionary<RenderingMode, string> RenderingModes => new Dictionary<RenderingMode, string>

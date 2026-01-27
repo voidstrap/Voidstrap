@@ -692,14 +692,38 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.FastFlags.SetPreset("Rendering.BrighterVisual", value ? "True" : null);
         }
 
-        public bool RemoveGrass
+        private const int DefaultMinGrassDistance = 100;
+        private const int DefaultMaxGrassDistance = 290;
+
+        public int MinGrassDistance
         {
-            get => App.FastFlags.GetPreset("Rendering.Nograss1") == "0";
+            get
+            {
+                var value = App.FastFlags.GetPreset("Rendering.Nograss1");
+                return int.TryParse(value, out var result)
+                    ? result
+                    : DefaultMinGrassDistance;
+            }
             set
             {
-                App.FastFlags.SetPreset("Rendering.Nograss1", value ? "0" : null);
-                App.FastFlags.SetPreset("Rendering.Nograss2", value ? "0" : null);
-                App.FastFlags.SetPreset("Rendering.Nograss3", value ? "0" : null);
+                App.FastFlags.SetPreset("Rendering.Nograss1", value.ToString());
+                OnPropertyChanged();
+            }
+        }
+
+        public int MaxGrassDistance
+        {
+            get
+            {
+                var value = App.FastFlags.GetPreset("Rendering.Nograss2");
+                return int.TryParse(value, out var result)
+                    ? result
+                    : DefaultMaxGrassDistance;
+            }
+            set
+            {
+                App.FastFlags.SetPreset("Rendering.Nograss2", value.ToString());
+                OnPropertyChanged();
             }
         }
 

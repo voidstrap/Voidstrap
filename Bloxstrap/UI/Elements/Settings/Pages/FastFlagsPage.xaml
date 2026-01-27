@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    xmlns:local="clr-namespace:Voidstrap"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:models="clr-namespace:Voidstrap.UI.ViewModels"
@@ -75,7 +76,7 @@
         <controls:OptionControl Header="{x:Static resources:Strings.Menu_FastFlags_Reset_Title}">
             <ui:ToggleSwitch IsChecked="{Binding ResetConfiguration, Mode=TwoWay}" />
         </controls:OptionControl>
-    
+
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
                 <StackPanel>
@@ -214,7 +215,6 @@ Effect="{DynamicResource ControlElevationShadow}">
             <ui:ToggleSwitch IsChecked="{Binding RobloxStudioCoreUI, Mode=TwoWay}" />
         </controls:OptionControl>
         
-
         <controls:OptionControl
     Description="Reduces or scales grass movement in Roblox for performance or visual comfort."
     Header="Grass Movement Factor">
@@ -480,7 +480,6 @@ Effect="{DynamicResource ControlElevationShadow}">
                     </ui:CardExpander.Header>
 
                     <StackPanel Margin="0,8,0,0">
-
                         <Grid Margin="0,8,0,0">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto"/>
@@ -578,6 +577,30 @@ Margin="8,0,8,0" />
                         Padding="10,5,10,5"
                         PreviewTextInput="ValidateUInt32"
                         Text="{Binding FramerateLimit, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+    Description="Controls grass render distance in Roblox games. Set both values to 0 to disable grass."
+    Header="Grass Distance">
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock VerticalAlignment="Center" Text="Min" Margin="0,0,8,0"/>
+                        <ui:TextBox
+            Width="80"
+            Padding="8,4"
+            PreviewTextInput="ValidateInt"
+            Text="{Binding MinGrassDistance, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+
+                        <TextBlock VerticalAlignment="Center" Margin="8,0,0,0"/>
+
+                        <ui:TextBox
+            Width="80"
+            Padding="8,4"
+            PreviewTextInput="ValidateInt"
+            Text="{Binding MaxGrassDistance, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+                        <TextBlock VerticalAlignment="Center" Text="Max" Margin="8,0,0,0"/>
+                    </StackPanel>
+
                 </controls:OptionControl>
 
                 <controls:OptionControl Description="Configure the rendering api for Roblox. Press Alt Enter when going to Fullscreen if using Direct3D. Setting to Vulkan may cause some bugs!." Header="Rendering Mode">

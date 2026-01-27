@@ -32,11 +32,13 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         public ObservableCollection<NvidiaFFlag> CustomFFlags { get; } = new();
 
         private FastFlagsViewModel _viewModel = null!;
-        private static readonly string SavedFilePath =
-            Path.Combine(Paths.Base, "Settings.ini");
 
-        private string _editorBaseProfile = "Default Settings";
-        private bool _editorModified;
+        private static readonly Regex _intRegex = new Regex("^[0-9]+$");
+
+        private void ValidateInt(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = !_intRegex.IsMatch(e.Text);
+        }
 
         public class NvidiaFFlag : INotifyPropertyChanged, IDataErrorInfo
         {
