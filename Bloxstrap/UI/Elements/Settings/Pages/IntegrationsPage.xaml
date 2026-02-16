@@ -57,6 +57,40 @@
             Margin="0,8,0,0"
             FontSize="20"
             FontWeight="Medium"
+            Text="Discord In-Game Chat" />
+
+
+        <controls:OptionControl 
+    Header="View Discord Chat"
+    Description="Chat with others via Discord in-game, with a clearer view.">
+            <Button Content="View" 
+            Command="{Binding ChatModeWindowCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"/>
+        </controls:OptionControl>
+        
+                <controls:OptionControl Header="In-Game Chat Overlay" Description="Displays the Discord Chat Overlay but ingame chat with others. (No Age Verify)">
+            <ui:ToggleSwitch IsChecked="{Binding IngameChatDiscord, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <ui:CardAction
+    Click="OpenDisyChatExplain_Click"
+    Icon="ChatHelp20"
+    Margin="0,8,0,0">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="Discord Chat Setup Explanation" />
+                <TextBlock
+            Margin="0,2,0,0"
+            Padding="0,0,16,0"
+            FontSize="12"
+            Text="Learn how to setup the chatbot to chat with your friends on Discord." />
+            </StackPanel>
+        </ui:CardAction>
+
+        <TextBlock
+            Margin="0,8,0,0"
+            FontSize="20"
+            FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Integrations_ActivityTracking}" />
 
 

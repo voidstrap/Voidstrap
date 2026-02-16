@@ -1,4 +1,5 @@
 ﻿using RobloxLightingOverlay;
+using RobloxLightingOverlay;
 using RobloxLightingOverlay.Effects;
 using System.Diagnostics;
 using System.Windows;
@@ -9,6 +10,7 @@ using System.Windows.Threading;
 using Voidstrap.Integrations;
 using Voidstrap.UI.Elements.Crosshair;
 using Voidstrap.UI.Elements.FPS;
+using Voidstrap.UI.Elements.Overlay;
 using Voidstrap.UI.Elements.Settings.Pages;
 using Voidstrap.UI.ViewModels;
 using Voidstrap.UI.ViewModels.Settings;
@@ -16,7 +18,6 @@ using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.UI.WindowsAndMessaging;
 using Wpf.Ui.Appearance;
-using RobloxLightingOverlay;
 
 namespace Voidstrap.UI.Elements.ContextMenu
 {
@@ -396,6 +397,29 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 });
             }
 
+            if (App.Settings.Prop.IngameChatDiscord)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if (App.Current.Resources["DiscordChatOverlayWindow"]
+                        is Voidstrap.UI.Elements.Overlay.DiscordChatOverlayWindow existing)
+                    {
+                        if (existing.IsLoaded)
+                        {
+                            return;
+                        }
+                        else
+                        {
+                            App.Current.Resources.Remove("DiscordChatOverlayWindow");
+                        }
+                    }
+
+                    var discordOverlay = new Voidstrap.UI.Elements.Overlay.DiscordChatOverlayWindow();
+                    discordOverlay.Show();
+                    App.Current.Resources["DiscordChatOverlayWindow"] = discordOverlay;
+                });
+            }
+
             if (App.Settings.Prop.FPSCounter || App.Settings.Prop.CurrentTimeDisplay || App.Settings.Prop.ServerPingCounter || App.Settings.Prop.ShowServerDetailsUI)
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -452,6 +476,12 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 {
                     overlay.Close();
                     App.Current.Resources.Remove("OverlayWindow");
+                }
+
+                if (App.Current.Resources["DiscordChatOverlayWindow"] is Voidstrap.UI.Elements.Overlay.DiscordChatOverlayWindow discordOverlay)
+                {
+                    discordOverlay.Close();
+                    App.Current.Resources.Remove("DiscordChatOverlayWindow");
                 }
 
                 if (RobloxLightingOverlay.OverlayManager.UI != null)

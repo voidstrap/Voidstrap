@@ -85,6 +85,8 @@ namespace Voidstrap.Models.Persistable
         public bool GameWIP { get; set; } = false;
         public bool ForceRobloxLanguage { get; set; } = true;
 
+        public bool IngameChatDiscord { get; set; } = false;
+
         // Analytics & Tracking
         public bool DarkTextures { get; set; } = false;
         public bool EnableActivityTracking { get; set; } = true;

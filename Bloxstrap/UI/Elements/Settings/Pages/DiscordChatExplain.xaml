@@ -1,0 +1,180 @@
+﻿<ui:UiPage
+    x:Class="Voidstrap.UI.Elements.Settings.Pages.DiscordChatExplain"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:controls="clr-namespace:Voidstrap.UI.Elements.Controls"
+    Title="Discord Chat Setup Guide"
+    Scrollable="True">
+
+    <StackPanel HorizontalAlignment="Center" MaxWidth="900">
+        <StackPanel Margin="0,0,0,16">
+            <TextBlock
+                FontSize="14"
+                Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                TextWrapping="Wrap"
+                Text="Learn how to create, configure, and install a Discord Bot so Voidstrap can connect to your Discord server." />
+        </StackPanel>
+        
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="What is the Discord Chat Feature?"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    The Discord Chat feature allows Voidstrap to connect directly to a Discord channel using a Bot.
+                    Once connected, you can send and receive messages inside Voidstrap without opening Discord.
+                    It works using a secure Bot Token and Channel ID that you configure.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="Step 1 Create a Discord Application"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    1. Go to https://discord.com/developers/applications
+                    <LineBreak/>
+                    2. Click "New Application".
+                    <LineBreak/>
+                    3. Give it a name (for example: Voidstrap Bot).
+                    <LineBreak/>
+                    4. Click Create.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="Step 2 Create the Bot And Copy the Token"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    1. Go to the "Bot" section on the left.
+                    <LineBreak/>
+                    2. Click "Add Bot".
+                    <LineBreak/>
+                    3. Click "Reset Token" and copy the Bot Token.
+                    <LineBreak/><LineBreak/>
+                    ⚠ IMPORTANT:
+                    Never share your Bot Token publicly. Anyone with the token can control your bot.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="Step 3 Invite the Bot to Your Server"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    1. Go to "OAuth2" → "URL Generator or "Installation".
+                    <LineBreak/>
+                    2. Under Scopes, select "bot".
+                    <LineBreak/>
+                    3. Under Bot Permissions, select:
+                    <LineBreak/>
+                    • Read Message History / View Channels
+                    <LineBreak/>
+                    • Send Messages
+                    <LineBreak/>
+                    • Attach Files
+                    <LineBreak/>
+                    • Add Reactions
+                    <LineBreak/><LineBreak/>
+                    4. Copy the generated URL at the bottom.
+                    <LineBreak/>
+                    5. Open it in your browser and invite the bot to your server.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="Step 4 Get the Channel ID"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    1. Open Discord Settings → Advanced.
+                    <LineBreak/>
+                    2. Enable Developer Mode.
+                    <LineBreak/>
+                    3. Right-click the channel you want to use.
+                    <LineBreak/>
+                    4. Click "Copy Channel ID".
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18" FontWeight="SemiBold"
+                           Text="Using the Options in Voidstrap"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    Bot Token:
+                    This is the secret key that allows Voidstrap to control the bot.
+                    <LineBreak/><LineBreak/>
+                    Channel ID:
+                    The ID of the Discord channel where messages will be sent and received.
+                    <LineBreak/><LineBreak/>
+                    Group Name:
+                    The name shown inside Voidstrap for this chat tab.
+                    <LineBreak/><LineBreak/>
+                    Share Code:
+                    Generates a secure code that lets someone else connect to the same channel
+                    without manually entering the token and ID. When using Share Code it hides your channel ID and Token this isnt safe still but its better then just showing it.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <ui:Card Margin="0,0,0,16" Padding="24">
+            <StackPanel>
+                <TextBlock FontSize="18"
+                           FontWeight="SemiBold"
+                           Text="Security And Important Notes"
+                           Margin="0,0,0,8"/>
+
+                <TextBlock FontSize="14"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           TextWrapping="Wrap">
+                    • Keep your Bot Token private.
+                    <LineBreak/>
+                    • Only invite bots to servers you trust.
+                    <LineBreak/>
+                    • If your token is leaked, regenerate it immediately.
+                    <LineBreak/>
+                    • Make sure the bot has permission to read and send messages in the selected channel.
+                </TextBlock>
+            </StackPanel>
+        </ui:Card>
+
+        <StackPanel HorizontalAlignment="Center" Margin="0,0,0,32">
+            <ui:Button Width="200"
+                       FontSize="16"
+                       Click="Button_Click"
+                       Content="Back" />
+        </StackPanel>
+
+    </StackPanel>
+</ui:UiPage>

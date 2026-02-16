@@ -2110,6 +2110,9 @@ namespace Voidstrap
                 if (relativeFile.EndsWith(".lock"))
                     continue;
 
+                if (relativeFile.EndsWith(".mesh"))
+                    continue;
+
                 modFolderFiles.Add(relativeFile);
 
                 string fileModFolder = Path.Combine(Paths.Mods, relativeFile);

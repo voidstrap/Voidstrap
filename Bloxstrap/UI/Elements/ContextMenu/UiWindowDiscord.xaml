@@ -1,0 +1,169 @@
+﻿<Window x:Class="Voidstrap.UI.Elements.Overlay.DiscordChatOverlayWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:conv="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
+        AllowsTransparency="True"
+        Background="Transparent"
+        WindowStyle="None"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Width="400"
+        Height="400">
+
+    <Window.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </Window.Resources>
+
+    <Border CornerRadius="12"
+        Background="#CC1F1F1F"
+        BorderBrush="#404040"
+        BorderThickness="1"
+        Padding="8"
+        MouseLeftButtonDown="WindowDrag">
+
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,4">
+                <ui:TextBox PlaceholderText="Bot Token" Text="{Binding NewBotToken, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,4,0"/>
+                <ui:TextBox PlaceholderText="Channel ID" Text="{Binding NewChannelId, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,4,0"/>
+                <ui:TextBox PlaceholderText="Name" Text="{Binding NewGroupName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,4,0"/>
+                <ui:Button Content="Create / Join" Command="{Binding JoinCommand}" Appearance="Primary"/>
+            </StackPanel>
+            
+            <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,4">
+                <ui:TextBox Width="150" PlaceholderText="Paste Share Code" Text="{Binding InputShareCode}" Margin="0,0,4,0"/>
+                <ui:Button Content="Copy Code" Command="{Binding CopyShareCodeCommand}" Appearance="Primary"/>
+                <ui:Button Content="Join via Code" Command="{Binding JoinViaCodeCommand}" CommandParameter="{Binding InputShareCode}" Appearance="Primary"/>
+            </StackPanel>
+
+            <TabControl Grid.Row="2"
+                        ItemsSource="{Binding ChatTabs}"
+                        SelectedItem="{Binding SelectedTab}">
+                <TabControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="{Binding TabName}"
+                                       Foreground="White"
+                                       FontWeight="SemiBold"
+                                       Margin="0,0,4,0"/>
+                            <Button Content="✕"
+                                    Width="20" Height="20"
+                                    Padding="0"
+                                    Command="{Binding DataContext.DeleteGroupChatCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                    CommandParameter="{Binding}"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="LightGray"
+                                    FontWeight="Bold"
+                                    Cursor="Hand"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </TabControl.ItemTemplate>
+
+                <TabControl.ContentTemplate>
+                    <DataTemplate>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Name="MessagesScrollViewer">
+                            <ItemsControl ItemsSource="{Binding Messages}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Margin="0,4"
+                                                Padding="6"
+                                                CornerRadius="8"
+                                                Background="#2A2A2A">
+                                            <StackPanel>
+                                                <TextBlock FontWeight="SemiBold" Foreground="#BFBFBF">
+                                                    <Run Text="{Binding DisplayUsername}"/>
+                                                    <Run Text="{Binding ReplyToText}" FontStyle="Italic"/>
+                                                </TextBlock>
+
+                                                <TextBlock Text="{Binding Content}"
+                                                           Foreground="White"
+                                                           TextWrapping="Wrap"/>
+
+                                                <ItemsControl ItemsSource="{Binding Attachments}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Image Source="{Binding}" Width="120" Height="120" Margin="4"
+                                                                   Stretch="UniformToFill"
+                                                                   Cursor="Hand"
+                                                                   MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <ItemsControl ItemsSource="{Binding Reactions}" Margin="0,2,0,0">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal" Margin="2,0,2,0">
+                                                                <TextBlock Text="{Binding Emoji}" Cursor="Hand"
+                                                                           MouseLeftButtonDown="Reaction_Click"/>
+                                                                <TextBlock Text="{Binding Count}" Margin="2,0,0,0"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+
+                                                <TextBlock Text="{Binding TimestampDateTime, StringFormat={}{0:HH:mm}}"
+                                                           FontSize="11"
+                                                           HorizontalAlignment="Right"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+                    </DataTemplate>
+                </TabControl.ContentTemplate>
+            </TabControl>
+
+            <TextBlock Grid.Row="3" Margin="4,2,4,0" FontStyle="Italic" Foreground="Gray"
+                       Text="{Binding SelectedTab.TypingIndicatorText}"
+                       Visibility="{Binding SelectedTab.SomeoneTyping, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+            <Grid Grid.Row="4" Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ui:TextBox Grid.Column="0"
+                            Text="{Binding SelectedTab.MessageText, UpdateSourceTrigger=PropertyChanged}"
+                            Height="40"
+                            VerticalContentAlignment="Center"
+                            Margin="0,0,4,0"
+                            PlaceholderText="Type a message..."/>
+
+                <ui:Button Grid.Column="1"
+                           Content="Attach Image"
+                           Command="{Binding SelectedTab.AttachImageCommand}"
+                           Margin="4,0"/>
+
+                <ui:Button Grid.Column="2"
+                           Content="Send"
+                           Icon="Send24"
+                           Command="{Binding SelectedTab.SendMessageCommand}"
+                           Appearance="Primary"
+                           Margin="4,0"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -17,6 +17,7 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand BrowseIntegrationLocationCommand => new RelayCommand(BrowseIntegrationLocation);
         public ICommand OpenHistoryWindowCommand { get; }
         public ICommand MusicWindowCommand { get; }
+        public ICommand ChatModeWindowCommand { get; }
         public ICommand RPCWindowCommand { get; }
         public ICommand AccountWindowCommand { get; }
 
@@ -27,6 +28,7 @@ namespace Voidstrap.UI.ViewModels.Settings
             _watcher = watcher;
             OpenHistoryWindowCommand = new RelayCommand(OpenHistoryWindow);
             MusicWindowCommand = new RelayCommand(MusicPlayerWindow);
+            ChatModeWindowCommand = new RelayCommand(ChatModeWindow);
             RPCWindowCommand = new RelayCommand(RPCUIWindow);
             AccountWindowCommand = new RelayCommand(AccountWindow);
         }
@@ -47,6 +49,12 @@ namespace Voidstrap.UI.ViewModels.Settings
         private void OpenHistoryWindow()
         {
             var historyWindow = new ServerHistory(_watcher);
+            historyWindow.Show();
+        }
+
+        private void ChatModeWindow()
+        {
+            var historyWindow = new DiscordChatWindow();
             historyWindow.Show();
         }
 
@@ -123,6 +131,12 @@ namespace Voidstrap.UI.ViewModels.Settings
         {
             get => App.Settings.Prop.ShowServerDetails;
             set => App.Settings.Prop.ShowServerDetails = value;
+        }
+
+        public bool IngameChatDiscord
+        {
+            get => App.Settings.Prop.IngameChatDiscord;
+            set => App.Settings.Prop.IngameChatDiscord = value;
         }
 
         public bool exitondissy

@@ -9,8 +9,8 @@
 		<UseWPF>true</UseWPF>
 		<UseWindowsForms>True</UseWindowsForms>
 		<ApplicationIcon>Voidstrap.ico</ApplicationIcon>
-		<Version>1.0.9.1</Version>
-		<FileVersion>1.0.9.1</FileVersion>
+		<Version>1.0.9.3</Version>
+		<FileVersion>1.0.9.3</FileVersion>
 		<ApplicationManifest>app.manifest</ApplicationManifest>
 		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 		<RootNamespace>Voidstrap</RootNamespace>
@@ -53,6 +53,7 @@
 	
 
 	<ItemGroup>
+		<None Remove="Resources\mappings.json" />
 		<None Remove="Voidstrap.png" />
 	</ItemGroup>
 
@@ -69,6 +70,7 @@
 		<Resource Include="Resources\MessageBox\Information.png" />
 		<Resource Include="Resources\MessageBox\Question.png" />
 		<Resource Include="Resources\MessageBox\Warning.png" />
+		<EmbeddedResource Include="Resources\mappings.json" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Berry.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-UltraGray.xshd" />
 		<EmbeddedResource Include="UI\Style\Editor-Theme-Voidstrap.xshd" />
@@ -134,7 +136,10 @@
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
 		<PackageReference Include="DiscordRichPresence" Version="1.6.1.70" />
 		<PackageReference Include="Markdig" Version="0.44.0" />
-		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3650.58" />
+		<PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.2" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3719.77" />
 		<!-- <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.14.0" /> -->
 
 		<PackageReference Include="Microsoft.Windows.CsWin32" Version="0.3.264">

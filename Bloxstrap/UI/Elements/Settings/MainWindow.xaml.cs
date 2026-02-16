@@ -1,6 +1,7 @@
 ﻿using DiscordRPC;
 using DiscordRPC.Logging;
 using Microsoft.VisualBasic.ApplicationServices;
+using Microsoft.Web.WebView2.Core;
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -40,6 +41,7 @@ namespace Voidstrap.UI.Elements.Settings
         private DispatcherTimer _backgroundUpdateTimer;
         private string? _currentBackgroundPath;
         private FileSystemWatcher? _appearanceViewModelWatcher;
+        private bool _spotifyInitialized = false;
         private Vector _currentOffset;
         private Vector _targetOffset;
         private double _currentRotation;

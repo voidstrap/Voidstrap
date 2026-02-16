@@ -54,20 +54,16 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             GenerateModButton.IsEnabled = false;
             AddStopButton.IsEnabled = false;
-
             DownloadStatusText.Text = "Starting mod generation...";
             App.Logger?.WriteLine(LOG_IDENT, "Mod generation started.");
 
             try
             {
-
                 var (luaPackagesZip, extraTexturesZip, contentTexturesZip, versionHash, version) =
                     await Deployment.DownloadForModGenerator();
-
                 App.Logger?.WriteLine(LOG_IDENT, $"DownloadForModGenerator returned. Version: {version} ({versionHash})");
 
                 string VoidstrapTemp = Path.Combine(Path.GetTempPath(), "Voidstrap");
-
                 string luaPackagesDir = Path.Combine(VoidstrapTemp, "ExtraContent", "LuaPackages");
                 string extraTexturesDir = Path.Combine(VoidstrapTemp, "ExtraContent", "textures");
                 string contentTexturesDir = Path.Combine(VoidstrapTemp, "content", "textures");
@@ -110,26 +106,30 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 SafeExtract(luaPackagesZip, luaPackagesDir);
                 SafeExtract(extraTexturesZip, extraTexturesDir);
                 SafeExtract(contentTexturesZip, contentTexturesDir);
-
                 App.Logger?.WriteLine(LOG_IDENT, "Extraction complete.");
 
-                var assembly = Assembly.GetExecutingAssembly();
                 Dictionary<string, string[]> mappings;
-                using (var stream = assembly.GetManifestResourceStream("Voidstrap.Resources.mappings.json"))
+                var assembly = Assembly.GetExecutingAssembly();
+                string resourceName = assembly.GetManifestResourceNames()
+                                              .FirstOrDefault(r => r.EndsWith("Voidstrap.Resources.mappings.json", StringComparison.OrdinalIgnoreCase))
+                                              ?? throw new FileNotFoundException("Could not find embedded resource 'Voidstrap.Resources.mappings.json'.");
+
+                using (var stream = assembly.GetManifestResourceStream(resourceName))
                 using (var reader = new StreamReader(stream!))
                 {
                     string json = await reader.ReadToEndAsync();
-                    mappings = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json)!;
+                    mappings = JsonSerializer.Deserialize<Dictionary<string, string[]>>(json)
+                               ?? throw new InvalidDataException("Failed to deserialize mappings.json");
                 }
-                App.Logger?.WriteLine(LOG_IDENT, $"Loaded mappings.json with {mappings.Count} top-level entries.");
+
+                App.Logger?.WriteLine(LOG_IDENT, $"Loaded {resourceName} with {mappings.Count} top-level entries.");
 
                 string foundationImagesDir = Path.Combine(VoidstrapTemp, @"ExtraContent\LuaPackages\Packages\_Index\FoundationImages\FoundationImages");
                 string? getImageSetDataPath = Directory.EnumerateFiles(foundationImagesDir, "GetImageSetData.lua", SearchOption.AllDirectories).FirstOrDefault();
 
-                if (getImageSetDataPath != null)
-                    App.Logger?.WriteLine(LOG_IDENT, $"Found GetImageSetData.lua at {getImageSetDataPath}");
-                else
-                    App.Logger?.WriteLine(LOG_IDENT, $"No GetImageSetData.lua found under {foundationImagesDir}");
+                App.Logger?.WriteLine(LOG_IDENT, getImageSetDataPath != null
+                    ? $"Found GetImageSetData.lua at {getImageSetDataPath}"
+                    : $"No GetImageSetData.lua found under {foundationImagesDir}");
 
                 DownloadStatusText.Text = "Recoloring images...";
 
@@ -158,18 +158,14 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
                 DownloadStatusText.Text = "Cleaning up unnecessary files...";
                 var preservePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
-                {
-                    Path.Combine(VoidstrapTemp, @"ExtraContent\LuaPackages\Packages\_Index\FoundationImages\FoundationImages\SpriteSheets")
-                };
+        {
+            Path.Combine(VoidstrapTemp, @"ExtraContent\LuaPackages\Packages\_Index\FoundationImages\FoundationImages\SpriteSheets")
+        };
 
                 foreach (var entry in mappings.Values)
-                {
-                    string fullPath = Path.Combine(VoidstrapTemp, Path.Combine(entry));
-                    preservePaths.Add(fullPath);
-                }
+                    preservePaths.Add(Path.Combine(VoidstrapTemp, Path.Combine(entry)));
 
-                if (getImageSetDataPath != null)
-                    preservePaths.Add(getImageSetDataPath);
+                if (getImageSetDataPath != null) preservePaths.Add(getImageSetDataPath);
 
                 if (colorCursors)
                 {
@@ -179,81 +175,34 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 }
 
                 if (colorShiftlock)
-                {
                     preservePaths.Add(Path.Combine(VoidstrapTemp, @"content\textures\MouseLockedCursor.png"));
-                }
 
                 if (colorEmoteWheel)
                 {
                     string emotesDir = Path.Combine(VoidstrapTemp, @"content\textures\ui\Emotes\Large");
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedGradient.png"));
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedGradient@2x.png"));
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedGradient@3x.png"));
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedLine.png"));
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedLine@2x.png"));
-                    preservePaths.Add(Path.Combine(emotesDir, "SelectedLine@3x.png"));
+                    preservePaths.UnionWith(new[]
+                    {
+                Path.Combine(emotesDir, "SelectedGradient.png"),
+                Path.Combine(emotesDir, "SelectedGradient@2x.png"),
+                Path.Combine(emotesDir, "SelectedGradient@3x.png"),
+                Path.Combine(emotesDir, "SelectedLine.png"),
+                Path.Combine(emotesDir, "SelectedLine@2x.png"),
+                Path.Combine(emotesDir, "SelectedLine@3x.png")
+            });
                 }
 
                 if (colorVoiceChat)
                 {
                     var voiceChatMappings = new Dictionary<string, (string BaseDir, string[] Files)>
                     {
-                        ["VoiceChat"] = (
-                            @"content\textures\ui\VoiceChat",
-                            new[]
-                            {"Blank.png","Blank@2x.png","Blank@3x.png","Error.png","Error@2x.png","Error@3x.png","Muted.png","Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png"}
-                        ),
-                        ["SpeakerNew"] = (
-                            @"content\textures\ui\VoiceChat\SpeakerNew",
-                            new[]
-                            {"Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Error.png","Error@2x.png","Error@3x.png","Muted.png","Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png"}
-                        ),
-                        ["SpeakerLight"] = (
-                            @"content\textures\ui\VoiceChat\SpeakerLight",
-                            new[]
-                            {"Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Error.png","Error@2x.png","Error@3x.png","Muted.png"}
-                        ),
-                        ["SpeakerDark"] = (
-                            @"content\textures\ui\VoiceChat\SpeakerDark",
-                            new[]
-                            {"Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Error.png","Error@2x.png","Error@3x.png","Muted.png","Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png"}
-                        ),
-                        ["RedSpeakerLight"] = (
-                            @"content\textures\ui\VoiceChat\RedSpeakerLight",
-                            new[]
-                            {"Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png"}
-                        ),
-                        ["RedSpeakerDark"] = (
-                            @"content\textures\ui\VoiceChat\RedSpeakerDark",
-                            new[]
-                            {"Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png"}
-                        ),
-                        ["New"] = (
-                            @"content\textures\ui\VoiceChat\New",
-                            new[]
-                            {
-                        "Error.png","Error@2x.png","Error@3x.png",
-                        "Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Blank.png","Blank@2x.png","Blank@3x.png"}
-                        ),
-                        ["MicLight"] = (
-                            @"content\textures\ui\VoiceChat\MicLight",
-                            new[]
-                            {"Error.png","Error@2x.png","Error@3x.png","Muted.png","Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png"}
-                        ),
-                        ["MicDark"] = (
-                            @"content\textures\ui\VoiceChat\MicDark",
-                            new[]
-                            {"Muted.png","Muted@2x.png","Muted@3x.png","Unmuted0.png","Unmuted0@2x.png","Unmuted0@3x.png","Unmuted20.png","Unmuted20@2x.png","Unmuted20@3x.png","Unmuted40.png","Unmuted40@2x.png","Unmuted40@3x.png","Unmuted60.png","Unmuted60@2x.png","Unmuted60@3x.png","Unmuted80.png","Unmuted80@2x.png","Unmuted80@3x.png","Unmuted100.png","Unmuted100@2x.png","Unmuted100@3x.png","Error.png","Error@2x.png","Error@3x.png"}
-                        )
+                        ["VoiceChat"] = (@"content\textures\ui\VoiceChat", new[] { "Blank.png", "Blank@2x.png", "Blank@3x.png", "Error.png", "Error@2x.png", "Error@3x.png", "Muted.png", "Muted@2x.png", "Muted@3x.png", "Unmuted0.png", "Unmuted0@2x.png", "Unmuted0@3x.png", "Unmuted20.png", "Unmuted20@2x.png", "Unmuted20@3x.png", "Unmuted40.png", "Unmuted40@2x.png", "Unmuted40@3x.png", "Unmuted60.png", "Unmuted60@2x.png", "Unmuted60@3x.png", "Unmuted80.png", "Unmuted80@2x.png", "Unmuted80@3x.png", "Unmuted100.png", "Unmuted100@2x.png", "Unmuted100@3x.png" })
                     };
 
                     foreach (var mapping in voiceChatMappings.Values)
                     {
                         string baseDir = Path.Combine(VoidstrapTemp, mapping.BaseDir);
                         foreach (var file in mapping.Files)
-                        {
                             preservePaths.Add(Path.Combine(baseDir, file));
-                        }
                     }
                 }
 
@@ -262,9 +211,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                     foreach (var file in Directory.GetFiles(dir))
                     {
                         if (!preservePaths.Contains(file))
-                        {
-                            try { File.Delete(file); } catch { /* ignore */ }
-                        }
+                            try { File.Delete(file); } catch { }
                     }
 
                     foreach (var subDir in Directory.GetDirectories(dir))
@@ -277,7 +224,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                                 if (Directory.Exists(subDir) && !Directory.EnumerateFileSystemEntries(subDir).Any())
                                     Directory.Delete(subDir);
                             }
-                            catch { /* ignore */ }
+                            catch { }
                         }
                     }
                 }
@@ -287,26 +234,11 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 if (Directory.Exists(contentTexturesDir)) DeleteExcept(contentTexturesDir);
 
                 string infoPath = Path.Combine(VoidstrapTemp, "info.json");
-                object? colorInfo;
-                if (solidColor.HasValue)
-                {
-                    colorInfo = new
-                    {
-                        SolidColor = $"#{solidColor.Value.R:X2}{solidColor.Value.G:X2}{solidColor.Value.B:X2}"
-                    };
-                }
-                else if (gradient != null && gradient.Count > 0)
-                {
-                    colorInfo = gradient.Select(g => new
-                    {
-                        Stop = g.Stop,
-                        Color = $"#{g.Color.R:X2}{g.Color.G:X2}{g.Color.B:X2}"
-                    }).ToArray();
-                }
-                else
-                {
-                    colorInfo = null;
-                }
+                object? colorInfo = solidColor.HasValue
+                    ? new { SolidColor = $"#{solidColor.Value.R:X2}{solidColor.Value.G:X2}{solidColor.Value.B:X2}" }
+                    : gradient != null && gradient.Count > 0
+                        ? gradient.Select(g => new { Stop = g.Stop, Color = $"#{g.Color.R:X2}{g.Color.G:X2}{g.Color.B:X2}" }).ToArray()
+                        : null;
 
                 var infoData = new
                 {
@@ -325,13 +257,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                     ColorsUsed = colorInfo
                 };
 
-                string infoJson = JsonSerializer.Serialize(infoData, new JsonSerializerOptions { WriteIndented = true });
-                await File.WriteAllTextAsync(infoPath, infoJson);
-
+                await File.WriteAllTextAsync(infoPath, JsonSerializer.Serialize(infoData, new JsonSerializerOptions { WriteIndented = true }));
                 if (IncludeModificationsCheckBox.IsChecked == true)
                 {
-                    if (!Directory.Exists(Paths.Mods))
-                        Directory.CreateDirectory(Paths.Mods);
+                    if (!Directory.Exists(Paths.Mods)) Directory.CreateDirectory(Paths.Mods);
 
                     int copiedFiles = 0;
                     foreach (var file in Directory.GetFiles(VoidstrapTemp, "*", SearchOption.AllDirectories))
@@ -342,32 +271,24 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                         string relativePath = Path.GetRelativePath(VoidstrapTemp, file);
                         string destPath = Path.Combine(Paths.Mods, relativePath);
                         Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-                        File.Copy(file, destPath, overwrite: true);
+                        File.Copy(file, destPath, true);
                         copiedFiles++;
                     }
 
                     DownloadStatusText.Text = $"Mod files copied to {Paths.Mods}";
                     App.Logger?.WriteLine(LOG_IDENT, $"Copied {copiedFiles} files to {Paths.Mods}");
-                }
-                else
-                {
-                    var saveDialog = new SaveFileDialog
+                    try
                     {
-                        FileName = "VoidstrapMod.zip",
-                        Filter = "ZIP Archives (*.zip)|*.zip",
-                        Title = "VoidstrapMod"
-                    };
-
-                    if (saveDialog.ShowDialog() == true)
-                    {
-                        ModGenerator.ZipResult(VoidstrapTemp, saveDialog.FileName);
-                        DownloadStatusText.Text = $"Mod generated successfully! Saved to: {saveDialog.FileName}";
-                        App.Logger?.WriteLine(LOG_IDENT, $"Mod zip created at {saveDialog.FileName}");
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = Paths.Mods,
+                            UseShellExecute = true,
+                            Verb = "open"
+                        });
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        DownloadStatusText.Text = "Save cancelled by user.";
-                        App.Logger?.WriteLine(LOG_IDENT, "User cancelled save dialog.");
+                        App.Logger?.WriteException(LOG_IDENT, ex);
                     }
                 }
 
@@ -420,12 +341,14 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             if (dlg.ShowDialog() == true)
             {
                 CustomSpinnerPath = dlg.FileName;
+                _ = UpdatePreviewAsync();
             }
         }
 
         private void OnClearCustomSpinner_Click(object sender, RoutedEventArgs e)
         {
             CustomSpinnerPath = null;
+            _ = UpdatePreviewAsync();
         }
 
         private Bitmap? _sheetOriginalBitmap = null;
@@ -505,56 +428,75 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
             try
             {
-                Color? solidColor = null;
                 List<ModGenerator.GradientStop>? gradient = null;
+                Color? solidColor = null;
+
                 if (ViewModel.GradientStops.Count == 1)
+                {
                     solidColor = ViewModel.GradientStops[0].Color;
+                }
                 else
-                    gradient = ViewModel.GradientStops.Select(s => new ModGenerator.GradientStop(s.Offset, s.Color)).ToList();
+                {
+                    gradient = ViewModel.GradientStops
+                        .Select(s => new ModGenerator.GradientStop(s.Offset, s.Color))
+                        .ToList();
+                }
 
                 string? customRobloxPath = string.IsNullOrEmpty(CustomLogoPath) ? null : CustomLogoPath;
 
                 if (_sheetOriginalBitmap == null) return;
-                byte[] sheetBytes;
-                using (var ms = new MemoryStream())
+
+                Bitmap sheetCopy;
+                lock (_sheetOriginalBitmap)
                 {
-                    _sheetOriginalBitmap.Save(ms, ImageFormat.Png);
-                    sheetBytes = ms.ToArray();
+                    sheetCopy = new Bitmap(_sheetOriginalBitmap);
                 }
 
-                var bmp = await Task.Run(() =>
+                Bitmap? previewBmp = await Task.Run(() =>
                 {
-                    if (ct.IsCancellationRequested) return (Bitmap?)null;
+                    if (ct.IsCancellationRequested)
+                    {
+                        sheetCopy.Dispose();
+                        return null;
+                    }
 
                     try
                     {
-                        using var ms2 = new MemoryStream(sheetBytes);
-                        using var sheetCopy = new Bitmap(ms2);
-                        float angleDeg = (float)_gradientAngle;
-                        var result = RenderPreviewSheet(sheetCopy, solidColor, gradient, customRobloxPath, angleDeg);
-
-                        return result;
+                        return RenderPreviewSheet(sheetCopy, solidColor, gradient, customRobloxPath, (float)_gradientAngle);
                     }
                     catch (Exception ex)
                     {
                         App.Logger?.WriteException("ModsPage::UpdatePreviewAsync(Task)", ex);
-                        return (Bitmap?)null;
+                        return null;
+                    }
+                    finally
+                    {
+                        sheetCopy.Dispose();
                     }
                 }, ct).ConfigureAwait(false);
 
-                if (bmp == null) return;
+                if (previewBmp == null || ct.IsCancellationRequested)
+                {
+                    previewBmp?.Dispose();
+                    return;
+                }
 
                 await Dispatcher.InvokeAsync(() =>
                 {
-                    SheetPreview.Source = BitmapToImageSource(bmp);
-                    UpdateSpritePreviewFromBitmap(bmp);
-                });
+                    if (ct.IsCancellationRequested)
+                    {
+                        previewBmp.Dispose();
+                        return;
+                    }
 
-                bmp.Dispose();
+                    SheetPreview.Source = BitmapToImageSource(previewBmp);
+                    UpdateSpritePreviewFromBitmap(previewBmp);
+
+                    previewBmp.Dispose();
+                });
             }
             catch (OperationCanceledException)
             {
-
             }
             catch (Exception ex)
             {
@@ -566,75 +508,61 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
             if (sheetBmp == null) throw new InvalidOperationException("sheetBmp is null.");
 
-            var output = new Bitmap(sheetBmp.Width, sheetBmp.Height, PixelFormat.Format32bppArgb);
-            using (var g = Graphics.FromImage(output))
-            {
-                g.CompositingMode = CompositingMode.SourceOver;
-                g.CompositingQuality = CompositingQuality.HighQuality;
-                g.SmoothingMode = SmoothingMode.HighQuality;
-                g.DrawImage(sheetBmp, 0, 0);
-            }
-
             Bitmap? customRoblox = null;
-            if (!string.IsNullOrEmpty(customRobloxPath) && File.Exists(customRobloxPath))
-            {
-                using var fs = new FileStream(customRobloxPath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                using var tmp = new Bitmap(fs);
-                customRoblox = new Bitmap(tmp.Width, tmp.Height, PixelFormat.Format32bppArgb);
-                using (var g = Graphics.FromImage(customRoblox)) g.DrawImage(tmp, 0, 0, tmp.Width, tmp.Height);
-            }
 
             try
             {
+                if (!string.IsNullOrEmpty(customRobloxPath) && File.Exists(customRobloxPath))
+                {
+                    using var fs = new FileStream(customRobloxPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    using var tmp = new Bitmap(fs);
+                    customRoblox = new Bitmap(tmp.Width, tmp.Height, PixelFormat.Format32bppArgb);
+                    using var g = Graphics.FromImage(customRoblox);
+                    g.DrawImage(tmp, 0, 0, tmp.Width, tmp.Height);
+                }
+
+                var output = new Bitmap(sheetBmp.Width, sheetBmp.Height, PixelFormat.Format32bppArgb);
+                using var gOutput = Graphics.FromImage(output);
+                gOutput.CompositingMode = CompositingMode.SourceOver;
+                gOutput.CompositingQuality = CompositingQuality.HighQuality;
+                gOutput.SmoothingMode = SmoothingMode.HighQuality;
+
+                gOutput.DrawImage(sheetBmp, 0, 0);
+
                 foreach (var def in _previewSprites)
                 {
                     if (def.W <= 0 || def.H <= 0) continue;
                     var rect = new Rectangle(def.X, def.Y, def.W, def.H);
 
-                    if (string.Equals(def.Name, "roblox", StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(def.Name, "roblox", StringComparison.OrdinalIgnoreCase) && customRoblox != null)
                     {
-                        if (customRoblox != null)
-                        {
-                            using (var g = Graphics.FromImage(output))
-                            {
-                                g.CompositingMode = CompositingMode.SourceCopy;
-                                using (var clearBrush = new SolidBrush(Color.FromArgb(0, 0, 0, 0)))
-                                    g.FillRectangle(clearBrush, rect);
-
-                                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                                g.CompositingMode = CompositingMode.SourceOver;
-                                g.DrawImage(customRoblox, rect);
-                            }
-                        }
-                        else
-                        {
-                            using (var cropped = sheetBmp.Clone(rect, PixelFormat.Format32bppArgb))
-                            using (var recolored = ApplyMaskPreview(cropped, solidColor, gradient, gradientAngleDeg))
-                            using (var g = Graphics.FromImage(output))
-                            {
-                                g.CompositingMode = CompositingMode.SourceOver;
-                                g.DrawImage(recolored, rect);
-                            }
-                        }
-
+                        using var brush = new SolidBrush(Color.FromArgb(0, 0, 0, 0));
+                        gOutput.CompositingMode = CompositingMode.SourceCopy;
+                        gOutput.FillRectangle(brush, rect);
+                        gOutput.CompositingMode = CompositingMode.SourceOver;
+                        gOutput.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                        gOutput.DrawImage(customRoblox, rect);
                         continue;
                     }
 
-                    using (var cropped = sheetBmp.Clone(rect, PixelFormat.Format32bppArgb))
-                    using (var recolored = ApplyMaskPreview(cropped, solidColor, gradient, gradientAngleDeg))
-                    using (var g = Graphics.FromImage(output))
+                    try
                     {
-                        g.CompositingMode = CompositingMode.SourceOver;
-                        g.DrawImage(recolored, rect);
+                        using var cropped = sheetBmp.Clone(rect, PixelFormat.Format32bppArgb);
+                        using var recolored = ApplyMaskPreview(cropped, solidColor, gradient, gradientAngleDeg);
+                        gOutput.DrawImage(recolored, rect);
+                    }
+                    catch (OutOfMemoryException)
+                    {
+                        continue;
                     }
                 }
+
+                return output;
             }
             finally
             {
                 customRoblox?.Dispose();
             }
-
-            return output;
         }
 
         private Bitmap ApplyMaskPreview(Bitmap original, Color? solidColor, List<ModGenerator.GradientStop>? gradient, float gradientAngleDeg)
@@ -642,75 +570,61 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             if (original.Width == 0 || original.Height == 0)
                 return new Bitmap(original);
 
-            var recolored = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
-            var rect = new Rectangle(0, 0, original.Width, original.Height);
-            BitmapData srcData = original.LockBits(rect, ImageLockMode.ReadOnly, PixelFormat.Format32bppArgb);
-            BitmapData dstData = recolored.LockBits(rect, ImageLockMode.WriteOnly, PixelFormat.Format32bppArgb);
+            Bitmap recolored = new Bitmap(original.Width, original.Height, PixelFormat.Format32bppArgb);
 
             double theta = gradientAngleDeg * Math.PI / 180.0;
             double cos = Math.Cos(theta);
             double sin = Math.Sin(theta);
-
             double w = original.Width - 1;
             double h = original.Height - 1;
+
             double[] projs = new double[]
             {
-                0 * cos + 0 * sin,
-                w * cos + 0 * sin,
-                0 * cos + h * sin,
-                w * cos + h * sin
+        0 * cos + 0 * sin,
+        w * cos + 0 * sin,
+        0 * cos + h * sin,
+        w * cos + h * sin
             };
             double minProj = projs.Min();
             double maxProj = projs.Max();
-            double denom = maxProj - minProj;
-            if (Math.Abs(denom) < 1e-6) denom = 1.0;
+            double denom = Math.Abs(maxProj - minProj) < 1e-6 ? 1.0 : (maxProj - minProj);
 
-            unsafe
+            for (int y = 0; y < original.Height; y++)
             {
-                byte* srcPtr = (byte*)srcData.Scan0;
-                byte* dstPtr = (byte*)dstData.Scan0;
-                int bytesPerPixel = 4;
-
-                for (int y = 0; y < original.Height; y++)
+                for (int x = 0; x < original.Width; x++)
                 {
-                    for (int x = 0; x < original.Width; x++)
+                    Color src = original.GetPixel(x, y);
+                    if (src.A <= 5)
                     {
-                        int idx = y * srcData.Stride + x * bytesPerPixel;
-                        byte a = srcPtr[idx + 3];
-
-                        if (a <= 5)
-                        {
-                            dstPtr[idx] = 0;
-                            dstPtr[idx + 1] = 0;
-                            dstPtr[idx + 2] = 0;
-                            dstPtr[idx + 3] = 0;
-                            continue;
-                        }
-
-                        Color applyColor;
-                        if (gradient != null && gradient.Count > 0)
-                        {
-                            double proj = x * cos + y * sin;
-                            float t = (float)((proj - minProj) / denom);
-                            t = Math.Clamp(t, 0f, 1f);
-                            applyColor = InterpolateGradientPreview(gradient, t);
-                        }
-                        else
-                        {
-                            applyColor = solidColor ?? Color.White;
-                        }
-
-                        float alphaFactor = a / 255f;
-                        dstPtr[idx] = (byte)(applyColor.B * alphaFactor);
-                        dstPtr[idx + 1] = (byte)(applyColor.G * alphaFactor);
-                        dstPtr[idx + 2] = (byte)(applyColor.R * alphaFactor);
-                        dstPtr[idx + 3] = a;
+                        recolored.SetPixel(x, y, Color.Transparent);
+                        continue;
                     }
+
+                    Color applyColor;
+                    if (gradient != null && gradient.Count > 0)
+                    {
+                        double proj = x * cos + y * sin;
+                        float t = (float)((proj - minProj) / denom);
+                        t = Math.Clamp(t, 0f, 1f);
+                        applyColor = InterpolateGradientPreview(gradient, t);
+                    }
+                    else
+                    {
+                        applyColor = solidColor ?? Color.White;
+                    }
+
+                    float alphaFactor = src.A / 255f;
+                    Color finalColor = Color.FromArgb(
+                        src.A,
+                        (byte)(applyColor.R * alphaFactor),
+                        (byte)(applyColor.G * alphaFactor),
+                        (byte)(applyColor.B * alphaFactor)
+                    );
+
+                    recolored.SetPixel(x, y, finalColor);
                 }
             }
 
-            original.UnlockBits(srcData);
-            recolored.UnlockBits(dstData);
             return recolored;
         }
 

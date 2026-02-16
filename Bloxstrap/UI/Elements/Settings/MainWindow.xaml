@@ -9,6 +9,7 @@
     xmlns:pages="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
     xmlns:resources="clr-namespace:Voidstrap.Resources"
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
     xmlns:media="clr-namespace:System.Windows.Media.Animation;assembly=PresentationCore"
     Title="{x:Static resources:Strings.Menu_Title}"
     Width="1185"
@@ -113,12 +114,12 @@
     </base:WpfUiWindow.Resources>
 
     <Grid>
-
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
+
 
         <Grid x:Name="BackgroundLayer"
       Grid.RowSpan="3"
@@ -320,7 +321,7 @@
                 </ui:NavigationFluent.Footer>
             </ui:NavigationFluent>
 
-            <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1">
+            <Grid Grid.Row="0" Grid.RowSpan="3" Grid.Column="1">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
@@ -352,6 +353,7 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />
                                 <ColumnDefinition Width="Auto" />

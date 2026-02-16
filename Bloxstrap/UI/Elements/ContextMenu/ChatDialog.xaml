@@ -1,0 +1,164 @@
+﻿<base:WpfUiWindow
+    x:Class="Voidstrap.UI.Elements.ContextMenu.DiscordChatWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:base="clr-namespace:Voidstrap.UI.Elements.Base"
+    xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+    xmlns:conv="clr-namespace:Voidstrap.UI.Elements.Settings.Pages"
+    Width="1000"
+    Height="750"
+    Background="{ui:ThemeResource ApplicationBackgroundBrush}"
+    ExtendsContentIntoTitleBar="True"
+    WindowStartupLocation="CenterScreen">
+
+    <base:WpfUiWindow.Resources>
+        <conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
+    </base:WpfUiWindow.Resources>
+
+    <Grid>
+        <Grid.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.00" Color="{DynamicResource WindowBackgroundColorPrimary}"/>
+                <GradientStop Offset="0.70" Color="{DynamicResource WindowBackgroundColorSecondary}"/>
+                <GradientStop Offset="1.1" Color="{DynamicResource WindowBackgroundColorThird}"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <ui:TitleBar Grid.Row="0" Title="Discord Chat" ShowMinimize="False" ShowMaximize="False"/>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="12,6,12,0" VerticalAlignment="Top">
+            <ui:TextBox Width="400" Text="{Binding InputShareCode}" PlaceholderText="Paste share code here" Margin="0,0,6,0"/>
+
+            <ui:Button Content="Copy Code" Width="100" Command="{Binding CopyShareCodeCommand}" Appearance="Primary"/>
+
+            <ui:Button Content="Join via Code" Width="120" 
+               Command="{Binding JoinViaCodeCommand}" 
+               CommandParameter="{Binding InputShareCode}"
+               Appearance="Primary"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" Margin="12,6,12,0" VerticalAlignment="Top">
+            <ui:TextBox Width="200" PlaceholderText="Bot Token" Text="{Binding NewBotToken, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+            <ui:TextBox Width="150" PlaceholderText="Channel ID" Text="{Binding NewChannelId, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+            <ui:TextBox Width="120" PlaceholderText="Group Name" Text="{Binding NewGroupName, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,6,0"/>
+            <ui:Button Content="Join / Create" Command="{Binding JoinCommand}" Appearance="Primary"/>
+        </StackPanel>
+
+        <!-- Chat Tabs -->
+        <TabControl x:Name="ChatTabControl" Grid.Row="4" ItemsSource="{Binding ChatTabs}" SelectedItem="{Binding SelectedTab}" Margin="12">
+
+            <!-- Tab Header with Delete Button -->
+            <TabControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="{Binding TabName}" FontWeight="SemiBold" Margin="0,0,6,0"/>
+                        <Button Content="✕"
+                                Width="25" Height="25"
+                                Padding="0"
+                                Command="{Binding DataContext.DeleteGroupChatCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}"
+                                Background="Transparent"
+                                BorderThickness="0"
+                                Foreground="LightGray"
+                                FontWeight="Bold"
+                                Cursor="Hand"/>
+                    </StackPanel>
+                </DataTemplate>
+            </TabControl.ItemTemplate>
+
+            <!-- Messages -->
+            <TabControl.ContentTemplate>
+                <DataTemplate>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" Name="MessagesScrollViewer">
+                        <ItemsControl ItemsSource="{Binding Messages}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ui:Card Margin="0,6" Padding="10" Background="{DynamicResource CardBackgroundBrush}">
+                                        <StackPanel>
+                                            <TextBlock FontWeight="SemiBold">
+                                                <Run Text="{Binding DisplayUsername}"/>
+                                                <Run Text="{Binding ReplyToText}" FontStyle="Italic"/>
+                                            </TextBlock>
+
+                                            <TextBlock Text="{Binding Content}" TextWrapping="Wrap" Margin="0,2,0,2"/>
+
+                                            <ItemsControl ItemsSource="{Binding Attachments}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal"/>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Image Source="{Binding}" Width="150" Height="150" Margin="4"
+                                                               Stretch="UniformToFill"
+                                                               Cursor="Hand"
+                                                               MouseLeftButtonDown="Image_MouseLeftButtonDown"/>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+
+                                            <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
+                                                <ComboBox Width="80"
+                                                          ItemsSource="{Binding DataContext.AllEmojis, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                          SelectionChanged="Emoji_SelectionChanged"/>
+                                                <ItemsControl ItemsSource="{Binding Reactions}" Margin="6,0,0,0">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal"/>
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal" Margin="2,0,2,0">
+                                                                <TextBlock Text="{Binding Emoji}"/>
+                                                                <TextBlock Text="{Binding Count}" Margin="2,0,0,0"/>
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </StackPanel>
+
+                                            <TextBlock Text="{Binding TimestampDateTime, StringFormat={}{0:HH:mm}}" FontSize="11" HorizontalAlignment="Right"/>
+                                        </StackPanel>
+                                    </ui:Card>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </DataTemplate>
+            </TabControl.ContentTemplate>
+        </TabControl>
+
+        <!-- Typing Indicator -->
+        <TextBlock Grid.Row="5" Margin="12,4" FontStyle="Italic" Foreground="Gray"
+                   Text="{Binding SelectedTab.TypingIndicatorText}"
+                   Visibility="{Binding SelectedTab.SomeoneTyping, Converter={StaticResource BoolToVisibilityConverter}}"/>
+
+        <Border Grid.Row="6" Padding="10" Background="{ui:ThemeResource ControlFillColorDefaultBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <ui:TextBox Grid.Column="0" Text="{Binding SelectedTab.MessageText, UpdateSourceTrigger=PropertyChanged}" 
+                    Height="40" VerticalContentAlignment="Center" Margin="0,0,4,0"/>
+                <ui:Button Grid.Column="1" Content="Attach Image"
+                   Command="{Binding SelectedTab.AttachImageCommand}" Margin="4,0"/>
+                <ui:Button Grid.Column="2" Content="Send" Icon="Send24" 
+                   Command="{Binding SelectedTab.SendMessageCommand}" Appearance="Primary" Margin="4,0"/>
+            </Grid>
+        </Border>
+    </Grid>
+</base:WpfUiWindow>

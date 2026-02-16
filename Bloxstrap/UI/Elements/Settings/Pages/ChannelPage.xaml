@@ -11,7 +11,7 @@
     xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
     Title="Settings"
     d:DataContext="{d:DesignInstance Type=models:ChannelViewModel}"
-    d:DesignHeight="1200"
+    d:DesignHeight="2000"
     d:DesignWidth="800"
     Scrollable="True"
     mc:Ignorable="d">
@@ -202,9 +202,8 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Header text -->
                     <StackPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
-                        <TextBlock FontSize="14" Text="Channels" />
+                        <TextBlock FontSize="14" Text="Channels - [Roblox Build]" />
                         <TextBlock FontSize="12"
                            Text="Enter deployment channel name. Invalid channels will cause 403-404 error!"
                            Foreground="{DynamicResource TextFillColorTertiaryBrush}"

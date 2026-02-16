@@ -41,5 +41,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
         {
             NavigationService.Navigate(new MobilePageExplain());
         }
+
+        private void OpenDisyChatExplain_Click(object sender, RoutedEventArgs e)
+        {
+            NavigationService.Navigate(new DiscordChatExplain());
+        }
     }
 }
