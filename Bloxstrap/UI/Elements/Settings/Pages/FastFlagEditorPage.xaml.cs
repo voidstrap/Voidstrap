@@ -41,7 +41,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCStudioApp.json",
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-FFlag-Tracker/refs/heads/main/PCDesktopClient",
     "https://raw.githubusercontent.com/MaximumADHD/Roblox-Client-Tracker/refs/heads/roblox/FVariables.txt",
-    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/FVariablesV2.json", // credits to scroom not froststrap
+    "https://raw.githubusercontent.com/SCR00M/froststap-shi/refs/heads/main/FVariablesV2.json", // just credits to everyone idk why I was so harsh im sorry
     "https://clientsettings.roblox.com/v2/settings/application/PCDesktopClient"
         };
 
@@ -226,7 +226,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
 
         private void UpdateTotalFlagsCount()
         {
-            TotalFlagsTextBlock.Text = $"Total flags: {_fastFlagList.Count}";
+            TotalFlagsTextBlock.Text = $"Total Flags: {_fastFlagList.Count}";
         }
 
         private async void ClearSearch(bool refresh = true)

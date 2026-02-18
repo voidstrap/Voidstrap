@@ -619,20 +619,20 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void InitializeWindowState()
         {
-            if (_state.Left > SystemParameters.VirtualScreenWidth || _state.Top > SystemParameters.VirtualScreenHeight)
+            if (_state.LeftUpdate > SystemParameters.VirtualScreenWidth || _state.TopUpdate > SystemParameters.VirtualScreenHeight)
             {
-                _state.Left = 0;
-                _state.Top = 0;
+                _state.LeftUpdate = 0;
+                _state.TopUpdate = 0;
             }
 
-            if (_state.Width > 0) Width = _state.Width;
-            if (_state.Height > 0) Height = _state.Height;
+            if (_state.WidthUpdate > 0) Width = _state.WidthUpdate;
+            if (_state.HeightUpdate > 0) Height = _state.HeightUpdate;
 
-            if (_state.Left > 0 && _state.Top > 0)
+            if (_state.LeftUpdate > 0 && _state.TopUpdate > 0)
             {
                 WindowStartupLocation = WindowStartupLocation.Manual;
-                Left = _state.Left;
-                Top = _state.Top;
+                Left = _state.LeftUpdate;
+                Top = _state.TopUpdate;
             }
         }
 
@@ -701,10 +701,10 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void SaveWindowState()
         {
-            _state.Width = Width;
-            _state.Height = Height;
-            _state.Top = Top;
-            _state.Left = Left;
+            _state.WidthUpdate = Width;
+            _state.HeightUpdate = Height;
+            _state.TopUpdate = Top;
+            _state.LeftUpdate = Left;
 
             App.State.Save();
         }

@@ -7,7 +7,7 @@
 With a clean, modern UI, useful tools, and performance improvements, Voidstrap lets you decide how Roblox runs, not the default launcher.
 
 <p align="center">
-  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Bloxstrap/Voidstrap.png" alt="Voidstrap Logo" width="300" />
+  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Bloxstrap/Voidstrap.png" alt="Voidstrap Logo" width="400" />
 </p>
 
 <p align="center"><strong>Enjoy Voidstrap? Star the repository and support development!</strong></p>

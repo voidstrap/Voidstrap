@@ -205,16 +205,11 @@ Effect="{DynamicResource ControlElevationShadow}">
             </StackPanel>
         </ui:CardExpander>
 
-
         <TextBlock Margin="0,16,0,0"
             FontSize="17.65"
             FontWeight="Medium"
             Text="FastFlags" />
 
-        <controls:OptionControl Description="Changes Roblox Studios core UI back to the OG." Header="Old Roblox Studio UI">
-            <ui:ToggleSwitch IsChecked="{Binding RobloxStudioCoreUI, Mode=TwoWay}" />
-        </controls:OptionControl>
-        
         <controls:OptionControl
     Description="Reduces or scales grass movement in Roblox for performance or visual comfort."
     Header="Grass Movement Factor">
@@ -232,79 +227,114 @@ Effect="{DynamicResource ControlElevationShadow}">
             </ComboBox>
         </controls:OptionControl>
 
+        <ui:CardExpander Margin="0,8,0,0"
+                 IsExpanded="{Binding MeshQualityEnabled, Mode=OneWay}"
+                 Style="{StaticResource NoUserExpansionCardExpanderStyle}">
 
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
             <ui:CardExpander.Header>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
+
+                    <!-- Header Info -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14" Text="System" />
-                        <TextBlock
-                            Margin="0,2,0,0"
-                            FontSize="12"
-                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                            Text="Configure how your system behaves with Roblox" />
+                        <TextBlock FontSize="14" Text="Mesh Detail" />
+                        <TextBlock FontSize="12"
+                           Text="Control how detail meshes appear in the game itself."
+                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                     </StackPanel>
+                    <ui:ToggleSwitch Grid.Column="1"
+                             IsChecked="{Binding MeshQualityEnabled, Mode=TwoWay}" />
                 </Grid>
             </ui:CardExpander.Header>
-            <StackPanel>
 
-                <StackPanel>
-                    <ui:CardExpander IsExpanded="True">
-                        <ui:CardExpander.Header>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
-                                    <TextBlock FontSize="14" Text="CPU Options - This Can Break Roblox Studio From Loading" />
-                                </StackPanel>
-                            </Grid>
-                        </ui:CardExpander.Header>
+            <StackPanel Margin="0,8,0,0">
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                        <StackPanel>
-                            <controls:OptionControl Margin="0,-8,0,0" Description="Configure the logical cores to run Roblox." Header="Force Logical Processors">
-                                <ComboBox
-                                    Width="200"
-                                    Margin="5,0,0,0"
-                                    Padding="10,5,10,5"
-                                    ItemsSource="{Binding CpuThreads}"
-                                    SelectedItem="{Binding SelectedCpuThreads, Mode=TwoWay}">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Key}" />
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </controls:OptionControl>
+                    <TextBlock Text="Lowest Quality"
+               Grid.Column="0"
+               VerticalAlignment="Center"
+               Margin="0,0,8,0" />
 
-                            <controls:OptionControl Description="Configure CPU Cores that run Roblox (the value will be selected minus 1)" Header="Force Async Threads">
-                                <ComboBox
-                                    Width="200"
-                                    Margin="5,0,0,0"
-                                    Padding="10,5,10,5"
-                                    ItemsSource="{Binding CpuCoreMinThreadCount}"
-                                    SelectedItem="{Binding SelectedCpuCoreMinThreadCount, Mode=TwoWay}">
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Key}" />
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </controls:OptionControl>
-                        </StackPanel>
-                    </ui:CardExpander>
-                </StackPanel>
+                    <Slider Grid.Column="1"
+            Minimum="1"
+            Maximum="3"
+            TickFrequency="1"
+            IsSnapToTickEnabled="True"
+            TickPlacement="BottomRight"
+            SmallChange="1"
+            LargeChange="1"
+            Value="{Binding MeshQuality, Mode=TwoWay}"
+            Margin="8,0,8,0" />
 
+                    <TextBlock Text="Highest Quality"
+               Grid.Column="2"
+               VerticalAlignment="Center"
+               Margin="8,0,0,0" />
+                </Grid>
+            </StackPanel>
+        </ui:CardExpander>
 
-                <controls:OptionControl Description="Allow one CPU core handle two tasks at once, boosting efficiency and multitasking." Header="Hyper-Threading">
-                    <ui:ToggleSwitch IsChecked="{Binding Threading, Mode=TwoWay}" />
-                </controls:OptionControl>
+        <ui:CardExpander Margin="0,8,0,0"
+     IsExpanded="{Binding FRMQualityOverrideEnabled, Mode=OneWay}"
+     Style="{StaticResource NoUserExpansionCardExpanderStyle}">
 
+            <ui:CardExpander.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                        <TextBlock FontSize="14" Text="FRM Quality Overright" />
+                        <TextBlock FontSize="12"
+               Text="Choose the FRM quality overright."
+               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                    </StackPanel>
+
+                    <ui:ToggleSwitch Grid.Column="1"
+                 IsChecked="{Binding FRMQualityOverrideEnabled, Mode=TwoWay}" />
+                </Grid>
+            </ui:CardExpander.Header>
+
+            <StackPanel Margin="0,8,0,0">
+
+                <Grid Margin="0,8,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="Lowest Quality"
+   Grid.Column="0"
+   VerticalAlignment="Center"
+   Margin="0,0,8,0" />
+
+                    <Slider Grid.Column="1"
+Minimum="1"
+Maximum="21"
+TickFrequency="1"
+IsSnapToTickEnabled="True"
+TickPlacement="BottomRight"
+SmallChange="1"
+LargeChange="1"
+Value="{Binding FRMQualityOverride, Mode=TwoWay}"
+Margin="8,0,8,0" />
+
+                    <TextBlock Text="Highest Quality"
+   Grid.Column="2"
+   VerticalAlignment="Center"
+   Margin="8,0,0,0" />
+                </Grid>
             </StackPanel>
         </ui:CardExpander>
 
@@ -329,41 +359,8 @@ Effect="{DynamicResource ControlElevationShadow}">
 
 
             <StackPanel>
+
                 <ui:CardExpander IsExpanded="False">
-                    <ui:CardExpander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <StackPanel Grid.Column="0">
-                                <TextBlock FontSize="14" Text="Graphics" />
-                            </StackPanel>
-                        </Grid>
-                    </ui:CardExpander.Header>
-
-                    <StackPanel>
-
-                        <controls:OptionControl Margin="0,-8,0,0" Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisableTerrainTextures_Title}">
-                            <ui:ToggleSwitch IsChecked="{Binding DisableTerrainTextures, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Disable Layered Clothing">
-                            <ui:ToggleSwitch IsChecked="{Binding Layered, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Minimal Rendering">
-                            <ui:ToggleSwitch IsChecked="{Binding MinimalRendering, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Gray Avatars">
-                            <ui:ToggleSwitch IsChecked="{Binding GrayAvatar, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                    </StackPanel>
-                </ui:CardExpander>
-
-                <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
                     <ui:CardExpander.Header>
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -377,24 +374,13 @@ Effect="{DynamicResource ControlElevationShadow}">
                     </ui:CardExpander.Header>
 
                     <StackPanel>
-                        <controls:OptionControl Margin="0,-8,0,0" Header="{x:Static resources:Strings.Menu_FastFlags_Presets_DisablePostFX_Title}" HelpLink="https://create.roblox.com/docs/environment/post-processing-effects">
-                            <ui:ToggleSwitch IsChecked="{Binding DisablePostFX, Mode=TwoWay}" />
-                        </controls:OptionControl>
 
-                        <controls:OptionControl Header="Disable Shadows">
+                        <controls:OptionControl Margin="0,-8,0,0" Header="Disable Shadows">
                             <ui:ToggleSwitch IsChecked="{Binding DisablePlayerShadows, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Disable Clouds">
-                            <ui:ToggleSwitch IsChecked="{Binding DisableSky, Mode=TwoWay}" />
                         </controls:OptionControl>
 
                         <controls:OptionControl Header="Force Gray Sky">
                             <ui:ToggleSwitch IsChecked="{Binding EnableGraySky, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Lower Quality Particles">
-                            <ui:ToggleSwitch IsChecked="{Binding WorserParticles, Mode=TwoWay}" />
                         </controls:OptionControl>
                     </StackPanel>
                 </ui:CardExpander>
@@ -432,151 +418,10 @@ Effect="{DynamicResource ControlElevationShadow}">
                 </controls:OptionControl>
 
                 <controls:OptionControl
-                    Description="Adjusts the resolution in game, such as 720p, 1080p, 1440p, and 4k. Similar to adjusting video quality on YouTube."
-                    Header="Dynamic Resolution"
-                    HelpLink="https://www.vdocipher.com/blog/video-resolution">
-                    <ComboBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        ItemsSource="{Binding DynamicResolutions.Keys, Mode=OneTime}"
-                        Text="{Binding SelectedDynamicResolution, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </controls:OptionControl>
-
-                <controls:OptionControl
                     Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Description}"
                     Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FixDisplayScaling_Title}"
                     HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#dpi-scaling-fixes">
                     <ui:ToggleSwitch IsChecked="{Binding FixDisplayScaling, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <ui:CardExpander Margin="0,8,0,0"
-                 IsExpanded="{Binding MeshQualityEnabled, Mode=OneWay}"
-                 Style="{StaticResource NoUserExpansionCardExpanderStyle}">
-
-                    <ui:CardExpander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <!-- Header Info -->
-                            <StackPanel Grid.Column="0">
-                                <TextBlock FontSize="14" Text="Mesh Detail" />
-                                <TextBlock FontSize="12"
-                           Text="Control how detail meshes appear in the game itself."
-                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                            </StackPanel>
-                            <ui:ToggleSwitch Grid.Column="1"
-                             IsChecked="{Binding MeshQualityEnabled, Mode=TwoWay}" />
-                        </Grid>
-                    </ui:CardExpander.Header>
-
-                    <StackPanel Margin="0,8,0,0">
-                        <Grid Margin="0,8,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="Lowest Quality"
-               Grid.Column="0"
-               VerticalAlignment="Center"
-               Margin="0,0,8,0" />
-
-                            <Slider Grid.Column="1"
-            Minimum="1"
-            Maximum="3"
-            TickFrequency="1"
-            IsSnapToTickEnabled="True"
-            TickPlacement="BottomRight"
-            SmallChange="1"
-            LargeChange="1"
-            Value="{Binding MeshQuality, Mode=TwoWay}"
-            Margin="8,0,8,0" />
-
-                            <TextBlock Text="Highest Quality"
-               Grid.Column="2"
-               VerticalAlignment="Center"
-               Margin="8,0,0,0" />
-                        </Grid>
-                    </StackPanel>
-                </ui:CardExpander>
-
-                <ui:CardExpander Margin="0,8,0,0"
-     IsExpanded="{Binding FRMQualityOverrideEnabled, Mode=OneWay}"
-     Style="{StaticResource NoUserExpansionCardExpanderStyle}">
-
-                    <ui:CardExpander.Header>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-
-                            <StackPanel Grid.Column="0">
-                                <TextBlock FontSize="14" Text="FRM Quality Overright" />
-                                <TextBlock FontSize="12"
-               Text="Choose the FRM quality overright."
-               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                            </StackPanel>
-                            
-                            <ui:ToggleSwitch Grid.Column="1"
-                 IsChecked="{Binding FRMQualityOverrideEnabled, Mode=TwoWay}" />
-                        </Grid>
-                    </ui:CardExpander.Header>
-
-                    <StackPanel Margin="0,8,0,0">
-
-                        <Grid Margin="0,8,0,0">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="Auto"/>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-
-                            <TextBlock Text="Lowest Quality"
-   Grid.Column="0"
-   VerticalAlignment="Center"
-   Margin="0,0,8,0" />
-
-                            <Slider Grid.Column="1"
-Minimum="1"
-Maximum="21"
-TickFrequency="1"
-IsSnapToTickEnabled="True"
-TickPlacement="BottomRight"
-SmallChange="1"
-LargeChange="1"
-Value="{Binding FRMQualityOverride, Mode=TwoWay}"
-Margin="8,0,8,0" />
-
-                            <TextBlock Text="Highest Quality"
-   Grid.Column="2"
-   VerticalAlignment="Center"
-   Margin="8,0,0,0" />
-                        </Grid>
-                    </StackPanel>
-                </ui:CardExpander>
-
-                <controls:OptionControl
-                    Description="Set to 0 to enable V-Sync."
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FPSLimit_Title}"
-                    HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#framerate-limit">
-                    <ui:TextBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        PreviewTextInput="ValidateUInt32"
-                        Text="{Binding FramerateLimit, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl
@@ -617,167 +462,12 @@ Margin="8,0,8,0" />
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </controls:OptionControl>
-
-                <controls:OptionControl
-                    Description="{Binding ConverterParameter=https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology, Converter={StaticResource StringFormatConverter}, Source={x:Static resources:Strings.Menu_FastFlags_Presets_LightingTechnology_Description}}"
-                    Foreground="{StaticResource TextFillColorSecondaryBrush}"
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_LightingTechnology_Title}"
-                    HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#preferred-lighting-technology">
-                    <ComboBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        ItemsSource="{Binding LightingModes.Keys, Mode=OneTime}"
-                        Text="{Binding SelectedLightingMode, Mode=TwoWay}">
-                        <ComboBox.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding ., Converter={StaticResource EnumNameConverter}}" />
-                            </DataTemplate>
-                        </ComboBox.ItemTemplate>
-                    </ComboBox>
-                </controls:OptionControl>
             </StackPanel>
         </ui:CardExpander>
-
-        <ui:CardExpander Margin="0,8,0,0">
-            <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Column="0">
-                        <TextBlock FontSize="14.4" Text="User Interface and Layout" />
-                        <TextBlock
-                            Margin="0,2,0,0"
-                            FontSize="12"
-                            Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                            Text="Configure the UI settings" />
-                    </StackPanel>
-                </Grid>
-            </ui:CardExpander.Header>
-            <StackPanel>
-
-
-                <controls:OptionControl Margin="0,-8,0,0" Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Description}" Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FullscreenTitlebar_Title}">
-                    <ui:ToggleSwitch IsChecked="{Binding FullscreenTitlebarDisabled, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Import a monitoring UI for FPS." Header="Display FPS">
-                    <ui:ToggleSwitch IsChecked="{Binding DisplayFps, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Disables Roblox Built-in Ads" Header="Disable Ads">
-                    <ui:ToggleSwitch IsChecked="{Binding DisableAds, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Disables Robloxs chat." Header="Disable Chat">
-                    <ui:ToggleSwitch IsChecked="{Binding ChatUI, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Removes blur effects like the blur effect when loading." Header="Remove Blur Effect">
-                    <ui:ToggleSwitch IsChecked="{Binding NoGuiBlur, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Adds a text size changer in roblox settings." Header="Text Size Changer">
-                    <ui:ToggleSwitch IsChecked="{Binding TextSizeChanger, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-                    Description="{Binding ConverterParameter=https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Voidstrap, Converter={StaticResource StringFormatConverter}, Source={x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Description}}"
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_HideGuis_Title}"
-                    HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding">
-                    <ui:TextBox
-                        Width="200"
-                        Margin="5,0,0,0"
-                        Padding="10,5,10,5"
-                        PreviewTextInput="ValidateUInt32"
-                        Text="{Binding HideGUI, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl Description="Sets FakeVerify Icon on Players ID." Header="Fake Verifyed Icon">
-                    <ui:TextBox
-                        Width="200"
-                        Padding="10,5,10,5"
-                        Text="{Binding FakeVerify, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-                    x:Name="FontPaddingOption"
-                    Description="{Binding ConverterParameter=https://github.com/BloxstrapLabs/Bloxstrap/wiki/A-guide-to-FastFlags#gui-hiding|https://www.roblox.com/groups/32380007/Voidstrap, Converter={StaticResource StringFormatConverter}, Source={x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Description}}"
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FontPadding_Title}">
-                    <ui:TextBox
-                        Width="200"
-                        Padding="10,5,10,5"
-                        PreviewTextInput="ValidateInt32"
-                        Text="{Binding FontSize, Mode=TwoWay}" />
-                </controls:OptionControl>
-            </StackPanel>
-        </ui:CardExpander>
-
-        <TextBlock
-            Margin="0,16,0,0"
-            FontSize="17.65"
-            FontWeight="Medium"
-            Text="Profiles and Debug" />
-
-        <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
-            <ui:CardExpander.Header>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
-                    </Grid.ColumnDefinitions>
-                    <StackPanel>
-                        <TextBlock FontSize="14" Text="Debug and Test" />
-
-                    </StackPanel>
-                </Grid>
-            </ui:CardExpander.Header>
-
-            <!--  Content inside CardExpander  -->
-            <StackPanel>
-                <controls:OptionControl Margin="0,-8,0,0" Description="Displays the worlds chunks in a similar way to Minecraft." Header="Show Chunks">
-                    <ui:ToggleSwitch IsChecked="{Binding ShowChunks, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <!--  PingBreakdownOption  -->
-                <controls:OptionControl
-                    x:Name="PingBreakdownOption"
-                    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Description}"
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_PingBreakdown_Title}">
-                    <ui:ToggleSwitch IsChecked="{Binding PingBreakdown, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <!--  FlagStateOption  -->
-                <controls:OptionControl
-                    x:Name="FlagStateOption"
-                    Description="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Description}"
-                    Header="{x:Static resources:Strings.Menu_FastFlags_Presets_FlagState_Title}">
-                    <ui:TextBox
-                        Width="200"
-                        Padding="10,5"
-                        Text="{Binding FlagState, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <TextBlock
-                    Margin="0,8,0,0"
-                    FontSize="14"
-                    Text="Debug settings by putting in the FFlag and playing to test to see if the FFlag is still active/removed."
-                    TextWrapping="Wrap" />
-
-                <TextBlock
-                    Margin="0,5,0,0"
-                    FontSize="14"
-                    Text="To use the ping breakdown while in-game, press FN+9 or type 'console' in chat to open the player console."
-                    TextWrapping="Wrap" />
-            </StackPanel>
-        </ui:CardExpander>
-
 
         <StackPanel Margin="0,8,0,0">
             <Button Name="CheckSystemButton"
-            Content="Check System Specs"
+            Content="Apply Recommended"
             HorizontalAlignment="Right"
             Click="CheckSystemButton_Click"/>
 

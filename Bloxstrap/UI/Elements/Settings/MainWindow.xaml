@@ -12,10 +12,10 @@
     xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
     xmlns:media="clr-namespace:System.Windows.Media.Animation;assembly=PresentationCore"
     Title="{x:Static resources:Strings.Menu_Title}"
-    Width="1185"
-    Height="750"
-    MinWidth="1185"
-    MinHeight="750"
+    Width="1100"
+    Height="720"
+    MinWidth="1100"
+    MinHeight="720"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel, IsDesignTimeCreatable=True}"
     AllowsTransparency="True"
     WindowStyle="None"
@@ -119,7 +119,6 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-
 
         <Grid x:Name="BackgroundLayer"
       Grid.RowSpan="3"
@@ -295,20 +294,71 @@
                                  SelectedPageIndex="0">
 
                 <ui:NavigationFluent.Items>
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" PageType="{x:Type pages:IntegrationsPage}" />
-                    <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" PageType="{x:Type pages:BehaviourPage}" />
-                    <ui:NavigationItem Content="Modifications" Icon="WrenchScrewdriver20" PageType="{x:Type pages:ModsPage}" />
-                    <ui:NavigationItem Content="Server Browser" Icon="ServerMultiple20" PageType="{x:Type pages:ServerBrowserPage}" />
-                    <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" PageType="{x:Type pages:FastFlagsPage}" />
-                    <ui:NavigationItem x:Name="FastFlagEditorNavItem" Content="FastFlag Editor"
-                                       Icon="Flag28"
-                                       PageType="{x:Type pages:FastFlagEditorPage}"
-                                       Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                    <ui:NavigationItem Content="Appearance" Icon="PaintBucket24" PageType="{x:Type pages:AppearancePage}" />
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}" Icon="Apps32" PageType="{x:Type pages:ShortcutsPage}" />
-                    <ui:NavigationItem Content="Global" Icon="GlobeLocation24" PageType="{x:Type pages:GBSEditorPage}" />
-                    <ui:NavigationItem Content="News" Icon="News16" PageType="{x:Type pages:NewsPage}" />
+                    
+                    <ui:NavigationItem Content="CORE"
+                       IsEnabled="False"
+                       Opacity="0.6" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
+                       Icon="Add12"
+                       PageType="{x:Type pages:IntegrationsPage}" />
+                    
+                    <ui:NavigationItem Content="Deployment"
+                       Icon="PlaySettings20"
+                       PageType="{x:Type pages:BehaviourPage}" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Appearance_Title}"
+                       Icon="PaintBucket24"
+                       PageType="{x:Type pages:AppearancePage}" />
+
+                    <ui:NavigationItem Content="Browser"
+                       Icon="Server24"
+                       PageType="{x:Type pages:ServerBrowserPage}" />
+
+                    <ui:NavigationSeparator />
+
+                    <ui:NavigationItem Content="CONFIGURATION"
+                       IsEnabled="False"
+                       Opacity="0.6" />
+                    
+                    <ui:NavigationItem Content="FastFlag Settings"
+                       Icon="Settings28"
+                       PageType="{x:Type pages:FastFlagsPage}" />
+                    
+                    <ui:NavigationItem x:Name="FastFlagEditorNavItem"
+                       Content="FastFlag Editor"
+                       Icon="Flag28"
+                       PageType="{x:Type pages:FastFlagEditorPage}"
+                       Visibility="{Binding IsFastFlagEditorVisible,
+                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
+                       Icon="Apps32"
+                       PageType="{x:Type pages:ShortcutsPage}" />
+                    
+
+                    <ui:NavigationItem Content="Global"
+                       Icon="GlobeLocation24"
+                       PageType="{x:Type pages:GBSEditorPage}" />
+
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
+                       Icon="WrenchScrewdriver20"
+                       PageType="{x:Type pages:ModsPage}" />
+
+                    <ui:NavigationSeparator />
+
+                    <ui:NavigationItem
+                       IsEnabled="False"
+                       Opacity="0.6" />
+                    
+                    <ui:NavigationItem Content="News"
+                       Icon="News16"
+                       Margin="0,-45,0,20"
+                       PageType="{x:Type pages:NewsPage}" />
+
                 </ui:NavigationFluent.Items>
+
 
                 <ui:NavigationFluent.Footer>
                     <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />

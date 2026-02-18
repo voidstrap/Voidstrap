@@ -298,7 +298,6 @@ namespace Voidstrap
                 {
                     var allowedFlags = new Dictionary<string, string>
                         {
-                            { "DFFlagDebugPerfMode", "True" },
                             { "FFlagHandleAltEnterFullscreenManually", "False" }
                         };
                     try

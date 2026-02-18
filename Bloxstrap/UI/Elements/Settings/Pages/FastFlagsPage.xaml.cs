@@ -276,18 +276,62 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             int cpuCores = Environment.ProcessorCount;
 
             SystemCheckProgress.Value = 20;
-            await Task.Delay(200);
+            await Task.Delay(350);
 
             var tierFlags = new Dictionary<string, Dictionary<string, string>>
             {
-                ["Low"] = new Dictionary<string, string> { ["DFFlagDebugPerfMode"] = "True", ["FFlagHandleAltEnterFullscreenManually"] = "False", ["DFFlagDisableDPIScale"] = "True", ["FFlagDebugGraphicsPreferVulkan"] = "True", ["FFlagDebugGraphicsDisableDirect3D11"] = "True" },
-                ["Mid"] = new Dictionary<string, string> { ["FFlagRenderDisableShadows"] = "False", ["FFlagGraphicsTextureQuality"] = "2", ["FFlagTerrainEnable"] = "True", ["FIntRenderShadowmapBias"] = "-1", ["DFFlagDebugPauseVoxelizer"] = "True", ["FIntRenderShadowIntensity"] = "0", ["DFFlagDebugRenderForceTechnologyVoxel"] = "True", ["FIntFullscreenTitleBarTriggerDelayMillis"] = "3600000", ["FFlagDisablePostFx"] = "True", ["DFIntTextureQualityOverride"] = "2", ["DFFlagTextureQualityOverrideEnabled"] = "True", ["DFFlagDisableDPIScale"] = "True" },
-                ["High"] = new Dictionary<string, string> { ["FFlagRenderDisableShadows"] = "False", ["FFlagGraphicsTextureQuality"] = "3", ["FFlagTerrainEnable"] = "True", ["DFIntTextureQualityOverride"] = "2", ["DFFlagTextureQualityOverrideEnabled"] = "True", ["FFlagDisablePostFx"] = "True", ["FIntFullscreenTitleBarTriggerDelayMillis"] = "3600000", ["FFlagDebugForceFutureIsBrightPhase2"] = "True", ["DFFlagDisableDPIScale"] = "True" },
-                ["Ultra"] = new Dictionary<string, string> { ["FFlagRenderDisableShadows"] = "False", ["FFlagGraphicsTextureQuality"] = "3", ["FFlagTerrainEnable"] = "True", ["FFlagDisablePostFx"] = "True", ["FIntFullscreenTitleBarTriggerDelayMillis"] = "3600000", ["DFFlagDisableDPIScale"] = "True" }
+                ["Low"] = new Dictionary<string, string>
+                {
+                    ["DFFlagDisableDPIScale"] = "True",
+                    ["DFFlagTextureQualityOverrideEnabled"] = "False",
+                    ["DFIntTextureQualityOverride"] = "1",
+                    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "10",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "5",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "0",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "0",
+                    ["FIntGrassMovementReducedMotionFactor"] = "0"
+                },
+
+                ["Mid"] = new Dictionary<string, string>
+                {
+                    ["DFFlagDisableDPIScale"] = "True",
+                    ["DFFlagDebugPauseVoxelizer"] = "True",
+                    ["DFFlagTextureQualityOverrideEnabled"] = "True",
+                    ["DFIntTextureQualityOverride"] = "2",
+                    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "20",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "10",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "5",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "0",
+                    ["FIntGrassMovementReducedMotionFactor"] = "50"
+                },
+
+                ["High"] = new Dictionary<string, string>
+                {
+                    ["DFFlagDisableDPIScale"] = "True",
+                    ["DFFlagTextureQualityOverrideEnabled"] = "True",
+                    ["DFIntTextureQualityOverride"] = "3",
+                    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "30",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "15",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "10",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "5",
+                    ["FIntGrassMovementReducedMotionFactor"] = "75"
+                },
+
+                ["Ultra"] = new Dictionary<string, string>
+                {
+                    ["DFFlagDisableDPIScale"] = "True",
+                    ["DFFlagTextureQualityOverrideEnabled"] = "True",
+                    ["DFIntTextureQualityOverride"] = "4",
+                    ["DFIntCSGLevelOfDetailSwitchingDistance"] = "50",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL12"] = "30",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL23"] = "20",
+                    ["DFIntCSGLevelOfDetailSwitchingDistanceL34"] = "10",
+                    ["FIntGrassMovementReducedMotionFactor"] = "100"
+                }
             };
 
             SystemCheckProgress.Value = 40;
-            await Task.Delay(200);
+            await Task.Delay(350);
 
             string tier = "Mid";
             if (totalRamGb < 4 || cpuCores <= 2)
@@ -298,18 +342,18 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 tier = "High";
 
             SystemCheckProgress.Value = 60;
-            await Task.Delay(200);
+            await Task.Delay(350);
 
             var flags = tierFlags.ContainsKey(tier) ? new Dictionary<string, string>(tierFlags[tier]) : new Dictionary<string, string>();
 
             SystemCheckProgress.Value = 80;
-            await Task.Delay(200);
+            await Task.Delay(350);
 
             string json = System.Text.Json.JsonSerializer.Serialize(flags, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
             await File.WriteAllTextAsync(configFile, json);
 
             SystemCheckProgress.Value = 90;
-            await Task.Delay(200);
+            await Task.Delay(350);
 
             using (StreamWriter writer = new StreamWriter(logFile, false))
             {
@@ -323,7 +367,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
 
             SystemCheckProgress.Value = 100;
-            await Task.Delay(200);
+            await Task.Delay(350);
             Frontend.ShowMessageBox($"System check complete! Flags applied for {tier}-tier.\nConfig saved to: {configFile}\nLog saved to Documents.\nApp Restart is needed!", MessageBoxImage.Information);
 
             string exePath = System.Diagnostics.Process.GetCurrentProcess().MainModule!.FileName!;

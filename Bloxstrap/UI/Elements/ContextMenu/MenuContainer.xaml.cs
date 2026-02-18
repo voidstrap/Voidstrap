@@ -170,7 +170,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                     iconUrl = data.UniverseDetails?.Thumbnail.ImageUrl;
                     universeName = data.UniverseDetails?.Data.Name ?? universeName;
                 }
-                catch {}
+                catch { }
             }
             Dispatcher.Invoke(() => UpdateCurrentGameInfo(universeName, iconUrl));
         }
@@ -345,7 +345,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
             }
         }
 
-        public void ActivityWatcher_OnLogOpen(object? sender, EventArgs e) => 
+        public void ActivityWatcher_OnLogOpen(object? sender, EventArgs e) =>
             Dispatcher.Invoke(() => LogTracerMenuItem.Visibility = Visibility.Visible);
 
         public void ActivityWatcher_OnGameJoin(object? sender, EventArgs e)

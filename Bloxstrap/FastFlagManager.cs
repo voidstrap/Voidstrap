@@ -196,7 +196,6 @@ namespace Voidstrap
             { "Rendering.Mode.D3D11", "FFlagDebugGraphicsPreferD3D11" },
             { "Rendering.Mode.Vulkan", "FFlagDebugGraphicsPreferVulkan" },
             { "Rendering.Mode.OpenGL", "FFlagDebugGraphicsPreferOpenGL" },
-            { "Rendering.Mode.D3D10", "FFlagDebugGraphicsPreferD3D11FL10" },
 
             // Task Scheduler Avoid sleep
             { "Rendering.AvoidSleep", "DFFlagTaskSchedulerAvoidSleep" },
@@ -455,7 +454,6 @@ namespace Voidstrap
         {
             { RenderingMode.Default, "None" },
             { RenderingMode.D3D11, "D3D11" },
-            { RenderingMode.D3D10, "D3D10" },
             { RenderingMode.Vulkan, "Vulkan" },
             { RenderingMode.OpenGL, "OpenGL" },
 
@@ -764,29 +762,10 @@ public static IReadOnlyDictionary<RefreshRate, string?> RefreshRates => new Dict
             OriginalProp = new(Prop);
         }
 
-
-
         public override void Load(bool alertFailure = false)
         {
             base.Load(alertFailure);
             OriginalProp = Prop.ToDictionary(pair => pair.Key, pair => (object)(pair.Value?.ToString() ?? string.Empty));
-
-            if (!HasFastFlags())
-            {
-                var presets = new Dictionary<string, string>
-        {
-            { "DFFlagDebugPerfMode", "True" },
-            { "FFlagHandleAltEnterFullscreenManually", "False" },
-        }
-            ;
-                foreach (var (key, value) in presets)
-                {
-                    if (!Prop.ContainsKey(key))
-                    {
-                        Prop[key] = value;
-                    }
-                }
-            }
         }
 
         private bool HasFastFlags()

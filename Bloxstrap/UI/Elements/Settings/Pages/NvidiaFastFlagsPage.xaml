@@ -217,36 +217,5 @@
             </StackPanel>
         </ui:CardExpander>
 
-        <TextBlock Margin="0,16,0,0"
-            FontSize="17.65"
-            FontWeight="Medium"
-            Text="Advanced" />
-
-        <ui:CardExpander Margin="0,8,0,0">
-            <ui:CardExpander.Header>
-                <StackPanel>
-                    <TextBlock FontSize="14" Text="DLSS Overrides" />
-                    <TextBlock FontSize="12" Foreground="{StaticResource TextFillColorTertiaryBrush}"
-                               Text="Force specific DLSS behaviors at the driver level." />
-                </StackPanel>
-            </ui:CardExpander.Header>
-
-            <StackPanel>
-
-                <controls:OptionControl
-                    Header="DLSS Super Resolution Override"
-                    Description="Forces DLSS Super Resolution behavior where supported.">
-                    <ui:ToggleSwitch IsChecked="{Binding EnableDlssSuperResolution}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-                    Header="DLSS Frame Generation Override"
-                    Description="Forces DLSS Frame Generation on supported RTX 40 series GPUs.">
-                    <ui:ToggleSwitch IsChecked="{Binding EnableDlssFrameGen}" />
-                </controls:OptionControl>
-
-            </StackPanel>
-        </ui:CardExpander>
-
     </StackPanel>
 </ui:UiPage>
