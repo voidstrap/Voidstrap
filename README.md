@@ -1,6 +1,6 @@
 # Voidstrap
 
-### A Next‑Gen Bloxstrap Fork
+### A Simple Bloxstrap Fork
 
 **Voidstrap** is a modern, performance‑focused fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to give you **full control, maximum customization, and improved stability** for your **Roblox** experience.
 
