@@ -138,7 +138,7 @@ With a clean, modern UI, useful tools, and performance improvements, Voidstrap l
 
 ### Core Team
 
-* **Bratic** — Owner · [https://github.com/nobadboy](https://github.com/nobadboy)
+* **Bratic** — Owner · [https://github.com/KloBraticc](https://github.com/KloBraticc)
 * **midaskira** — Co‑Owner · [https://github.com/midaskira](https://github.com/midaskira)
 
 ### Contributors
