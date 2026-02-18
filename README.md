@@ -67,7 +67,7 @@ With a clean, modern UI, useful tools, and performance improvements, Voidstrap l
 * Discord RPC (Discord Rich Presence) (with join support)
 * Cross‑game teleport fixes
 * CPU core limiter
-* Memory & GPU optimizer *(BETA)*
+* Memory & GPU optimizer
 * Custom Discord RPC editor
 * Built‑in music player and web browser
 
