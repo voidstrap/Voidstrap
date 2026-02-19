@@ -5,27 +5,16 @@
 
 <p align="center"><strong>Enjoy Voidstrap? Star the repository and support development!</strong></p>
 
----
+<div align="center">
 
-## Quick/Social Links
+[![Total Downloads][shield-repo-total]][repo-releases]
+[![Latest Downloads][shield-repo-downloads]][repo-latest]
+[![Latest Release][shield-repo-latest]][repo-latest]
+[![Stars][shield-repo-stars]][repo-stargazers]
+[![Discord][shield-discord-server]][discord-invite]
 
-<p align="center">
-  <a href="https://github.com/voidstrap/Voidstrap/releases">
-    <img src="https://img.shields.io/github/downloads/voidstrap/Voidstrap/total?style=for-the-badge&color=981bfe&label=Downloads" />
-  </a>
-  <a href="https://github.com/voidstrap/Voidstrap/releases/latest">
-    <img src="https://img.shields.io/github/downloads/voidstrap/Voidstrap/latest/total?style=for-the-badge&color=ba55ff&label=Latest" />
-  </a>
-  <a href="https://github.com/voidstrap/Voidstrap/releases/latest">
-    <img src="https://img.shields.io/github/v/release/voidstrap/Voidstrap?style=for-the-badge&color=7a39fb&label=Release" />
-  </a>
-  <a href="https://github.com/voidstrap/Voidstrap/stargazers">
-    <img src="https://img.shields.io/github/stars/voidstrap/Voidstrap?style=for-the-badge&color=FFD700&label=Stars" />
-  </a>
-  <a href="https://discord.gg/dfA9PdWgcV">
-    <img src="https://img.shields.io/discord/1327967202015580223?style=for-the-badge&logo=discord&label=Discord&color=4d3dff" />
-  </a>
-</p>
+</div>
+
 
 ## Installation
 
@@ -74,3 +63,15 @@ Voidstrap is built using **C# and .NET**.
    https://github.com/voidstrap/Voidstrap
 2. Click **Fork** (top right)
 3. This creates your own copy under your GitHub account
+
+
+[shield-repo-downloads]:  https://img.shields.io/github/downloads/voidstrap/Voidstrap/latest/total?color=981bfe
+[shield-repo-total]:      https://img.shields.io/github/downloads/voidstrap/Voidstrap/total?color=8a2be2
+[shield-repo-latest]:     https://img.shields.io/github/v/release/voidstrap/Voidstrap?color=7a39fb
+[shield-repo-stars]:      https://img.shields.io/github/stars/voidstrap/Voidstrap?color=ffd700
+[shield-discord-server]:  https://img.shields.io/discord/1327967202015580223?logo=discord&logoColor=white&label=Discord&color=4d3dff
+
+[repo-releases]:          https://github.com/voidstrap/Voidstrap/releases
+[repo-latest]:            https://github.com/voidstrap/Voidstrap/releases/latest
+[repo-stargazers]:        https://github.com/voidstrap/Voidstrap/stargazers
+[discord-invite]:         https://discord.gg/dfA9PdWgcV
