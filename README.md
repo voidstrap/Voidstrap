@@ -48,8 +48,8 @@ https://github.com/voidstrap/Voidstrap
 
 ---
 
-
-## How to Fork & Build
+<!-- Removed build will prob show how to do that in a later date im lazy for rn -->
+## How to Fork
 
 <p align="left">
   <a href="https://www.w3schools.com/cs/" target="_blank" rel="noreferrer">
