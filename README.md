@@ -74,5 +74,3 @@ Voidstrap is built using **C# and .NET**.
    https://github.com/voidstrap/Voidstrap
 2. Click **Fork** (top right)
 3. This creates your own copy under your GitHub account
-
----
