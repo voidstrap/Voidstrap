@@ -15,6 +15,12 @@
 
 </div>
 
+> [!NOTE]
+> Voidstrap only supports **Windows 10 and above**. We do not plan on supporting other Operating Systems.
+> You can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for MacOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.
+> More experienced Linux users can use tools like **[Lution](https://github.com/wookhq/Lution)** for example.
+<!-- Got permission from return to add this it looked nice sooo I wanted to ask if I could thank u man u da best ❤️ though I may change it soon because I didnt change it at all when I added it and I felt guilty for adding it even after asking -->
+
 ## Installation
 
 1. Download the latest version
