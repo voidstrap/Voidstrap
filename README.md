@@ -1,20 +1,13 @@
-# Voidstrap
-
-### A Simple Bloxstrap Fork
-
-**Voidstrap** is a modern, performance‑focused fork of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap), designed to give you **full control, maximum customization, and improved stability** for your **Roblox** experience.
-
-With a clean, modern UI, useful tools, and performance improvements, Voidstrap lets you decide how Roblox runs, not the default launcher.
 
 <p align="center">
-  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Bloxstrap/Voidstrap.png" alt="Voidstrap Logo" width="400" />
+  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Bloxstrap/Voidstrap.png" alt="Voidstrap Logo" width="350" />
 </p>
 
 <p align="center"><strong>Enjoy Voidstrap? Star the repository and support development!</strong></p>
 
 ---
 
-## 🚀 Quick Links
+## Quick/Social Links
 
 <p align="center">
   <a href="https://github.com/voidstrap/Voidstrap/releases">
@@ -34,121 +27,52 @@ With a clean, modern UI, useful tools, and performance improvements, Voidstrap l
   </a>
 </p>
 
----
+## Installation
 
-## ✨ Why choose Voidstrap?
-
-* **Fast & Lightweight** — Optimized launcher that runs efficiently
-* **Multi-Instance Support** — Run multiple Roblox clients at the same time
-* **Cross Game Teleport Fix** — Seamless teleports without Error 773
-* **Channel Control** — Full access to Roblox channels and boot behavior
-* **Customizable UI** — Themes, layouts, icons, cursors, and backgrounds
-* **Update Management** — Block, delay, or control forced Roblox updates
-* **Improved Stability** — Enhanced logging, diagnostics, and crash prevention
+1. Download the latest version
+   👉 https://github.com/voidstrap/Voidstrap/releases/latest
+2. Run the installer
+3. Launch Voidstrap
+4. Enjoy a more simple Roblox
 
 ---
 
-## 📥 Installation
+## Frequently Asked Questions (FAQ)
 
-1. **Download** the latest version [here](https://github.com/voidstrap/Voidstrap/releases/latest)
-2. **Run the installer** and follow the instructions
-3. **Launch Voidstrap** and enjoy a epic Roblox experience
+### Can it get you banned?
 
----
-
-## 🧩 Features
-
-### Integrations
-
-* Player and message logging
-* Hardware acceleration & animation toggles
-* One‑click Roblox Studio launch
-* Community hub (themes, mods, FastFlags)
-* Discord RPC (Discord Rich Presence) (with join support)
-* Cross‑game teleport fixes
-* CPU core limiter
-* Memory & GPU optimizer
-* Custom Discord RPC editor
-* Built‑in music player and web browser
+No. Voidstrap does not inject cheats, exploits, or bypass Roblox security.  
+It functions as a launcher and configuration manager. However, as with any third-party tool, use it at your own discretion.
 
 ---
 
-### FastFlags & Settings
+### Is it a virus?
 
-* Backup and restore configurations
-* Import/export FastFlags with history
-* Support for custom and invalid flags
-* Skip splash screens and startup warnings
-* System specification viewer
+No. Voidstrap is fully open-source, meaning anyone can inspect the code.  
+If your antivirus flags it, it is most likely a false positive due to how launchers interact with Roblox processes and updates. You can verify the source code yourself at:
+https://github.com/voidstrap/Voidstrap
 
 ---
 
-### Channel & Update Control
 
-* Prevent forced Roblox updates
-* Switch between update channels with ease
-* Built‑in Voidstrap auto‑updater
+## How to Fork & Build
 
----
+<p align="left">
+  <a href="https://www.w3schools.com/cs/" target="_blank" rel="noreferrer">
+    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/csharp/csharp-original.svg" alt="csharp" width="40" height="40"/>
+    <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/dot-net/dot-net-original-wordmark.svg" alt="dotnet" width="40" height="40"/>
+  </a>
+</p>
 
-### Bootstrap & Launcher Improvements
-
-* Multi‑instance support
-* Theme preview before applying
-* Advanced error logging & diagnostics
-* Persistent uninstall data
-* Faster installs and updates
-* Fully redesigned UI (v1.0.7.1+)
-* Optional CPU overclock feature
-* BetterBLOX datacenter viewer
+Voidstrap is built using **C# and .NET**.
 
 ---
 
-### UI, Themes & Mods
+### Fork the Repository
 
-* Theme switching (no restart required)
-* Over 10+ built‑in themes
-* Custom cursors and icons
-* Mod manager (e.g. Potato Graphics)
-* Hub‑based theme and mod downloads
-* Custom backgrounds and animated GIF support
+1. Go to:  
+   https://github.com/voidstrap/Voidstrap
+2. Click **Fork** (top right)
+3. This creates your own copy under your GitHub account
 
 ---
-
-### Performance & Smart Tools
-
-* Session memory restore
-* Automatic log cleanup
-* Roblox performance optimizer *(BETA)*
-* Crash monitoring for problematic flags
-* Gamepass info in taskbar menu
-* BetterBLOX uptime tracking
-
----
-
-## 🤝 Community and Support
-
-* **Discord:** [Join the Voidstrap Server](https://discord.gg/dfA9PdWgcV)
-* **Issues & Feature Requests:** [GitHub Issues](https://github.com/voidstrap/Voidstrap/issues)
-* **Support the Project:** Star the repository
-
----
-
-## 🙌 Credits
-
-### Core Team
-
-* **Bratic** — Owner · [https://github.com/KloBraticc](https://github.com/KloBraticc)
-* **midaskira** — Co‑Owner · [https://github.com/midaskira](https://github.com/midaskira)
-
-### Contributors
-
-* [https://github.com/stoofis](https://github.com/stoofis)
-* [https://github.com/LeventGameing](https://github.com/LeventGameing)
-* [https://github.com/DynamicFastFlag](https://github.com/DynamicFastFlag)
-* [https://github.com/TnoobixRT](https://github.com/TnoobixRT)
-
-### Inspiration
-
-* [https://github.com/bloxstraplabs/bloxstrap](https://github.com/bloxstraplabs/bloxstrap)
-* [https://github.com/fishstrap/fishstrap](https://github.com/fishstrap/fishstrap)
