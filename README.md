@@ -15,7 +15,6 @@
 
 </div>
 
-
 ## Installation
 
 1. Download the latest version
