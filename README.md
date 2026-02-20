@@ -25,7 +25,7 @@
 
 1. Download the latest version
    👉 https://github.com/voidstrap/Voidstrap/releases/latest
-2. Run the installer
+2. Run the Exe and Finish the setup
 3. Launch Voidstrap
 4. Enjoy a more simple Roblox
 
