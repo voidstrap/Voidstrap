@@ -228,12 +228,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.MultiAccount = value;
         }
 
-        public bool DX12Likely
-        {
-            get => App.Settings.Prop.DX12Like;
-            set => App.Settings.Prop.DX12Like = value;
-        }
-
         public bool ForceRobloxLanguage
         {
             get => App.Settings.Prop.ForceRobloxLanguage;

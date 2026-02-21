@@ -147,9 +147,6 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand AddCustomDeathSoundCommand => new RelayCommand(AddCustomDeathSound);
         public ICommand RemoveCustomDeathSoundCommand => new RelayCommand(RemoveCustomDeathSound);
 
-        public ICommand ClearTexturesCommand => new RelayCommand(() => ApplyDarkTextures(true));
-        public ICommand RestoreTexturesCommand => new RelayCommand(() => ApplyDarkTextures(false));
-
         public Visibility ChooseCustomFontVisibility => !String.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Collapsed : Visibility.Visible;
 
         public Visibility DeleteCustomFontVisibility => !String.IsNullOrEmpty(TextFontTask.NewState) ? Visibility.Visible : Visibility.Collapsed;
@@ -231,12 +228,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.SkyBoxDataSending = value;
         }
 
-        public bool MotionBlurOverlay2
-        {
-            get => App.Settings.Prop.MotionBlurOverlay2;
-            set => App.Settings.Prop.MotionBlurOverlay2 = value;
-        }
-
         public bool ServerPingDisplay
         {
             get => App.Settings.Prop.ServerPingCounter;
@@ -290,96 +281,6 @@ namespace Voidstrap.UI.ViewModels.Settings
                 Frontend.ShowMessageBox(Strings.Common_RobloxNotInstalled, MessageBoxImage.Error);
 
         }
-
-        public static void ApplyDarkTextures(bool enableDarkTextures)
-        {
-            try
-            {
-                string versionsPath = Paths.Versions;
-                if (!Directory.Exists(versionsPath))
-                    return;
-
-                string integrationsPath = Paths.Integrations;
-                string backupFolderName = "OriginalTextures";
-                bool IsBrdfLUT(string file) =>
-                    Path.GetFileNameWithoutExtension(file)
-                        .Equals("brdfLUT", StringComparison.OrdinalIgnoreCase);
-
-                void MoveFiles(string sourceDir, string destDir)
-                {
-                    if (!Directory.Exists(sourceDir))
-                        return;
-
-                    foreach (var file in Directory.GetFiles(sourceDir, "*", SearchOption.AllDirectories))
-                    {
-                        if (IsBrdfLUT(file))
-                            continue;
-
-                        string relativePath = Path.GetRelativePath(sourceDir, file);
-                        string destPath = Path.Combine(destDir, relativePath);
-
-                        Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-                        File.Move(file, destPath, true);
-                    }
-                }
-                void CleanDirectory(string dir)
-                {
-                    if (!Directory.Exists(dir))
-                        return;
-
-                    foreach (var file in Directory.GetFiles(dir, "*", SearchOption.AllDirectories))
-                    {
-                        if (IsBrdfLUT(file))
-                            continue;
-
-                        File.Delete(file);
-                    }
-                    foreach (var subDir in Directory.GetDirectories(dir, "*", SearchOption.AllDirectories)
-                                                   .OrderByDescending(d => d.Length))
-                    {
-                        if (!Directory.EnumerateFileSystemEntries(subDir).Any())
-                            Directory.Delete(subDir);
-                    }
-                }
-
-                var versionFolders = Directory.GetDirectories(versionsPath)
-                                              .Where(d => Path.GetFileName(d).StartsWith("version-"));
-
-                foreach (var versionFolder in versionFolders)
-                {
-                    string pcPath = Path.Combine(versionFolder, "PlatformContent", "pc", "textures");
-                    string backupPath = Path.Combine(
-                        integrationsPath,
-                        backupFolderName,
-                        Path.GetFileName(versionFolder)
-                    );
-
-                    if (!Directory.Exists(pcPath))
-                        continue;
-
-                    if (enableDarkTextures)
-                    {
-                        Directory.CreateDirectory(backupPath);
-                        MoveFiles(pcPath, backupPath);
-                        CleanDirectory(pcPath);
-                    }
-                    else if (Directory.Exists(backupPath))
-                    {
-                        CleanDirectory(pcPath);
-                        MoveFiles(backupPath, pcPath);
-                    }
-                }
-
-                Console.WriteLine(enableDarkTextures
-                    ? "Textures removed (brdfLUT preserved)."
-                    : "Textures restored (brdfLUT preserved).");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error applying textures: {ex.Message}");
-            }
-        }
-
 
         private Visibility GetVisibility(string directory, string[] filenames, bool checkExist)
         {

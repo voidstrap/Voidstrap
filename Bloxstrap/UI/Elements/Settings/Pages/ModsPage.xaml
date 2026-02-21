@@ -93,7 +93,7 @@
             Margin="0,0,0,16"
             Text="{x:Static resources:Strings.Common_Presets}" />
 
-                    <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
+                    <ui:CardExpander IsExpanded="False">
                         <ui:CardExpander.Header>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -294,16 +294,8 @@ Description="Adds a Experimental overlay-based lighting changer. Customize your 
                                         <ui:ToggleSwitch IsChecked="{Binding MotionBlurOverlayEnabled, Mode=TwoWay}" />
                                     </controls:OptionControl>
 
-
-                                    <controls:OptionControl 
-    Header="FPS Smoother (WIP)" 
-Description="Adds Smoother Effect to your Screen as a Overlay. This is in the works (WIP)"
->
-                                        <ui:ToggleSwitch IsChecked="{Binding MotionBlurOverlay2, Mode=TwoWay}" />
-                                    </controls:OptionControl>
                                 </StackPanel>
                             </ui:CardExpander>
-
                         </StackPanel>
                     </ui:CardExpander>
 
@@ -317,13 +309,6 @@ Description="Adds Smoother Effect to your Screen as a Overlay. This is in the wo
 
                     <controls:OptionControl Description="Attempt to recreate Fullbright without FFlags. Not effective when Lighting FFlags are used." Header="FullBright">
                         <ui:ToggleSwitch IsChecked="{Binding Fullbright, Mode=TwoWay}" />
-                    </controls:OptionControl>
-
-                    <controls:OptionControl Description="Attempts to add potato graphics to certain Roblox games." Header="Potato graphics">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                            <ui:Button Content="Clear Textures" Command="{Binding ClearTexturesCommand}" Margin="0,0,5,0"/>
-                            <ui:Button Appearance="Danger" Content="Restore" Command="{Binding RestoreTexturesCommand}" />
-                        </StackPanel>
                     </controls:OptionControl>
 
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Presets_MouseCursor_Description}" Header="{x:Static resources:Strings.Menu_Mods_Presets_MouseCursor_Title}">

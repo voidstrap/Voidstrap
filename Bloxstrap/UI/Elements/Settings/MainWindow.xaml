@@ -124,7 +124,7 @@
       Grid.RowSpan="3"
       Panel.ZIndex="-10"
       ClipToBounds="True">
-            
+
             <MediaElement x:Name="BackgroundMedia"
                   Stretch="UniformToFill"
                   Opacity="1"
@@ -294,7 +294,7 @@
                                  SelectedPageIndex="0">
 
                 <ui:NavigationFluent.Items>
-                    
+
                     <ui:NavigationItem Content="CORE"
                        IsEnabled="False"
                        Opacity="0.6" />
@@ -302,7 +302,7 @@
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
                        Icon="Add12"
                        PageType="{x:Type pages:IntegrationsPage}" />
-                    
+
                     <ui:NavigationItem Content="Deployment"
                        Icon="PlaySettings20"
                        PageType="{x:Type pages:BehaviourPage}" />
@@ -320,11 +320,11 @@
                     <ui:NavigationItem Content="CONFIGURATION"
                        IsEnabled="False"
                        Opacity="0.6" />
-                    
+
                     <ui:NavigationItem Content="FastFlag Settings"
                        Icon="Settings28"
                        PageType="{x:Type pages:FastFlagsPage}" />
-                    
+
                     <ui:NavigationItem x:Name="FastFlagEditorNavItem"
                        Content="FastFlag Editor"
                        Icon="Flag28"
@@ -336,7 +336,7 @@
                     <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
                        Icon="Apps32"
                        PageType="{x:Type pages:ShortcutsPage}" />
-                    
+
 
                     <ui:NavigationItem Content="Global"
                        Icon="GlobeLocation24"
@@ -351,7 +351,7 @@
                     <ui:NavigationItem
                        IsEnabled="False"
                        Opacity="0.6" />
-                    
+
                     <ui:NavigationItem Content="News"
                        Icon="News16"
                        Margin="0,-45,0,20"

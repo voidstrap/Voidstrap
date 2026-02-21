@@ -128,15 +128,11 @@
                                     SelectedItem="{Binding SelectedCpuPriority, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                         </controls:OptionControl>
 
-                        <controls:OptionControl Header="Trim Roblox Memory" Description="Cuts Roblox's memory in half to help with RAM usage. Useful for multi-account use.">
-                            <ui:ToggleSwitch IsChecked="{Binding MultiAccount, Mode=TwoWay}" />
-                        </controls:OptionControl>
+                            <controls:OptionControl Header="Trim Roblox Memory" Description="Cuts Roblox's memory in half to help with RAM usage. Useful for multi-account use.">
+                                <ui:ToggleSwitch IsChecked="{Binding MultiAccount, Mode=TwoWay}" />
+                            </controls:OptionControl>
 
-                        <controls:OptionControl Header="DX12 Features" Description="DX12-like features for Roblox (simulated, not actual DX12).">
-                            <ui:ToggleSwitch IsChecked="{Binding DX12Likely, Mode=TwoWay}" />
-                        </controls:OptionControl>
-
-                        <controls:OptionControl Header="Optimize Roblox" Description="Optimizes Roblox based on your current CPU, GPU, and memory.">
+                            <controls:OptionControl Header="Optimize Roblox" Description="Optimizes Roblox based on your current CPU, GPU, and memory.">
                             <ui:ToggleSwitch IsChecked="{Binding OptimizeRoblox, Mode=TwoWay}" />
                         </controls:OptionControl>
 

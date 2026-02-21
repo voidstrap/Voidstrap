@@ -369,23 +369,6 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 });
             }
 
-            if (App.Settings.Prop.MotionBlurOverlay2)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if (!MotionBlurManager.IsEnabled)
-                        MotionBlurManager.Start();
-                });
-            }
-            else
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if (MotionBlurManager.IsEnabled)
-                        MotionBlurManager.Stop();
-                });
-            }
-
             if (App.Settings.Prop.Crosshair)
             {
                 var crosshairVM = new ModsViewModel();

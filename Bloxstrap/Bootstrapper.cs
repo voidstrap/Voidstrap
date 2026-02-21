@@ -80,7 +80,7 @@ namespace Voidstrap
         private string _latestVersionDirectory = null!;
         private PackageManifest _versionPackageManifest = null!;
 
-        private bool _isInstalling = false;
+        private int _isInstalling; // 0 = false, 1 = true
         private double _progressIncrement;
         private double _taskbarProgressIncrement;
         private double _taskbarProgressMaximum;
@@ -164,7 +164,7 @@ namespace Voidstrap
             _noConnection = true;
             App.Logger.WriteException(LOG_IDENT, exception);
 
-            if (_isInstalling)
+            if (Volatile.Read(ref _isInstalling) == 1)
             {
                 App.Logger.WriteLine(LOG_IDENT, "Already upgrading skipping retry.");
                 return;
@@ -374,11 +374,13 @@ namespace Voidstrap
                 App.Logger.WriteLine(LOG_IDENT,
                     $"Fetching client version info for channel: {Deployment.Channel}");
 
-                ClientVersion clientVersion;
+                ClientVersion? clientVersion = null;
+
+                var infoUrl = Deployment.GetInfoUrl(Deployment.Channel);
 
                 using (var response = await App.HttpClient.GetAsync(
-                    Deployment.GetInfoUrl(Deployment.Channel),
-                    HttpCompletionOption.ResponseHeadersRead))
+                    infoUrl,
+                    HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
                 {
                     if (!response.IsSuccessStatusCode)
                     {
@@ -391,32 +393,48 @@ namespace Voidstrap
                                 "403 Forbidden — switching to default channel.");
 
                             Deployment.Channel = Deployment.DefaultChannel;
-                            clientVersion = await Deployment.GetInfo(Deployment.Channel);
-                            goto VersionInfoOK;
+                            clientVersion = await Deployment
+                                .GetInfo(Deployment.Channel)
+                                .ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            throw new HttpRequestException(
+                                $"Bad HTTP status: {response.StatusCode}");
+                        }
+                    }
+                    else
+                    {
+                        var mediaType = response.Content.Headers.ContentType?.MediaType;
+
+                        if (mediaType == null ||
+                            !mediaType.Contains("application/json",
+                                StringComparison.OrdinalIgnoreCase))
+                        {
+                            var preview = await response.Content
+                                .ReadAsStringAsync()
+                                .ConfigureAwait(false);
+
+                            App.Logger.WriteLine(LOG_IDENT,
+                                $"❌ Expected JSON but got '{mediaType}'. Preview:\n" +
+                                preview.Substring(0, Math.Min(300, preview.Length)));
+
+                            throw new Exception("Invalid response content-type");
                         }
 
-                        throw new HttpRequestException(
-                            $"Bad HTTP status: {response.StatusCode}");
+                        var jsonText = await response.Content
+                            .ReadAsStringAsync()
+                            .ConfigureAwait(false);
+
+                        clientVersion = JsonSerializer.Deserialize<ClientVersion>(jsonText);
+
+                        if (clientVersion == null)
+                            throw new Exception("ClientVersion JSON deserialized to null.");
                     }
-
-                    var mediaType = response.Content.Headers.ContentType?.MediaType;
-                    if (mediaType != "application/json")
-                    {
-                        var preview = await response.Content.ReadAsStringAsync();
-                        App.Logger.WriteLine(LOG_IDENT,
-                            $"❌ Expected JSON but got '{mediaType}'. Preview:\n" +
-                            preview[..Math.Min(300, preview.Length)]);
-
-                        throw new Exception("Invalid response content-type");
-                    }
-
-                    var jsonText = await response.Content.ReadAsStringAsync();
-
-                    clientVersion = JsonSerializer.Deserialize<ClientVersion>(jsonText)
-                        ?? throw new Exception("ClientVersion JSON was null.");
                 }
 
-            VersionInfoOK:
+                if (clientVersion == null || string.IsNullOrWhiteSpace(clientVersion.VersionGuid))
+                    throw new Exception("VersionGuid is missing from clientVersion.");
 
                 _latestVersionGuid = clientVersion.VersionGuid;
                 _latestVersionDirectory =
@@ -430,7 +448,7 @@ namespace Voidstrap
 
                 using (var manifestResp = await App.HttpClient.GetAsync(
                     pkgManifestUrl,
-                    HttpCompletionOption.ResponseHeadersRead))
+                    HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false))
                 {
                     if (!manifestResp.IsSuccessStatusCode)
                     {
@@ -441,13 +459,15 @@ namespace Voidstrap
                         return;
                     }
 
-                    var manifestText =
-                        await manifestResp.Content.ReadAsStringAsync();
+                    var manifestText = await manifestResp.Content
+                        .ReadAsStringAsync()
+                        .ConfigureAwait(false);
 
-                    if (manifestText.TrimStart().StartsWith("<"))
+                    if (string.IsNullOrWhiteSpace(manifestText) ||
+                        manifestText.TrimStart().StartsWith("<"))
                     {
                         App.Logger.WriteLine(LOG_IDENT,
-                            "❌ Manifest returned HTML — skipping parse.");
+                            "❌ Manifest returned HTML or empty response — skipping parse.");
 
                         _versionPackageManifest = new("");
                         return;
@@ -628,24 +648,6 @@ namespace Voidstrap
 
                     if (App.Settings.Prop?.IsBetterServersEnabled == true)
                         ApplyOptimizations(_robloxProcess);
-
-
-                    if (App.Settings.Prop?.DX12Like == true)
-                    {
-                        var options = new RobloxDX12Optimizer.RobloxDx12Optimizer.OptimizerOptions
-                        {
-                            EnableHighResTimer = true,
-                            HighResMillis = 1,
-                            OverrideAffinity = true,
-                            AffinityMask = 0xFFFFFFFFFFFFFFFFUL,
-                            WorkingSetMinMB = 128,
-                            WorkingSetMaxMB = 2048,
-                            BoostThreads = true,
-                            ProbeVendorAndDx = true,
-                            SafeMode = false
-                        };
-                        RobloxDX12Optimizer.RobloxDx12Optimizer.Start(intervalMs: 2000, options: options);
-                    }
 
                     if (App.Settings.Prop?.MultiAccount == true)
                         RobloxMemoryCleaner.CleanAllRobloxMemory();
@@ -1106,7 +1108,7 @@ namespace Voidstrap
         private IntPtr _originalAffinity;
         private ProcessPriorityClass _originalPriority;
 
-        public void ApplyOptimizations(Process robloxProcess)
+        public void ApplyOptimizations(Process robloxProcess) // lowk placebo and forgot to remove this... or im just lazy, lazy breatic at work. If u see this ping me on discord for a special role fr
         {
             if (robloxProcess == null || robloxProcess.HasExited) return;
             if (!App.Settings.Prop.IsBetterServersEnabled)
@@ -1417,12 +1419,15 @@ namespace Voidstrap
             if (Dialog is not null)
                 Dialog.CancelEnabled = false;
 
-            if (_isInstalling)
+            if (Volatile.Read(ref _isInstalling) == 1)
             {
                 try
                 {
-                    if (Directory.Exists(_latestVersionDirectory))
+                    if (!string.IsNullOrWhiteSpace(_latestVersionDirectory) &&
+                        Directory.Exists(_latestVersionDirectory))
+                    {
                         Directory.Delete(_latestVersionDirectory, true);
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -1577,20 +1582,28 @@ namespace Voidstrap
         {
             const string LOG_IDENT = "Bootstrapper::UpgradeRoblox";
             var ct = _cancelTokenSource.Token;
-            if (_isInstalling) { App.Logger.WriteLine(LOG_IDENT, "Upgrade already in progress; skipping."); return; }
-            _isInstalling = true;
+
+            if (Interlocked.Exchange(ref _isInstalling, 1) == 1)
+            {
+                App.Logger.WriteLine(LOG_IDENT, "Upgrade already in progress; skipping.");
+                return;
+            }
 
             try
             {
                 if (!App.Settings.Prop.UpdateRoblox)
                 {
                     SetStatus(Strings.Bootstrapper_Status_CancelUpgrade);
-                    App.Logger.WriteLine(LOG_IDENT, "Upgrading disabled, cancelling the upgrade.");
+                    App.Logger.WriteLine(LOG_IDENT, "Upgrading disabled, cancelling upgrade.");
+
                     await Task.Delay(250, ct).ConfigureAwait(false);
 
                     if (!Directory.Exists(_latestVersionDirectory))
                     {
-                        Frontend.ShowMessageBox(Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient, MessageBoxImage.Warning, MessageBoxButton.OK);
+                        Frontend.ShowMessageBox(
+                            Strings.Bootstrapper_Dialog_NoUpgradeWithoutClient,
+                            MessageBoxImage.Warning,
+                            MessageBoxButton.OK);
                     }
                     return;
                 }
@@ -1603,66 +1616,83 @@ namespace Voidstrap
                 Directory.CreateDirectory(Paths.Downloads);
                 Directory.CreateDirectory(Paths.Versions);
 
-                var cachedPackageHashes = Directory.GetFiles(Paths.Downloads).Select(Path.GetFileName).ToList();
+                var cachedPackageHashes =
+                    Directory.Exists(Paths.Downloads)
+                        ? Directory.GetFiles(Paths.Downloads).Select(Path.GetFileName).ToList()
+                        : new List<string?>();
+
                 if (!IsStudioLaunch)
                     await Task.Run(KillRobloxPlayers, ct).ConfigureAwait(false);
+
                 if (Directory.Exists(_latestVersionDirectory))
                 {
                     try
                     {
-                        await SafeDeleteDirectoryAsync(_latestVersionDirectory, LOG_IDENT, ct).ConfigureAwait(false);
+                        await SafeDeleteDirectoryAsync(_latestVersionDirectory, LOG_IDENT, ct)
+                            .ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, "Failed to delete latest version directory");
+                        App.Logger.WriteLine(LOG_IDENT, "Failed to delete version directory.");
                         App.Logger.WriteException(LOG_IDENT, ex);
                     }
                 }
+
                 Directory.CreateDirectory(_latestVersionDirectory);
+
                 if (_versionPackageManifest == null || !_versionPackageManifest.Any())
                 {
-                    App.Logger.WriteLine(LOG_IDENT, "Warning: _versionPackageManifest is null or empty. Skipping upgrade logic.");
-                    return;
+                    throw new Exception("Package manifest is null or empty.");
                 }
 
                 long totalPackedSize = _versionPackageManifest.Sum(p => (long)p.PackedSize);
                 long totalUnpackedSize = _versionPackageManifest.Sum(p => (long)p.Size);
-                long totalSizeRequired = totalPackedSize + totalUnpackedSize;
+
+                long totalSizeRequired =
+                    (long)((totalPackedSize + totalUnpackedSize) * 1.1);
 
                 if (Filesystem.GetFreeDiskSpace(Paths.Base) < totalSizeRequired)
                 {
-                    Frontend.ShowMessageBox(Strings.Bootstrapper_NotEnoughSpace, MessageBoxImage.Error);
+                    Frontend.ShowMessageBox(
+                        Strings.Bootstrapper_NotEnoughSpace,
+                        MessageBoxImage.Error);
+
                     App.Terminate(ErrorCode.ERROR_INSTALL_FAILURE);
                     return;
                 }
+
                 if (Dialog is not null)
                 {
                     Dialog.ProgressStyle = ProgressBarStyle.Continuous;
                     Dialog.TaskbarProgressState = TaskbarItemProgressState.Normal;
 
                     Dialog.ProgressMaximum = ProgressBarMaximum;
-                    _progressIncrement = (double)ProgressBarMaximum / Math.Max(1, totalPackedSize);
 
-                    _taskbarProgressMaximum = Dialog is WinFormsDialogBase
-                        ? TaskbarProgressMaximumWinForms
-                        : TaskbarProgressMaximumWpf;
+                    _progressIncrement =
+                        (double)ProgressBarMaximum / Math.Max(1, totalPackedSize);
 
-                    _taskbarProgressIncrement = _taskbarProgressMaximum / Math.Max(1, totalPackedSize);
+                    _taskbarProgressMaximum =
+                        Dialog is WinFormsDialogBase
+                            ? TaskbarProgressMaximumWinForms
+                            : TaskbarProgressMaximumWpf;
+
+                    _taskbarProgressIncrement =
+                        _taskbarProgressMaximum / Math.Max(1, totalPackedSize);
                 }
 
-                var totalPackages = _versionPackageManifest.Count;
+                int totalPackages = _versionPackageManifest.Count;
                 int packagesCompleted = 0;
+                int failedPackages = 0;
 
-                long totalBytesToDownload = _versionPackageManifest.Sum(p => (long)p.PackedSize);
                 long totalBytesDownloaded = 0;
-
-                using var throttler = new SemaphoreSlim(8);
                 var swOverall = Stopwatch.StartNew();
 
-                App.Logger.WriteLine(LOG_IDENT, $"Preparing to download {totalPackages} packages ({totalBytesToDownload / 1048576.0:F2} MB total)");
+                using var throttler = new SemaphoreSlim(8);
+
                 var tasks = _versionPackageManifest.Select(async package =>
                 {
                     await throttler.WaitAsync(ct).ConfigureAwait(false);
+
                     try
                     {
                         await WithRetryAsync(
@@ -1678,41 +1708,48 @@ namespace Voidstrap
 
                         Interlocked.Add(ref totalBytesDownloaded, package.PackedSize);
                         int completed = Interlocked.Increment(ref packagesCompleted);
+
                         double elapsedSec = Math.Max(0.5, swOverall.Elapsed.TotalSeconds);
-                        double speedBytesPerSec = totalBytesDownloaded / elapsedSec;
-                        double remainingBytes = totalBytesToDownload - totalBytesDownloaded;
-                        double remainingSec = remainingBytes / Math.Max(speedBytesPerSec, 1);
-                        string eta = TimeSpan.FromSeconds(remainingSec).ToString(@"hh\:mm\:ss");
-                        SetStatus($"Downloading packages... ({completed}/{totalPackages}) | ETA: {eta}");
+                        double speed = totalBytesDownloaded / elapsedSec;
+                        double remaining =
+                            (totalPackedSize - totalBytesDownloaded) /
+                            Math.Max(speed, 1);
+
+                        string eta = TimeSpan.FromSeconds(remaining)
+                            .ToString(@"hh\:mm\:ss");
+
+                        SetStatus(
+                            $"Downloading packages... ({completed}/{totalPackages}) | ETA: {eta}");
+
                         _totalDownloadedBytes = totalBytesDownloaded;
                         UpdateProgressBar();
+
                         await WithRetryAsync(
-                            async () =>
+                            () =>
                             {
                                 ExtractPackage(package);
-                                await Task.CompletedTask;
+                                return Task.CompletedTask;
                             },
                             context: $"{LOG_IDENT}::Extract({package.Name})",
                             maxAttempts: 4,
                             baseDelayMs: 800,
-                            isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                            isTransient: ex =>
+                                ex is IOException ||
+                                ex is UnauthorizedAccessException,
                             ct: ct
                         ).ConfigureAwait(false);
                     }
-                    catch (System.Text.Json.JsonException jex)
+                    catch (TaskCanceledException)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, $"Invalid JSON for package {package.Name}: {jex.Message}");
-                        await HandleConnectionError(jex).ConfigureAwait(false);
+                        throw;
                     }
-                    catch (HttpRequestException httpEx)
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, $"HTTP error downloading {package.Name}: {httpEx.StatusCode} - {httpEx.Message}");
-                        await HandleConnectionError(httpEx).ConfigureAwait(false);
-                    }
-                    catch (TaskCanceledException) { }
                     catch (Exception ex)
                     {
-                        App.Logger.WriteLine(LOG_IDENT, $"Failed processing package {package.Name}: {ex}");
+                        Interlocked.Increment(ref failedPackages);
+                        App.Logger.WriteLine(
+                            LOG_IDENT,
+                            $"Failed processing package {package.Name}: {ex}");
+                        _cancelTokenSource.Cancel();
                     }
                     finally
                     {
@@ -1723,76 +1760,121 @@ namespace Voidstrap
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 swOverall.Stop();
 
-                if (ct.IsCancellationRequested) return;
+                if (ct.IsCancellationRequested)
+                    return;
+
+                if (failedPackages > 0)
+                    throw new Exception($"{failedPackages} package(s) failed during upgrade.");
+
                 if (Dialog is not null)
                 {
                     Dialog.ProgressStyle = ProgressBarStyle.Marquee;
-                    Dialog.TaskbarProgressState = TaskbarItemProgressState.Indeterminate;
+                    Dialog.TaskbarProgressState =
+                        TaskbarItemProgressState.Indeterminate;
+
                     SetStatus(Strings.Bootstrapper_Status_Configuring);
                 }
 
-                App.Logger.WriteLine(LOG_IDENT, "Writing AppSettings.xml...");
                 await WithRetryAsync(
-                    async () =>
-                    {
-                        await File.WriteAllTextAsync(Path.Combine(_latestVersionDirectory, "AppSettings.xml"), AppSettings, ct).ConfigureAwait(false);
-                    },
+                    () =>
+                        File.WriteAllTextAsync(
+                            Path.Combine(_latestVersionDirectory, "AppSettings.xml"),
+                            AppSettings,
+                            ct),
                     context: $"{LOG_IDENT}::Write(AppSettings.xml)",
                     maxAttempts: 3,
                     baseDelayMs: 600,
-                    isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                    isTransient: ex =>
+                        ex is IOException ||
+                        ex is UnauthorizedAccessException,
                     ct: ct
                 ).ConfigureAwait(false);
 
-                if (ct.IsCancellationRequested) return;
                 try { MigrateCompatibilityFlags(); }
-                catch (Exception ex) { App.Logger.WriteLine(LOG_IDENT, $"MigrateCompatibilityFlags failed: {ex.Message}"); }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT,
+                        $"MigrateCompatibilityFlags failed: {ex.Message}");
+                }
 
                 AppData.State.VersionGuid = _latestVersionGuid;
                 AppData.State.PackageHashes.Clear();
+
                 foreach (var package in _versionPackageManifest)
-                    AppData.State.PackageHashes.Add(package.Name, package.Signature);
-                try { CleanupVersionsFolder(); } catch (Exception ex) { App.Logger.WriteLine(LOG_IDENT, $"CleanupVersionsFolder failed: {ex.Message}"); }
-                var allPackageHashes = App.State.Prop.Player.PackageHashes.Values
-                    .Concat(App.State.Prop.Studio.PackageHashes.Values)
+                    AppData.State.PackageHashes[package.Name] = package.Signature;
+
+                try { CleanupVersionsFolder(); }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT,
+                        $"CleanupVersionsFolder failed: {ex.Message}");
+                }
+
+                var allPackageHashes =
+                    (App.State.Prop.Player?.PackageHashes.Values ??
+                     Enumerable.Empty<string>())
+                    .Concat(
+                     App.State.Prop.Studio?.PackageHashes.Values ??
+                     Enumerable.Empty<string>())
                     .ToHashSet();
 
                 var deleteTasks = cachedPackageHashes
-                    .Where(hash => !allPackageHashes.Contains(hash))
-                    .Select(async hash =>
-                    {
-                        string path = Path.Combine(Paths.Downloads, hash);
-                        await WithRetryAsync(
-                            async () =>
+                    .Where(hash => hash != null &&
+                                   !allPackageHashes.Contains(hash))
+                    .Select(hash =>
+                        WithRetryAsync(
+                            () =>
                             {
-                                try { if (File.Exists(path)) File.Delete(path); } catch { }
-                                await Task.CompletedTask;
+                                string path =
+                                    Path.Combine(Paths.Downloads, hash!);
+
+                                if (File.Exists(path))
+                                    File.Delete(path);
+
+                                return Task.CompletedTask;
                             },
                             context: $"{LOG_IDENT}::DeleteCache({hash})",
                             maxAttempts: 3,
                             baseDelayMs: 500,
-                            isTransient: ex => ex is IOException || ex is UnauthorizedAccessException,
+                            isTransient: ex =>
+                                ex is IOException ||
+                                ex is UnauthorizedAccessException,
                             ct: ct
-                        ).ConfigureAwait(false);
-                    });
+                        ));
 
                 await Task.WhenAll(deleteTasks).ConfigureAwait(false);
+
                 try
                 {
-                    App.Logger.WriteLine(LOG_IDENT, "Registering approximate program size...");
-                    int bufferSizeKbte = int.Parse(App.Settings.Prop.BufferSizeKbte);
-                    int distributionSize =
-                        _versionPackageManifest.Sum(x => x.Size + x.PackedSize) / bufferSizeKbte;
-                    AppData.State.Size = distributionSize;
-                    int totalSize = App.State.Prop.Player.Size + App.State.Prop.Studio.Size;
-                    using (var uninstallKey = Registry.CurrentUser.CreateSubKey(App.UninstallKey))
-                        uninstallKey?.SetValueSafe("EstimatedSize", totalSize);
+                    if (!int.TryParse(App.Settings.Prop.BufferSizeKbte,
+                                      out int bufferSizeKbte) ||
+                        bufferSizeKbte <= 0)
+                    {
+                        bufferSizeKbte = 1024;
+                    }
 
-                    App.Logger.WriteLine(LOG_IDENT, $"Registered as {totalSize} KB");
+                    int distributionSize =
+                        _versionPackageManifest.Sum(x =>
+                            x.Size + x.PackedSize) / bufferSizeKbte;
+
+                    AppData.State.Size = distributionSize;
+
+                    int totalSize =
+                        (App.State.Prop.Player?.Size ?? 0) +
+                        (App.State.Prop.Studio?.Size ?? 0);
+
+                    using var uninstallKey =
+                        Registry.CurrentUser.CreateSubKey(App.UninstallKey);
+
+                    uninstallKey?.SetValueSafe("EstimatedSize", totalSize);
+
+                    App.Logger.WriteLine(LOG_IDENT,
+                        $"Registered as {totalSize} KB");
                 }
                 catch (Exception ex)
                 {
-                    App.Logger.WriteLine(LOG_IDENT, $"Failed to register size: {ex.Message}");
+                    App.Logger.WriteLine(LOG_IDENT,
+                        $"Failed to register size: {ex.Message}");
                 }
 
                 App.State.Save();
@@ -1803,12 +1885,16 @@ namespace Voidstrap
             }
             catch (Exception ex)
             {
-                App.Logger.WriteLine(LOG_IDENT, $"Unexpected upgrade error: {ex}");
-                Frontend.ShowMessageBox($"{Strings.Bootstrapper_Status_Upgrading} failed:\n{ex.Message}", MessageBoxImage.Error);
+                App.Logger.WriteLine(LOG_IDENT,
+                    $"Unexpected upgrade error: {ex}");
+
+                Frontend.ShowMessageBox(
+                    $"{Strings.Bootstrapper_Status_Upgrading} failed:\n{ex.Message}",
+                    MessageBoxImage.Error);
             }
             finally
             {
-                _isInstalling = false;
+                Interlocked.Exchange(ref _isInstalling, 0);
             }
         }
 

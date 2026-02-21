@@ -62,8 +62,6 @@ namespace Voidstrap.Models.Persistable
 
         public bool MotionBlurOverlay { get; set; } = false;
 
-        public bool MotionBlurOverlay2 { get; set; } = false;
-
         public string ClientPath { get; set; } = Path.Combine(Paths.Base, "Roblox", "Player");
 
         public string Locale { get; set; } = "nil";
@@ -104,8 +102,6 @@ namespace Voidstrap.Models.Persistable
         public bool GameNameChecked { get; set; } = true;
         public bool GameCreatorChecked { get; set; } = true;
         public bool GameStatusChecked { get; set; } = true;
-
-        public bool DX12Like { get; set; } = false;
 
         // Rich Presence (Discord Integration)
         public bool UseDiscordRichPresence { get; set; } = true;
