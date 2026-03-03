@@ -31,22 +31,31 @@
 
 ---
 
+![f27d092b0c96c669](https://github.com/user-attachments/assets/f8aab035-21e3-49ac-8d2c-359ee4ab2919)
+
+
 ## Frequently Asked Questions (FAQ)
 
-### Can it get you banned?
+<details>
+  <summary><strong>Can it get you banned?</strong></summary>
+  <br>
 
-No. Voidstrap does not inject cheats, exploits, or bypass Roblox security.  
-It functions as a launcher and configuration manager. However, as with any third-party tool, use it at your own discretion.
+  No. Voidstrap does not inject cheats, exploits, or bypass Roblox security.  
+  It functions as a launcher and configuration manager. However, as with any third-party tool, use it at your own discretion.
+</details>
 
----
+<br>
 
-### Is it a virus?
+<details>
+  <summary><strong>Is it a virus?</strong></summary>
+  <br>
 
-No. Voidstrap is fully open-source, meaning anyone can inspect the code.  
-If your antivirus flags it, it is most likely a false positive due to how launchers interact with Roblox processes and updates. You can verify the source code yourself at:
-https://github.com/voidstrap/Voidstrap
+  No. Voidstrap is fully open-source, meaning anyone can inspect the code.  
+  If your antivirus flags it, it is most likely a false positive due to how launchers interact with Roblox processes and updates.
 
----
+  You can verify the source code yourself at:  
+  https://github.com/voidstrap/Voidstrap
+</details>
 
 <!-- Removed build will prob show how to do that in a later date im lazy for rn -->
 ## How to Fork
