@@ -18,6 +18,7 @@
     SizeToContent="Height"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
+
     <ui:UiWindow.Resources>
         <converters:RangeConverter x:Key="ValidationConverter" From="0" />
     </ui:UiWindow.Resources>
@@ -30,126 +31,83 @@
                 <GradientStop Offset="1.10" Color="{DynamicResource WindowBackgroundColorThird}" />
             </LinearGradientBrush>
         </Grid.Background>
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <ui:TitleBar
             Title="{x:Static resources:Strings.Dialog_AddFastFlag_Title}"
             Grid.Row="0"
-            Grid.ColumnSpan="2"
             Padding="8"
             CanMaximize="False"
-            KeyboardNavigation.TabNavigation="None"
             ShowMaximize="False"
-            ShowMinimize="False" />
+            ShowMinimize="False"/>
 
-        <TabControl
-            x:Name="Tabs"
-            Grid.Row="1"
-            Margin="16">
+        <TabControl x:Name="Tabs" Grid.Row="1" Margin="16">
             <TabItem Header="{x:Static resources:Strings.Common_AddSingle}">
-                <Grid Grid.Row="1" Margin="16">
+                <Grid Margin="16">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Grid.Column="0"
-                        MinWidth="100"
-                        Margin="0,0,0,12"
-                        VerticalAlignment="Center"
-                        Text="{x:Static resources:Strings.Common_Name}" />
-                    <TextBox
-                        Name="FlagNameTextBox"
-                        Grid.Row="0"
-                        Grid.Column="1"
-                        Grid.ColumnSpan="2"
-                        Margin="0,0,0,12" />
+                    <TextBlock Grid.Row="0" Grid.Column="0" MinWidth="100" Margin="0,0,0,12" VerticalAlignment="Center"
+                               Text="{x:Static resources:Strings.Common_Name}"/>
+                    <TextBox Name="FlagNameTextBox" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" Margin="0,0,0,12"/>
 
-                    <TextBlock
-                        Grid.Row="1"
-                        Grid.Column="0"
-                        MinWidth="100"
-                        VerticalAlignment="Center"
-                        Text="{x:Static resources:Strings.Common_Value}" />
-                    <TextBox
-                        Name="FlagValueTextBox"
-                        Grid.Row="1"
-                        Grid.Column="1"
-                        Margin="0,0,8,0" />
-                    <Button
-                        Grid.Row="1"
-                        Grid.Column="2"
-                        Width="30"
-                        Height="30"
-                        Padding="0"
-                        Click="PresetValuesButton_Click"
-                        Content="⤵"
-                        FontSize="16"
-                        FontWeight="Bold"
-                        ToolTip="Select preset value" />
+                    <TextBlock Grid.Row="1" Grid.Column="0" MinWidth="100" VerticalAlignment="Center"
+                               Text="{x:Static resources:Strings.Common_Value}"/>
+                    <TextBox Name="FlagValueTextBox" Grid.Row="1" Grid.Column="1" Margin="0,0,8,0"/>
+                    <Button Grid.Row="1" Grid.Column="2" Width="30" Height="30" Padding="0"
+                            Click="PresetValuesButton_Click" Content="⤵" FontSize="16" FontWeight="Bold"
+                            ToolTip="Select preset value"/>
                 </Grid>
             </TabItem>
+            
             <TabItem Header="{x:Static resources:Strings.Common_ImportJson}">
                 <Grid Margin="16">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <TextBox
-                        x:Name="JsonTextBox"
-                        Grid.Row="0"
-                        MinHeight="80"
-                        MaxHeight="480"
-                        Margin="5"
-                        Padding="10"
-                        AcceptsReturn="True"
-                        AcceptsTab="True"
-                        Background="#1E1E1E"
-                        BorderBrush="#333"
-                        BorderThickness="1"
-                        FontFamily="Consolas"
-                        FontSize="14"
-                        Foreground="#D4D4D4"
-                        HorizontalScrollBarVisibility="Auto"
-                        VerticalScrollBarVisibility="Auto" />
 
-                    <TextBlock
-                        Grid.Row="0"
-                        Margin="18,14,0,0"
-                        Foreground="DarkGray"
-                        IsHitTestVisible="False"
-                        Text="{}{&#10;    &quot;FFlagDebugDisplayFPS&quot;: &quot;True&quot;&#10;}">
-                        <TextBlock.Style>
-                            <Style TargetType="{x:Type TextBlock}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding Text, ElementName=JsonTextBox}" Value="">
-                                        <Setter Property="Visibility" Value="Visible" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-                    <ui:Button
-                        Grid.Row="1"
-                        Margin="4"
-                        HorizontalAlignment="Stretch"
-                        Click="ImportButton_Click"
-                        Content="{x:Static resources:Strings.Common_ImportFromFile}"
-                        Icon="ArrowImport24" />
+                    <TextBox x:Name="JsonTextBox" Grid.Row="0" MinHeight="80" MaxHeight="480" Margin="5" Padding="10"
+                             AcceptsReturn="True" AcceptsTab="True" Background="#1E1E1E" BorderBrush="#333"
+                             BorderThickness="1" FontFamily="Consolas" FontSize="14" Foreground="#D4D4D4"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                             TextChanged="JsonTextBox_TextChanged"/>
+
+                    <ui:Button Grid.Row="1" Margin="4" HorizontalAlignment="Stretch" Click="ImportButton_Click"
+                               Content="{x:Static resources:Strings.Common_ImportFromFile}" Icon="ArrowImport24"/>
                 </Grid>
             </TabItem>
+            
+            <TabItem Header="Base64">
+                <Grid Margin="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBox x:Name="Base64TextBox" Grid.Row="0" MinHeight="80" MaxHeight="480" Margin="5" Padding="10"
+                             AcceptsReturn="True" AcceptsTab="True" Background="#1E1E1E" BorderBrush="#333"
+                             BorderThickness="1" FontFamily="Consolas" FontSize="14" Foreground="#D4D4D4"
+                             HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+
+                    <ui:Button Grid.Row="1" Margin="4" HorizontalAlignment="Stretch"
+                               Click="PasteBase64Button_Click"
+                               Content="Paste Base64" Icon="Add16"/>
+                </Grid>
+            </TabItem>
+
         </TabControl>
 
         <Border

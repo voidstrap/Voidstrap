@@ -9,6 +9,12 @@ namespace Voidstrap.UI.ViewModels.Settings
 {
     public partial class NewsItem : ObservableObject
     {
+        private static readonly Regex UrlRegex =
+            new(@"(https?://[^\s]+)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static readonly Regex UrlStripRegex =
+            new(@"https?://[^\s]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         [ObservableProperty]
         private string title = string.Empty;
 
@@ -18,8 +24,6 @@ namespace Voidstrap.UI.ViewModels.Settings
         private DateTime date;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(Tags))]
-        [NotifyPropertyChangedFor(nameof(DisplayContent))]
         private string content = string.Empty;
 
         [ObservableProperty]
@@ -27,16 +31,42 @@ namespace Voidstrap.UI.ViewModels.Settings
 
         [ObservableProperty]
         private BitmapImage? image;
-        public ObservableCollection<string> Tags =>
-            new(Regex.Matches(content ?? string.Empty, @"(https?://[^\s]+)")
+
+        private readonly ObservableCollection<string> tags = new();
+        public ObservableCollection<string> Tags => tags;
+
+        partial void OnContentChanged(string value)
+        {
+            GenerateTags(value);
+            OnPropertyChanged(nameof(DisplayContent));
+        }
+
+        private void GenerateTags(string? text)
+        {
+            tags.Clear();
+
+            if (string.IsNullOrWhiteSpace(text))
+                return;
+
+            var matches = UrlRegex.Matches(text);
+
+            foreach (var url in matches
                 .Select(m => m.Value.TrimEnd('.', ',', ')'))
                 .Where(u => Uri.IsWellFormedUriString(u, UriKind.Absolute))
-                .Distinct()
-                .ToList());
+                .Distinct())
+            {
+                tags.Add(url);
+            }
+        }
+
         public string DisplayContent =>
-            Regex.Replace(content ?? string.Empty, @"https?://[^\s]+", "").Trim();
+            string.IsNullOrWhiteSpace(Content)
+                ? string.Empty
+                : UrlStripRegex.Replace(Content, "").Trim();
+
         public bool IsNew =>
-            (DateTime.UtcNow - Date.ToUniversalTime()).TotalHours < 24;
-        public string AgeLabel => IsNew ? "NEW" : "OLD";
+            (DateTime.Now - Date).TotalDays <= 3;
+
+        public string AgeLabel => "NEW";
     }
 }

@@ -208,6 +208,7 @@ namespace Voidstrap
 
             Locale.Initialize();
             base.OnStartup(e);
+
             Logger.WriteLine(LOG_IDENT, $"Starting {ProjectName} v{Version}");
             string userAgent = $"{ProjectName}/{Version}";
 
@@ -335,6 +336,12 @@ namespace Voidstrap
                 {
                     await ProcessAllStudioVersions();
                 });
+                if (App.Settings.Prop.SmooothBARRyesirikikthxlucipook)
+                {
+                    await Task.Delay(50);
+                    System.Runtime.CompilerServices.RuntimeHelpers
+                        .RunClassConstructor(typeof(Helpers.SmoothScrollBehavior).TypeHandle);
+                }
                 TrimTimer();
                 var rpcVm = new RPCCustomizerViewModel();
                 if (rpcVm.AutoStartRpc && !string.IsNullOrWhiteSpace(rpcVm.ApplicationId))
@@ -400,6 +407,7 @@ namespace Voidstrap
             }
         }
 
+        // this is a fix for studio cuz I was too fucking lazy
         private static async Task DownloadAndImportStudioContent(string targetFolder, string url)
         {
             string tempZipPath = Path.Combine(Path.GetTempPath(), "StudioContent.zip");

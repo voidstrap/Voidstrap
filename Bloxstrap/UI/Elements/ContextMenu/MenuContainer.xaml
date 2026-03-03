@@ -179,8 +179,9 @@
             </MenuItem>
 
             <MenuItem
-                x:Name="BetterBloxDataCentersMenuItem"
-                Click="BetterBloxDataCentersMenuItem_Click">
+                x:Name="ServerDetailsMenuItem"
+                Visibility="Collapsed"
+                Click="ServerDetailsMenuItem_Click">
                 <MenuItem.Header>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -188,12 +189,11 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <ui:SymbolIcon Grid.Column="0" Symbol="DataArea24"/>
+                        <ui:SymbolIcon Grid.Column="0" Symbol="Info28"/>
                         <TextBlock
                             Grid.Column="1"
                             Margin="4,0,0,0"
-                            VerticalAlignment="Center"
-                            Text="BetterBLOX"/>
+                            Text="{x:Static resources:Strings.ContextMenu_ServerInformation_Title}"/>
                     </Grid>
                 </MenuItem.Header>
             </MenuItem>
@@ -211,26 +211,6 @@
 
                         <ui:SymbolIcon Grid.Column="0" Symbol="Money24"/>
                         <TextBlock Grid.Column="1" Margin="4,0,0,0" Text="GamePass Info"/>
-                    </Grid>
-                </MenuItem.Header>
-            </MenuItem>
-
-            <MenuItem
-                x:Name="ServerDetailsMenuItem"
-                Visibility="Collapsed"
-                Click="ServerDetailsMenuItem_Click">
-                <MenuItem.Header>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <ui:SymbolIcon Grid.Column="0" Symbol="Info28"/>
-                        <TextBlock
-                            Grid.Column="1"
-                            Margin="4,0,0,0"
-                            Text="{x:Static resources:Strings.ContextMenu_ServerInformation_Title}"/>
                     </Grid>
                 </MenuItem.Header>
             </MenuItem>

@@ -49,20 +49,6 @@
                         <ui:ToggleSwitch IsChecked="{Binding ForceRobloxLanguage, Mode=TwoWay}" />
                     </controls:OptionControl>
 
-                    <controls:OptionControl 
-                    x:Name="AllowMultipleInstancesOption"
-                    Header="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Title}" 
-                    Description="{x:Static resources:Strings.Menu_Behaviour_MultiInstances_Description}">
-                    <ui:ToggleSwitch IsChecked="{Binding MultiInstanceLaunchingEnabled, Mode=TwoWay}" />
-                </controls:OptionControl>
-
-                <controls:OptionControl
-                    Header="Allow cross-game teleportation"
-                    Description="Allows for cross-game teleportation with multiple instances. (Fixes error 773)"
-                    IsEnabled="{Binding InnerContent.IsChecked, ElementName=AllowMultipleInstancesOption, Mode=OneWay}">
-                    <ui:ToggleSwitch IsChecked="{Binding FixTeleportsEnabled, Mode=TwoWay}" />
-                </controls:OptionControl>
-
                     <controls:OptionControl Description="Disables Background Window when Launching Roblox" Header="Disable Background Window">
                      <ui:ToggleSwitch IsChecked="{Binding BackgroundWindow, Mode=TwoWay}" />
                 </controls:OptionControl>

@@ -3,6 +3,7 @@ using DiscordRPC.Logging;
 using Microsoft.VisualBasic.ApplicationServices;
 using Microsoft.Web.WebView2.Core;
 using System;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
@@ -17,6 +18,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 using Voidstrap.Integrations;
+using Voidstrap.UI.Elements.Base;
+using Voidstrap.UI.Elements.Controls;
 using Voidstrap.UI.Elements.Dialogs;
 using Voidstrap.UI.Elements.Settings.Pages;
 using Voidstrap.UI.ViewModels.Settings;
@@ -53,7 +56,7 @@ namespace Voidstrap.UI.Elements.Settings
         private const double MaxOffset = 0.04;
         private const double MaxRotation = 5.0;
         private const double FollowSpeed = 0.035;
-
+        private string TabsConfigPath => Path.Combine(Paths.Base, "TabsConfig.json");
         private readonly List<Type> _pagesToHideSearchBox = new List<Type> // idfk my lazy bum ass didnt wanna spent 4000hours tranna figure another way for all tis bullshit of work took me 1 day for this shit FAHHHHHHHHHH WSEIEWMIEWOMHGEW
         {
         typeof(FastFlagEditorPage),
@@ -100,8 +103,690 @@ namespace Voidstrap.UI.Elements.Settings
             RootFrame.Navigated += RootFrame_Navigated;
 
             App.Logger.WriteLine("MainWindow", "Initializing settings window");
+
+            if (DataContext is MainWindowViewModel vm && vm.Tabs == null)
+                vm.Tabs = new ObservableCollection<TabItemViewModel>();
+
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbarAsync();
+        }
+
+        private void SaveTabsStructure()
+        {
+            if (DataContext is not MainWindowViewModel vm) return;
+
+            var blueprint = vm.Tabs.Select(tab => new TabBlueprint
+            {
+                Title = tab.Title,
+                Headers = GetHeaderControls(tab),
+                Options = GetOptionControls(tab)
+            }).ToList();
+
+            string json = JsonSerializer.Serialize(blueprint, new JsonSerializerOptions { WriteIndented = true });
+            File.WriteAllText(TabsConfigPath, json);
+        }
+
+        private List<HeaderControlData> GetHeaderControls(TabItemViewModel tab)
+        {
+            var list = new List<HeaderControlData>();
+            if (tab.PageInstance?.Content is not Grid root) return list;
+
+            var headers = root.Children.OfType<StackPanel>().FirstOrDefault();
+            if (headers == null) return list;
+
+            foreach (var child in headers.Children)
+            {
+                if (child is System.Windows.Controls.Button btn)
+                {
+                    string content = btn.Content?.ToString();
+                    if (content == "X" || content == "+") continue;
+                }
+
+                if (child is System.Windows.Controls.TextBox tb)
+                {
+                    list.Add(new HeaderControlData
+                    {
+                        Type = "TextBox",
+                        Text = tb.Text,
+                        Width = tb.Width,
+                        Height = tb.Height,
+                        Margin = new SerializableThickness(tb.Margin)
+                    });
+                }
+                else if (child is System.Windows.Controls.Button actionBtn)
+                {
+                    list.Add(new HeaderControlData
+                    {
+                        Type = "Button",
+                        Text = actionBtn.Content?.ToString() ?? "",
+                        Width = actionBtn.Width,
+                        Height = actionBtn.Height,
+                        Margin = new SerializableThickness(actionBtn.Margin)
+                    });
+                }
+            }
+            return list;
+        }
+
+        private List<OptionControlData> GetOptionControls(TabItemViewModel tab)
+        {
+            var list = new List<OptionControlData>();
+            if (tab.PageInstance?.Content is not Grid root) return list;
+
+            var scroll = root.Children.OfType<ScrollViewer>().FirstOrDefault();
+            if (scroll?.Content is not Grid controlsGrid) return list;
+
+            foreach (var child in controlsGrid.Children.OfType<OptionControl>())
+            {
+                if (child.Content is Border border && border.Child is StackPanel stack)
+                {
+                    var textBlocks = stack.Children.OfType<TextBlock>().ToList();
+                    var headerText = textBlocks.FirstOrDefault()?.Text ?? "";
+                    var descText = textBlocks.Count > 1 ? textBlocks[1].Text : "";
+
+                    var toggle = stack.Children.OfType<ToggleSwitch>().FirstOrDefault();
+
+                    list.Add(new OptionControlData
+                    {
+                        Header = headerText,
+                        Description = descText,
+                        ControlType = "ToggleSwitch",
+                        IsChecked = toggle?.IsChecked ?? false,
+                        Margin = new SerializableThickness(toggle?.Margin ?? new Thickness(0, 5, 0, 0))
+                    });
+                }
+            }
+            return list;
+        }
+        private void LoadTabsStructure()
+        {
+            if (!File.Exists(TabsConfigPath)) return;
+            if (DataContext is not MainWindowViewModel vm) return;
+
+            try
+            {
+                string json = File.ReadAllText(TabsConfigPath);
+                var blueprint = JsonSerializer.Deserialize<List<TabBlueprint>>(json);
+                if (blueprint == null) return;
+
+                vm.Tabs.Clear();
+
+                foreach (var tabData in blueprint)
+                {
+                    var newTab = new TabItemViewModel { Title = tabData.Title };
+                    var rootGrid = new Grid();
+                    rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+                    rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+                    var headerPanel = new StackPanel { Orientation = Orientation.Horizontal, Margin = new Thickness(10) };
+
+                    var deleteBtn = new System.Windows.Controls.Button
+                    {
+                        Content = "X",
+                        Width = 34,
+                        Height = 34,
+                        Margin = new Thickness(0, 0, 5, 0)
+                    };
+                    deleteBtn.Click += (s, e) =>
+                    {
+                        vm.Tabs.Remove(newTab);
+                        if (vm.SelectedTab == newTab)
+                            vm.SelectedTab = vm.Tabs.FirstOrDefault();
+                        SaveTabsStructure();
+                    };
+                    headerPanel.Children.Add(deleteBtn);
+                    var plusBtn = new System.Windows.Controls.Button
+                    {
+                        Content = "+",
+                        Width = 34,
+                        Height = 34,
+                        Margin = new Thickness(5, 0, 5, 0)
+                    };
+                    plusBtn.Click += (s, e) => OpenToolbox(newTab, vm);
+                    headerPanel.Children.Add(plusBtn);
+
+                    if (tabData.Headers != null)
+                    {
+                        foreach (var header in tabData.Headers)
+                        {
+                            if (header.Text == "X" || header.Text == "+") continue;
+
+                            var btn = new System.Windows.Controls.Button
+                            {
+                                Content = header.Text,
+                                Width = header.Width,
+                                Height = header.Height,
+                                Margin = header.Margin.ToThickness()
+                            };
+                            headerPanel.Children.Add(btn);
+                        }
+                    }
+
+                    Grid.SetRow(headerPanel, 0);
+                    rootGrid.Children.Add(headerPanel);
+
+                    var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+                    var controlsGrid = new Grid { Margin = new Thickness(10) };
+                    for (int i = 0; i < 3; i++) controlsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                    scrollViewer.Content = controlsGrid;
+                    Grid.SetRow(scrollViewer, 1);
+                    rootGrid.Children.Add(scrollViewer);
+
+                    newTab.PageInstance = new Page { Background = Brushes.Transparent, Content = rootGrid };
+
+                    if (tabData.Options != null)
+                    {
+                        foreach (var option in tabData.Options)
+                        {
+                            AddOption(option.Header, option.Description, true, newTab, vm);
+                        }
+                    }
+
+                    vm.Tabs.Add(newTab);
+                }
+
+                if (vm.Tabs.Any()) vm.SelectedTab = vm.Tabs.First();
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("MainWindow", $"Load Error: {ex.Message}");
+            }
+        }
+
+        private void OpenToolbox(TabItemViewModel targetTab, MainWindowViewModel vm)
+        {
+            var toolboxWindow = new Window
+            {
+                Title = "Add Tools",
+                Width = 320,
+                Height = 400,
+                Owner = this,
+                Background = Brushes.Transparent
+            };
+
+            var backgroundGradient = new LinearGradientBrush
+            {
+                StartPoint = new Point(1, 1),
+                EndPoint = new Point(0, 0)
+            };
+
+            backgroundGradient.GradientStops.Add(new GradientStop((Color)TryFindResource("WindowBackgroundColorPrimary"), 0.00));
+            backgroundGradient.GradientStops.Add(new GradientStop((Color)TryFindResource("WindowBackgroundColorSecondary"), 0.80));
+            backgroundGradient.GradientStops.Add(new GradientStop((Color)TryFindResource("WindowBackgroundColorThird"), 1.10));
+
+            var rootGrid = new Grid { Background = backgroundGradient };
+
+            var toolboxPanel = new StackPanel { Margin = new Thickness(15) };
+            var scrollViewer = new ScrollViewer
+            {
+                Content = toolboxPanel,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+            };
+
+            rootGrid.Children.Add(scrollViewer);
+            toolboxWindow.Content = rootGrid;
+
+            void CreateToolItem(string name, string desc)
+            {
+                var toolBtn = new System.Windows.Controls.Button
+                {
+                    Margin = new Thickness(0, 0, 0, 10),
+                    Padding = new Thickness(10),
+                    HorizontalContentAlignment = HorizontalAlignment.Left
+                };
+
+                var stack = new StackPanel();
+                stack.Children.Add(new TextBlock { Text = name, FontWeight = FontWeights.Medium });
+                stack.Children.Add(new TextBlock { Text = desc, FontSize = 12, TextWrapping = TextWrapping.Wrap });
+                toolBtn.Content = stack;
+
+                toolBtn.Click += (_, _) =>
+                {
+                    AddOption(name, desc, true, targetTab, vm);
+                    SaveTabsStructure();
+                    toolboxWindow.Close();
+                };
+                toolboxPanel.Children.Add(toolBtn);
+            }
+
+            CreateToolItem("FullBright", "Attempt to recreate Fullbright without FFlags.");
+            CreateToolItem("Windows FPS Counter", "Displays your computer's FPS.");
+            CreateToolItem("Enable Overlay", "Enables the Overlay Mods to work over Roblox.");
+            CreateToolItem("Crosshair", "Show a crosshair on screen. (In-Game Only)");
+            CreateToolItem("Current Time", "Displays the current system time.");
+            CreateToolItem("Lighting Changer (BETA)", "Adds a Experimental overlay-based lighting changer. Customize your Roblox lighting.");
+            CreateToolItem(Strings.Menu_Integrations_EnableActivityTracking_Title, Strings.Menu_Integrations_EnableActivityTracking_Description);
+            CreateToolItem(Strings.Menu_Integrations_QueryServerLocation_Title, Strings.Menu_Integrations_QueryServerLocation_Description);
+            CreateToolItem(Strings.Menu_Integrations_DesktopApp_Title, Strings.Menu_Integrations_DesktopApp_Description);
+            CreateToolItem(Strings.Menu_Integrations_ShowGameActivity_Title, Strings.Menu_Integrations_ShowGameActivity_Description);
+            CreateToolItem(Strings.Menu_Integrations_ShowAccountOnProfile_Title, Strings.Menu_Integrations_ShowAccountOnProfile_Description);
+            CreateToolItem(Strings.Menu_Behaviour_ConfirmLaunches_Title, Strings.Menu_Behaviour_ConfirmLaunches_Description);
+            CreateToolItem(Strings.Menu_Behaviour_ForceRobloxLanguage_Title, Strings.Menu_Behaviour_ForceRobloxLanguage_Description);
+            CreateToolItem("Disable Background Window", "Disables Background Window when Launching Roblox");
+            CreateToolItem("Disable RobloxCrashHandler", "Disables the RobloxCrashHandler that runs on startup, improving memory and RAM efficiency.");
+            CreateToolItem("Exclusive Fullscreen", "Enables exclusive fullscreen mode. This may fix latency issues.");
+            CreateToolItem("Background Snow", "Adds Snow to Voidstraps background (Restart Required)");
+            CreateToolItem("Gradient Movement", "Adds a Gradient Movement with Cursor (Restart Required)");
+            CreateToolItem("Smooth ScrollBar", "Adds a Smooth ScrollBar Movement (Restart Required)");
+
+            toolboxWindow.ShowDialog();
+        }
+
+        private void AddOption(string header, string description, bool isShared, TabItemViewModel newTab, MainWindowViewModel vm)
+        {
+            if (newTab.PageInstance?.Content is not Grid rootGrid) return;
+            var controlsGrid = rootGrid.Children.OfType<ScrollViewer>().FirstOrDefault()?.Content as Grid;
+            if (controlsGrid == null) return;
+
+            int columns = 3;
+            int index = controlsGrid.Children.Count;
+            int row = index / columns;
+            int col = index % columns;
+            while (controlsGrid.RowDefinitions.Count <= row)
+                controlsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            var optionControl = new OptionControl { Margin = new Thickness(5) };
+            var border = new Border
+            {
+                Background = Brushes.Transparent,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(6),
+                Padding = new Thickness(8)
+            };
+
+            var stack = new StackPanel();
+            stack.Children.Add(new TextBlock { Text = header, FontWeight = FontWeights.Bold, Foreground = Brushes.White });
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                stack.Children.Add(new TextBlock
+                {
+                    Text = description,
+                    FontSize = 12,
+                    TextWrapping = TextWrapping.Wrap,
+                    Margin = new Thickness(0, 5, 0, 5),
+                    Foreground = Brushes.White
+                });
+            }
+
+            bool currentValue = GlobalToggleManager.Get(header);
+            var toggle = new ToggleSwitch { IsChecked = currentValue, Margin = new Thickness(0, 5, 0, 0), Tag = header };
+
+            toggle.Checked += (s, e) =>
+            {
+                GlobalToggleManager.Set(header, true);
+                SaveTabsStructure();
+            };
+
+            toggle.Unchecked += (s, e) =>
+            {
+                GlobalToggleManager.Set(header, false);
+                SaveTabsStructure();
+            };
+
+            stack.Children.Add(toggle);
+            border.Child = stack;
+            optionControl.Content = border;
+
+            Grid.SetRow(optionControl, row);
+            Grid.SetColumn(optionControl, col);
+            controlsGrid.Children.Add(optionControl);
+
+            newTab.Options[header] = currentValue;
+        }
+
+        private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null) yield break;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T t) yield return t;
+                foreach (var sub in FindVisualChildren<T>(child))
+                    yield return sub;
+            }
+        }
+
+        private void AddTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (DataContext is not MainWindowViewModel vm) return;
+
+            if (vm.Tabs.Count >= 4)
+            {
+                // hmmmm yea 4 :nerd:
+                return;
+            }
+
+            int nextNumber = 1;
+            if (vm.Tabs.Any())
+            {
+                var existingNumbers = vm.Tabs
+                    .Select(t => System.Text.RegularExpressions.Regex.Match(t.Title, @"\d+"))
+                    .Where(m => m.Success)
+                    .Select(m => int.Parse(m.Value))
+                    .ToList();
+
+                if (existingNumbers.Any())
+                {
+                    nextNumber = existingNumbers.Max() + 1;
+                }
+                else
+                {
+                    nextNumber = vm.Tabs.Count + 1;
+                }
+            }
+
+            var newTab = new TabItemViewModel
+            {
+                Title = $"Tab #{nextNumber}"
+            };
+
+            var rootGrid = new Grid();
+            rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            rootGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+
+            var headerPanel = new StackPanel
+            {
+                Orientation = Orientation.Horizontal,
+                Margin = new Thickness(10)
+            };
+
+            var deleteButton = new System.Windows.Controls.Button
+            {
+                Content = "X",
+                Width = 34,
+                Height = 34,
+                Margin = new Thickness(0, 0, 5, 0)
+            };
+
+            deleteButton.Click += (s, ev) =>
+            {
+                vm.Tabs.Remove(newTab);
+                if (vm.SelectedTab == newTab)
+                    vm.SelectedTab = vm.Tabs.FirstOrDefault();
+
+                SaveTabsStructure();
+            };
+
+            var plusButton = new System.Windows.Controls.Button
+            {
+                Content = "+",
+                Width = 34,
+                Height = 34,
+                Margin = new Thickness(5, 0, 0, 0)
+            };
+            headerPanel.Children.Add(deleteButton);
+            headerPanel.Children.Add(plusButton);
+
+            Grid.SetRow(headerPanel, 0);
+            rootGrid.Children.Add(headerPanel);
+
+            var scrollViewer = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto };
+            Grid.SetRow(scrollViewer, 1);
+            rootGrid.Children.Add(scrollViewer);
+
+            var controlsGrid = new Grid { Margin = new Thickness(10) };
+            scrollViewer.Content = controlsGrid;
+
+            int columns = 3;
+            for (int i = 0; i < columns; i++)
+                controlsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+
+            void AddOption(string header, string description, bool isShared)
+            {
+                var optionControl = new OptionControl { Margin = new Thickness(5) };
+                var border = new Border
+                {
+                    Background = Brushes.Transparent,
+                    BorderBrush = new SolidColorBrush(Color.FromRgb(80, 80, 80)),
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(6),
+                    Padding = new Thickness(8)
+                };
+
+                var stack = new StackPanel();
+                stack.Children.Add(new TextBlock
+                {
+                    Text = header,
+                    FontWeight = FontWeights.Bold,
+                    Foreground = Brushes.White
+                });
+                if (!string.IsNullOrEmpty(description))
+                {
+                    stack.Children.Add(new TextBlock
+                    {
+                        Text = description,
+                        FontSize = 12,
+                        TextWrapping = TextWrapping.Wrap,
+                        Margin = new Thickness(0, 5, 0, 5),
+                        Foreground = Brushes.White
+                    });
+                }
+
+                bool currentValue = isShared ? GlobalToggleManager.Get(header) : newTab.Options.GetValueOrDefault(header, false);
+
+                var toggle = new ToggleSwitch
+                {
+                    IsChecked = currentValue,
+                    Margin = new Thickness(0, 5, 0, 0),
+                    Tag = header
+                };
+
+                toggle.Checked += (_, _) =>
+                {
+                    if (isShared) GlobalToggleManager.Set(header, true);
+                    else newTab.Options[header] = true;
+
+                    ApplyGlobalEffect(header, true);
+                    RefreshAllTabs(vm, header);
+                    SaveTabsStructure();
+                };
+
+                toggle.Unchecked += (_, _) =>
+                {
+                    if (isShared) GlobalToggleManager.Set(header, false);
+                    else newTab.Options[header] = false;
+
+                    ApplyGlobalEffect(header, false);
+                    RefreshAllTabs(vm, header);
+                    SaveTabsStructure();
+                };
+
+                stack.Children.Add(toggle);
+                border.Child = stack;
+                optionControl.Content = border;
+
+                int index = controlsGrid.Children.Count;
+                int row = index / columns;
+                int col = index % columns;
+
+                while (controlsGrid.RowDefinitions.Count <= row)
+                    controlsGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                Grid.SetRow(optionControl, row);
+                Grid.SetColumn(optionControl, col);
+                controlsGrid.Children.Add(optionControl);
+
+                newTab.Options[header] = currentValue;
+            }
+
+            plusButton.Click += (_, _) =>
+            {
+                OpenToolbox(newTab, vm);
+            };
+
+            newTab.PageInstance = new Page { Background = Brushes.Transparent, Content = rootGrid };
+            vm.Tabs.Add(newTab);
+            vm.SelectedTab = newTab;
+
+            SaveTabsStructure();
+
+            void RefreshAllTabs(MainWindowViewModel viewModel, string key)
+            {
+                foreach (var tab in viewModel.Tabs)
+                {
+                    if (tab.PageInstance?.Content is Grid root)
+                    {
+                        foreach (var toggle in FindVisualChildren<ToggleSwitch>(root))
+                        {
+                            if (toggle.Tag?.ToString() == key)
+                                toggle.IsChecked = GlobalToggleManager.Get(key);
+                        }
+                    }
+                }
+            }
+
+            static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+            {
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+                {
+                    var child = VisualTreeHelper.GetChild(parent, i);
+                    if (child is T t) yield return t;
+                    foreach (var sub in FindVisualChildren<T>(child)) yield return sub;
+                }
+            }
+
+            void SaveTabs()
+            {
+                if (vm.Tabs == null) return;
+                var blueprint = vm.Tabs.Select(t => new TabBlueprint
+                {
+                    Title = t.Title,
+                    Headers = new List<HeaderControlData>(),
+                    Options = t.Options.Select(o => new OptionControlData
+                    {
+                        Header = o.Key,
+                        Description = "",
+                        ControlType = "ToggleSwitch",
+                        IsChecked = o.Value,
+                        Margin = new SerializableThickness(0, 5, 0, 0)
+                    }).ToList()
+                }).ToList();
+
+                File.WriteAllText(TabsConfigPath, JsonSerializer.Serialize(blueprint, new JsonSerializerOptions { WriteIndented = true }));
+            }
+        }
+
+        private void ApplyGlobalEffect(string header, bool isOn)
+        {
+            switch (header)
+            {
+                case "FullBright": App.Settings.Prop.Fullbright = isOn; break;
+                case "Crosshair": App.Settings.Prop.Crosshair = isOn; break;
+                case "Enable Overlay": App.Settings.Prop.OverlaysEnabled = isOn; break;
+                case "Windows FPS Counter": App.Settings.Prop.FPSCounter = isOn; break;
+                case "Current Time": App.Settings.Prop.CurrentTimeDisplay = isOn; break;
+                case "Lighting Changer (BETA)": App.Settings.Prop.MotionBlurOverlay = isOn; break;
+                case var s when s == Strings.Menu_Integrations_EnableActivityTracking_Title: App.Settings.Prop.EnableActivityTracking = isOn; break;
+                case var s when s == Strings.Menu_Integrations_QueryServerLocation_Title: App.Settings.Prop.ShowServerDetails = isOn; break;
+                case var s when s == Strings.Menu_Integrations_DesktopApp_Title: App.Settings.Prop.UseDisableAppPatch = isOn; break;
+                case var s when s == Strings.Menu_Integrations_ShowGameActivity_Title: App.Settings.Prop.UseDiscordRichPresence = isOn; break;
+                case var s when s == Strings.Menu_Integrations_ShowAccountOnProfile_Title: App.Settings.Prop.ShowAccountOnRichPresence = isOn; break;
+                case var s when s == Strings.Menu_Behaviour_ConfirmLaunches_Title: App.Settings.Prop.ConfirmLaunches = isOn; break;
+                case var s when s == Strings.Menu_Behaviour_ForceRobloxLanguage_Title: App.Settings.Prop.ForceRobloxLanguage = isOn; break;
+                case "Disable Background Window": App.Settings.Prop.BackgroundWindow = isOn; break;
+                case "Disable RobloxCrashHandler": App.Settings.Prop.DisableCrash = isOn; break;
+                case "Exclusive Fullscreen": App.Settings.Prop.ExclusiveFullscreen = isOn; break;
+                case "Background Snow": App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = isOn; break;
+                case "Gradient Movement": App.Settings.Prop.GRADmentFR = isOn; break;
+                case "Smooth ScrollBar": App.Settings.Prop.SmooothBARRyesirikikthxlucipook = isOn; break;
+            }
+        }
+
+        public static class GlobalToggleManager
+        {
+            public static bool Get(string key)
+            {
+                return key switch
+                {
+                    "FullBright" => App.Settings.Prop.Fullbright,
+                    "Crosshair" => App.Settings.Prop.Crosshair,
+                    "Enable Overlay" => App.Settings.Prop.OverlaysEnabled,
+                    "Windows FPS Counter" => App.Settings.Prop.FPSCounter,
+                    "Current Time" => App.Settings.Prop.CurrentTimeDisplay,
+                    "Lighting Changer (BETA)" => App.Settings.Prop.MotionBlurOverlay,
+                    var s when s == Strings.Menu_Integrations_EnableActivityTracking_Title => App.Settings.Prop.EnableActivityTracking,
+                    var s when s == Strings.Menu_Integrations_QueryServerLocation_Title => App.Settings.Prop.ShowServerDetails,
+                    var s when s == Strings.Menu_Integrations_DesktopApp_Title => App.Settings.Prop.UseDisableAppPatch,
+                    var s when s == Strings.Menu_Integrations_ShowGameActivity_Title => App.Settings.Prop.UseDiscordRichPresence,
+                    var s when s == Strings.Menu_Integrations_ShowAccountOnProfile_Title => App.Settings.Prop.ShowAccountOnRichPresence,
+                    var s when s == Strings.Menu_Behaviour_ConfirmLaunches_Title => App.Settings.Prop.ConfirmLaunches,
+                    var s when s == Strings.Menu_Behaviour_ForceRobloxLanguage_Title => App.Settings.Prop.ForceRobloxLanguage,
+                    "Disable Background Window" => App.Settings.Prop.BackgroundWindow,
+                    "Disable RobloxCrashHandler" => App.Settings.Prop.DisableCrash,
+                    "Exclusive Fullscreen" => App.Settings.Prop.ExclusiveFullscreen,
+                    "Background Snow" => App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw,
+                    "Gradient Movement" => App.Settings.Prop.GRADmentFR,
+                    "Smooth ScrollBar" => App.Settings.Prop.SmooothBARRyesirikikthxlucipook,
+                    _ => false
+                };
+            }
+
+            public static void Set(string key, bool value)
+            {
+                switch (key)
+                {
+                    case "FullBright": App.Settings.Prop.Fullbright = value; break;
+                    case "Crosshair": App.Settings.Prop.Crosshair = value; break;
+                    case "Enable Overlay": App.Settings.Prop.OverlaysEnabled = value; break;
+                    case "Windows FPS Counter": App.Settings.Prop.FPSCounter = value; break;
+                    case "Current Time": App.Settings.Prop.CurrentTimeDisplay = value; break;
+                    case "Lighting Changer (BETA)": App.Settings.Prop.MotionBlurOverlay = value; break;
+                    case var s when s == Strings.Menu_Integrations_EnableActivityTracking_Title: App.Settings.Prop.EnableActivityTracking = value; break;
+                    case var s when s == Strings.Menu_Integrations_QueryServerLocation_Title: App.Settings.Prop.ShowServerDetails = value; break;
+                    case var s when s == Strings.Menu_Integrations_DesktopApp_Title: App.Settings.Prop.UseDisableAppPatch = value; break;
+                    case var s when s == Strings.Menu_Integrations_ShowGameActivity_Title: App.Settings.Prop.UseDiscordRichPresence = value; break;
+                    case var s when s == Strings.Menu_Integrations_ShowAccountOnProfile_Title: App.Settings.Prop.ShowAccountOnRichPresence = value; break;
+                    case var s when s == Strings.Menu_Behaviour_ConfirmLaunches_Title: App.Settings.Prop.ConfirmLaunches = value; break;
+                    case var s when s == Strings.Menu_Behaviour_ForceRobloxLanguage_Title: App.Settings.Prop.ForceRobloxLanguage = value; break;
+                    case "Disable Background Window": App.Settings.Prop.BackgroundWindow = value; break;
+                    case "Disable RobloxCrashHandler": App.Settings.Prop.DisableCrash = value; break;
+                    case "Exclusive Fullscreen": App.Settings.Prop.ExclusiveFullscreen = value; break;
+                    case "Background Snow": App.Settings.Prop.SnowWOWSOCOOLWpfSnowbtw = value; break;
+                    case "Gradient Movement": App.Settings.Prop.GRADmentFR = value; break;
+                    case "Smooth ScrollBar": App.Settings.Prop.SmooothBARRyesirikikthxlucipook = value; break;
+                }
+
+                RefreshAllSwitches(key, value);
+            }
+
+            private static void RefreshAllSwitches(string key, bool value)
+            {
+                foreach (Window window in Application.Current.Windows)
+                {
+                    foreach (var toggle in FindVisualChildren<ToggleSwitch>(window))
+                    {
+                        if (toggle.Tag?.ToString() == key)
+                        {
+                            toggle.IsChecked = value;
+                        }
+                    }
+                }
+            }
+
+            private static IEnumerable<T> FindVisualChildren<T>(DependencyObject parent) where T : DependencyObject
+            {
+                if (parent == null) yield break;
+                for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+                {
+                    var child = VisualTreeHelper.GetChild(parent, i);
+                    if (child is T t) yield return t;
+                    foreach (var sub in FindVisualChildren<T>(child)) yield return sub;
+                }
+            }
+        }
+
+        private void WorkspaceTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (WorkspaceTabs.SelectedItem is TabItemViewModel tab)
+            {
+                if (tab.PageInstance != null)
+                {
+                    RootFrame.Navigate(tab.PageInstance);
+                }
+            }
         }
 
         private void RootFrame_Navigated(object sender, System.Windows.Navigation.NavigationEventArgs e)
@@ -120,12 +805,12 @@ namespace Voidstrap.UI.Elements.Settings
             }
         }
 
-        //fuck man I dont even understand whats going on in this code dont go asking me 👇
+        //fuck man I dont even understand whats going on in this code dont go asking me 👇 nvm it was just 3am I do understand..
         private void GlobalSearchBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (_searchDebounceTimer == null)
             {
-                _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(200) };
+                _searchDebounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
                 _searchDebounceTimer.Tick += (s, args) =>
                 {
                     _searchDebounceTimer.Stop();
@@ -630,10 +1315,12 @@ namespace Voidstrap.UI.Elements.Settings
             if (_discordClient == null || !_discordRpcEnabled) return;
 
             string pageName = GetCurrentPageName();
+            string currentTime = DateTime.Now.ToString("hh:mm tt");
 
             _discordClient.SetPresence(new DiscordRPC.RichPresence()
             {
                 Details = $"Viewing {pageName}", // the fuck was there state I just relized that it already displays fucking voidstrap THE FUCK
+                State = $"Current Time: {currentTime}",
                 Timestamps = DiscordRPC.Timestamps.Now,
                 Buttons = new[]
                 {
@@ -644,7 +1331,7 @@ namespace Voidstrap.UI.Elements.Settings
             },
             new DiscordRPC.Button
             {
-                Label = "Github", // sick of this shit ❤️‍🔥 why the fuck I put fire emoji it came out as a heart + fire fah
+                Label = "Github",  // sick of this shit ❤️‍🔥 why the fuck I put fire emoji it came out as a heart + fire fah
                 Url = "https://github.com/voidstrap/Voidstrap"
             }
         }
@@ -665,6 +1352,7 @@ namespace Voidstrap.UI.Elements.Settings
 
         private async void MainWindow_Loaded(object? sender, RoutedEventArgs e)
         {
+            LoadTabsStructure();
             InitializeNavigation();
             if (App.Settings.Prop.GRADmentFR)
             {
@@ -839,20 +1527,20 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void InitializeWindowState()
         {
-            if (_state.LeftUpdate > SystemParameters.VirtualScreenWidth || _state.TopUpdate > SystemParameters.VirtualScreenHeight)
+            if (_state.LeftUpdateV2 > SystemParameters.VirtualScreenWidth || _state.TopUpdateV2 > SystemParameters.VirtualScreenHeight)
             {
-                _state.LeftUpdate = 0;
-                _state.TopUpdate = 0;
+                _state.LeftUpdateV2 = 0;
+                _state.TopUpdateV2 = 0;
             }
 
-            if (_state.WidthUpdate > 0) Width = _state.WidthUpdate;
-            if (_state.HeightUpdate > 0) Height = _state.HeightUpdate;
+            if (_state.WidthUpdateV2 > 0) Width = _state.WidthUpdateV2;
+            if (_state.HeightUpdateV2 > 0) Height = _state.HeightUpdateV2;
 
-            if (_state.LeftUpdate > 0 && _state.TopUpdate > 0)
+            if (_state.LeftUpdateV2 > 0 && _state.TopUpdateV2 > 0)
             {
                 WindowStartupLocation = WindowStartupLocation.Manual;
-                Left = _state.LeftUpdate;
-                Top = _state.TopUpdate;
+                Left = _state.LeftUpdateV2;
+                Top = _state.TopUpdateV2;
             }
         }
 
@@ -907,6 +1595,7 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void WpfUiWindow_Closing(object sender, CancelEventArgs e)
         {
+            SaveTabsStructure();
             SaveWindowState();
         }
 
@@ -921,10 +1610,10 @@ namespace Voidstrap.UI.Elements.Settings
 
         private void SaveWindowState()
         {
-            _state.WidthUpdate = Width;
-            _state.HeightUpdate = Height;
-            _state.TopUpdate = Top;
-            _state.LeftUpdate = Left;
+            _state.WidthUpdateV2 = Width;
+            _state.HeightUpdateV2 = Height;
+            _state.TopUpdateV2 = Top;
+            _state.LeftUpdateV2 = Left;
 
             App.State.Save();
         }
@@ -964,6 +1653,65 @@ namespace Voidstrap.UI.Elements.Settings
 
 
         private void Button_Click_2(object sender, RoutedEventArgs e) { }
+
+        public class TabItemViewModel
+        {
+            public string Title { get; set; } = "";
+            public Page PageInstance { get; set; } = null!;
+            public Dictionary<string, bool> Options { get; } = new();
+            public override string ToString() => Title;
+        }
+
+        public class TabBlueprint
+        {
+            public string Title { get; set; } = "";
+            public List<HeaderControlData> Headers { get; set; } = new();
+            public List<OptionControlData> Options { get; set; } = new();
+        }
+
+        public struct SerializableThickness
+        {
+            public double Left;
+            public double Top;
+            public double Right;
+            public double Bottom;
+
+            public SerializableThickness(double left, double top, double right, double bottom)
+            {
+                Left = left;
+                Top = top;
+                Right = right;
+                Bottom = bottom;
+            }
+
+            public SerializableThickness(Thickness thickness)
+            {
+                Left = thickness.Left;
+                Top = thickness.Top;
+                Right = thickness.Right;
+                Bottom = thickness.Bottom;
+            }
+
+            public Thickness ToThickness() => new Thickness(Left, Top, Right, Bottom);
+        }
+
+        public class HeaderControlData
+        {
+            public string Type { get; set; } = "TextBox";
+            public string Text { get; set; } = "";
+            public double Width { get; set; }
+            public double Height { get; set; }
+            public SerializableThickness Margin { get; set; } = new SerializableThickness();
+        }
+
+        public class OptionControlData
+        {
+            public string Header { get; set; } = "";
+            public string Description { get; set; } = "";
+            public string ControlType { get; set; } = "ToggleSwitch";
+            public bool IsChecked { get; set; }
+            public SerializableThickness Margin { get; set; } = new SerializableThickness();
+        }
 
         #endregion
     }

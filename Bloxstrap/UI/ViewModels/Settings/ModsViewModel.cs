@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Input;
 using ICSharpCode.SharpZipLib.Zip;
 using Microsoft.Win32;
+using NAudio.Gui;
 using NAudio.Midi;
 using System;
 using System.Collections.ObjectModel;
@@ -25,7 +26,7 @@ namespace Voidstrap.UI.ViewModels.Settings
 {
     public class ModsViewModel : NotifyPropertyChangedViewModel
     {
-        private const string GitHubApiBase = "https://api.github.com/repos/KloBraticc/ModsHub-Reworked-/contents"; // fuckass
+        private const string GitHubApiBase = "https://api.github.com/repos/KloBraticc/ModsHub-Reworked-/contents"; // fuckass nneda do this after this update ngl..
         public ObservableCollection<ModInfo> AvailableMods { get; set; }
         = new ObservableCollection<ModInfo>();
 
@@ -590,6 +591,8 @@ namespace Voidstrap.UI.ViewModels.Settings
         public ICommand DeleteArrowFarCursorCommand => new RelayCommand(() => DeleteCursorImage("ArrowFarCursor.png"));
         public ICommand DeleteIBeamCursorCommand => new RelayCommand(() => DeleteCursorImage("IBeamCursor.png"));
         public ICommand DeleteShiftlockCursorCommand => new RelayCommand(() => DeleteCursorImage("MouseLockedCursor.png"));
+        public RelayCommand DownloadCurCommand { get; }
+        public RelayCommand DownloadPngCommand { get; }
 
         private CrosshairShape _selectedShape = CrosshairShape.Cross;
         private string _cursorColorHex = "#00FF00";
@@ -619,6 +622,8 @@ namespace Voidstrap.UI.ViewModels.Settings
             PickOutlineColorCommand = new RelayCommand(() => PickColor(false));
             GenerateCursorCodeCommand = new RelayCommand(GenerateCode);
             ApplyCursorCodeCommand = new RelayCommand(ApplyCode);
+            DownloadCurCommand = new RelayCommand(DownloadCurFile);
+            DownloadPngCommand = new RelayCommand(DownloadPngFile);
 
             System.Windows.Application.Current.Dispatcher.BeginInvoke(
                 DispatcherPriority.Loaded,
@@ -754,6 +759,226 @@ namespace Voidstrap.UI.ViewModels.Settings
             catch
             {
                 return null;
+            }
+        }
+
+        private void DownloadCurFile() // goofass someone made this - bratic did
+        {
+            try
+            {
+                const int size = 64; // should I make this customizable HELL NOO
+                double center = size / 2.0;
+                var visual = new DrawingVisual();
+                using (var dc = visual.RenderOpen())
+                {
+                    dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, size, size));
+
+                    if (SelectedShape == CrosshairShape.Image && !string.IsNullOrWhiteSpace(ImageUrl))
+                    {
+                        var img = LoadImageFromUrl(ImageUrl) as BitmapSource;
+                        if (img != null)
+                            dc.DrawImage(img, new Rect(0, 0, size, size));
+                    }
+                    else
+                    {
+                        var mainColor = (Color)ColorConverter.ConvertFromString(CursorColorHex);
+                        var outlineColor = (Color)ColorConverter.ConvertFromString(CursorOutlineColorHex);
+
+                        var mainBrush = new SolidColorBrush(mainColor) { Opacity = CursorOpacity };
+                        var outlineBrush = new SolidColorBrush(outlineColor) { Opacity = CursorOpacity };
+                        mainBrush.Freeze();
+                        outlineBrush.Freeze();
+
+                        double scale = 1.0;
+                        double drawSize = CursorSize * scale;
+                        double gap = Gap * scale;
+                        double thickness = Math.Max(1, CrosshairThickness * scale);
+
+                        var mainPen = new Pen(mainBrush, thickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+                        var outlinePen = new Pen(outlineBrush, thickness + 2) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+                        mainPen.Freeze(); outlinePen.Freeze();
+
+                        switch (SelectedShape)
+                        {
+                            case CrosshairShape.Cross:
+                                dc.DrawLine(outlinePen, new Point(center - drawSize, center), new Point(center - gap, center));
+                                dc.DrawLine(outlinePen, new Point(center + gap, center), new Point(center + drawSize, center));
+                                dc.DrawLine(outlinePen, new Point(center, center - drawSize), new Point(center, center - gap));
+                                dc.DrawLine(outlinePen, new Point(center, center + gap), new Point(center, center + drawSize));
+
+                                dc.DrawLine(mainPen, new Point(center - drawSize, center), new Point(center - gap, center));
+                                dc.DrawLine(mainPen, new Point(center + gap, center), new Point(center + drawSize, center));
+                                dc.DrawLine(mainPen, new Point(center, center - drawSize), new Point(center, center - gap));
+                                dc.DrawLine(mainPen, new Point(center, center + gap), new Point(center, center + drawSize));
+                                break;
+
+                            case CrosshairShape.Dot:
+                                double r = drawSize / 3;
+                                dc.DrawEllipse(outlineBrush, null, new Point(center, center), r + 2, r + 2);
+                                dc.DrawEllipse(mainBrush, null, new Point(center, center), r, r);
+                                break;
+
+                            case CrosshairShape.Circle:
+                                double rc = drawSize / 2;
+                                dc.DrawEllipse(null, outlinePen, new Point(center, center), rc, rc);
+                                dc.DrawEllipse(null, mainPen, new Point(center, center), rc - 2, rc - 2);
+                                break;
+                        }
+                    }
+                }
+
+                var bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+                bmp.Render(visual);
+
+                int stride = size * 4;
+                byte[] pixels = new byte[stride * size];
+                bmp.CopyPixels(pixels, stride, 0);
+
+                byte[] flipped = new byte[pixels.Length];
+                for (int y = 0; y < size; y++)
+                {
+                    Array.Copy(pixels, y * stride, flipped, (size - y - 1) * stride, stride);
+                }
+
+                var saveDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "Cursor File (*.cur)|*.cur",
+                    FileName = "crosshair.cur"
+                };
+
+                if (saveDialog.ShowDialog() != true)
+                    return;
+
+                using var fs = new FileStream(saveDialog.FileName, FileMode.Create);
+                using var bw = new BinaryWriter(fs);
+
+                bw.Write((ushort)0);
+                bw.Write((ushort)2);
+                bw.Write((ushort)1);
+
+                bw.Write((byte)size);
+                bw.Write((byte)size);
+                bw.Write((byte)0);
+                bw.Write((byte)0);
+                bw.Write((ushort)(size / 2));
+                bw.Write((ushort)(size / 2));
+
+                int bmpDataSize = 40 + flipped.Length + (size * ((size + 7) / 8));
+                bw.Write((uint)bmpDataSize);
+                bw.Write((uint)22);
+
+                bw.Write(40);
+                bw.Write(size);
+                bw.Write(size * 2);
+                bw.Write((ushort)1);
+                bw.Write((ushort)32);
+                bw.Write(0);
+                bw.Write(flipped.Length);
+                bw.Write(0);
+                bw.Write(0);
+                bw.Write(0);
+                bw.Write(0);
+
+                bw.Write(flipped);
+
+                int maskBytes = size * ((size + 7) / 8);
+                bw.Write(new byte[maskBytes]);
+
+                bw.Flush();
+                Frontend.ShowMessageBox("Crosshair CUR Saved");
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox("Failed to generate cursor:\n" + ex.Message);
+            }
+        }
+
+        private void DownloadPngFile()
+        {
+            try
+            {
+                const int size = 128;
+                double center = size / 2.0;
+
+                var visual = new DrawingVisual();
+                using (var dc = visual.RenderOpen())
+                {
+                    dc.DrawRectangle(Brushes.Transparent, null, new Rect(0, 0, size, size));
+
+                    if (SelectedShape == CrosshairShape.Image && !string.IsNullOrWhiteSpace(ImageUrl))
+                    {
+                        var img = LoadImageFromUrl(ImageUrl) as BitmapSource;
+                        if (img != null)
+                            dc.DrawImage(img, new Rect(0, 0, size, size));
+                    }
+                    else
+                    {
+                        var mainColor = (Color)ColorConverter.ConvertFromString(CursorColorHex);
+                        var outlineColor = (Color)ColorConverter.ConvertFromString(CursorOutlineColorHex);
+
+                        var mainBrush = new SolidColorBrush(mainColor) { Opacity = CursorOpacity };
+                        var outlineBrush = new SolidColorBrush(outlineColor) { Opacity = CursorOpacity };
+                        mainBrush.Freeze(); outlineBrush.Freeze();
+
+                        double scale = 1.0;
+                        double drawSize = CursorSize * scale;
+                        double gap = Gap * scale;
+                        double thickness = Math.Max(1, CrosshairThickness * scale);
+
+                        var mainPen = new Pen(mainBrush, thickness) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+                        var outlinePen = new Pen(outlineBrush, thickness + 2) { StartLineCap = PenLineCap.Round, EndLineCap = PenLineCap.Round };
+                        mainPen.Freeze(); outlinePen.Freeze();
+
+                        switch (SelectedShape)
+                        {
+                            case CrosshairShape.Cross:
+                                dc.DrawLine(outlinePen, new Point(center - drawSize, center), new Point(center - gap, center));
+                                dc.DrawLine(outlinePen, new Point(center + gap, center), new Point(center + drawSize, center));
+                                dc.DrawLine(outlinePen, new Point(center, center - drawSize), new Point(center, center - gap));
+                                dc.DrawLine(outlinePen, new Point(center, center + gap), new Point(center, center + drawSize));
+
+                                dc.DrawLine(mainPen, new Point(center - drawSize, center), new Point(center - gap, center));
+                                dc.DrawLine(mainPen, new Point(center + gap, center), new Point(center + drawSize, center));
+                                dc.DrawLine(mainPen, new Point(center, center - drawSize), new Point(center, center - gap));
+                                dc.DrawLine(mainPen, new Point(center, center + gap), new Point(center, center + drawSize));
+                                break;
+
+                            case CrosshairShape.Dot:
+                                double r = drawSize / 3;
+                                dc.DrawEllipse(outlineBrush, null, new Point(center, center), r + 2, r + 2);
+                                dc.DrawEllipse(mainBrush, null, new Point(center, center), r, r);
+                                break;
+
+                            case CrosshairShape.Circle:
+                                double rc = drawSize / 2;
+                                dc.DrawEllipse(null, outlinePen, new Point(center, center), rc, rc);
+                                dc.DrawEllipse(null, mainPen, new Point(center, center), rc - 2, rc - 2);
+                                break;
+                        }
+                    }
+                }
+
+                var bmp = new RenderTargetBitmap(size, size, 96, 96, PixelFormats.Pbgra32);
+                bmp.Render(visual);
+
+                var saveDialog = new Microsoft.Win32.SaveFileDialog
+                {
+                    Filter = "PNG Image (*.png)|*.png",
+                    FileName = "crosshair.png"
+                };
+                if (saveDialog.ShowDialog() != true)
+                    return;
+
+                var encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(bmp));
+                using var fs = new FileStream(saveDialog.FileName, FileMode.Create);
+                encoder.Save(fs);
+
+                Frontend.ShowMessageBox("Crosshair PNG Saved");
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox("Failed to save PNG:\n" + ex.Message);
             }
         }
 

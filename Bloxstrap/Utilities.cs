@@ -204,49 +204,5 @@ namespace Voidstrap
                 Frontend.ShowExceptionDialog(ex);
             }
         }
-
-        public static void ApplyTeleportFix()
-        {
-            const string LOG_IDENT = "Utilities::ApplyTeleportFix";
-
-            string user = Environment.UserDomainName + "\\" + Environment.UserName;
-
-            if (File.Exists(App.RobloxCookiesFilePath))
-            {
-                if (App.Settings.Prop.FixTeleports)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "Attempting to apply teleport fix...");
-
-                    try
-                    {
-                        FileInfo fileInfo = new FileInfo(App.RobloxCookiesFilePath);
-                        FileSecurity fileSecurity = fileInfo.GetAccessControl();
-
-                        fileSecurity.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.Read, AccessControlType.Deny));
-                        fileSecurity.AddAccessRule(new FileSystemAccessRule(user, FileSystemRights.Write, AccessControlType.Allow));
-
-                        fileInfo.SetAccessControl(fileSecurity);
-
-                        App.Logger.WriteLine(LOG_IDENT, "Successfully made RobloxCookies.dat write-only.");
-                    }
-                    catch (Exception ex)
-                    {
-                        App.Logger.WriteLine(LOG_IDENT, "Failed to make RobloxCookies.dat write-only.");
-                        App.Logger.WriteException(LOG_IDENT, ex);
-                        Frontend.ShowExceptionDialog(ex);
-                    }
-                }
-                else
-                {
-                    App.Logger.WriteLine(LOG_IDENT, "Removing teleport fix...");
-                    RemoveTeleportFix();
-                }
-            }
-            else
-            {
-                App.Logger.WriteLine(LOG_IDENT, $"Failed to find RobloxCookies.dat");
-                Frontend.ShowMessageBox($"Failed to find RobloxCookies.dat | Path: {App.RobloxCookiesFilePath}", MessageBoxImage.Error);
-            }
-        }
     }
 }

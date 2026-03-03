@@ -239,7 +239,6 @@ namespace Voidstrap
 
             if (App.Settings.Prop.ConfirmLaunches
                 && Mutex.TryOpenExisting(MutexName, out _)
-                && !App.Settings.Prop.MultiInstanceLaunching
                 && !(App.Settings.Prop.IsGameEnabled && !string.IsNullOrWhiteSpace(App.Settings.Prop.LaunchGameID)))
             {
                 var result = Frontend.ShowMessageBox(
@@ -267,20 +266,6 @@ namespace Voidstrap
             }
 
             Mutex? mutex = null;
-            if (App.Settings.Prop.MultiInstanceLaunching)
-            {
-                try
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Creating {MutexName}");
-                    mutex = new Mutex(initiallyOwned: true, name: MutexName);
-                    App.Logger.WriteLine(LOG_IDENT, $"Created {MutexName}");
-                }
-                catch (Exception ex)
-                {
-                    App.Logger.WriteLine(LOG_IDENT, $"Failed to create {MutexName}: {ex}");
-                    mutex = null;
-                }
-            }
 
             if (App.Settings.Prop.ExclusiveFullscreen)
             {

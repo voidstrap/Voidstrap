@@ -17,7 +17,7 @@
         <ui:CardExpander IsExpanded="False">
             <ui:CardExpander.Header>
                 <StackPanel>
-                    <TextBlock FontSize="14" Text="Background" />
+                    <TextBlock FontSize="14" Text="Background and UI" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Text="Customize background ui and options" Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
                 </StackPanel>
             </ui:CardExpander.Header>
@@ -33,6 +33,12 @@
             Description="Adds a Gradient Movement with Cursor (Restart Required)"
             Header="Gradient Movement">
                     <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding GRADmentFR, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Description="Adds a Smooth ScrollBar Movement (Restart Required)"
+            Header="Smooth ScrollBar">
+                    <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding SmooothBARRyesirikikthxlucipook, Mode=TwoWay}" />
                 </controls:OptionControl>
 
                 <controls:OptionControl 

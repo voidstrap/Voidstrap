@@ -271,28 +271,33 @@
             FontWeight="Medium"
             Text="Roblox" />
 
+
+        <Expander Header="Roblox Settings" IsExpanded="False" Margin="0,8,0,0">
+            <StackPanel Orientation="Vertical">
+                <controls:OptionControl
+            Header="System Tray"
+            Description="Would you like to use Roblox System Tray.">
+                    <ui:ToggleSwitch IsChecked="{Binding RobloxSystemTray, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+            Header="Launch Startup"
+            Description="Would you like to Launch Roblox on Startup.">
+                    <ui:ToggleSwitch IsChecked="{Binding LaunchStartup, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl 
+            Header="Anti AFK"
+            Description="Auto rejoins the game instead of getting kicked for being AFK every 20 minutes.">
+                    <ui:ToggleSwitch IsChecked="{Binding AntiAFK, Mode=TwoWay}" />
+                </controls:OptionControl>
+            </StackPanel>
+        </Expander>
+
         <controls:OptionControl 
             Header="FPS Unlocker"
             Description="Removes the 240 FPS Limit without using FastFlags.">
             <ui:ToggleSwitch IsChecked="{Binding UncapFPS, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-            Header="System Tray"
-            Description="Would you like to use Roblox System Tray.">
-            <ui:ToggleSwitch IsChecked="{Binding RobloxSystemTray, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl 
-            Header="Launch Startup"
-            Description="Would you like to Launch Roblox on Startup.">
-            <ui:ToggleSwitch IsChecked="{Binding LaunchStartup, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl 
-            Header="Anti AFK"
-            Description="Auto rejoins the game instead of getting kicked for being AFK every 20 minutes.">
-            <ui:ToggleSwitch IsChecked="{Binding AntiAFK, Mode=TwoWay}" />
         </controls:OptionControl>
 
         <controls:OptionControl 

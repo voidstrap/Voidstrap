@@ -96,6 +96,34 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             }
         }
 
+        private void CopyFFlagsButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (App.FastFlags.Prop == null || App.FastFlags.Prop.Count == 0)
+            {
+                return;
+            }
+
+            var filteredFlags = App.FastFlags.Prop
+                .Where(kvp =>
+                    kvp.Key.StartsWith("FFlag") ||
+                    kvp.Key.StartsWith("DFFlag") ||
+                    kvp.Key.StartsWith("FInt") ||
+                    kvp.Key.StartsWith("DFInt") ||
+                    kvp.Key.StartsWith("FString") ||
+                    kvp.Key.StartsWith("FDouble"))
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value?.ToString() ?? string.Empty);
+
+            if (!filteredFlags.Any())
+            {
+                Frontend.ShowMessageBox("No matching flags found to copy.");
+                return;
+            }
+
+            string json = JsonSerializer.Serialize(filteredFlags, new JsonSerializerOptions { WriteIndented = true });
+            string base64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(json));
+            Clipboard.SetText(base64);
+        }
+
         private async Task LoadKnownFlagsAsync()
         {
             if (_knownFlagNames.Count > 0)

@@ -142,37 +142,6 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
-        public bool MultiInstanceLaunchingEnabled
-        {
-            get => App.Settings.Prop.MultiInstanceLaunching;
-            set
-            {
-                if (App.Settings.Prop.MultiInstanceLaunching != value)
-                {
-                    App.Settings.Prop.MultiInstanceLaunching = value;
-                    OnPropertyChanged(nameof(MultiInstanceLaunchingEnabled));
-
-                    if (!value)
-                    {
-                        FixTeleportsEnabled = false;
-                    }
-                }
-            }
-        }
-
-        public bool FixTeleportsEnabled
-        {
-            get => App.Settings.Prop.FixTeleports;
-            set
-            {
-                if (App.Settings.Prop.FixTeleports != value)
-                {
-                    App.Settings.Prop.FixTeleports = value;
-                    OnPropertyChanged(nameof(FixTeleportsEnabled));
-                }
-            }
-        }
-
         public bool disablecrashhandleryayyysocool
         {
             get => App.Settings.Prop.DisableCrash;

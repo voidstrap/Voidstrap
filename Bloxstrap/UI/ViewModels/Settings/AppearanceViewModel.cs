@@ -84,6 +84,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.GRADmentFR = value;
         }
 
+        public bool SmooothBARRyesirikikthxlucipook
+        {
+            get => App.Settings.Prop.SmooothBARRyesirikikthxlucipook;
+            set => App.Settings.Prop.SmooothBARRyesirikikthxlucipook = value;
+        }
+
         #region Properties
 
         public string? BackgroundFilePath

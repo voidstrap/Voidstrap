@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
+using System.Threading;
 using System.Windows;
 
 namespace Voidstrap
@@ -29,12 +30,19 @@ namespace Voidstrap
                     Save();
                     return;
                 }
-                string json = File.ReadAllText(FileLocation);
+
+                string json;
+                using (var stream = new FileStream(FileLocation, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
+
                 T? settings = JsonSerializer.Deserialize<T>(json);
                 if (settings is null)
                     throw new InvalidOperationException("Deserialization returned null.");
+
                 Prop = settings;
-                LastFileHash = MD5Hash.FromFile(FileLocation);
+
+                LastFileHash = SafeGetFileHash(FileLocation);
                 App.Logger.WriteLine(LOG_IDENT, "Loaded successfully!");
             }
             catch (Exception ex)
@@ -68,23 +76,55 @@ namespace Voidstrap
             string LOG_IDENT = $"{LOG_IDENT_CLASS}::Save";
             App.Logger.WriteLine(LOG_IDENT, $"Saving to {FileLocation}...");
 
+            Directory.CreateDirectory(Path.GetDirectoryName(FileLocation)!);
+
+            const int maxRetries = 5;
+            const int delayMs = 100;
+            int attempts = 0;
+
+            while (true)
+            {
+                try
+                {
+                    string json = JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true });
+                    File.WriteAllText(FileLocation, json);
+
+                    LastFileHash = SafeGetFileHash(FileLocation);
+                    App.Logger.WriteLine(LOG_IDENT, "Save complete!");
+                    break;
+                }
+                catch (IOException ex) when ((ex.HResult & 0xFFFF) == 32 && attempts < maxRetries)
+                {
+                    attempts++;
+                    Thread.Sleep(delayMs);
+                }
+                catch (UnauthorizedAccessException ex) when (attempts < maxRetries)
+                {
+                    attempts++;
+                    Thread.Sleep(delayMs);
+                }
+                catch (Exception ex)
+                {
+                    App.Logger.WriteLine(LOG_IDENT, "Failed to save");
+                    App.Logger.WriteException(LOG_IDENT, ex);
+
+                    string errorMessage = string.Format(Resources.Strings.Bootstrapper_JsonManagerSaveFailed, ClassName, ex.Message);
+                    Frontend.ShowMessageBox(errorMessage, MessageBoxImage.Warning);
+                    break;
+                }
+            }
+        }
+
+        private static string? SafeGetFileHash(string path)
+        {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(FileLocation)!);
-
-                string json = JsonSerializer.Serialize(Prop, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(FileLocation, json);
-
-                LastFileHash = MD5Hash.FromFile(FileLocation);
-                App.Logger.WriteLine(LOG_IDENT, "Save complete!");
+                using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    return MD5Hash.FromFile(path);
             }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            catch
             {
-                App.Logger.WriteLine(LOG_IDENT, "Failed to save");
-                App.Logger.WriteException(LOG_IDENT, ex);
-
-                string errorMessage = string.Format(Resources.Strings.Bootstrapper_JsonManagerSaveFailed, ClassName, ex.Message);
-                Frontend.ShowMessageBox(errorMessage, MessageBoxImage.Warning);
+                return null;
             }
         }
 
@@ -92,7 +132,7 @@ namespace Voidstrap
         {
             try
             {
-                string currentHash = MD5Hash.FromFile(FileLocation);
+                string? currentHash = SafeGetFileHash(FileLocation);
                 return LastFileHash != currentHash;
             }
             catch
@@ -140,9 +180,12 @@ namespace Voidstrap
                 if (!File.Exists(filePath))
                     throw new FileNotFoundException($"Backup file '{name}' not found.");
 
-                string json = File.ReadAllText(filePath);
-                T? settings = JsonSerializer.Deserialize<T>(json);
+                string json;
+                using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var reader = new StreamReader(stream))
+                    json = reader.ReadToEnd();
 
+                T? settings = JsonSerializer.Deserialize<T>(json);
                 if (settings is null)
                     throw new InvalidOperationException("Deserialization returned null.");
 

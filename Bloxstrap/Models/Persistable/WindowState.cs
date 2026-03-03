@@ -2,12 +2,12 @@
 {
     public class WindowState
     {
-        public double WidthUpdate { get; set; }
+        public double WidthUpdateV2 { get; set; }
 
-        public double HeightUpdate { get; set; }
+        public double HeightUpdateV2 { get; set; }
 
-        public double LeftUpdate { get; set; }
+        public double LeftUpdateV2 { get; set; }
 
-        public double TopUpdate { get; set; }
+        public double TopUpdateV2 { get; set; }
     }
 }

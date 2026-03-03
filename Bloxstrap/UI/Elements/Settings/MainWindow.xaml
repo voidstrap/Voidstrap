@@ -12,10 +12,10 @@
     xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
     xmlns:media="clr-namespace:System.Windows.Media.Animation;assembly=PresentationCore"
     Title="{x:Static resources:Strings.Menu_Title}"
-    Width="1100"
-    Height="720"
-    MinWidth="1100"
-    MinHeight="720"
+    Width="1071"
+    Height="690"
+    MinWidth="1071"
+    MinHeight="690"
     d:DataContext="{d:DesignInstance dmodels:MainWindowViewModel, IsDesignTimeCreatable=True}"
     AllowsTransparency="True"
     WindowStyle="None"
@@ -296,7 +296,7 @@
 
                 <ui:NavigationFluent.Items>
 
-                    <ui:NavigationItem Content="CORE"
+                    <ui:NavigationItem Content="Core"
                        IsEnabled="False"
                        Opacity="0.6" />
 
@@ -318,7 +318,7 @@
 
                     <ui:NavigationSeparator />
 
-                    <ui:NavigationItem Content="CONFIGURATION"
+                    <ui:NavigationItem Content="Configuration"
                        IsEnabled="False"
                        Opacity="0.6" />
 
@@ -374,8 +374,8 @@
 
             <Grid Grid.Row="0" Grid.RowSpan="3" Grid.Column="1">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
 
                 <Grid Grid.Row="0" Margin="0,0,0,5">
@@ -386,29 +386,70 @@
                     </Grid.ColumnDefinitions>
 
                     <ui:Breadcrumb Grid.Column="0"
-                       Navigation="{Binding ElementName=RootNavigation}" />
+                   Navigation="{Binding ElementName=RootNavigation}" />
 
-                    <ui:InfoBar Grid.Column="1"
-                    Margin="8,0,8,0"
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+                        <ui:TextBox x:Name="GlobalSearchBox"
+                Margin="0,0,6,0"
+                HorizontalAlignment="Right"
+                PlaceholderText="Search..."
+                TextChanged="GlobalSearchBox_TextChanged"
+                ClearButtonEnabled="True"
+                Icon="Search24"
+                Visibility="{Binding ShowSearchBox, Converter={StaticResource BoolToVisibilityConverter}}" />
+                    </StackPanel>
+
+                    <ui:InfoBar Margin="0,0,28,0"
+                    Grid.Column="2"
                     HorizontalAlignment="Right"
-                    Padding="1"
+                    Padding="3"
                     IsClosable="True"
                     IsOpen="True"
                     Severity="Informational"
-                    Message="{Binding AppVersion}" />
+                    Message="{Binding AppVersion}"/>
 
-                    <ui:TextBox x:Name="GlobalSearchBox"
-                    Grid.Column="2"
-                    Margin="0,0,28,0"
-                    HorizontalAlignment="Right"
-                    PlaceholderText="Search..."
-                    TextChanged="GlobalSearchBox_TextChanged"
-                    ClearButtonEnabled="True"
-                    Icon="Search24"
-                    Visibility="{Binding ShowSearchBox, Converter={StaticResource BoolToVisibilityConverter}}" />
                 </Grid>
-                <Frame x:Name="RootFrame" Grid.Row="1" />
+                <Frame x:Name="RootFrame" Grid.Row="1"/>
             </Grid>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.Column="1" HorizontalAlignment="Stretch" VerticalAlignment="Bottom">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TabControl x:Name="WorkspaceTabs" 
+                ItemsSource="{Binding Tabs}" 
+                SelectedItem="{Binding SelectedTab, Mode=TwoWay}" 
+                Background="Transparent" 
+                BorderThickness="0" 
+                Height="34" 
+                MinWidth="200" 
+                Grid.Column="0" 
+                Margin="275,5,0,0"
+                SelectionChanged="WorkspaceTabs_SelectionChanged">
+                <TabControl.Template>
+                    <ControlTemplate TargetType="TabControl">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+                                <TabPanel x:Name="HeaderPanel" IsItemsHost="True" Background="Transparent"/>
+                            </ScrollViewer>
+                            <ContentPresenter Grid.Row="1" ContentSource="SelectedContent" Margin="{TemplateBinding Padding}"/>
+                        </Grid>
+                    </ControlTemplate>
+                </TabControl.Template>
+            </TabControl>
+
+            <ui:Button Grid.Column="1" Width="34" Height="34" Appearance="Secondary" Icon="Add16" Click="AddTab_Click" Margin="0,0,16,6">
+                <ui:Button.ToolTip>
+                    <ToolTip>Tabs - Beta</ToolTip>
+                </ui:Button.ToolTip>
+            </ui:Button>
         </Grid>
 
         <Border Grid.Row="2"

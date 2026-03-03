@@ -16,7 +16,7 @@
 
         <controls:Expander HeaderIcon="Gift24"
                            HeaderText="Donation Info"
-                           IsExpanded="True">
+                           IsExpanded="False">
 
             <StackPanel Margin="8">
                 <controls:MarkdownTextBlock MarkdownText="**Why Donate?**" Margin="0,0,0,6"/>

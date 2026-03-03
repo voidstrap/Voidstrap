@@ -44,8 +44,9 @@ namespace Voidstrap.Models.Persistable
         public bool ShouldExportLogs { get; set; } = true;
         public bool UseFastFlagManager { get; set; } = true;
         public bool WPFSoftwareRender { get; set; } = false;
-        public bool FixTeleports { get; set; } = false;
         public bool ConfirmLaunches { get; set; } = true;
+
+        public bool SmooothBARRyesirikikthxlucipook { get; set; } = false; // wanna keep this on false so people may not be annoyed by it being on
         public bool HasLaunchedGame { get; set; } = false;
         public bool BackgroundWindow { get; set; } = true;
         public bool UsePlaceId { get; set; } = false;
@@ -53,7 +54,6 @@ namespace Voidstrap.Models.Persistable
         public bool OptimizeRoblox { get; set; } = false;
         public bool BackgroundUpdatesEnabled { get; set; } = true;
         public bool VoidNotify { get; set; } = true;
-        public bool MultiInstanceLaunching { get; set; } = false;
         public bool ServerPingCounter { get; set; } = false;
         public bool ShowServerDetailsUI { get; set; } = false;
         public bool EnableCustomStatusDisplay { get; set; } = true;
