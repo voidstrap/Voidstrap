@@ -1,25 +1,42 @@
-
 <p align="center">
-  <img src="https://github.com/voidstrap/Voidstrap/blob/main/Bloxstrap/Voidstrap.png" alt="Voidstrap Logo" width="350" />
+<a href="https://currentlymakingwebsitelol">
+<img src="https://raw.githubusercontent.com/voidstrap/Voidstrap/main/Bloxstrap/Voidstrap.png" alt="preview" width="100px"/>
+</a>
 </p>
 
-<p align="center"><strong>Enjoy Voidstrap? Star the repository and support development!</strong></p>
+<h1 align="center"><b>Voidstrap</b></h1>
+
+<p align="center">
+<img src="https://raw.githubusercontent.com/KloBraticc/RandomMods/main/Untitled%20design%20(2)-Photoroom.png" alt="preview" width="100%"/>
+</p>
+
+<p align="center">
+  <a href="github.com/voidstrap/Voidstrap/releases/latest">Latest release</a> |
+  <a href="https://www.youtube.com/watch?v=P-GqTUo_HIA&t">Tutorial</a> |
+  <a href="https://discord.gg/5tJBqBH8ck">Discord</a>
+</p>
 
 <div align="center">
 
 [![Total Downloads][shield-repo-total]][repo-releases]
 [![Latest Downloads][shield-repo-downloads]][repo-latest]
 [![Latest Release][shield-repo-latest]][repo-latest]
-[![Stars][shield-repo-stars]][repo-stargazers]
 [![Discord][shield-discord-server]][discord-invite]
+[![Stars][shield-repo-stars]][repo-stargazers]
 
 </div>
 
-> [!NOTE]
-> Voidstrap only supports **Windows 10 and above**. We do not plan on supporting other Operating Systems.
-> You can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for MacOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.
-> More experienced Linux users can use tools like **[Lution](https://github.com/wookhq/Lution)** for example.
-<!-- Got permission from return to add this it looked nice sooo I wanted to ask if I could thank u man u da best ❤️ though I may change it soon because I didnt change it at all when I added it and I felt guilty for adding it even after asking -->
+<h5 align="center">
+Leave a star if you like the project! ⭐️
+</h5>
+
+
+> [!IMPORTANT]
+> Voidstrap currently supports **Windows 10 and above**.  
+> **Linux support is in the works**, but it is not available yet.
+>
+> In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.
+> More experienced Linux users can also try tools like **[Lution](https://github.com/wookhq/Lution)**.
 
 ## Installation
 
@@ -30,9 +47,6 @@
 4. Enjoy a more simple Roblox
 
 ---
-
-![f27d092b0c96c669](https://github.com/user-attachments/assets/f8aab035-21e3-49ac-8d2c-359ee4ab2919)
-
 
 ## Frequently Asked Questions (FAQ)
 
@@ -78,6 +92,17 @@ Voidstrap is built using **C# and .NET**.
 2. Click **Fork** (top right)
 3. This creates your own copy under your GitHub account
 
+## Star History
+
+<p align="center">
+  <a href="https://www.star-history.com/#voidstrap/Voidstrap&Timeline">
+    <img src="https://api.star-history.com/svg?repos=voidstrap/Voidstrap&type=Timeline&theme=dark" />
+  </a>
+</p>
+
+> [!NOTE]
+> Voidstrap is still in **early development**, even though the project has existed for over **2 years**.  
+> Features may change and some things may still be unfinished.
 
 [shield-repo-downloads]:  https://img.shields.io/github/downloads/voidstrap/Voidstrap/latest/total?color=981bfe
 [shield-repo-total]:      https://img.shields.io/github/downloads/voidstrap/Voidstrap/total?color=8a2be2
@@ -89,3 +114,4 @@ Voidstrap is built using **C# and .NET**.
 [repo-latest]:            https://github.com/voidstrap/Voidstrap/releases/latest
 [repo-stargazers]:        https://github.com/voidstrap/Voidstrap/stargazers
 [discord-invite]:         https://discord.gg/dfA9PdWgcV
+
