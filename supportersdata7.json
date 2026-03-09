@@ -3,22 +3,20 @@
     "columns": 3,
     "supporters": [
       {
-        "name": "Bratic"
+        "name": "Stoof",
+        "Icon": "https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_640.png"
       },
       {
-        "name": "Stoof"
+        "name": "A.k.h.i.l.e.s.h",
+        "Icon": "https://cdn.pixabay.com/photo/2022/01/30/13/33/github-6980894_640.png"
       },
       {
-        "name": "A.k.h.i.l.e.s.h"
+        "name": "Cozy",
+        "Icon": "https://cdn.discordapp.com/avatars/1331780207979401289/d5d54739100acc42b4407b281017a6ef.png?size=1024"
       },
       {
-        "name": "Cozy"
-      },
-      {
-        "name": "midas_kira"
-      },
-      {
-        "name": "Supermfmfan"
+        "name": "Supermfmfan",
+        "Icon": "https://cdn.discordapp.com/avatars/1076703255708581918/9e097606c3f7c95549b2d00f54151c47.png?size=1024"
       }
     ]
   }
