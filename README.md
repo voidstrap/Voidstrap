@@ -34,9 +34,9 @@ Leave a star if you like the project! ⭐️
 
 > [!IMPORTANT]
 > Voidstrap currently supports **Windows 10 and above**.  
-> **Linux support is in the works**, but it is not available yet.
+> **macOS support is in the works**, but it is not available yet.
 >
-> In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.
+> In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.  
 > More experienced Linux users can also try tools like **[Lution](https://github.com/wookhq/Lution)**.
 
 ## Installation
