@@ -13,6 +13,7 @@
 <p align="center">
   <a href="github.com/voidstrap/Voidstrap/releases/latest">Latest release</a> |
   <a href="https://www.youtube.com/watch?v=P-GqTUo_HIA&t">Tutorial</a> |
+  <a href="https://voidstrapp.netlify.app/donate/donate">Donate</a> |
   <a href="https://discord.gg/5tJBqBH8ck">Discord</a>
 </p>
 
