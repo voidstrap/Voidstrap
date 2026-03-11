@@ -68,8 +68,9 @@ Leave a star if you like the project! ⭐️
   No. Voidstrap is fully open-source, meaning anyone can inspect the code.  
   If your antivirus flags it, it is most likely a false positive due to how launchers interact with Roblox processes and updates.
 
-  You can verify the source code yourself at:  
+  You can verify the source code yourself at:
   https://github.com/voidstrap/Voidstrap
+  or just scroll up dummy <!-- hada add this -->
 </details>
 
 <!-- Removed build will prob show how to do that in a later date im lazy for rn -->
