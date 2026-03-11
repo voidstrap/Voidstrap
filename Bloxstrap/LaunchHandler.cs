@@ -218,7 +218,8 @@ namespace Voidstrap
         public static void LaunchRoblox(LaunchMode launchMode)
         {
             const string LOG_IDENT = "LaunchHandler::LaunchRoblox";
-            const string MutexName = "ROBLOX_singletonMutex";
+            const string GlobalMutexName = @"Global\ROBLOX_singletonMutex";
+            const string LocalMutexName = "ROBLOX_singletonMutex"; // fallback idk, was cuz someone had a issue with this so added a fallback
 
             if (launchMode == LaunchMode.None)
                 throw new InvalidOperationException("No Roblox launch mode set");
@@ -237,8 +238,34 @@ namespace Voidstrap
                 return;
             }
 
+            bool robloxRunning = false;
+            try
+            {
+                robloxRunning = Mutex.TryOpenExisting(GlobalMutexName, out _);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                robloxRunning = false;
+            }
+            catch
+            {
+                robloxRunning = false;
+            }
+
+            if (!robloxRunning)
+            {
+                try
+                {
+                    robloxRunning = Mutex.TryOpenExisting(LocalMutexName, out _);
+                }
+                catch
+                {
+                    robloxRunning = false;
+                }
+            }
+
             if (App.Settings.Prop.ConfirmLaunches
-                && Mutex.TryOpenExisting(MutexName, out _)
+                && robloxRunning
                 && !(App.Settings.Prop.IsGameEnabled && !string.IsNullOrWhiteSpace(App.Settings.Prop.LaunchGameID)))
             {
                 var result = Frontend.ShowMessageBox(
@@ -255,7 +282,7 @@ namespace Voidstrap
 
             App.Logger.WriteLine(LOG_IDENT, "Initializing bootstrapper");
             App.Bootstrapper = new Bootstrapper(launchMode);
-            
+
             IBootstrapperDialog? dialog = null;
             if (!App.LaunchSettings.QuietFlag.Active)
             {
@@ -270,7 +297,7 @@ namespace Voidstrap
             if (App.Settings.Prop.ExclusiveFullscreen)
             {
                 _ = Task.Run(RobloxFullscreen.WaitAndForceExclusiveFullscreen);
-            } // redid again cuz of a bug
+            }
 
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>
             {
@@ -301,7 +328,7 @@ namespace Voidstrap
                 {
                     if (mutex != null)
                     {
-                        try { mutex.ReleaseMutex(); } catch {}
+                        try { mutex.ReleaseMutex(); } catch { }
                         mutex.Dispose();
                     }
 

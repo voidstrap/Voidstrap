@@ -16,10 +16,10 @@ namespace Voidstrap.Integrations
     public static class NvidiaProfileManager
     {
         private const string NVIDIA_INSPECTOR_URL =
-            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.30/nvidiaProfileInspector.zip";
+            "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.34/nvidiaProfileInspector.zip";
 
         private static readonly string InspectorDir =
-            Path.Combine(Paths.Integrations);
+            Path.Combine(Paths.Integrations, "NvidiaUpdate"); // was too lazy to add auto-update
 
         private static readonly string InspectorExe =
             Path.Combine(InspectorDir, "nvidiaProfileInspector.exe");

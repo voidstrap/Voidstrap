@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Voidstrap.UI.Elements.Settings.Pages;
 using static Voidstrap.Models.Persistable.AppSettings;
 
 namespace Voidstrap.Integrations
@@ -107,6 +108,76 @@ namespace Voidstrap.Integrations
         {
             if (!string.IsNullOrEmpty(logFile))
                 LogLocation = logFile;
+        }
+
+        public async Task<string?> GetGameIconAsync()
+        {
+            try
+            {
+                if (Data.UniverseId == 0)
+                    return null;
+
+                using var client = new System.Net.Http.HttpClient();
+
+                string url = $"https://thumbnails.roblox.com/v1/games/icons?universeIds={Data.UniverseId}&size=150x150&format=Png&isCircular=true";
+
+                var json = await client.GetStringAsync(url);
+
+                using JsonDocument doc = JsonDocument.Parse(json);
+
+                return doc.RootElement
+                    .GetProperty("data")[0]
+                    .GetProperty("imageUrl")
+                    .GetString();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<int> GetPlayerCount()
+        {
+            if (Data.PlaceId == 0)
+                return 0;
+
+            int countFromApi = 0;
+            try
+            {
+                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                string url = $"https://games.roblox.com/v1/games/{Data.PlaceId}/servers/Public?limit=100";
+
+                var json = await http.GetStringAsync(url);
+                var response = JsonSerializer.Deserialize<ServerResponse>(json,
+                    new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+                if (response?.Data != null)
+                {
+                    var currentServer = response.Data.FirstOrDefault(s => s.Id == Data.JobId);
+                    if (currentServer != null)
+                    {
+                        countFromApi = currentServer.Playing;
+                    }
+                    else
+                    {
+                        countFromApi = response.Data.Sum(s => s.Playing);
+                    }
+                }
+            }
+            catch
+            {
+            }
+
+            int countFromLogs = 1;
+            if (Data.PlayerLogs != null && Data.PlayerLogs.Count > 0)
+            {
+                countFromLogs = Data.PlayerLogs.Values
+                    .Where(log => log != null && !string.IsNullOrWhiteSpace(log.UserId))
+                    .GroupBy(log => log.UserId!.Trim())
+                    .Select(g => g.OrderByDescending(l => l.Time).First())
+                    .Count(log => string.Equals(log.Type, "added", StringComparison.OrdinalIgnoreCase));
+            }
+            return Math.Max(countFromApi, countFromLogs);
         }
 
         public async void Start()

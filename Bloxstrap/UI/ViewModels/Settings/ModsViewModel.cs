@@ -994,29 +994,38 @@ namespace Voidstrap.UI.ViewModels.Settings
                 $"VXH:{SelectedShape}|{CursorColorHex}|{CursorOutlineColorHex}|{CursorSize}|{CrosshairThickness}|{Gap}|{CursorOpacity}";
         }
 
-        public void ApplyCode()
+        private void ApplyCode()
         {
             if (string.IsNullOrWhiteSpace(CursorCode) || !CursorCode.StartsWith("VXH:"))
                 return;
 
             var parts = CursorCode.Substring(4).Split('|');
-
-            if (parts[0] == "IMAGE")
+            try
             {
-                SelectedShape = CrosshairShape.Image;
-                ImageUrl = parts[1];
-                CursorSize = int.Parse(parts[2]);
-                CursorOpacity = double.Parse(parts[3]);
-                return;
-            }
+                if (parts[0] == "IMAGE")
+                {
+                    SelectedShape = CrosshairShape.Image;
+                    ImageUrl = parts.Length > 1 ? parts[1] : "";
+                    CursorSize = (parts.Length > 2 && int.TryParse(parts[2], out var size)) ? size : 20;
+                    CursorOpacity = (parts.Length > 3 && double.TryParse(parts[3], out var opacity)) ? opacity : 1.0;
+                    return;
+                }
 
-            SelectedShape = Enum.Parse<CrosshairShape>(parts[0]);
-            CursorColorHex = parts[1];
-            CursorOutlineColorHex = parts[2];
-            CursorSize = int.Parse(parts[3]);
-            CrosshairThickness = int.Parse(parts[4]);
-            Gap = int.Parse(parts[5]);
-            CursorOpacity = double.Parse(parts[6]);
+                if (!Enum.TryParse<CrosshairShape>(parts[0], true, out var shape))
+                    shape = CrosshairShape.Cross;
+                SelectedShape = shape;
+
+                CursorColorHex = parts.Length > 1 ? parts[1] : "#00FF00";
+                CursorOutlineColorHex = parts.Length > 2 ? parts[2] : "#000000";
+                CursorSize = (parts.Length > 3 && int.TryParse(parts[3], out var sizeVal)) ? sizeVal : 20;
+                CrosshairThickness = (parts.Length > 4 && int.TryParse(parts[4], out var thickVal)) ? thickVal : 2;
+                Gap = (parts.Length > 5 && int.TryParse(parts[5], out var gapVal)) ? gapVal : 4;
+                CursorOpacity = (parts.Length > 6 && double.TryParse(parts[6], out var opVal)) ? opVal : 1.0;
+            }
+            catch
+            {
+                // dont catch anything... UWU we catch UWU
+            }
         }
 
         private void UpdatePreview()
@@ -1185,13 +1194,31 @@ namespace Voidstrap.UI.ViewModels.Settings
             if (!File.Exists(_file)) return;
 
             var ini = IniFile.Read(_file);
-            SelectedShape = Enum.Parse<CrosshairShape>(ini.GetValueOrDefault("Shape", "Cross"));
+            string shapeStr = ini.GetValueOrDefault("Shape", "Cross");
+            if (!Enum.TryParse<CrosshairShape>(shapeStr, true, out var parsedShape))
+            {
+                parsedShape = CrosshairShape.Cross;
+            }
+            SelectedShape = parsedShape;
             CursorColorHex = ini.GetValueOrDefault("Color", "#00FF00");
             CursorOutlineColorHex = ini.GetValueOrDefault("Outline", "#000000");
-            CursorSize = int.Parse(ini.GetValueOrDefault("Size", "20"));
-            CrosshairThickness = int.Parse(ini.GetValueOrDefault("Thickness", "2"));
-            Gap = int.Parse(ini.GetValueOrDefault("Gap", "4"));
-            CursorOpacity = double.Parse(ini.GetValueOrDefault("Opacity", "1.0"));
+
+            if (!int.TryParse(ini.GetValueOrDefault("Size", "20"), out int size))
+                size = 20;
+            CursorSize = size;
+
+            if (!int.TryParse(ini.GetValueOrDefault("Thickness", "2"), out int thickness))
+                thickness = 2;
+            CrosshairThickness = thickness;
+
+            if (!int.TryParse(ini.GetValueOrDefault("Gap", "4"), out int gap))
+                gap = 4;
+            Gap = gap;
+
+            if (!double.TryParse(ini.GetValueOrDefault("Opacity", "1.0"), out double opacity))
+                opacity = 1.0;
+            CursorOpacity = opacity;
+
             ImageUrl = ini.GetValueOrDefault("ImageUrl", "");
         }
 

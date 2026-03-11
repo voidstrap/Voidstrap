@@ -116,4 +116,3 @@ Voidstrap is built using **C# and .NET**.
 [repo-latest]:            https://github.com/voidstrap/Voidstrap/releases/latest
 [repo-stargazers]:        https://github.com/voidstrap/Voidstrap/stargazers
 [discord-invite]:         https://discord.gg/dfA9PdWgcV
-

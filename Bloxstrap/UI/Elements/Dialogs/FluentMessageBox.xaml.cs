@@ -11,7 +11,7 @@ using Voidstrap.UI.Utility;
 
 namespace Voidstrap.UI.Elements.Dialogs
 {
-    // wpfui does have its own messagebox control but it SUCKS so heres this instead
+    // wpfui does have its own messagebox control but it SUCKS so heres this instead, ayo man chill out on wpf ui its amazing :3
 
     /// <summary>
     /// Interaction logic for FluentMessageBox.xaml

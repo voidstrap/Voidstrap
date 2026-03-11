@@ -47,25 +47,6 @@
             <ui:ToggleSwitch IsChecked="{Binding UpdateCheckingEnabled, Mode=TwoWay}" />
         </controls:OptionControl>
 
-        <controls:OptionControl Header="Disable hardware acceleration (WIP)"
-    Description="When disabled, Voidstrap won't take up as much memory usage and disables All Animations and Transparency effects. Requires App Restart.">
-            <ui:ToggleSwitch IsChecked="{Binding HWAsselEnabled, Mode=TwoWay}"
-                     Checked="ToggleSwitch_Checked_1"
-                     Unchecked="ToggleSwitch_Unchecked_1" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-            Description="Displays Voidstrap notifications, joined servers, and more."
-            Header="App Notifications">
-            <ui:ToggleSwitch IsChecked="{Binding VoidNotify, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-            Description="Displays Voidstraps discord RPC."
-            Header="Voidstrap RPC">
-            <ui:ToggleSwitch IsChecked="{Binding VoidRPC, Mode=TwoWay}" />
-        </controls:OptionControl>
-
         <controls:OptionControl 
     Header="Check for Updates"
     Description="Check for any available Voidstrap updates.">
@@ -75,7 +56,6 @@
                 Click="Check_Click"/>
             </StackPanel>
         </controls:OptionControl>
-        
 
         <controls:OptionControl 
     Header="Global Settings"
@@ -86,6 +66,31 @@
                 Click="ApplyNow_Click"/>
             </StackPanel>
         </controls:OptionControl>
+
+        <Expander Header="App Settings" IsExpanded="False" Margin="0,8,0,0">
+            <StackPanel>
+
+                <controls:OptionControl Header="Disable hardware acceleration (WIP)"
+    Description="When disabled, Voidstrap won't take up as much memory usage and disables All Animations and Transparency effects. Requires App Restart.">
+                    <ui:ToggleSwitch IsChecked="{Binding HWAsselEnabled, Mode=TwoWay}"
+                     Checked="ToggleSwitch_Checked_1"
+                     Unchecked="ToggleSwitch_Unchecked_1" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Description="Displays Voidstrap notifications, joined servers, and more."
+            Header="App Notifications">
+                    <ui:ToggleSwitch IsChecked="{Binding VoidNotify, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+                <controls:OptionControl
+            Description="Displays Voidstraps discord RPC."
+            Header="Voidstrap RPC">
+                    <ui:ToggleSwitch IsChecked="{Binding VoidRPC, Mode=TwoWay}" />
+                </controls:OptionControl>
+
+            </StackPanel>
+        </Expander>
 
         <TextBlock
             Margin="0,16,0,0"
@@ -116,7 +121,50 @@
             FontSize="16"
             FontWeight="Medium"
             Text="Roblox" />
+        
+        <Expander Header="Resolution Settings" IsExpanded="False" Margin="0,8,0,0">
+            <StackPanel>
 
+                <controls:OptionControl
+    Header="Resolution Changer"
+    Description="Select a resolution for your primary monitor">
+
+                    <StackPanel>
+                        <ComboBox
+            ItemsSource="{Binding AvailableResolutions}"
+            SelectedItem="{Binding SelectedResolution, Mode=TwoWay}"
+            DisplayMemberPath="DisplayName"
+            Width="220"/>
+                    </StackPanel>
+                </controls:OptionControl>
+
+                <controls:OptionControl
+    Header="Resolution Changer (In-Game)"
+    Description="Change resolution when entering a specific Roblox PlaceId">
+
+                    <StackPanel>
+
+                        <CheckBox
+            Content="Apply Resolution PlaceID"
+            IsChecked="{Binding UsePlaceId, Mode=TwoWay}"/>
+
+                        <TextBox
+            Width="220"
+            Text="{Binding PlaceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+            IsEnabled="{Binding UsePlaceId}"/>
+
+                        <ComboBox
+            ItemsSource="{Binding AvailableResolutionsInGame}"
+            SelectedItem="{Binding SelectedResolutionInGame, Mode=TwoWay}"
+            DisplayMemberPath="DisplayName"
+            Width="220"
+            Margin="0,8,0,0"/>
+
+                    </StackPanel>
+                </controls:OptionControl>
+
+            </StackPanel>
+        </Expander>
 
         <controls:OptionControl 
     Header="Roblox Priority"
@@ -154,43 +202,6 @@
                 </Style>
             </controls:OptionControl.Style>
             <ui:ToggleSwitch IsChecked="{Binding UpdateRoblox, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl
-    Header="Resolution Changer"
-    Description="Select a resolution for your primary monitor">
-
-            <StackPanel>
-                <ComboBox
-    ItemsSource="{Binding AvailableResolutions}"
-    SelectedItem="{Binding SelectedResolution, Mode=TwoWay}"
-    DisplayMemberPath="DisplayName"
-    Width="220"/>
-            </StackPanel>
-        </controls:OptionControl>
-
-        <controls:OptionControl
-    Header="Resolution Changer (In-Game)"
-    Description="Change resolution when entering a specific Roblox PlaceId">
-
-            <StackPanel>
-
-                <CheckBox
-            Content="Apply Resolution PlaceID"
-            IsChecked="{Binding UsePlaceId, Mode=TwoWay}"/>
-
-                <TextBox
-            Width="220"
-            Text="{Binding PlaceId, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-            IsEnabled="{Binding UsePlaceId}"/>
-
-                <ComboBox
-   ItemsSource="{Binding AvailableResolutionsInGame}"
-   SelectedItem="{Binding SelectedResolutionInGame, Mode=TwoWay}"
-   DisplayMemberPath="DisplayName"
-   Width="220" Margin="0,8,0,0"/>
-
-            </StackPanel>
         </controls:OptionControl>
 
         <ui:CardExpander Margin="0,8,0,0" IsExpanded="False">
@@ -337,19 +348,24 @@
 
                     <TextBlock Grid.Column="1" Margin="16" VerticalAlignment="Center" Text="{Binding ChannelInfoLoadingText, Mode=OneWay}" TextWrapping="Wrap" />
                 </Grid>
+                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                    <Button Content="Channels"
+            Click="OpenChannelListDialog_Click" />
+                </StackPanel>
             </StackPanel>
         </ui:CardExpander>
 
-
         <controls:OptionControl x:Name="RobloxVersionAPP" Header="">
         </controls:OptionControl>
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+        <StackPanel Orientation="Horizontal">
             <Button Content="Reset Settings"
-            Margin="0,0,8,0"
+            Margin="0,8,8,0"
             Click="Button_Click" />
 
-            <Button Content="Channels"
-            Click="OpenChannelListDialog_Click" />
+            <ui:Button Content="Donate"
+               Icon="Heart24"
+               Margin="0,8,8,0"
+               Click="DonateButton_Click" />
         </StackPanel>
     </StackPanel>
 </ui:UiPage>

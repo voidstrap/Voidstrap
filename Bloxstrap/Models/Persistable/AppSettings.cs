@@ -48,8 +48,10 @@ namespace Voidstrap.Models.Persistable
 
         public bool SmooothBARRyesirikikthxlucipook { get; set; } = false; // wanna keep this on false so people may not be annoyed by it being on
         public bool HasLaunchedGame { get; set; } = false;
+        public bool NotificationWindowShow { get; set; } = true;
         public bool BackgroundWindow { get; set; } = true;
         public bool UsePlaceId { get; set; } = false;
+        public bool ClearFont { get; set; } = false;
         public string PlaceId { get; set; } = "";
         public bool OptimizeRoblox { get; set; } = false;
         public bool BackgroundUpdatesEnabled { get; set; } = true;

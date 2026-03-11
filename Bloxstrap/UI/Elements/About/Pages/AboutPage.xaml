@@ -77,7 +77,7 @@
                         Text="Voidstrap" />
 
                 </Grid>
-                <TextBlock Text="A Bloxstrap Fork. Mod based :3" />
+                <TextBlock Text="A Simple yet Advanced, Bloxstrap Fork." />
             </StackPanel>
         </Grid>
 
@@ -100,116 +100,176 @@
                 NavigateUri="https://discord.gg/X3CRTP66VG" />
         </WrapPanel>
 
-        <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
-            <TextBlock
-                Margin="0,16,0,0"
-                FontFamily="Segoe UI Semibold"
-                FontSize="20"
-                Text="Build Information" />
+        <TextBlock
+    Margin="0,16,0,0"
+    FontFamily="Segoe UI Semibold"
+    FontSize="20"
+    FontWeight="Medium"
+    Text="Main Contributors" />
 
-            <Grid Margin="0,4,0,4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <!-- Label column -->
-                    <ColumnDefinition Width="*" />
-                    <!-- Value column -->
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <!-- Updated row -->
-                    <RowDefinition Height="Auto" />
-                    <!-- Version row -->
-                    <RowDefinition Height="Auto" />
-                    <!-- Commit hash row -->
-                </Grid.RowDefinitions>
+        <TextBlock
+            Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+            Text="These are the people who have made the main contributions to Voidstrap, helping make it real."
+            TextWrapping="Wrap" />
 
-                <!-- Updated Label -->
-                <TextBlock
-        Grid.Row="0"
-        Grid.Column="0"
-        FontSize="14"
-        FontWeight="Medium"
-        Text="Updated:"
-        VerticalAlignment="Center"
-        Margin="0,0,8,0" />
+        <StackPanel Orientation="Vertical" Margin="0,8,0,0">
 
-                <!-- Build Timestamp -->
-                <TextBlock
-        Grid.Row="0"
-        Grid.Column="1"
-        FontSize="14"
-        Text="{Binding BuildTimestamp, Mode=OneTime}"
-        VerticalAlignment="Center" />
+            <ui:Card Padding="12">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://cdn.discordapp.com/avatars/1113241245364535416/b041574571d2dfc9026c2205f7897398.png?size=1024"/>
 
-                <!-- Version Label -->
-                <TextBlock
-        Grid.Row="1"
-        Grid.Column="0"
-        FontSize="14"
-        FontWeight="Medium"
-        Text="Version:"
-        VerticalAlignment="Center"
-        Margin="0,4,8,0" />
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Bratic"/>
 
-                <!-- Version Value -->
-                <TextBlock
-        Grid.Row="1"
-        Grid.Column="1"
-        FontSize="14"
-        Text="{Binding Version, Mode=OneTime}"
-        VerticalAlignment="Center" />
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="Love Everyone With a Purpose."/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
 
-                <!-- Commit Hash Label -->
-                <TextBlock
-        Grid.Row="2"
-        Grid.Column="0"
-        FontSize="14"
-        FontWeight="Medium"
-        Text="Commit Hash:"
-        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
-        VerticalAlignment="Center"
-        Margin="0,4,8,0" />
+            <ui:Card Padding="12" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                <!-- Commit Hash Value (optional if you want to show it) -->
-                <TextBlock
-        Grid.Row="2"
-        Grid.Column="1"
-        FontSize="14"
-        Text="{Binding CommitHash, Mode=OneTime}"
-        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
-        VerticalAlignment="Center" />
-                <TextBlock
-                    Grid.Row="2"
-                    Grid.Column="1"
-                    Margin="0,0,0,4"
-                    VerticalAlignment="Bottom"
-                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}">
-                    <Hyperlink
-                        Command="models:GlobalViewModel.OpenWebpageCommand"
-                        CommandParameter="{Binding BuildCommitHashUrl, Mode=OneTime}"
-                        Foreground="{DynamicResource TextFillColorTertiaryBrush}">
-                        <TextBlock Text="{Binding BuildMetadata.CommitHash, Mode=OneTime}" />
-                    </Hyperlink>
-                </TextBlock>
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://avatars.githubusercontent.com/u/168036205?v=4"/>
 
-                <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Margin="0,4,16,4"
-                    FontSize="14"
-                    FontWeight="Medium"
-                    Text="Commit Ref"
-                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
-                <TextBlock
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="0,0,0,4"
-                    VerticalAlignment="Bottom"
-                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
-                    Text="{Binding BuildMetadata.CommitRef, Mode=OneTime}"
-                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
-            </Grid>
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Luci"/>
+
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="One of Bratics Besties, Lucistrap Owner"/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <ui:Card Padding="12" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://avatars.githubusercontent.com/u/193777251?v=4"/>
+
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Midaskira"/>
+
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="Retired (Co-Owner) Was like a brother."/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <ui:Card Padding="12" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://avatars.githubusercontent.com/u/213444273?v=4"/>
+
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="NoRam"/>
+
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="A kind soul that helped on the way."/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <ui:Card Padding="12" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://avatars.githubusercontent.com/u/105540464?v=4"/>
+
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="Levent"/>
+
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="A kind soul that helped on the way."/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
+            <ui:Card Padding="12" Margin="0,8,0,0">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="60"/>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Image
+                Width="48"
+                Height="48"
+                VerticalAlignment="Top"
+                Source="https://avatars.githubusercontent.com/u/194078013?v=4"/>
+
+                    <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                        <TextBlock
+                    FontSize="16"
+                    FontWeight="SemiBold"
+                    Text="7bt"/>
+
+                        <TextBlock
+                    Opacity="0.7"
+                    Text="A kind soul that helped on the way."/>
+                    </StackPanel>
+                </Grid>
+            </ui:Card>
+
         </StackPanel>
 
         <TextBlock
@@ -342,5 +402,106 @@
                 </StackPanel>
             </controls:Expander>
         </Grid>
+
+        <StackPanel Visibility="{Binding BuildInformationVisibility, Mode=OneTime}">
+            <TextBlock
+                Margin="0,16,0,0"
+                FontFamily="Segoe UI Semibold"
+                FontSize="20"
+                Text="Build Information" />
+
+            <Grid Margin="0,4,0,4">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <TextBlock
+        Grid.Row="0"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Updated:"
+        VerticalAlignment="Center"
+        Margin="0,0,8,0" />
+
+                <TextBlock
+        Grid.Row="0"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding BuildTimestamp, Mode=OneTime}"
+        VerticalAlignment="Center" />
+
+                <TextBlock
+        Grid.Row="1"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Version:"
+        VerticalAlignment="Center"
+        Margin="0,4,8,0" />
+
+                <TextBlock
+        Grid.Row="1"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding Version, Mode=OneTime}"
+        VerticalAlignment="Center" />
+
+                <TextBlock
+        Grid.Row="2"
+        Grid.Column="0"
+        FontSize="14"
+        FontWeight="Medium"
+        Text="Commit Hash:"
+        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
+        VerticalAlignment="Center"
+        Margin="0,4,8,0" />
+
+                <TextBlock
+        Grid.Row="2"
+        Grid.Column="1"
+        FontSize="14"
+        Text="{Binding CommitHash, Mode=OneTime}"
+        Visibility="{Binding BuildCommitVisibility, Mode=OneTime}"
+        VerticalAlignment="Center" />
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}">
+                    <Hyperlink
+                        Command="models:GlobalViewModel.OpenWebpageCommand"
+                        CommandParameter="{Binding BuildCommitHashUrl, Mode=OneTime}"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}">
+                        <TextBlock Text="{Binding BuildMetadata.CommitHash, Mode=OneTime}" />
+                    </Hyperlink>
+                </TextBlock>
+
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="0"
+                    Margin="0,4,16,4"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    Text="Commit Ref"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+                <TextBlock
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Margin="0,0,0,4"
+                    VerticalAlignment="Bottom"
+                    Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                    Text="{Binding BuildMetadata.CommitRef, Mode=OneTime}"
+                    Visibility="{Binding BuildCommitVisibility, Mode=OneTime}" />
+            </Grid>
+        </StackPanel>
     </StackPanel>
 </ui:UiPage>

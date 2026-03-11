@@ -213,6 +213,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.IngameChatDiscord = value;
         }
 
+        public bool joinGameNotify
+        {
+            get => App.Settings.Prop.NotificationWindowShow;
+            set => App.Settings.Prop.NotificationWindowShow = value;
+        }
+
         public bool exitondissy
         {
             get => App.Settings.Prop.exitondissy;

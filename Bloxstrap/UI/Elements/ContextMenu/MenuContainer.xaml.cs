@@ -1,7 +1,7 @@
 ﻿using RobloxLightingOverlay;
-using RobloxLightingOverlay;
 using RobloxLightingOverlay.Effects;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -34,6 +34,11 @@ namespace Voidstrap.UI.Elements.ContextMenu
         private DispatcherTimer closestServerTimer;
         private Server? lastClosestServer;
 
+        [DllImport("kernel32.dll")]
+        private static extern bool SetProcessWorkingSetSize(IntPtr proc, UIntPtr min, UIntPtr max);
+
+        private DispatcherTimer memoryCleanTimer;
+
         private ActivityWatcher? _activityWatcher => _watcher.ActivityWatcher;
 
         private ServerInformation? _serverInformationWindow;
@@ -47,6 +52,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
         private BetterBloxDataCenterConsole? _betterbloxWindow;
 
         private OutputConsole? _OutputConsole;
+        private DispatcherTimer memoryTimer;
 
         private ChatLogs? _ChatLogs;
 
@@ -66,6 +72,32 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 return dots;
 
             return text.Substring(0, take) + dots;
+        }
+
+        private void StartMemoryCleaner()
+        {
+            memoryCleanTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2)
+            };
+            memoryCleanTimer.Tick += MemoryCleanTimer_Tick;
+            memoryCleanTimer.Start();
+        }
+
+        private void MemoryCleanTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+                var process = Process.GetCurrentProcess();
+                SetProcessWorkingSetSize(process.Handle, UIntPtr.Zero, UIntPtr.Zero);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"MemoryCleaner Error: {ex.Message}");
+            }
         }
 
         private void LoadFlags()
@@ -100,6 +132,8 @@ namespace Voidstrap.UI.Elements.ContextMenu
         public MenuContainer(Watcher watcher)
         {
             InitializeComponent();
+            StartMemoryMonitoring();
+            StartMemoryCleaner();
             var vm = new MenuContainerViewModel();
             DataContext = vm;
 
@@ -107,6 +141,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
                 this.ContextMenu.DataContext = vm;
 
             StartPlayTimeTimer();
+
             _watcher = watcher;
             DataContext = new MenuContainerViewModel();
 
@@ -271,6 +306,51 @@ namespace Voidstrap.UI.Elements.ContextMenu
             }
         }
 
+        private void StartMemoryMonitoring()
+        {
+            memoryTimer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(2)
+            };
+            memoryTimer.Tick += MemoryTimer_Tick;
+            memoryTimer.Start();
+        }
+
+        private void MemoryTimer_Tick(object? sender, EventArgs e)
+        {
+            try
+            {
+                var voidstrapProcess = Process.GetProcessesByName("Voidstrap").FirstOrDefault();
+                long voidstrapMemory = voidstrapProcess?.WorkingSet64 ?? 0;
+                var robloxProcesses = Process.GetProcessesByName("RobloxPlayerBeta");
+                long robloxMemory = robloxProcesses.Sum(p => p.WorkingSet64);
+
+                Dispatcher.Invoke(() =>
+                {
+                    MemoryTextBlock.Text = $"Roblox: {FormatBytes(robloxMemory)}";
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Memory {ex.Message}");
+            }
+        }
+
+        private static string FormatBytes(long bytes)
+        {
+            const int scale = 1024;
+            string[] orders = new string[] { "GB", "MB", "KB", "B" };
+            long max = (long)Math.Pow(scale, orders.Length - 1);
+
+            foreach (string order in orders)
+            {
+                if (bytes > max)
+                    return $"{(double)bytes / max:0.##} {order}";
+                max /= scale;
+            }
+            return "0 B";
+        }
+
         private async void JoinClosestServerMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (_activityWatcher?.Data == null)
@@ -353,6 +433,65 @@ namespace Voidstrap.UI.Elements.ContextMenu
 
         public void ActivityWatcher_OnLogOpen(object? sender, EventArgs e) =>
             Dispatcher.Invoke(() => LogTracerMenuItem.Visibility = Visibility.Visible);
+
+        private async Task ShowJoinNotification()
+        {
+            if (!App.Settings.Prop.NotificationWindowShow)
+                return;
+            if (_activityWatcher == null)
+                return;
+
+            var data = _activityWatcher.Data;
+            string universeName = data.UniverseDetails?.Data.Name ?? $"Place {data.PlaceId}";
+            string? iconUrl = data.UniverseDetails?.Thumbnail.ImageUrl;
+
+            if (iconUrl == null && data.UniverseDetails == null)
+            {
+                try
+                {
+                    await UniverseDetails.FetchSingle(data.UniverseId);
+                    data.UniverseDetails = UniverseDetails.LoadFromCache(data.UniverseId);
+                    iconUrl = data.UniverseDetails?.Thumbnail.ImageUrl;
+                    universeName = data.UniverseDetails?.Data.Name ?? universeName;
+                }
+                catch { }
+            }
+
+            int players = await _activityWatcher.GetPlayerCount();
+            string serverLocation = "Unknown Location";
+
+            try
+            {
+                if (data != null)
+                {
+                    string? location = await data.QueryServerLocation();
+                    if (!string.IsNullOrWhiteSpace(location))
+                        serverLocation = location;
+                }
+            }
+            catch { }
+            string playerText = players > 1 ? $" • {players} Players" : string.Empty;
+            string text = $"{universeName}\n{serverLocation}{playerText}";
+
+            await Dispatcher.InvokeAsync(() =>
+            {
+                try
+                {
+                    if (!(App.Current.Resources["NotificationWindow"] is NotificationWindow notificationWindow))
+                    {
+                        notificationWindow = new NotificationWindow();
+                        App.Current.Resources["NotificationWindow"] = notificationWindow;
+                    }
+
+                    if (!notificationWindow.IsVisible)
+                        notificationWindow.Show();
+
+                    notificationWindow.Activate();
+                    notificationWindow.ShowNotification(text, iconUrl, 6);
+                }
+                catch { }
+            });
+        }
 
         public void ActivityWatcher_OnGameJoin(object? sender, EventArgs e)
         {
@@ -454,6 +593,7 @@ namespace Voidstrap.UI.Elements.ContextMenu
             });
 
             _ = UpdateCurrentGameIconAsync(_activityWatcher.Data);
+            _ = ShowJoinNotification();
         }
 
         public void ActivityWatcher_OnGameLeave(object? sender, EventArgs e)

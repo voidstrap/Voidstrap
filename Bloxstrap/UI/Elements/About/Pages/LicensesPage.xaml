@@ -36,7 +36,7 @@
                 Grid.Column="0"
                 Margin="0,8,8,0"
                 Command="models:GlobalViewModel.OpenWebpageCommand"
-                CommandParameter="https://github.com/midaskira/Voidstrap/blob/main/LICENSE.md">
+                CommandParameter="https://github.com/voidstrap/Voidstrap/blob/main/LICENSE.VOIDSTRAP">
                 <StackPanel>
                     <TextBlock FontSize="14" Text="Voidstrap" />
                     <TextBlock
@@ -196,6 +196,22 @@
                         FontSize="12"
                         Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                         Text="Apache 2.0" />
+                </StackPanel>
+            </ui:CardAction>
+
+            <ui:CardAction
+                Grid.Row="0"
+                Grid.Column="2"
+                Margin="0,8,0,0"
+                Command="models:GlobalViewModel.OpenWebpageCommand"
+                CommandParameter="https://github.com/Orbmu2k/nvidiaProfileInspector/blob/master/LICENSE.txt">
+                <StackPanel>
+                    <TextBlock FontSize="14" Text="Nvidia Profile Inspector" />
+                    <TextBlock
+                        Margin="0,2,0,0"
+                        FontSize="12"
+                        Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                        Text="MIT License" />
                 </StackPanel>
             </ui:CardAction>
 

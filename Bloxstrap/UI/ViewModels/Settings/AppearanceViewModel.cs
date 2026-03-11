@@ -84,6 +84,12 @@ namespace Voidstrap.UI.ViewModels.Settings
             set => App.Settings.Prop.GRADmentFR = value;
         }
 
+        public bool ClearFont
+        {
+            get => App.Settings.Prop.ClearFont;
+            set => App.Settings.Prop.ClearFont = value;
+        }
+
         public bool SmooothBARRyesirikikthxlucipook
         {
             get => App.Settings.Prop.SmooothBARRyesirikikthxlucipook;

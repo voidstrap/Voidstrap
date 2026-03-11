@@ -121,8 +121,10 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 string modsSource = Path.Combine(basePath, "VoidstrapMods");
 
                 var strapDirs = Directory.GetDirectories(localAppData)
-                                         .Where(d => d.EndsWith("strap", StringComparison.OrdinalIgnoreCase))
-                                         .ToList();
+                    .Where(d => d.EndsWith("strap", StringComparison.OrdinalIgnoreCase) &&
+                                !d.EndsWith("Voidstrap", StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
                 foreach (var dir in strapDirs)
                 {
                     string settingsTarget = Path.Combine(dir, "Settings.json");
@@ -132,9 +134,9 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                     BackupIfExists(modsTarget);
                     SafeCopy(appSettingsSource, settingsTarget);
                     SafeCopy(modsSource, modsTarget);
-                    Console.WriteLine($"Updated: {dir}");
                 }
-                Frontend.ShowMessageBox("Voidstrap data synchronized!");
+
+                Frontend.ShowMessageBox("Voidstrap Settings/Mods Synced"); // diddy is synced :)))))))))) eheh not funny ik.. sorry
             }
             catch (Exception ex)
             {
@@ -256,16 +258,22 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             {
                 string basePath = Paths.Base;
                 string appSettingsPath = Path.Combine(basePath, "AppSettings.json");
+
                 if (File.Exists(appSettingsPath))
                 {
                     File.Delete(appSettingsPath);
                 }
-                Process.Start(Application.ResourceAssembly.Location);
+                Process.Start(new ProcessStartInfo // this alr caused me enough fucking pain as is
+                {
+                    FileName = Process.GetCurrentProcess().MainModule.FileName,
+                    UseShellExecute = true
+                });
+
                 Application.Current.Shutdown();
             }
             catch (Exception ex)
             {
-               Frontend.ShowMessageBox($"An error occurred: {ex.Message}");
+                Frontend.ShowMessageBox($"An error occurred: {ex.Message}");
             }
         }
 
@@ -274,6 +282,24 @@ namespace Voidstrap.UI.Elements.Settings.Pages
             var dialog = new ChannelListsDialog();
             dialog.Owner = Window.GetWindow(this);
             dialog.ShowDialog();
+        }
+
+        private void DonateButton_Click(object sender, RoutedEventArgs e)
+        {
+            string url = "https://voidstrapp.netlify.app/donate/donate";
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo
+                {
+                    FileName = url,
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception ex)
+            {
+                Frontend.ShowMessageBox($"Wasnt able to open: {ex.Message}");
+            }
         }
     }
 }

@@ -245,24 +245,42 @@
         </ui:Snackbar>
 
         <ui:Snackbar x:Name="SettingsSavedSnackbar"
-                     Title="{x:Static resources:Strings.Menu_SettingsSaved_Title}"
-                     Grid.RowSpan="10"
-                     Margin="200,0,200,20"
-                     Panel.ZIndex="9"
-                     Appearance="Dark"
-                     Icon="CheckboxChecked24"
-                     Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
-                     Timeout="2100" />
-
+             Title="{x:Static resources:Strings.Menu_SettingsSaved_Title}"
+             Grid.RowSpan="10"
+             Margin="200,0,200,20"
+             Panel.ZIndex="9"
+             Appearance="Dark"
+             Icon="CheckboxChecked24"
+             Message="{x:Static resources:Strings.Menu_SettingsSaved_Message}"
+             Timeout="2100">
+            <ui:Snackbar.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                    <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                    <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                    <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                </LinearGradientBrush>
+            </ui:Snackbar.Background>
+        </ui:Snackbar>
+        
         <ui:Snackbar x:Name="SettingsSavedLaunchSnackbar"
-                     Title="Voidstrap Saved And Launched Roblox!"
-                     Grid.RowSpan="10"
-                     Margin="150,0,150,20"
-                     Panel.ZIndex="10"
-                     Appearance="Dark"
-                     Icon="CheckboxChecked24"
-                     Message="Changes have been saved."
-                     Timeout="2000" />
+             Title="Voidstrap Saved And Launched Roblox!"
+             Grid.RowSpan="10"
+             Margin="150,0,150,20"
+             Panel.ZIndex="10"
+             Appearance="Dark"
+             Icon="CheckboxChecked24"
+             Message="Changes have been saved."
+             Timeout="2000">
+            <ui:Snackbar.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                    <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                    <GradientStop Offset="0.35" Color="{DynamicResource WindowBackgroundColorSecondary}" />
+                    <GradientStop Offset="0.75" Color="{DynamicResource WindowBackgroundColorThird}" />
+                    <GradientStop Offset="1.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
+                </LinearGradientBrush>
+            </ui:Snackbar.Background>
+        </ui:Snackbar>
 
         <ui:TitleBar Padding="8"
                      x:Name="RootTitleBar"
@@ -313,7 +331,7 @@
                        PageType="{x:Type pages:AppearancePage}" />
 
                     <ui:NavigationItem Content="Browser"
-                       Icon="Server24"
+                       Icon="BroadActivityFeed20"
                        PageType="{x:Type pages:ServerBrowserPage}" />
 
                     <ui:NavigationSeparator />
@@ -333,14 +351,8 @@
                        Visibility="{Binding IsFastFlagEditorVisible,
                                             Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
-                       Icon="Apps32"
-                       PageType="{x:Type pages:ShortcutsPage}" />
-
-
                     <ui:NavigationItem Content="Global"
-                       Icon="GlobeLocation24"
+                       Icon="GlobeLocation20"
                        PageType="{x:Type pages:GBSEditorPage}" />
 
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
@@ -363,8 +375,10 @@
 
                 <ui:NavigationFluent.Footer>
                     <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
+                       Icon="Apps32"
+                       PageType="{x:Type pages:ShortcutsPage}" />
                     <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:ReleasesPage}" />
-                    <ui:NavigationItem Content="Donate" Icon="MoneyHand24" PageType="{x:Type pages:DonoPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48"
                                        Command="{Binding OpenAboutCommand, Mode=OneTime}" />

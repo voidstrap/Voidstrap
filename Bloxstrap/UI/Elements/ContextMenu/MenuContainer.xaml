@@ -22,6 +22,7 @@
     WindowStartupLocation="Manual"
     Loaded="Window_Loaded"
     Closed="Window_Closed">
+    
 
     <ui:UiWindow.ContextMenu>
         <ContextMenu>
@@ -85,7 +86,7 @@
                 </MenuItem.Header>
             </MenuItem>
 
-            <MenuItem x:Name="FlagsMenuItem" IsEnabled="False">
+            <MenuItem>
                 <MenuItem.Header>
                     <Grid>
                         <Grid.ColumnDefinitions>
@@ -93,36 +94,42 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <ui:SymbolIcon Grid.Column="0" Symbol="Flag24"/>
-                        <TextBlock
-                            x:Name="FlagsTextBlock"
-                            Grid.Column="1"
-                            Margin="4,0,0,0"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            Text="Flags: 0"/>
+                        <ui:SymbolIcon Grid.Column="0" Symbol="Info20"/>
+                        <TextBlock Grid.Column="1" Margin="4,0,0,0" VerticalAlignment="Center" Text="Info"/>
                     </Grid>
                 </MenuItem.Header>
-            </MenuItem>
 
-            <MenuItem IsEnabled="False">
-                <MenuItem.Header>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="24"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+                <MenuItem.Items>
+                    <StackPanel>
+                        <Expander Header="FFlags" IsExpanded="True" Background="Transparent">
+                            <TextBlock
+                    x:Name="FlagsTextBlock"
+                    Margin="4,2,0,2"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="Flags: 0"/>
+                        </Expander>
 
-                        <ui:SymbolIcon Grid.Column="0" Symbol="Timer24"/>
-                        <TextBlock
-                            x:Name="PlayTimeTextBlock"
-                            Grid.Column="1"
-                            Margin="6,0,0,0"
-                            VerticalAlignment="Center"
-                            Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            Text="PlayTime: 00:00:00"/>
-                    </Grid>
-                </MenuItem.Header>
+                        <Expander Header="PlayTime" IsExpanded="True" Background="Transparent">
+                            <TextBlock
+                    x:Name="PlayTimeTextBlock"
+                    Margin="4,2,0,2"
+                    VerticalAlignment="Center"
+                    Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                    Text="PlayTime: 00:00:00"/>
+                        </Expander>
+
+                        <Expander Header="Memory Details" IsExpanded="True" Background="Transparent">
+                            <StackPanel Margin="4,2,0,2">
+                                <TextBlock
+                        x:Name="MemoryTextBlock"
+                        Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                        FontWeight="SemiBold"
+                        Text="Roblox: 0 MB"/>
+                            </StackPanel>
+                        </Expander>
+                    </StackPanel>
+                </MenuItem.Items>
             </MenuItem>
 
             <Separator/>
@@ -134,7 +141,7 @@
                 IsChecked="True"
                 Visibility="Collapsed"
                 Click="RichPresenceMenuItem_Click"/>
-
+            
             <MenuItem
                 x:Name="InviteDeeplinkMenuItem"
                 Visibility="Collapsed"

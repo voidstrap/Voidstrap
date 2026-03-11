@@ -89,12 +89,27 @@ namespace Voidstrap
         private CancellationTokenSource? _optimizationCts;
         private Process? _fflagRunnerProcess;
         private DispatcherTimer? _memoryCleanerTimer;
+        private const string ZipUrl =
+        "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
 
+        private const string CommitApiUrl =
+        "https://api.github.com/repos/KloBraticc/SkyboxPackV2/commits/main";
+
+        private const string VersionFile = "skybox.commit";
+        private static readonly string PackRepoZip = "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
+        private static readonly string PackFolder = Path.Combine(Paths.Base, "SkyboxPack");
+        private static readonly HttpClient Http = new HttpClient
+        {
+            Timeout = TimeSpan.FromMinutes(30)
+        };
         private bool _mustUpgrade => String.IsNullOrEmpty(AppData.State.VersionGuid) || !File.Exists(AppData.ExecutablePath);
         private bool _noConnection = false;
+        private static readonly float CpuHighThreshold = 80f;
+        private static readonly float CpuLowThreshold = 20f;
+        private static readonly float MemoryHighThreshold = 0.7f;
+        private static readonly int MinWorkingSetMB = 50;
 
         private AsyncMutex? _mutex;
-
         private int _appPid = 0;
 
         public IBootstrapperDialog? Dialog = null;
@@ -137,20 +152,33 @@ namespace Voidstrap
 
         private void UpdateProgressBar()
         {
-            if (Dialog is null)
+            if (Dialog == null)
                 return;
+
+            if (System.Windows.Application.Current?.Dispatcher != null)
+            {
+                System.Windows.Application.Current.Dispatcher.Invoke(UpdateProgressBarInternal);
+            }
+            else
+            {
+                UpdateProgressBarInternal();
+            }
+        }
+
+        private void UpdateProgressBarInternal()
+        {
             if (_totalDownloadedBytes <= 0 || _progressIncrement <= 0)
             {
                 Dialog.ProgressValue = 0;
                 Dialog.TaskbarProgressValue = 0;
                 return;
             }
-            int progressValue = (int)Math.Floor(_progressIncrement * _totalDownloadedBytes);
-            progressValue = Math.Clamp(progressValue, 0, ProgressBarMaximum);
-            Dialog.ProgressValue = progressValue;
-            double taskbarProgressValue = _taskbarProgressIncrement * _totalDownloadedBytes;
-            taskbarProgressValue = Math.Clamp(taskbarProgressValue, 0.0, _taskbarProgressMaximum);
-            Dialog.TaskbarProgressValue = taskbarProgressValue;
+
+            double rawProgress = _progressIncrement * _totalDownloadedBytes;
+            Dialog.ProgressValue = Math.Clamp((int)Math.Floor(rawProgress), 0, ProgressBarMaximum);
+
+            double taskbarProgress = _taskbarProgressIncrement * _totalDownloadedBytes;
+            Dialog.TaskbarProgressValue = Math.Clamp(taskbarProgress, 0.0, _taskbarProgressMaximum);
         }
 
         private async Task HandleConnectionError(Exception exception)
@@ -1321,11 +1349,6 @@ namespace Voidstrap
             App.Logger.WriteLine("Optimizer", "Continuous Roblox optimization stopped.");
         }
 
-        private static readonly float CpuHighThreshold = 80f;
-        private static readonly float CpuLowThreshold = 20f;
-        private static readonly float MemoryHighThreshold = 0.7f;
-        private static readonly int MinWorkingSetMB = 50;
-
         private async Task MonitorProcessPerformance(Process process, Dictionary<int, PerformanceCounter> cpuCounters)
         {
             try
@@ -1897,20 +1920,6 @@ namespace Voidstrap
                 Interlocked.Exchange(ref _isInstalling, 0);
             }
         }
-
-        private const string ZipUrl =
-            "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
-
-        private const string CommitApiUrl =
-            "https://api.github.com/repos/KloBraticc/SkyboxPackV2/commits/main";
-
-        private const string VersionFile = "skybox.commit";
-        private static readonly string PackRepoZip = "https://github.com/KloBraticc/SkyboxPackV2/archive/refs/heads/main.zip";
-        private static readonly string PackFolder = Path.Combine(Paths.Base, "SkyboxPack");
-        private static readonly HttpClient Http = new HttpClient
-        {
-            Timeout = TimeSpan.FromMinutes(30)
-        };
 
         private static readonly Dictionary<string, string> SkyboxPatchFolderMap = new()
     {

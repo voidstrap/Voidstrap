@@ -50,13 +50,12 @@
             </ui:CardAction>
 
             <!--  Help Card  -->
-            <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,0,4,0" Icon="BookQuestionMark24" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://github.com/Voidstraplabs/Voidstrap/wiki/Adding-custom-mods">
+            <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,0,4,0" Icon="BookQuestionMark24" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://github.com/Bloxstraplabs/Bloxstrap/wiki/Adding-custom-mods">
                 <StackPanel>
                     <TextBlock FontSize="14" Text="{x:Static resources:Strings.Common_Help}" FontWeight="Medium" />
                     <TextBlock Margin="0,2,0,0" FontSize="12" Text="{x:Static resources:Strings.Menu_Mods_Help_Description}" Padding="0,0,16,0"  Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
                 </StackPanel>
             </ui:CardAction>
-
 
             <!--  Compatibility Settings Card  -->
             <ui:CardAction
@@ -93,7 +92,14 @@
             Margin="0,0,0,16"
             Text="{x:Static resources:Strings.Common_Presets}" />
 
-                    <ui:CardExpander IsExpanded="False">
+                    <ui:CardAction Grid.Row="0" Grid.Column="0" Icon="DocumentTextToolbox20" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://voidstrapp.netlify.app/mods/mods">
+                        <StackPanel>
+                            <TextBlock FontSize="14" Text="Find Mods" FontWeight="Medium" />
+                            <TextBlock Margin="0,2,0,0" FontSize="12" Text="Search for Mods on the Voidstrap Website." Padding="0,0,16,0"  Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </ui:CardAction>
+
+                    <ui:CardExpander IsExpanded="False" Margin="0,8,0,0">
                         <ui:CardExpander.Header>
                             <Grid>
                                 <Grid.ColumnDefinitions>
@@ -121,7 +127,7 @@
             Grid.Column="0"
             Icon="CursorHover24"
             Command="models:GlobalViewModel.OpenWebpageCommand"
-            CommandParameter="https://discord.com/channels/1327967202015580223/1453208164030873814">
+            CommandParameter="https://voidstrapp.netlify.app/crosshairs/crosshairs">
 
                                         <StackPanel>
                                             <TextBlock
@@ -132,7 +138,7 @@
                                             <TextBlock
                     Margin="0,2,0,0"
                     FontSize="12"
-                    Text="Post or Share your Crosshair Codes with others!"
+                    Text="Find Crosshairs you would like to use!"
                     Padding="0,0,16,0"
                     Foreground="{DynamicResource TextFillColorTertiaryBrush}"
                     TextWrapping="Wrap" />
@@ -369,33 +375,12 @@ Description="Adds a Experimental overlay-based lighting changer. Customize your 
                         </ComboBox>
                     </controls:OptionControl>
 
-                    <controls:OptionControl 
-    Header="Skybox Manager"
-    Description="Select a Custom Roblox Skybox to use. Works best in Rivals.">
-
-                        <StackPanel Orientation="Vertical">
-
-                            <ComboBox 
-            ItemsSource="{Binding AvailableSkyboxPacks}" 
-            SelectedItem="{Binding SelectedSkyboxPack, Mode=TwoWay}" 
-            DisplayMemberPath="Name" 
-            Width="200"
-            Margin="0,0,0,5"/>
-
-                            <ui:ToggleSwitch 
-            IsChecked="{Binding SkyboxEnabled, Mode=TwoWay}" HorizontalAlignment="Right"
-            Margin="0,6,0,0"/>
-
-                        </StackPanel>
-                    </controls:OptionControl>
-
                     <TextBlock
             Margin="0,16,0,0"
             FontSize="20"
             FontWeight="Bold"
             Text="{x:Static resources:Strings.Common_Miscellaneous}" />
 
-                    <!--  Custom Font Option  -->
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Description}" Header="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Title}">
                         <StackPanel>
                             <ui:Button
@@ -437,7 +422,7 @@ Description="Adds a Experimental overlay-based lighting changer. Customize your 
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
                                 <StackPanel Grid.Column="0">
-                                    <TextBlock FontSize="14" Text="Custom Cursor Features" FontWeight="Medium" />
+                                    <TextBlock FontSize="14" Text="Custom Cursor Features" />
                                     <TextBlock Margin="0,2,0,0" FontSize="12" Text="All of the Custom Cursor features you need." Foreground="{DynamicResource TextFillColorTertiaryBrush}"  />
                                 </StackPanel>
                             </Grid>

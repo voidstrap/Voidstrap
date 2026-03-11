@@ -24,6 +24,26 @@
             Margin="0,8,0,0"
             FontSize="20"
             FontWeight="Medium"
+            Text="Info" />
+
+        <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,8,0,0" Icon="Document24" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://voidstrapp.netlify.app/documentation/documentation">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="Documentation" FontWeight="Medium" />
+                <TextBlock Margin="0,2,0,0" FontSize="12" Text="See information about Voidstrap’s features and how to resolve issues." Padding="0,0,16,0"  Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+        </ui:CardAction>
+        
+        <ui:CardAction Grid.Row="0" Grid.Column="0" Margin="0,8,0,0" Icon="Globe20" Command="models:GlobalViewModel.OpenWebpageCommand" CommandParameter="https://voidstrapp.netlify.app">
+            <StackPanel>
+                <TextBlock FontSize="14" Text="Website" FontWeight="Medium" />
+                <TextBlock Margin="0,2,0,0" FontSize="12" Text="View Mods, Crosshairs and more." Padding="0,0,16,0"  Foreground="{DynamicResource TextFillColorTertiaryBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+        </ui:CardAction>
+
+        <TextBlock
+            Margin="0,8,0,0"
+            FontSize="20"
+            FontWeight="Medium"
             Text="{x:Static resources:Strings.Menu_Integrations_ActivityTracking}" />
 
 
@@ -46,6 +66,13 @@
         </controls:OptionControl>
 
         <controls:OptionControl
+    Description="Displays the game you have joined and its server location in the top-right corner."
+    Header="Join-Game Notification"
+    IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
+            <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding joinGameNotify, Mode=TwoWay}" />
+        </controls:OptionControl>
+
+        <controls:OptionControl
             Description="{x:Static resources:Strings.Menu_Integrations_PlayerMessageLogs_Description}"
             Header="{x:Static resources:Strings.Menu_Integrations_PlayerMessageLogs_Title}"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
@@ -58,15 +85,6 @@
             HelpLink="https://github.com/BloxstrapLabs/Bloxstrap/wiki/What-is-activity-tracking%3F#dont-exit-to-desktop-app"
             IsEnabled="{Binding InnerContent.IsChecked, ElementName=ActivityTrackingOption, Mode=OneWay}">
             <ui:ToggleSwitch Background="{DynamicResource SystemAccentBrush}" IsChecked="{Binding DisableAppPatchEnabled, Mode=TwoWay}" />
-        </controls:OptionControl>
-
-        <controls:OptionControl 
-    Header="View Music Player"
-    Description="View and listen to your music, or manage from the tray menu.">
-            <Button Content="View" 
-            Command="{Binding MusicWindowCommand}"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"/>
         </controls:OptionControl>
 
         <Expander Header="Extra Supports" Margin="0,8,0,0">
@@ -137,6 +155,15 @@
             Text="Learn how to setup the chatbot to chat with your friends on Discord." />
                     </StackPanel>
                 </ui:CardAction>
+
+                <controls:OptionControl 
+    Header="View Music Player"
+    Description="View and listen to your music, or manage from the tray menu.">
+                    <Button Content="View" 
+            Command="{Binding MusicWindowCommand}"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"/>
+                </controls:OptionControl>
 
             </StackPanel>
         </Expander>
