@@ -102,6 +102,13 @@ Voidstrap is built using **C# and .NET**.
   </a>
 </p>
 
+<table style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <td style="width: 33%; text-align: left;">© Voidstrap</td>
+    <td style="width: 33%; text-align: right;"><a href="https://github.com/voidstrap/Voidstrap/blob/main/LICENSE.VOIDSTRAP" target="_blank">MIT</a></td>
+  </tr>
+</table>
+
 > [!NOTE]
 > Voidstrap is still in **early development**, even though the project has existed for over **2 years**.  
 > Features may change and some things may still be unfinished.
