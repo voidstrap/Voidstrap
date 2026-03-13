@@ -94,6 +94,13 @@ Voidstrap is built using **C# and .NET**.
 2. Click **Fork** (top right)
 3. This creates your own copy under your GitHub account
 
+<table style="width: 100%; border-collapse: collapse;">
+  <tr>
+    <td style="width: 33%; text-align: left;">© Voidstrap</td>
+    <td style="width: 33%; text-align: right;"><a href="https://github.com/voidstrap/Voidstrap/blob/main/LICENSE.VOIDSTRAP" target="_blank">MIT</a></td>
+  </tr>
+</table>
+
 ## Star History
 
 <p align="center">
