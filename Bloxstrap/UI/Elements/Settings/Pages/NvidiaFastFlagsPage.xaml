@@ -35,7 +35,7 @@
 
             <ui:CardAction
             Command="models:GlobalViewModel.OpenWebpageCommand"
-            CommandParameter="https://discord.com/channels/1327967202015580223/1456965691054755911"
+            CommandParameter="https://voidstrapp.netlify.app/documentation/documentation#nvidia_fflags"
             Margin="0,8,0,0"
             Icon="Book24">
                 <StackPanel>

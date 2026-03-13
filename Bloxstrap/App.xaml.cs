@@ -45,6 +45,7 @@ namespace Voidstrap
         public static string Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString();
 
         public static Bootstrapper? Bootstrapper { get; set; } = null!;
+        public const int TaskbarProgressMaximum = 100;
 
         public static bool IsActionBuild => !String.IsNullOrEmpty(BuildMetadata.CommitRef);
 

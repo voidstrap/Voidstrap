@@ -142,43 +142,137 @@ namespace Voidstrap
 
         private void SetStatus(string message)
         {
-            App.Logger.WriteLine("Bootstrapper::SetStatus", message);
-
-            message = message.Replace("{product}", AppData.ProductName);
-
-            if (Dialog is not null)
+            if (Dialog == null)
+                return;
+            if (Dialog is System.Windows.Forms.Control winFormsControl)
+            {
+                if (winFormsControl.InvokeRequired)
+                    winFormsControl.Invoke(new Action(() => Dialog.Message = message));
+                else
+                    Dialog.Message = message;
+            }
+            else if (Dialog is System.Windows.DependencyObject depObj)
+            {
+                var dispatcher = System.Windows.Threading.Dispatcher.FromThread(System.Threading.Thread.CurrentThread);
+                if (dispatcher != null && !depObj.Dispatcher.CheckAccess())
+                    depObj.Dispatcher.Invoke(() => Dialog.Message = message);
+                else
+                    Dialog.Message = message;
+            }
+            else
+            {
                 Dialog.Message = message;
+            }
+        }
+        private void SetProgressValue(int value)
+        {
+            if (Dialog == null) return;
+
+            void update() => Dialog.ProgressValue = value;
+
+            if (Dialog is System.Windows.Forms.Control winFormsControl)
+            {
+                if (winFormsControl.InvokeRequired)
+                    winFormsControl.Invoke(update);
+                else
+                    update();
+            }
+            else if (Dialog is System.Windows.DependencyObject depObj)
+            {
+                if (!depObj.Dispatcher.CheckAccess())
+                    depObj.Dispatcher.Invoke(update);
+                else
+                    update();
+            }
+            else
+            {
+                update();
+            }
+        }
+        private void SetProgressMaximum(int max)
+        {
+            if (Dialog == null) return;
+
+            void update() => Dialog.ProgressMaximum = max;
+
+            if (Dialog is System.Windows.Forms.Control winFormsControl)
+            {
+                if (winFormsControl.InvokeRequired)
+                    winFormsControl.Invoke(update);
+                else
+                    update();
+            }
+            else if (Dialog is System.Windows.DependencyObject depObj)
+            {
+                if (!depObj.Dispatcher.CheckAccess())
+                    depObj.Dispatcher.Invoke(update);
+                else
+                    update();
+            }
+            else
+            {
+                update();
+            }
+        }
+        private void SetProgressStyle(ProgressBarStyle style)
+        {
+            if (Dialog == null) return;
+
+            void update() => Dialog.ProgressStyle = style;
+
+            if (Dialog is System.Windows.Forms.Control winFormsControl)
+            {
+                if (winFormsControl.InvokeRequired)
+                    winFormsControl.Invoke(update);
+                else
+                    update();
+            }
+            else if (Dialog is System.Windows.DependencyObject depObj)
+            {
+                if (!depObj.Dispatcher.CheckAccess())
+                    depObj.Dispatcher.Invoke(update);
+                else
+                    update();
+            }
+            else
+            {
+                update();
+            }
         }
 
         private void UpdateProgressBar()
         {
-            if (Dialog == null)
-                return;
+            if (Dialog == null) return;
 
-            if (System.Windows.Application.Current?.Dispatcher != null)
+            void update()
             {
-                System.Windows.Application.Current.Dispatcher.Invoke(UpdateProgressBarInternal);
+                int progressValue = (int)Math.Floor(_progressIncrement * _totalDownloadedBytes);
+                progressValue = Math.Clamp(progressValue, 0, ProgressBarMaximum);
+                Dialog.ProgressValue = progressValue;
+
+                double taskbarProgressValue = _taskbarProgressIncrement * _totalDownloadedBytes;
+                taskbarProgressValue = Math.Clamp(taskbarProgressValue, 0, App.TaskbarProgressMaximum);
+                Dialog.TaskbarProgressValue = taskbarProgressValue;
+            }
+
+            if (Dialog is System.Windows.Forms.Control winFormsControl)
+            {
+                if (winFormsControl.InvokeRequired)
+                    winFormsControl.Invoke(update);
+                else
+                    update();
+            }
+            else if (Dialog is System.Windows.DependencyObject depObj)
+            {
+                if (!depObj.Dispatcher.CheckAccess())
+                    depObj.Dispatcher.Invoke(update);
+                else
+                    update();
             }
             else
             {
-                UpdateProgressBarInternal();
+                update();
             }
-        }
-
-        private void UpdateProgressBarInternal()
-        {
-            if (_totalDownloadedBytes <= 0 || _progressIncrement <= 0)
-            {
-                Dialog.ProgressValue = 0;
-                Dialog.TaskbarProgressValue = 0;
-                return;
-            }
-
-            double rawProgress = _progressIncrement * _totalDownloadedBytes;
-            Dialog.ProgressValue = Math.Clamp((int)Math.Floor(rawProgress), 0, ProgressBarMaximum);
-
-            double taskbarProgress = _taskbarProgressIncrement * _totalDownloadedBytes;
-            Dialog.TaskbarProgressValue = Math.Clamp(taskbarProgress, 0.0, _taskbarProgressMaximum);
         }
 
         private async Task HandleConnectionError(Exception exception)
@@ -548,7 +642,7 @@ namespace Voidstrap
         private async Task StartRoblox(CancellationToken ct = default)
         {
             const string LOG_IDENT = "Bootstrapper::StartRoblox";
-            SetStatus(Strings.Bootstrapper_Status_Starting);
+            SetStatus("Starting Roblox");
             try
             {
                 HandleFullBright();
@@ -1632,8 +1726,8 @@ namespace Voidstrap
                 }
 
                 SetStatus(string.IsNullOrEmpty(AppData.State.VersionGuid)
-                    ? Strings.Bootstrapper_Status_Installing
-                    : Strings.Bootstrapper_Status_Upgrading);
+                    ? "Installing Packages"
+                    : "Upgrading Packages");
 
                 Directory.CreateDirectory(Paths.Base);
                 Directory.CreateDirectory(Paths.Downloads);
@@ -1686,10 +1780,10 @@ namespace Voidstrap
 
                 if (Dialog is not null)
                 {
-                    Dialog.ProgressStyle = ProgressBarStyle.Continuous;
+                    SetProgressStyle(ProgressBarStyle.Continuous);
                     Dialog.TaskbarProgressState = TaskbarItemProgressState.Normal;
 
-                    Dialog.ProgressMaximum = ProgressBarMaximum;
+                    SetProgressMaximum(ProgressBarMaximum);
 
                     _progressIncrement =
                         (double)ProgressBarMaximum / Math.Max(1, totalPackedSize);
@@ -1791,7 +1885,7 @@ namespace Voidstrap
 
                 if (Dialog is not null)
                 {
-                    Dialog.ProgressStyle = ProgressBarStyle.Marquee;
+                    SetProgressStyle(ProgressBarStyle.Marquee);
                     Dialog.TaskbarProgressState =
                         TaskbarItemProgressState.Indeterminate;
 

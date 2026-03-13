@@ -7,6 +7,7 @@ using System.Management;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using Voidstrap.AppData;
@@ -53,10 +54,23 @@ namespace Voidstrap.UI.ViewModels.Settings
             }
         }
 
+        private bool _exclusiveFullscreen;
+
         public bool ExclusiveFullscreen
         {
-            get => App.Settings.Prop.ExclusiveFullscreen;
-            set => App.Settings.Prop.ExclusiveFullscreen = value;
+            get => _exclusiveFullscreen;
+            set
+            {
+                _exclusiveFullscreen = value;
+                App.Settings.Prop.ExclusiveFullscreen = value;
+
+                if (value)
+                {
+                    Frontend.ShowMessageBox(
+                        "This disables overlays. Are you sure you want to enable this?"
+                    );
+                }
+            }
         }
 
         private void LoadCpuOptions()

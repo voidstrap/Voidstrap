@@ -367,18 +367,21 @@
 
                     <ui:NavigationItem Content="News"
                        Icon="News16"
-                       Margin="0,-45,0,20"
+                       Margin="0,-40,0,20"
                        PageType="{x:Type pages:NewsPage}" />
+
 
                 </ui:NavigationFluent.Items>
 
 
                 <ui:NavigationFluent.Footer>
-                    <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
+                    <ui:NavigationItem Content="Extensions"
+                       Icon="PuzzlePiece24"
+                       PageType="{x:Type pages:ExtensionPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
                        Icon="Apps32"
                        PageType="{x:Type pages:ShortcutsPage}" />
-                    <ui:NavigationItem Content="Releases" Icon="Cloud16" PageType="{x:Type pages:ReleasesPage}" />
+                    <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
                                        Icon="QuestionCircle48"
                                        Command="{Binding OpenAboutCommand, Mode=OneTime}" />

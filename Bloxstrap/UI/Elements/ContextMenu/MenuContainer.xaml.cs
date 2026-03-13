@@ -161,13 +161,29 @@ namespace Voidstrap.UI.Elements.ContextMenu
 
                 if (!App.Settings.Prop.UseDisableAppPatch) // why the fuck was there 2 of them my bitch ass
                     GameHistoryMenuItem.Visibility = Visibility.Visible;
-                    MusicMenuItem.Visibility = Visibility.Visible;
+                MusicMenuItem.Visibility = Visibility.Visible;
             }
 
             if (_watcher.RichPresence is not null)
                 RichPresenceMenuItem.Visibility = Visibility.Visible;
 
             VersionTextBlock.Text = $"{App.ProjectName} v{App.Version}";
+
+            if (App.Settings.Prop.AniWatch)
+            {
+                if (!(App.Current.Resources["AnimeWindow"] is AnimeWindow window))
+                {
+                    window = new AnimeWindow();
+                    App.Current.Resources["AnimeWindow"] = window;
+                }
+                if (!window.IsVisible)
+                {
+                    window.Show();
+                }
+
+                window.MainBorder.Opacity = 0;
+                window.FadeIn();
+            }
         }
 
         public void UpdateCurrentGameInfo(string gameName, string gameIconUrl)

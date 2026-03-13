@@ -59,7 +59,7 @@
                         <ui:ToggleSwitch IsChecked="{Binding disablecrashhandleryayyysocool, Mode=TwoWay}" />
                     </controls:OptionControl>
 
-                    <controls:OptionControl Description="Enables exclusive fullscreen mode. This may fix latency issues." Header="Exclusive Fullscreen">
+                    <controls:OptionControl Description="Enables exclusive fullscreen mode. Overlays will not work in this." Header="Exclusive Fullscreen">
                         <ui:ToggleSwitch IsChecked="{Binding ExclusiveFullscreen, Mode=TwoWay}" />
                     </controls:OptionControl>
 

@@ -381,6 +381,28 @@ Description="Adds a Experimental overlay-based lighting changer. Customize your 
             FontWeight="Bold"
             Text="{x:Static resources:Strings.Common_Miscellaneous}" />
 
+                    <controls:OptionControl
+    Header="Skybox Manager"
+    Description="Select a custom Roblox skybox to use. Works best in games without an existing skybox.">
+
+                        <StackPanel Orientation="Vertical">
+
+                            <ComboBox
+            ItemsSource="{Binding AvailableSkyboxPacks}"
+            SelectedItem="{Binding SelectedSkyboxPack, Mode=TwoWay}"
+            DisplayMemberPath="Name"
+            Width="200"
+            Margin="0,0,0,5"/>
+
+                            <ui:ToggleSwitch
+            IsChecked="{Binding SkyboxEnabled, Mode=TwoWay}"
+            HorizontalAlignment="Right"
+            Margin="0,6,0,0"/>
+
+                        </StackPanel>
+
+                    </controls:OptionControl>
+
                     <controls:OptionControl Description="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Description}" Header="{x:Static resources:Strings.Menu_Mods_Misc_CustomFont_Title}">
                         <StackPanel>
                             <ui:Button

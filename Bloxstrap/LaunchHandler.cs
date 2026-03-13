@@ -296,7 +296,7 @@ namespace Voidstrap
 
             if (App.Settings.Prop.ExclusiveFullscreen)
             {
-                _ = Task.Run(RobloxFullscreen.WaitAndForceExclusiveFullscreen);
+                _ = Task.Run(RobloxFullscreen.WaitAndTriggerFullscreen); // redid https://github.com/voidstrap/Voidstrap/pull/362/changes/f0177af4ec39475a5b5c8ea5adc365dcdba0b0d9#diff-ed77fad50af3a8225af6d4c3e81af6095905805d31369da2b5d54f0c2382180e
             }
 
             Task.Run(App.Bootstrapper.Run).ContinueWith(t =>

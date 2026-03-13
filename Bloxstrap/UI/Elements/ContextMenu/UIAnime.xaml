@@ -1,0 +1,102 @@
+﻿<Window x:Class="Voidstrap.UI.Elements.Overlay.AnimeWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
+        Background="Transparent"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Topmost="True"
+        ShowInTaskbar="False"
+        Width="530"
+        Height="345"
+        MinWidth="150"
+        MinHeight="100">
+    <shell:WindowChrome.WindowChrome>
+        <shell:WindowChrome
+            ResizeBorderThickness="6"
+            CaptionHeight="0"
+            CornerRadius="8"
+            GlassFrameThickness="0"
+            UseAeroCaptionButtons="False"/>
+    </shell:WindowChrome.WindowChrome>
+
+    <Border x:Name="MainBorder"
+            CornerRadius="8"
+            Padding="8">
+        <Border.Background>
+            <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
+                <GradientStop Offset="0.0" Color="#CC1E1E1E"/>
+                <GradientStop Offset="0.7" Color="#CC2E2E2E"/>
+                <GradientStop Offset="1.0" Color="#CC3E3E3E"/>
+            </LinearGradientBrush>
+        </Border.Background>
+
+        <Grid x:Name="MainGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="40"/>
+            </Grid.RowDefinitions>
+
+            <wv2:WebView2 x:Name="AnimeWebView"
+                          Grid.Row="0"
+                          Source="https://aniwatchtv.to/home"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"/>
+            <Grid Grid.Row="1"
+      x:Name="BottomBar"
+      MouseLeftButtonDown="Grid_MouseLeftButtonDown"
+      HorizontalAlignment="Stretch"
+      VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <ui:Button x:Name="Watch2GetherButton"
+            Grid.Column="0"
+            Content="Watch2gether"
+            ToolTip="Watch with friends" Icon="People24"
+            Click="Watch2GetherButton_Click"/>
+
+                <ui:Button x:Name="RandomButton" Icon="PuzzlePiece24"
+            Grid.Column="1"
+            Content="Random"
+            ToolTip="Watch random anime"
+            Click="RandomButton_Click"/>
+
+                <ui:Button x:Name="CommunityButton" Icon="Comment24"
+            Grid.Column="3"
+            Content="Community"
+            ToolTip="AniWatch Connect"
+            Click="CommunityButton_Click"/>
+
+                <StackPanel Grid.Column="4"/>
+
+                <ui:Button x:Name="FullscreenButton"
+               Grid.Column="5"
+               HorizontalAlignment="Right"
+               VerticalAlignment="Center"
+               Icon="FullScreenMaximize20"
+               BorderThickness="1"
+               ToolTip="Fullscreen"
+               Click="FullscreenButton_Click"/>
+
+                <ui:Button x:Name="ExitButton"
+           Grid.Column="6"
+           HorizontalAlignment="Right"
+           VerticalAlignment="Center"
+           Icon="Dismiss24"
+           ToolTip="Exit"
+           BorderThickness="1"
+           Click="ExitButton_Click"/>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

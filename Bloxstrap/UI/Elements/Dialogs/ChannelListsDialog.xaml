@@ -19,7 +19,6 @@
     mc:Ignorable="d">
 
     <Grid>
-        <!-- 🌈 Subtle background gradient -->
         <Grid.Background>
             <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
                 <GradientStop Offset="0.0" Color="{DynamicResource WindowBackgroundColorPrimary}" />
@@ -29,7 +28,6 @@
             </LinearGradientBrush>
         </Grid.Background>
 
-        <!-- 🧭 Layout Rows -->
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -37,7 +35,6 @@
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
-        <!-- 🧩 Title Bar -->
         <ui:TitleBar
             Title="Available Channels"
             Grid.Row="0"
@@ -47,7 +44,6 @@
             ShowMaximize="True"
             ShowMinimize="True" />
 
-        <!-- 💬 Description -->
         <TextBlock
             Grid.Row="1"
             Margin="16,8,16,6"
@@ -57,9 +53,7 @@
             Text="Browse and select from all currently available deployment channels."
             TextWrapping="Wrap" />
 
-        <!-- 📋 Data Area -->
         <Grid Grid.Row="2" Margin="16,0,16,8">
-            <!-- Loader overlay -->
             <Grid Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Border Background="{DynamicResource ControlFillColorDefaultBrush}" Opacity="0.6" CornerRadius="6" />
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -72,7 +66,6 @@
                 </StackPanel>
             </Grid>
 
-            <!-- Data Grid -->
             <DataGrid
                 ItemsSource="{Binding Channels}"
                 Visibility="{Binding IsLoading, Converter={StaticResource InverseBooleanToVisibilityConverter}}"
@@ -92,7 +85,6 @@
                 VerticalGridLinesBrush="Transparent"
                 PreviewKeyDown="ChannelDataGrid_PreviewKeyDown">
 
-                <!-- Header Style -->
                 <DataGrid.ColumnHeaderStyle>
                     <Style TargetType="DataGridColumnHeader">
                         <Setter Property="Background" Value="{DynamicResource ControlFillColorTertiaryBrush}" />
@@ -110,7 +102,6 @@
                     </Style>
                 </DataGrid.ColumnHeaderStyle>
 
-                <!-- Cell Style -->
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Setter Property="Height" Value="32" />
@@ -141,7 +132,6 @@
                     </Style>
                 </DataGrid.CellStyle>
 
-                <!-- Columns -->
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Channel Name" Binding="{Binding ChannelName}" Width="180"/>
                     <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="*"/>
@@ -150,7 +140,6 @@
             </DataGrid>
         </Grid>
 
-        <!-- ⚙️ Footer Buttons -->
         <Border Grid.Row="3"
                 Margin="0,8,0,0"
                 Padding="16,12"
