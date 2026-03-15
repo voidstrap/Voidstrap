@@ -95,18 +95,21 @@ namespace Voidstrap.UI.Elements.Overlay
 
             core.Settings.AreDefaultScriptDialogsEnabled = false;
             core.Settings.AreDefaultContextMenusEnabled = false;
-            core.Settings.AreDevToolsEnabled = true;
 
-            // all the stuff I found in this website go here that are bad!
+            #if DEBUG
+            core.Settings.AreDevToolsEnabled = true;
+            #else
+            core.Settings.AreDevToolsEnabled = false;
+#endif
+
             string css = @"
-        #ads, .ad-container, .popup, .modal, .banner, .overlay,
-        .promo, .promotion, .deal-banner, .video-ad, .advertisement,
-        .nsfw, .hentai, .adult, .lust-goddess, .porn-content, .sex-content {
-            display: none !important;
-        }
-        iframe { width:100% !important; height:100% !important; border:none !important; }
-        * { scroll-behavior: smooth !important; }
-    ";
+    #ads, .ad-container, .popup, .modal, .banner, .overlay,
+    .promo, .promotion, .deal-banner, .video-ad, .advertisement {
+        display: none !important;
+    }
+    iframe { width:100% !important; height:100% !important; border:none !important; }
+    * { scroll-behavior: smooth !important; }
+";
 
             string injectCssScript = $@"
         let style = document.createElement('style');
@@ -137,13 +140,20 @@ namespace Voidstrap.UI.Elements.Overlay
             // block any (IF SO)
             string[] blockedKeywords = new string[]
             {
-        "ads","doubleclick","googlesyndication","promo","banner","deal",
-        "video-ad","advertisement","porn","hentai","lust","nsfw",
-        "adult","sex","goddess","noozy.tv",
-        "https://piccdn.net/blank-728x90-aniw.gif"
+    "ads",
+    "doubleclick",
+    "googlesyndication",
+    "promo",
+    "banner",
+    "deal",
+    "video-ad",
+    "advertisement",
+    "noozy.tv",
+    "https://piccdn.net/blank-728x90-aniw.gif"
             };
 
-            core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.All);
+            core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Script);
+            core.AddWebResourceRequestedFilter("*", CoreWebView2WebResourceContext.Image);
             core.WebResourceRequested += (sender, args) =>
             {
                 string uri = args.Request.Uri.ToLower();
@@ -468,8 +478,8 @@ namespace Voidstrap.UI.Elements.Overlay
             else
             {
                 MainGrid.RowDefinitions[1].Height = new GridLength(40);
-                MainBorder.Padding = new Thickness(8);
-                MainBorder.CornerRadius = new CornerRadius(8);
+                MainBorder.Padding = new Thickness(4);
+                MainBorder.CornerRadius = new CornerRadius(4);
 
                 Left = _prevLeft;
                 Top = _prevTop;

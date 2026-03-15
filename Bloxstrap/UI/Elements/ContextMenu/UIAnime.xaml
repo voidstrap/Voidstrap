@@ -17,14 +17,14 @@
         <shell:WindowChrome
             ResizeBorderThickness="6"
             CaptionHeight="0"
-            CornerRadius="8"
+            CornerRadius="4"
             GlassFrameThickness="0"
             UseAeroCaptionButtons="False"/>
     </shell:WindowChrome.WindowChrome>
 
     <Border x:Name="MainBorder"
-            CornerRadius="8"
-            Padding="8">
+            CornerRadius="4"
+            Padding="4">
         <Border.Background>
             <LinearGradientBrush StartPoint="1,1" EndPoint="0,0">
                 <GradientStop Offset="0.0" Color="#CC1E1E1E"/>
