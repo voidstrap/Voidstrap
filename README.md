@@ -31,7 +31,6 @@
 Leave a star if you like the project! ⭐️
 </h5>
 
-
 > [!IMPORTANT]
 > Voidstrap currently supports **Windows 10 and above**.  
 > **macOS support is in the works**, but it is not available yet.
@@ -104,8 +103,14 @@ Voidstrap is built using **C# and .NET**.
 ## Star History
 
 <p align="center">
-  <a href="https://www.star-history.com/#voidstrap/Voidstrap&Timeline">
-    <img src="https://api.star-history.com/svg?repos=voidstrap/Voidstrap&type=Timeline&theme=dark" />
+  <a href="https://www.star-history.com/?repos=voidstrap%2FVoidstrap%2CKloBraticc%2Fvoidstrap&type=timeline&legend=top-left">
+    <img src="https://api.star-history.com/svg?repos=voidstrap%2FVoidstrap%2CKloBraticc%2Fvoidstrap&type=timeline&legend=top-left&theme=dark" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://discord.gg/5tJBqBH8ck">
+    <img src="https://invidget.switchblade.xyz/5tJBqBH8ck">
   </a>
 </p>
 
