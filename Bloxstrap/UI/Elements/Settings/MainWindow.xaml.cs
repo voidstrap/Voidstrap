@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -56,6 +57,7 @@ namespace Voidstrap.UI.Elements.Settings
         private const double MaxOffset = 0.04;
         private const double MaxRotation = 5.0;
         private const double FollowSpeed = 0.035;
+        private readonly Dictionary<Wpf.Ui.Controls.NavigationItem, Wpf.Ui.Common.SymbolRegular> _defaultIcons = new();
         private string TabsConfigPath => Path.Combine(Paths.Base, "TabsConfig.json");
         private readonly List<Type> _pagesToHideSearchBox = new List<Type> // idfk my lazy bum ass didnt wanna spent 4000hours tranna figure another way for all tis bullshit of work took me 1 day for this shit FAHHHHHHHHHH WSEIEWMIEWOMHGEW
         {
@@ -74,6 +76,7 @@ namespace Voidstrap.UI.Elements.Settings
             InitializeWindowState();
             UpdateButtonContent();
             InitializeDiscordRPC();
+            RegisterHoverIcons();
             _appearanceViewModel = new AppearanceViewModel();
             InitializeBackgroundSettingsWatcher();
             ApplyBackgroundSettings();
@@ -109,6 +112,32 @@ namespace Voidstrap.UI.Elements.Settings
 
             if (showAlreadyRunningWarning)
                 _ = ShowAlreadyRunningSnackbarAsync();
+        }
+
+
+        private void RegisterHoverIcons()
+        {
+            IEnumerable<Wpf.Ui.Controls.NavigationItem> allItems = RootNavigation.Items
+                .OfType<Wpf.Ui.Controls.NavigationItem>()
+                .Concat(RootNavigation.Footer.OfType<Wpf.Ui.Controls.NavigationItem>())
+                .Where(i => i.Tag != null);
+
+            foreach (Wpf.Ui.Controls.NavigationItem item in allItems)
+            {
+                Wpf.Ui.Common.SymbolRegular defaultIcon = item.Icon;
+                _defaultIcons[item] = defaultIcon;
+
+                item.MouseEnter += (s, e) =>
+                {
+                    if (Enum.TryParse<Wpf.Ui.Common.SymbolRegular>(item.Tag?.ToString(), out Wpf.Ui.Common.SymbolRegular hoverIcon))
+                        item.Icon = hoverIcon;
+                };
+
+                item.MouseLeave += (s, e) =>
+                {
+                    item.Icon = defaultIcon;
+                };
+            }
         }
 
         private void SaveTabsStructure()
@@ -794,7 +823,7 @@ namespace Voidstrap.UI.Elements.Settings
             _allTextBlocksCache.Clear();
             _lastPage = null;
 
-            var currentPage = e.Content;
+            object currentPage = e.Content;
             if (currentPage != null && _pagesToHideSearchBox.Contains(currentPage.GetType()))
             {
                 GlobalSearchBox.Visibility = Visibility.Collapsed;
@@ -803,6 +832,14 @@ namespace Voidstrap.UI.Elements.Settings
             {
                 GlobalSearchBox.Visibility = Visibility.Visible;
             }
+
+            Wpf.Ui.Controls.NavigationItem selectedItem = RootNavigation.Items
+                .OfType<Wpf.Ui.Controls.NavigationItem>()
+                .Concat(RootNavigation.Footer.OfType<Wpf.Ui.Controls.NavigationItem>())
+                .FirstOrDefault(i => i.IsActive);
+
+            if (selectedItem != null && _defaultIcons.TryGetValue(selectedItem, out Wpf.Ui.Common.SymbolRegular icon))
+                BreadcrumbIcon.Symbol = icon;
         }
 
         //fuck man I dont even understand whats going on in this code dont go asking me 👇 nvm it was just 3am I do understand..

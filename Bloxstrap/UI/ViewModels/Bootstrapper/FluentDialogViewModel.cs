@@ -10,8 +10,6 @@ namespace Voidstrap.UI.ViewModels.Bootstrapper
 {
     public class FluentDialogViewModel : BootstrapperDialogViewModel
     {
-        public BackgroundType WindowBackdropType { get; set; } = BackgroundType.Mica;
-
         public SolidColorBrush BackgroundColourBrush { get; set; } = new SolidColorBrush(Color.FromArgb(0, 0, 0, 0));
 
         [Obsolete("Do not use this! This is for the designer only.", true)]
@@ -21,8 +19,6 @@ namespace Voidstrap.UI.ViewModels.Bootstrapper
         public FluentDialogViewModel(IBootstrapperDialog dialog, bool aero) : base(dialog)
         {
             const int alpha = 128;
-
-            WindowBackdropType = aero ? BackgroundType.Aero : BackgroundType.Mica;
 
             if (aero)
             {

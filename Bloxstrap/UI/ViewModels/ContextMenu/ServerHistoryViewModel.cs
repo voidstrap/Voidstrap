@@ -28,6 +28,7 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
 
         private readonly string _historyFilePath = Path.Combine(Paths.Base, "ServerHistory.json");
         private const int MaxHistoryEntries = 30;
+        public IEnumerable<ActivityData> Top10RecentHistory => GameHistory.Take(10);
 
         public ServerHistoryViewModel(ActivityWatcher activityWatcher)
         {
@@ -57,6 +58,7 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
                 {
                     MergeAndConsolidateHistory(savedHistory);
                     OnPropertyChanged(nameof(GameHistory));
+                    OnPropertyChanged(nameof(Top10RecentHistory));
                 }
             }
             catch (Exception ex)

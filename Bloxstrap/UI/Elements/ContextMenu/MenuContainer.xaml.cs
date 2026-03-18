@@ -74,32 +74,6 @@ namespace Voidstrap.UI.Elements.ContextMenu
             return text.Substring(0, take) + dots;
         }
 
-        private void StartMemoryCleaner()
-        {
-            memoryCleanTimer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(2)
-            };
-            memoryCleanTimer.Tick += MemoryCleanTimer_Tick;
-            memoryCleanTimer.Start();
-        }
-
-        private void MemoryCleanTimer_Tick(object? sender, EventArgs e)
-        {
-            try
-            {
-                GC.Collect();
-                GC.WaitForPendingFinalizers();
-                GC.Collect();
-                var process = Process.GetCurrentProcess();
-                SetProcessWorkingSetSize(process.Handle, UIntPtr.Zero, UIntPtr.Zero);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"MemoryCleaner Error: {ex.Message}");
-            }
-        }
-
         private void LoadFlags()
         {
             try
@@ -133,7 +107,6 @@ namespace Voidstrap.UI.Elements.ContextMenu
         {
             InitializeComponent();
             StartMemoryMonitoring();
-            StartMemoryCleaner();
             var vm = new MenuContainerViewModel();
             DataContext = vm;
 

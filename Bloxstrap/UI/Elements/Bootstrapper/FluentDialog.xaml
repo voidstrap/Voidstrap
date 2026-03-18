@@ -14,7 +14,7 @@
     Background="{ui:ThemeResource ApplicationBackgroundBrush}"
     ExtendsContentIntoTitleBar="True"
     ResizeMode="NoResize"
-    WindowBackdropType="{Binding WindowBackdropType, Mode=OneTime}"
+    WindowBackdropType="Mica"
     WindowStartupLocation="CenterScreen"
     WindowStyle="None"
     Closing="UiWindow_Closing"
@@ -34,10 +34,8 @@
     OpacityMask="Black"
     Panel.ZIndex="-1" />
 
-        <!-- Color Overlay -->
+        <!-- clean this shitty ui bratic - bratic NO!!!!!! -->
         <Rectangle Fill="{Binding BackgroundColourBrush, Mode=OneWay}" />
-
-        <!-- Title Bar for drag support -->
         <ui:TitleBar
             VerticalAlignment="Top"
             CanMaximize="False"
@@ -55,21 +53,13 @@
 
             <Image
                 Grid.Row="0"
-                Width="90"
-                Height="90"
+                Width="80"
+                Height="80"
                 Margin="0,30,0,0"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Top"
                 RenderOptions.BitmapScalingMode="HighQuality"
                 Source="{Binding Icon, Mode=OneWay}">
-                <Image.Effect>
-                    <DropShadowEffect 
-                        Color="Black"
-                        BlurRadius="10"
-                        ShadowDepth="5"
-                        Direction="315"
-                        Opacity="0.5"/>
-                </Image.Effect>
             </Image>
 
             <TextBlock
@@ -82,19 +72,17 @@
                 TextWrapping="Wrap"
                 TextAlignment="Center" />
 
-            <!-- Progress Bar -->
             <ProgressBar
                 Grid.Row="2"
                 Margin="0,8,0,16"
-                Height="11"
+                Height="13"
                 IsIndeterminate="{Binding ProgressIndeterminate, Mode=OneWay}"
                 Maximum="{Binding ProgressMaximum, Mode=OneWay}"
                 Value="{Binding ProgressValue, Mode=OneWay}" />
 
-            <!-- Cancel Button -->
             <Button
                 Grid.Row="3"
-                Width="240"
+                Width="200"
                 Padding="4"
                 HorizontalAlignment="Center"
                 FontSize="14"

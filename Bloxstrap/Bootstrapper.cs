@@ -37,6 +37,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Loader;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -639,14 +640,94 @@ namespace Voidstrap
             _processOptimizerTimer = null;
         }
 
+        private static void LaunchFleasionIfEnabled()
+        {
+            try
+            {
+                if (!App.Settings.Prop.Fleasion)
+                    return;
+
+                var existingProcess = Process.GetProcessesByName("Fleasion").FirstOrDefault(p => !p.HasExited);
+                if (existingProcess != null)
+                {
+                    WaitForFleasionAdmin(existingProcess);
+                    return;
+                }
+
+                string fleasionPath = Path.Combine(Paths.Base, "Fleasion", "Fleasion.exe");
+                if (!File.Exists(fleasionPath))
+                    return;
+
+                Process process = null;
+
+                try
+                {
+                    process = Process.Start(new ProcessStartInfo
+                    {
+                        FileName = fleasionPath,
+                        UseShellExecute = true,
+                        Verb = "runas"
+                    });
+                }
+                catch (System.ComponentModel.Win32Exception ex)
+                {
+                    App.Logger.WriteLine("LaunchHandler", $"Launch cancelled or failed: {ex.Message}");
+                    return;
+                }
+
+                if (process != null)
+                    WaitForFleasionAdmin(process);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteLine("LaunchHandler::LaunchFleasionIfEnabled", ex.ToString());
+            }
+        }
+
+        private static bool IsProcessElevated(Process process)
+        {
+            try
+            {
+                var wi = new WindowsIdentity(process.Handle);
+                var principal = new WindowsPrincipal(wi);
+                return principal.IsInRole(WindowsBuiltInRole.Administrator);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static void WaitForFleasionAdmin(Process process)
+        {
+            const int timeoutMs = 10000;
+            int waited = 0;
+            const int interval = 200;
+
+            while (waited < timeoutMs)
+            {
+                process.Refresh();
+                if (process.MainWindowHandle != IntPtr.Zero && IsProcessElevated(process))
+                {
+                    App.Logger.WriteLine("LaunchHandler::LaunchFleasionIfEnabled", "Fleasion as admin.");
+                    return;
+                }
+
+                Thread.Sleep(interval);
+                waited += interval;
+            }
+
+            App.Logger.WriteLine("LaunchHandler::LaunchFleasionIfEnabled", "Timed out.");
+        }
+
         private async Task StartRoblox(CancellationToken ct = default)
         {
             const string LOG_IDENT = "Bootstrapper::StartRoblox";
             SetStatus("Starting Roblox");
             try
             {
+                await Task.Run(() => LaunchFleasionIfEnabled());
                 HandleFullBright();
-                StartMemoryAndProcessOptimizer();
                 if (_launchMode == LaunchMode.Player && App.Settings.Prop?.ForceRobloxLanguage == true)
                 {
                     var match = Regex.Match(_launchCommandLine ?? string.Empty,

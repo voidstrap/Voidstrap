@@ -40,10 +40,9 @@
             </Grid.RowDefinitions>
 
             <wv2:WebView2 x:Name="AnimeWebView"
-                          Grid.Row="0"
-                          Source="https://aniwatchtv.to/home"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"/>
+              Grid.Row="0"
+              HorizontalAlignment="Stretch"
+              VerticalAlignment="Stretch"/>
             <Grid Grid.Row="1"
       x:Name="BottomBar"
       MouseLeftButtonDown="Grid_MouseLeftButtonDown"

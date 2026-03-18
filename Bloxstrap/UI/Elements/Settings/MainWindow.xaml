@@ -305,87 +305,29 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ui:NavigationFluent x:Name="RootNavigation"
-                                 Grid.Row="1"
-                                 Grid.Column="0"
-                                 Margin="0,0,5,0"
-                                 Frame="{Binding ElementName=RootFrame}"
-                                 SelectedPageIndex="0">
-
+            <ui:NavigationFluent x:Name="RootNavigation" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" Frame="{Binding ElementName=RootFrame}" SelectedPageIndex="0">
                 <ui:NavigationFluent.Items>
-
-                    <ui:NavigationItem Content="Core"
-                       IsEnabled="False"
-                       Opacity="0.6" />
-
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}"
-                       Icon="Add12"
-                       PageType="{x:Type pages:IntegrationsPage}" />
-
-                    <ui:NavigationItem Content="Deployment"
-                       Icon="PlaySettings20"
-                       PageType="{x:Type pages:BehaviourPage}" />
-
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Appearance_Title}"
-                       Icon="PaintBucket24"
-                       PageType="{x:Type pages:AppearancePage}" />
-
-                    <ui:NavigationItem Content="Browser"
-                       Icon="BroadActivityFeed20"
-                       PageType="{x:Type pages:ServerBrowserPage}" />
-
+                    <ui:NavigationItem Content="Core" IsEnabled="False" Opacity="0.6" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" Tag="Add16" PageType="{x:Type pages:IntegrationsPage}" />
+                    <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" Tag="Play20" PageType="{x:Type pages:BehaviourPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Appearance_Title}" Icon="PaintBucket24" Tag="PaintBucket20" PageType="{x:Type pages:AppearancePage}" />
+                    <ui:NavigationItem Content="Browser" Icon="Server20" Tag="ServerPlay20" PageType="{x:Type pages:ServerBrowserPage}" />
                     <ui:NavigationSeparator />
-
-                    <ui:NavigationItem Content="Configuration"
-                       IsEnabled="False"
-                       Opacity="0.6" />
-
-                    <ui:NavigationItem Content="FastFlag Settings"
-                       Icon="Settings28"
-                       PageType="{x:Type pages:FastFlagsPage}" />
-
-                    <ui:NavigationItem x:Name="FastFlagEditorNavItem"
-                       Content="FastFlag Editor"
-                       Icon="Flag28"
-                       PageType="{x:Type pages:FastFlagEditorPage}"
-                       Visibility="{Binding IsFastFlagEditorVisible,
-                                            Converter={StaticResource BooleanToVisibilityConverter}}" />
-
-                    <ui:NavigationItem Content="Global"
-                       Icon="GlobeLocation20"
-                       PageType="{x:Type pages:GBSEditorPage}" />
-
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}"
-                       Icon="WrenchScrewdriver20"
-                       PageType="{x:Type pages:ModsPage}" />
-
+                    <ui:NavigationItem Content="Configuration" IsEnabled="False" Opacity="0.6" />
+                    <ui:NavigationItem Content="FastFlag Settings" Icon="Settings28" Tag="SettingsChat24" PageType="{x:Type pages:FastFlagsPage}" />
+                    <ui:NavigationItem x:Name="FastFlagEditorNavItem" Content="FastFlag Editor" Icon="Flag28" Tag="Flag20" PageType="{x:Type pages:FastFlagEditorPage}" Visibility="{Binding IsFastFlagEditorVisible, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <ui:NavigationItem Content="Global" Icon="GlobeLocation20" Tag="Globe20" PageType="{x:Type pages:GBSEditorPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Mods_Title}" Icon="WrenchScrewdriver20" Tag="Wrench24" PageType="{x:Type pages:ModsPage}" />
                     <ui:NavigationSeparator />
-
-                    <ui:NavigationItem
-                       IsEnabled="False"
-                       Opacity="0.6" />
-
-                    <ui:NavigationItem Content="News"
-                       Icon="News16"
-                       Margin="0,-40,0,20"
-                       PageType="{x:Type pages:NewsPage}" />
-
-
+                    <ui:NavigationItem IsEnabled="False" Opacity="0.6" />
+                    <ui:NavigationItem Content="News" Icon="News16" Tag="News20" Margin="0,-40,0,20" PageType="{x:Type pages:NewsPage}" />
                 </ui:NavigationFluent.Items>
 
-
                 <ui:NavigationFluent.Footer>
-                    <ui:NavigationItem Content="Extensions"
-                       Icon="PuzzlePiece24"
-                       PageType="{x:Type pages:ExtensionPage}" />
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}"
-                       Icon="Apps32"
-                       PageType="{x:Type pages:ShortcutsPage}" />
-                    <ui:NavigationItem Content="Settings" Icon="Settings20" PageType="{x:Type pages:ChannelPage}" />
-                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}"
-                                       Icon="QuestionCircle48"
-                                       Command="{Binding OpenAboutCommand, Mode=OneTime}" />
-
+                    <ui:NavigationItem Content="Extensions" Icon="CubeAdd20" Tag="CubeLink20" PageType="{x:Type pages:ExtensionPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Common_Shortcuts}" Icon="Apps32" Tag="Apps24" PageType="{x:Type pages:ShortcutsPage}" />
+                    <ui:NavigationItem Content="Settings" Icon="Settings28" Tag="Settings20" PageType="{x:Type pages:ChannelPage}" />
+                    <ui:NavigationItem Content="{x:Static resources:Strings.Menu_About_Title}" Icon="QuestionCircle32" Tag="QuestionCircle48" Command="{Binding OpenAboutCommand, Mode=OneTime}" />
                 </ui:NavigationFluent.Footer>
             </ui:NavigationFluent>
 
@@ -402,8 +344,13 @@
                         <ColumnDefinition Width="Auto" />
                     </Grid.ColumnDefinitions>
 
-                    <ui:Breadcrumb Grid.Column="0"
-                   Navigation="{Binding ElementName=RootNavigation}" />
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <ui:SymbolIcon x:Name="BreadcrumbIcon" Symbol="Add12"
+                   FontSize="23"
+                   Margin="0,4,6,0"
+                   VerticalAlignment="Center" />
+                        <ui:Breadcrumb Navigation="{Binding ElementName=RootNavigation}" />
+                    </StackPanel>
 
                     <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
                         <ui:TextBox x:Name="GlobalSearchBox"

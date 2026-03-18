@@ -90,7 +90,9 @@ namespace Voidstrap.UI.Elements.Overlay
 
         private async void InitializeWebView()
         {
-            await AnimeWebView.EnsureCoreWebView2Async();
+            CoreWebView2Environment env = await CoreWebView2Environment.CreateAsync(null, null,
+            new CoreWebView2EnvironmentOptions("--disable-frame-rate-limit --disable-gpu-vsync"));
+            await AnimeWebView.EnsureCoreWebView2Async(env);
             var core = AnimeWebView.CoreWebView2;
 
             core.Settings.AreDefaultScriptDialogsEnabled = false;

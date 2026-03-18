@@ -1,7 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -17,23 +15,6 @@ namespace Voidstrap.UI.Elements.Bootstrapper
 
         private const int MaxWidth = 1920;
 
-        private const string FallbackBackgroundUrl =
-            "https://i.pinimg.com/videos/thumbnails/originals/8a/96/b6/8a96b669ada0e7988ef14d227cf8b77e.0000000.jpg";
-
-        private static readonly string CachePath =
-            Path.Combine(Path.GetTempPath(), "voidstrap_bg_cache");
-
-        private static readonly HttpClient Http = new HttpClient(
-            new HttpClientHandler
-            {
-                AutomaticDecompression =
-                    DecompressionMethods.GZip |
-                    DecompressionMethods.Deflate
-            })
-        {
-            Timeout = TimeSpan.FromSeconds(10)
-        };
-
         public static async Task SetBackgroundAsync(Image imageControl, string? customPath)
         {
             if (imageControl == null)
@@ -46,11 +27,11 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 if (!string.IsNullOrWhiteSpace(customPath) && File.Exists(customPath))
                 {
                     await LoadFromPathAsync(imageControl, customPath);
-                    return;
                 }
-
-                string fallbackPath = await GetOrDownloadFallbackAsync();
-                await LoadFromPathAsync(imageControl, fallbackPath);
+                else
+                {
+                    await ClearBackgroundAsync(imageControl);
+                }
             }
             catch (Exception ex)
             {
@@ -70,37 +51,6 @@ namespace Voidstrap.UI.Elements.Bootstrapper
                 await LoadGifAsync(imageControl, path);
             else
                 await LoadStaticImageAsync(imageControl, path);
-        }
-
-        private static async Task<string> GetOrDownloadFallbackAsync()
-        {
-            Directory.CreateDirectory(CachePath);
-
-            string ext = Path.GetExtension(FallbackBackgroundUrl);
-            if (string.IsNullOrWhiteSpace(ext))
-                ext = ".jpg";
-
-            string filePath = Path.Combine(CachePath, "fallback" + ext);
-
-            if (File.Exists(filePath))
-                return filePath;
-
-            using var response = await Http.GetAsync(
-                FallbackBackgroundUrl,
-                HttpCompletionOption.ResponseHeadersRead);
-
-            response.EnsureSuccessStatusCode();
-
-            await using var fs = new FileStream(
-                filePath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 81920,
-                useAsync: true);
-
-            await response.Content.CopyToAsync(fs);
-            return filePath;
         }
 
         private static async Task LoadGifAsync(Image imageControl, string path)
@@ -184,11 +134,6 @@ namespace Voidstrap.UI.Elements.Bootstrapper
 
             imageControl.SnapsToDevicePixels = true;
             imageControl.UseLayoutRounding = true;
-        }
-
-        public static Task PreloadFallbackAsync()
-        {
-            return GetOrDownloadFallbackAsync();
         }
     }
 }

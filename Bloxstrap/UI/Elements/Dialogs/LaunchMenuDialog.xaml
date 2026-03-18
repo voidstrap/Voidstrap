@@ -19,6 +19,9 @@
     ExtendsContentIntoTitleBar="True"
     ResizeMode="NoResize"
     SizeToContent="Height"
+    AllowsTransparency="True"
+    WindowBackdropType="Aero"
+    WindowStyle="None"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
