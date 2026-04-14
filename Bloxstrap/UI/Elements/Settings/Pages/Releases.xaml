@@ -22,7 +22,6 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <!-- Search at the top (row 0) -->
         <ui:TextBox
         x:Name="SearchBox"
         Height="32"

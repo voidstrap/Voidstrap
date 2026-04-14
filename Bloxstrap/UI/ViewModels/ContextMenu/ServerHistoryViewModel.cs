@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Voidstrap.Integrations;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Header;
 
 namespace Voidstrap.UI.ViewModels.ContextMenu
 {
@@ -16,7 +15,12 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
     {
         private readonly ActivityWatcher _activityWatcher;
         private readonly EventHandler _onGameLeaveHandler;
+
+        private readonly string _historyFilePath = Path.Combine(Paths.Base, "ServerHistory.json");
+        private const int MaxHistoryEntries = 30;
+
         public List<ActivityData> GameHistory { get; private set; } = new();
+        public IEnumerable<ActivityData> Top10RecentHistory => GameHistory.Take(10);
         public GenericTriState LoadState { get; private set; } = GenericTriState.Unknown;
         public string Error { get; private set; } = string.Empty;
 
@@ -26,10 +30,6 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
 
         public event EventHandler? RequestCloseEvent;
 
-        private readonly string _historyFilePath = Path.Combine(Paths.Base, "ServerHistory.json");
-        private const int MaxHistoryEntries = 30;
-        public IEnumerable<ActivityData> Top10RecentHistory => GameHistory.Take(10);
-
         public ServerHistoryViewModel(ActivityWatcher activityWatcher)
         {
             _activityWatcher = activityWatcher ?? throw new ArgumentNullException(nameof(activityWatcher));
@@ -38,28 +38,26 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             CopyDeeplinkCommand = new RelayCommand<ActivityData>(CopyDeeplinkToClipboard);
             LaunchDeeplinkCommand = new RelayCommand<ActivityData>(LaunchDeeplink);
 
-            _onGameLeaveHandler = (_, _) => LoadDataAsync();
-            _activityWatcher.OnGameLeave += _onGameLeaveHandler;
-
             LoadHistoryFromFile();
-            LoadDataAsync();
+            _onGameLeaveHandler = async (_, _) => await LoadDataAsync();
+            _activityWatcher.OnGameLeave += _onGameLeaveHandler;
+            _ = LoadDataAsync();
         }
 
         private void LoadHistoryFromFile()
         {
             try
             {
-                if (!File.Exists(_historyFilePath)) return;
+                if (!File.Exists(_historyFilePath))
+                    return;
 
                 var json = File.ReadAllText(_historyFilePath);
-                var savedHistory = JsonSerializer.Deserialize<List<ActivityData>>(json);
+                var saved = JsonSerializer.Deserialize<List<ActivityData>>(json);
+                if (saved is null || saved.Count == 0)
+                    return;
 
-                if (savedHistory != null)
-                {
-                    MergeAndConsolidateHistory(savedHistory);
-                    OnPropertyChanged(nameof(GameHistory));
-                    OnPropertyChanged(nameof(Top10RecentHistory));
-                }
+                MergeAndConsolidateHistory(saved);
+                NotifyHistoryChanged();
             }
             catch (Exception ex)
             {
@@ -67,25 +65,37 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             }
         }
 
-        private async void LoadDataAsync()
+        private async Task LoadDataAsync()
         {
             SetLoadingState();
 
-            var history = _activityWatcher.History.ToList();
-            var entriesWithoutDetails = history.Where(x => x.UniverseDetails == null).ToList();
-
-            if (entriesWithoutDetails.Any())
-                await TryLoadUniverseDetailsAsync(entriesWithoutDetails);
-
-            MergeAndConsolidateHistory(history);
-            foreach (var entry in GameHistory)
+            try
             {
-                entry.ComputeDisplayTimes();
-            }
+                var history = _activityWatcher.History.ToList();
+                var needsDetails = history
+                    .Where(x => x.UniverseDetails == null && x.UniverseId != 0)
+                    .ToList();
 
-            OnPropertyChanged(nameof(GameHistory));
-            SaveHistoryToFile();
-            SetSuccessState();
+                if (needsDetails.Any())
+                    await TryLoadUniverseDetailsAsync(needsDetails);
+
+                MergeAndConsolidateHistory(history);
+
+                foreach (var entry in GameHistory)
+                    entry.ComputeDisplayTimes();
+
+                await Task.Run(() => SaveHistoryToFile());
+
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    NotifyHistoryChanged();
+                    SetSuccessState();
+                });
+            }
+            catch (Exception ex)
+            {
+                HandleError(ex);
+            }
         }
 
         private void MergeAndConsolidateHistory(IEnumerable<ActivityData> incoming)
@@ -107,38 +117,17 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
                         existing.TimeLeft = entry.TimeLeft;
                     if (existing.RootActivity == null && entry.RootActivity != null)
                         existing.RootActivity = entry.RootActivity;
+                    if (existing.UniverseDetails == null && entry.UniverseDetails != null)
+                        existing.UniverseDetails = entry.UniverseDetails;
+
                     foreach (var kvp in entry.PlayerLogs)
                         existing.PlayerLogs[kvp.Key] = kvp.Value;
                     foreach (var kvp in entry.MessageLogs)
                         existing.MessageLogs[kvp.Key] = kvp.Value;
-                    if (existing.UniverseDetails == null && entry.UniverseDetails != null)
-                        existing.UniverseDetails = entry.UniverseDetails;
                 }
                 else
                 {
                     dict[key] = entry;
-                }
-            }
-
-            var seenRoots = new HashSet<string>();
-            foreach (var kvp in dict.Values)
-            {
-                if (kvp.RootActivity != null)
-                {
-                    if (kvp.RootActivity.TimeLeft < kvp.TimeLeft)
-                        kvp.RootActivity.TimeLeft = kvp.TimeLeft;
-
-                    string rootKey = $"{kvp.PlaceId}_{kvp.JobId}";
-
-                    if (!seenRoots.Contains(rootKey))
-                    {
-                        kvp.RootActivity.JobId = kvp.JobId;
-                        seenRoots.Add(rootKey);
-                    }
-                    else
-                    {
-                        kvp.RootActivity = null;
-                    }
                 }
             }
 
@@ -153,7 +142,8 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             try
             {
                 Directory.CreateDirectory(Paths.Base);
-                string json = JsonSerializer.Serialize(GameHistory);
+                var json = JsonSerializer.Serialize(GameHistory,
+                    new JsonSerializerOptions { WriteIndented = true });
                 File.WriteAllText(_historyFilePath, json);
             }
             catch (Exception ex)
@@ -162,16 +152,30 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             }
         }
 
-        private void LaunchDeeplink(ActivityData data)
+        private async Task TryLoadUniverseDetailsAsync(List<ActivityData> entries)
         {
-            if (data == null) return;
-
             try
             {
-                string url = data.GetInviteDeeplink();
+                string ids = string.Join(',', entries.Select(x => x.UniverseId).Distinct());
+                await UniverseDetails.FetchBulk(ids);
+
+                foreach (var entry in entries)
+                    entry.UniverseDetails = UniverseDetails.LoadFromCache(entry.UniverseId);
+            }
+            catch (Exception ex)
+            {
+                App.Logger.WriteException("ServerHistoryViewModel::TryLoadUniverseDetailsAsync", ex);
+            }
+        }
+
+        private void LaunchDeeplink(ActivityData? data)
+        {
+            if (data is null) return;
+            try
+            {
                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                 {
-                    FileName = url,
+                    FileName = data.GetInviteDeeplink(),
                     UseShellExecute = true
                 });
             }
@@ -181,10 +185,9 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             }
         }
 
-        private void CopyDeeplinkToClipboard(ActivityData data)
+        private void CopyDeeplinkToClipboard(ActivityData? data)
         {
-            if (data == null) return;
-
+            if (data is null) return;
             try
             {
                 Clipboard.SetText(data.GetInviteDeeplink());
@@ -195,34 +198,15 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             }
         }
 
+        private void NotifyHistoryChanged()
+        {
+            OnPropertyChanged(nameof(GameHistory));
+            OnPropertyChanged(nameof(Top10RecentHistory));
+        }
+
         private void SetLoadingState()
         {
             LoadState = GenericTriState.Unknown;
-            OnPropertyChanged(nameof(LoadState));
-        }
-
-        private async Task TryLoadUniverseDetailsAsync(List<ActivityData> entries)
-        {
-            try
-            {
-                string universeIds = string.Join(',', entries.Select(x => x.UniverseId).Distinct());
-                await UniverseDetails.FetchBulk(universeIds);
-
-                foreach (var entry in entries)
-                    entry.UniverseDetails = UniverseDetails.LoadFromCache(entry.UniverseId);
-            }
-            catch (Exception ex)
-            {
-                HandleError(ex);
-            }
-        }
-
-        private void HandleError(Exception ex)
-        {
-            App.Logger.WriteException("ServerHistoryViewModel::LoadData", ex);
-            Error = $"Failed to load universe details: {ex.Message}";
-            OnPropertyChanged(nameof(Error));
-            LoadState = GenericTriState.Failed;
             OnPropertyChanged(nameof(LoadState));
         }
 
@@ -232,11 +216,24 @@ namespace Voidstrap.UI.ViewModels.ContextMenu
             OnPropertyChanged(nameof(LoadState));
         }
 
+        private void HandleError(Exception ex)
+        {
+            App.Logger.WriteException("ServerHistoryViewModel::HandleError", ex);
+            Error = $"Failed to load history: {ex.Message}";
+            LoadState = GenericTriState.Failed;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                OnPropertyChanged(nameof(Error));
+                OnPropertyChanged(nameof(LoadState));
+            });
+        }
+
         private void RequestClose() => RequestCloseEvent?.Invoke(this, EventArgs.Empty);
 
         public void Dispose()
         {
             _activityWatcher.OnGameLeave -= _onGameLeaveHandler;
+            GC.SuppressFinalize(this);
         }
     }
 }

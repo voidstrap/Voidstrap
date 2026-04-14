@@ -308,6 +308,7 @@
             <ui:NavigationFluent x:Name="RootNavigation" Grid.Row="1" Grid.Column="0" Margin="0,0,5,0" Frame="{Binding ElementName=RootFrame}" SelectedPageIndex="0">
                 <ui:NavigationFluent.Items>
                     <ui:NavigationItem Content="Core" IsEnabled="False" Opacity="0.6" />
+                    <ui:NavigationItem Content="Continue Playing" Icon="Play24" Tag="Play20" PageType="{x:Type pages:HistoryPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Integrations_Title}" Icon="Add12" Tag="Add16" PageType="{x:Type pages:IntegrationsPage}" />
                     <ui:NavigationItem Content="Deployment" Icon="PlaySettings20" Tag="Play20" PageType="{x:Type pages:BehaviourPage}" />
                     <ui:NavigationItem Content="{x:Static resources:Strings.Menu_Appearance_Title}" Icon="PaintBucket24" Tag="PaintBucket20" PageType="{x:Type pages:AppearancePage}" />

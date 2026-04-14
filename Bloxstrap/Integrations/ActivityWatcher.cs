@@ -90,9 +90,12 @@ namespace Voidstrap.Integrations
         public event EventHandler<ActivityData.UserLog>? OnNewPlayerRequest;
         public event EventHandler<ActivityData.UserMessage>? OnNewMessageRequest;
         public event EventHandler<Message>? OnRPCMessage;
+
         private static ResolutionSetting? _originalResolution;
         private static bool _resolutionApplied = false;
+
         public bool AntiAFK => App.Settings.Prop.AntiAFK;
+
         private DateTime _lastRejoinAttempt = DateTime.MinValue;
         private DateTime LastRPCRequest;
 
@@ -118,13 +121,10 @@ namespace Voidstrap.Integrations
                     return null;
 
                 using var client = new System.Net.Http.HttpClient();
-
                 string url = $"https://thumbnails.roblox.com/v1/games/icons?universeIds={Data.UniverseId}&size=150x150&format=Png&isCircular=true";
-
                 var json = await client.GetStringAsync(url);
 
                 using JsonDocument doc = JsonDocument.Parse(json);
-
                 return doc.RootElement
                     .GetProperty("data")[0]
                     .GetProperty("imageUrl")
@@ -144,9 +144,8 @@ namespace Voidstrap.Integrations
             int countFromApi = 0;
             try
             {
-                using var http = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+                using var http = new System.Net.Http.HttpClient { Timeout = TimeSpan.FromSeconds(10) };
                 string url = $"https://games.roblox.com/v1/games/{Data.PlaceId}/servers/Public?limit=100";
-
                 var json = await http.GetStringAsync(url);
                 var response = JsonSerializer.Deserialize<ServerResponse>(json,
                     new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
@@ -154,19 +153,12 @@ namespace Voidstrap.Integrations
                 if (response?.Data != null)
                 {
                     var currentServer = response.Data.FirstOrDefault(s => s.Id == Data.JobId);
-                    if (currentServer != null)
-                    {
-                        countFromApi = currentServer.Playing;
-                    }
-                    else
-                    {
-                        countFromApi = response.Data.Sum(s => s.Playing);
-                    }
+                    countFromApi = currentServer != null
+                        ? currentServer.Playing
+                        : response.Data.Sum(s => s.Playing);
                 }
             }
-            catch
-            {
-            }
+            catch { }
 
             int countFromLogs = 1;
             if (Data.PlayerLogs != null && Data.PlayerLogs.Count > 0)
@@ -177,6 +169,7 @@ namespace Voidstrap.Integrations
                     .Select(g => g.OrderByDescending(l => l.Time).First())
                     .Count(log => string.Equals(log.Type, "added", StringComparison.OrdinalIgnoreCase));
             }
+
             return Math.Max(countFromApi, countFromLogs);
         }
 
@@ -199,7 +192,8 @@ namespace Voidstrap.Integrations
                 {
                     logFileInfo = new DirectoryInfo(logDirectory)
                         .GetFiles()
-                        .Where(x => x.Name.Contains("Player", StringComparison.OrdinalIgnoreCase) && x.CreationTime <= DateTime.Now)
+                        .Where(x => x.Name.Contains("Player", StringComparison.OrdinalIgnoreCase)
+                                 && x.CreationTime <= DateTime.Now)
                         .OrderByDescending(x => x.CreationTime)
                         .First();
 
@@ -249,9 +243,7 @@ namespace Voidstrap.Integrations
             if (entry.Contains(GameLeavingEntry))
             {
                 App.Logger.WriteLine(LOG_IDENT, "User is back into the desktop app");
-
                 RestoreOriginalResolution();
-
                 OnAppClose?.Invoke(this, EventArgs.Empty);
 
                 if (Data.PlaceId != 0 && !InGame)
@@ -273,7 +265,7 @@ namespace Voidstrap.Integrations
                 }
                 else if (entry.Contains(GameJoiningEntry))
                 {
-                    Match match = Regex.Match(entry, GameJoiningEntryPattern);
+                    var match = Regex.Match(entry, GameJoiningEntryPattern);
                     if (match.Groups.Count != 4)
                         return;
 
@@ -333,7 +325,6 @@ namespace Voidstrap.Integrations
                     Data.TimeJoined = DateTime.Now;
 
                     ApplyInGameResolutionIfNeeded();
-
                     OnGameJoin?.Invoke(this, EventArgs.Empty);
                 }
             }
@@ -350,52 +341,54 @@ namespace Voidstrap.Integrations
                     History.Insert(0, Data);
 
                     InGame = false;
+
+                    var lastData = Data;
                     Data = new();
 
                     OnGameLeave?.Invoke(this, EventArgs.Empty);
 
-                    if (App.Settings.Prop.AntiAFK && Data.PlaceId != 0 && (DateTime.Now - _lastRejoinAttempt).TotalSeconds > 5)
+                    if (App.Settings.Prop.AntiAFK
+                        && lastData.PlaceId != 0
+                        && (DateTime.Now - _lastRejoinAttempt).TotalSeconds > 5)
                     {
                         _lastRejoinAttempt = DateTime.Now;
 
                         Task.Run(() =>
                         {
-                            const string LOG_IDENT = "ActivityWatcher::AntiAFK";
-                            App.Logger.WriteLine(LOG_IDENT, "Anti-AFK enabled: Attempting auto-rejoin...");
+                            const string AFK_IDENT = "ActivityWatcher::AntiAFK";
+                            App.Logger.WriteLine(AFK_IDENT, "Anti-AFK enabled: Attempting auto-rejoin...");
 
                             try
                             {
-                                var robloxProcesses = System.Diagnostics.Process.GetProcessesByName("RobloxPlayerBeta");
-                                foreach (var proc in robloxProcesses)
+                                foreach (var proc in System.Diagnostics.Process.GetProcessesByName("RobloxPlayerBeta"))
                                 {
                                     try
                                     {
                                         proc.Kill();
                                         proc.WaitForExit(3000);
-                                        App.Logger.WriteLine(LOG_IDENT, $"Closed Roblox process {proc.Id}");
+                                        App.Logger.WriteLine(AFK_IDENT, $"Closed Roblox process {proc.Id}");
                                     }
                                     catch (Exception ex)
                                     {
-                                        App.Logger.WriteLine(LOG_IDENT, $"Failed to close Roblox process {proc.Id}: {ex.Message}");
+                                        App.Logger.WriteLine(AFK_IDENT, $"Failed to close process {proc.Id}: {ex.Message}");
                                     }
                                 }
 
-                                string url = $"https://www.roblox.com/games/{Data.PlaceId}/#/?universeId={Data.UniverseId}";
+                                string url = $"https://www.roblox.com/games/{lastData.PlaceId}/#/?universeId={lastData.UniverseId}";
                                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                                 {
                                     FileName = url,
                                     UseShellExecute = true
                                 });
 
-                                App.Logger.WriteLine(LOG_IDENT, $"Opened Roblox URL: {url}");
+                                App.Logger.WriteLine(AFK_IDENT, $"Opened Roblox URL: {url}");
                             }
                             catch (Exception ex)
                             {
-                                App.Logger.WriteLine(LOG_IDENT, $"Failed to auto-rejoin: {ex}");
+                                App.Logger.WriteLine(AFK_IDENT, $"Failed to auto-rejoin: {ex}");
                             }
                         });
                     }
-                }
                 }
                 else if (entry.Contains(GameTeleportingEntry))
                 {
@@ -414,11 +407,11 @@ namespace Voidstrap.Integrations
                         return;
 
                     string messagePlain = match.Groups[1].Value;
-                    Message? message;
 
                     if ((DateTime.Now - LastRPCRequest).TotalSeconds <= 1)
                         return;
 
+                    Message? message;
                     try
                     {
                         message = JsonSerializer.Deserialize<Message>(messagePlain);
@@ -428,7 +421,10 @@ namespace Voidstrap.Integrations
                         return;
                     }
 
-                    if (message?.Command == "SetLaunchData")
+                    if (message is null)
+                        return;
+
+                    if (message.Command == "SetLaunchData")
                     {
                         string? data = message.Data.Deserialize<string>();
                         if (data != null && data.Length <= 200)
@@ -471,18 +467,14 @@ namespace Voidstrap.Integrations
                     OnNewMessageRequest?.Invoke(this, messageLog);
                 }
             }
-        
+        }
 
         private void RestoreOriginalResolution()
         {
             if (!_resolutionApplied || _originalResolution is null)
                 return;
 
-            App.Logger.WriteLine(
-                "ActivityWatcher",
-                "Restoring original desktop resolution"
-            );
-
+            App.Logger.WriteLine("ActivityWatcher", "Restoring original desktop resolution");
             InGameResolutionApplier.Apply(_originalResolution);
 
             _resolutionApplied = false;
@@ -493,7 +485,6 @@ namespace Voidstrap.Integrations
         {
             DEVMODE devMode = new();
             devMode.dmSize = (short)Marshal.SizeOf(typeof(DEVMODE));
-
             EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref devMode);
 
             return new ResolutionSetting
@@ -511,33 +502,22 @@ namespace Voidstrap.Integrations
 
             var settings = App.Settings.Prop;
 
-            if (!settings.UsePlaceId)
-                return;
-
-            if (settings.InGameResolution is null)
+            if (!settings.UsePlaceId || settings.InGameResolution is null)
                 return;
 
             if (settings.MatchUniverseId)
             {
-                if (Data.UniverseId == 0)
-                    return;
-
-                if (settings.TargetUniverseId != Data.UniverseId)
+                if (Data.UniverseId == 0 || settings.TargetUniverseId != Data.UniverseId)
                     return;
             }
             else
             {
-                if (!long.TryParse(settings.PlaceId, out long targetPlaceId))
-                    return;
-
-                if (Data.PlaceId != targetPlaceId)
+                if (!long.TryParse(settings.PlaceId, out long targetPlaceId) || Data.PlaceId != targetPlaceId)
                     return;
             }
 
-            App.Logger.WriteLine(
-                "ActivityWatcher",
-                $"Applying in-game resolution (Universe={Data.UniverseId}, Place={Data.PlaceId})"
-            );
+            App.Logger.WriteLine("ActivityWatcher",
+                $"Applying in-game resolution (Universe={Data.UniverseId}, Place={Data.PlaceId})");
 
             _originalResolution ??= GetCurrentResolution();
             _resolutionApplied = true;

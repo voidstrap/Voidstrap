@@ -19,7 +19,7 @@ namespace Voidstrap.Integrations
             "https://github.com/Orbmu2k/nvidiaProfileInspector/releases/download/2.4.0.34/nvidiaProfileInspector.zip";
 
         private static readonly string InspectorDir =
-            Path.Combine(Paths.Integrations, "NvidiaUpdate"); // was too lazy to add auto-update
+            Path.Combine(Paths.Integrations, "Nvidia"); // was too lazy to add auto-update
 
         private static readonly string InspectorExe =
             Path.Combine(InspectorDir, "nvidiaProfileInspector.exe");
