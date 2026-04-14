@@ -142,7 +142,6 @@ namespace Voidstrap.Models.Persistable
         public bool GRADmentFR { get; set; } = false;
         public bool VoidRPC { get; set; } = true;
 
-        public bool AntiAFK { get; set; } = false;
 
         public ResolutionSetting? InGameResolution { get; set; }
 

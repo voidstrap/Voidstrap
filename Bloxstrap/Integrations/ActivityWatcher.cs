@@ -94,8 +94,6 @@ namespace Voidstrap.Integrations
         private static ResolutionSetting? _originalResolution;
         private static bool _resolutionApplied = false;
 
-        public bool AntiAFK => App.Settings.Prop.AntiAFK;
-
         private DateTime _lastRejoinAttempt = DateTime.MinValue;
         private DateTime LastRPCRequest;
 
@@ -346,49 +344,6 @@ namespace Voidstrap.Integrations
                     Data = new();
 
                     OnGameLeave?.Invoke(this, EventArgs.Empty);
-
-                    if (App.Settings.Prop.AntiAFK
-                        && lastData.PlaceId != 0
-                        && (DateTime.Now - _lastRejoinAttempt).TotalSeconds > 5)
-                    {
-                        _lastRejoinAttempt = DateTime.Now;
-
-                        Task.Run(() =>
-                        {
-                            const string AFK_IDENT = "ActivityWatcher::AntiAFK";
-                            App.Logger.WriteLine(AFK_IDENT, "Anti-AFK enabled: Attempting auto-rejoin...");
-
-                            try
-                            {
-                                foreach (var proc in System.Diagnostics.Process.GetProcessesByName("RobloxPlayerBeta"))
-                                {
-                                    try
-                                    {
-                                        proc.Kill();
-                                        proc.WaitForExit(3000);
-                                        App.Logger.WriteLine(AFK_IDENT, $"Closed Roblox process {proc.Id}");
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        App.Logger.WriteLine(AFK_IDENT, $"Failed to close process {proc.Id}: {ex.Message}");
-                                    }
-                                }
-
-                                string url = $"https://www.roblox.com/games/{lastData.PlaceId}/#/?universeId={lastData.UniverseId}";
-                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                                {
-                                    FileName = url,
-                                    UseShellExecute = true
-                                });
-
-                                App.Logger.WriteLine(AFK_IDENT, $"Opened Roblox URL: {url}");
-                            }
-                            catch (Exception ex)
-                            {
-                                App.Logger.WriteLine(AFK_IDENT, $"Failed to auto-rejoin: {ex}");
-                            }
-                        });
-                    }
                 }
                 else if (entry.Contains(GameTeleportingEntry))
                 {

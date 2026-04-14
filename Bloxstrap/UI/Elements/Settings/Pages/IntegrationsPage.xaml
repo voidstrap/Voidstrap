@@ -308,12 +308,6 @@
             Description="Would you like to Launch Roblox on Startup.">
                     <ui:ToggleSwitch IsChecked="{Binding LaunchStartup, Mode=TwoWay}" />
                 </controls:OptionControl>
-
-                <controls:OptionControl 
-            Header="Anti AFK"
-            Description="Auto rejoins the game instead of getting kicked for being AFK every 20 minutes.">
-                    <ui:ToggleSwitch IsChecked="{Binding AntiAFK, Mode=TwoWay}" />
-                </controls:OptionControl>
             </StackPanel>
         </Expander>
 
