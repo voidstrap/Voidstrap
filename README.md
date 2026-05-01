@@ -38,6 +38,9 @@ Leave a star if you like the project! ⭐️
 > In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.  
 > More experienced Linux users can also try tools like **[Lution](https://github.com/wookhq/Lution)**.
 
+> [!IMPORTANT]
+> Voidstrap is now currently discontinued thank yall for the best 2 years of my life with Voidstrap, I am now starting a new project called "Erablox" as a Roblox Revival 💘
+
 ## Installation
 
 1. Download the latest version
@@ -113,10 +116,6 @@ Voidstrap is built using **C# and .NET**.
     <img src="https://invidget.switchblade.xyz/5tJBqBH8ck">
   </a>
 </p>
-
-> [!NOTE]
-> Voidstrap is still in **early development**, even though the project has existed for over **2 years**.  
-> Features may change and some things may still be unfinished.
 
 [shield-repo-downloads]:  https://img.shields.io/github/downloads/voidstrap/Voidstrap/latest/total?color=981bfe
 [shield-repo-total]:      https://img.shields.io/github/downloads/voidstrap/Voidstrap/total?color=8a2be2
