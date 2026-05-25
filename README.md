@@ -38,9 +38,6 @@ Leave a star if you like the project! ⭐️
 > In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.  
 > More experienced Linux users can also try tools like **[Lution](https://github.com/wookhq/Lution)**.
 
-> [!IMPORTANT]
-> Voidstrap is now currently discontinued thank yall for the best 2 years of my life with Voidstrap, I am now starting a new project called "Erablox" as a Roblox Revival 💘
-
 ## Installation
 
 1. Download the latest version
