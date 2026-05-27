@@ -1,0 +1,245 @@
+{
+  "Servers": {
+    "128.116.48.0/24": {
+      "Cidr": "128.116.48.0/24",
+      "City": "Chicago",
+      "Region": "Illinois",
+      "Country": "USA",
+      "Lat": 41.8781,
+      "Lon": -87.6298,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.48.33"
+      ]
+    },
+    "128.116.1.0/24": {
+      "Cidr": "128.116.1.0/24",
+      "City": "Los Angeles",
+      "Region": "California",
+      "Country": "USA",
+      "Lat": 34.0522,
+      "Lon": -118.2437,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.1.33"
+      ]
+    },
+    "128.116.32.0/24": {
+      "Cidr": "128.116.32.0/24",
+      "City": "New York",
+      "Region": "New York",
+      "Country": "USA",
+      "Lat": 40.7128,
+      "Lon": -74.006,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.32.33"
+      ]
+    },
+    "128.116.95.0/24": {
+      "Cidr": "128.116.95.0/24",
+      "City": "Dallas",
+      "Region": "Texas",
+      "Country": "USA",
+      "Lat": 32.7767,
+      "Lon": -96.797,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.95.33"
+      ]
+    },
+    "128.116.5.0/24": {
+      "Cidr": "128.116.5.0/24",
+      "City": "Frankfurt",
+      "Region": "Hesse",
+      "Country": "Germany",
+      "Lat": 50.1109,
+      "Lon": 8.6821,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.5.33"
+      ]
+    },
+    "128.116.44.0/24": {
+      "Cidr": "128.116.44.0/24",
+      "City": "Frankfurt",
+      "Region": "Hesse",
+      "Country": "Germany",
+      "Lat": 50.1109,
+      "Lon": 8.6821,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.44.33"
+      ]
+    },
+    "128.116.50.0/24": {
+      "Cidr": "128.116.50.0/24",
+      "City": "Singapore",
+      "Region": "Singapore",
+      "Country": "Singapore",
+      "Lat": 1.3521,
+      "Lon": 103.8198,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.50.33"
+      ]
+    },
+    "128.116.13.0/24": {
+      "Cidr": "128.116.13.0/24",
+      "City": "Paris",
+      "Region": "Ile-de-France",
+      "Country": "France",
+      "Lat": 48.8534,
+      "Lon": 2.3488,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.13.34"
+      ]
+    },
+    "128.116.47.0/24": {
+      "Cidr": "128.116.47.0/24",
+      "City": "Mumbai",
+      "Region": "Maharashtra",
+      "Country": "India",
+      "Lat": 19.0728,
+      "Lon": 72.8826,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.47.33"
+      ]
+    },
+    "128.116.86.0/24": {
+      "Cidr": "128.116.86.0/24",
+      "City": "Barueri",
+      "Region": "Sao Paulo",
+      "Country": "Brazil",
+      "Lat": -23.5106,
+      "Lon": -46.8761,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.86.33"
+      ]
+    },
+    "128.116.46.0/24": {
+      "Cidr": "128.116.46.0/24",
+      "City": "Singapore",
+      "Region": "Singapore",
+      "Country": "Singapore",
+      "Lat": 1.2897,
+      "Lon": 103.8501,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.46.33"
+      ]
+    },
+    "128.116.21.0/24": {
+      "Cidr": "128.116.21.0/24",
+      "City": "Amsterdam",
+      "Region": "North Holland",
+      "Country": "Netherlands",
+      "Lat": 52.3676,
+      "Lon": 4.9041,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.21.33"
+      ]
+    },
+    "128.116.127.0/24": {
+      "Cidr": "128.116.127.0/24",
+      "City": "Miami",
+      "Region": "Florida",
+      "Country": "USA",
+      "Lat": 25.7617,
+      "Lon": -80.1918,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.127.33"
+      ]
+    },
+    "128.116.115.0/24": {
+      "Cidr": "128.116.115.0/24",
+      "City": "Seattle",
+      "Region": "Washington",
+      "Country": "USA",
+      "Lat": 47.6062,
+      "Lon": -122.3321,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.115.33"
+      ]
+    },
+    "128.116.31.0/24": {
+      "Cidr": "128.116.31.0/24",
+      "City": "Warsaw",
+      "Region": "Mazovia",
+      "Country": "Poland",
+      "Lat": 52.2297,
+      "Lon": 21.0122,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.31.33"
+      ]
+    },
+    "128.116.54.0/24": {
+      "Cidr": "128.116.54.0/24",
+      "City": "Singapore",
+      "Region": "Singapore",
+      "Country": "Singapore",
+      "Lat": 1.2897,
+      "Lon": 103.8501,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.54.33"
+      ]
+    },
+    "128.116.53.0/24": {
+      "Cidr": "128.116.53.0/24",
+      "City": "Ashburn",
+      "Region": "Virginia",
+      "Country": "USA",
+      "Lat": 39.0438,
+      "Lon": -77.4874,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.53.33"
+      ]
+    },
+    "128.116.97.0/24": {
+      "Cidr": "128.116.97.0/24",
+      "City": "Singapore",
+      "Region": "Singapore",
+      "Country": "Singapore",
+      "Lat": 1.3521,
+      "Lon": 103.8198,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.97.33"
+      ]
+    },
+    "128.116.55.0/24": {
+      "Cidr": "128.116.55.0/24",
+      "City": "Tokyo",
+      "Region": "Kanto",
+      "Country": "Japan",
+      "Lat": 35.6762,
+      "Lon": 139.6503,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.55.33"
+      ]
+    },
+    "128.116.56.0/24": {
+      "Cidr": "128.116.56.0/24",
+      "City": "Leesburg",
+      "Region": "Virginia",
+      "Country": "USA",
+      "Lat": 39.1157,
+      "Lon": -77.5636,
+      "SeenCount": 0,
+      "IPs": [
+        "128.116.56.33"
+      ]
+    }
+  },
+  "SchemaVersion": 1
+}
