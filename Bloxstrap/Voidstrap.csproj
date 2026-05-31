@@ -148,6 +148,7 @@
 			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="NAudio" Version="2.2.1" />
+		<PackageReference Include="NLua" Version="1.7.9" />
 		<PackageReference Include="securifybv.ShellLink" Version="0.1.0" />
 		<PackageReference Include="SharpCompress" Version="0.47.0" />
 		<PackageReference Include="SharpDX" Version="4.2.0" />

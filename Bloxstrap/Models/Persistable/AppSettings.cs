@@ -142,7 +142,6 @@ namespace Voidstrap.Models.Persistable
         public bool GRADmentFR { get; set; } = false;
         public bool VoidRPC { get; set; } = true;
 
-
         public ResolutionSetting? InGameResolution { get; set; }
 
         public class ResolutionSetting
@@ -151,5 +150,13 @@ namespace Voidstrap.Models.Persistable
             public int Height { get; set; }
             public int RefreshRate { get; set; }
         }
+
+        // ====== Swift Tunnel Settings ======
+        public bool SwiftTunnelEnabled { get; set; } = false;
+        public string SwiftTunnelRegion { get; set; } = "";
+        public bool SwiftTunnelAutoConnect { get; set; } = false;
+        public bool SwiftTunnelSplitTunnel { get; set; } = false;
+        public bool SwiftTunnelRememberLogin { get; set; } = false;
+        public bool EnableLuaScripting { get; set; } = false;
     }
 }
