@@ -151,7 +151,7 @@ namespace Voidstrap.UI.Elements.Settings.Pages
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("Voidstrap");
 
                 using HttpResponseMessage response = await client.GetAsync(
-                    "https://github.com/qrhrqiohj/Fleasion/releases/latest/download/Fleasion.exe",
+                    "https://github.com/fleasion/Fleasion/releases/latest/download/Fleasion.exe",
                     HttpCompletionOption.ResponseHeadersRead, ct);
 
                 response.EnsureSuccessStatusCode();
