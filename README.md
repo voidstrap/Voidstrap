@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="github.com/voidstrap/Voidstrap/releases/latest">Latest release</a> |
+  <a href="https://github.com/voidstrap/Voidstrap/releases/latest">Latest release</a> |
   <a href="https://www.youtube.com/watch?v=P-GqTUo_HIA&t">Tutorial</a> |
   <a href="https://voidstrapp.netlify.app/donate/donate">Donate</a> |
   <a href="https://discord.gg/5tJBqBH8ck">Discord</a>
@@ -106,6 +106,14 @@ Voidstrap is built using **C# and .NET**.
   <a href="https://www.star-history.com/?repos=voidstrap%2FVoidstrap%2CKloBraticc%2Fvoidstrap&type=timeline&legend=top-left">
     <img src="https://api.star-history.com/svg?repos=voidstrap%2FVoidstrap%2CKloBraticc%2Fvoidstrap&type=timeline&legend=top-left&theme=dark" />
   </a>
+</p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/voidstrap/Voidstrap/output/github-contribution-grid-snake-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/voidstrap/Voidstrap/output/github-contribution-grid-snake.svg">
+    <img alt="WH MY POOKIES" src="https://raw.githubusercontent.com/voidstrap/Voidstrap/output/github-contribution-grid-snake.svg">
+  </picture>
 </p>
 
 <p align="center">
