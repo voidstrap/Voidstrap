@@ -82,9 +82,7 @@ Leave a star if you like the project! ⭐️
   </a>
 </p>
 
-Voidstrap is built using **C# and .NET**.
-
----
+Voidstrap is built using **C# and .NET**
 
 ### Fork the Repository
 
@@ -92,6 +90,9 @@ Voidstrap is built using **C# and .NET**.
    https://github.com/voidstrap/Voidstrap
 2. Click **Fork** (top right)
 3. This creates your own copy under your GitHub account
+
+## Credits
+Built on top of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap) by pizzaboxer
 
 <table style="width: 100%; border-collapse: collapse;">
   <tr>
