@@ -38,6 +38,8 @@ Leave a star if you like the project! ⭐️
 > In the meantime, you can use **[AppleBlox](https://github.com/AppleBlox/appleblox)** *(for macOS)* or **[Sober](https://sober.vinegarhq.org/)** *(for Linux)*.  
 > More experienced Linux users can also try tools like **[Lution](https://github.com/wookhq/Lution)**.
 
+<img src="https://raw.githubusercontent.com/voidstrap/Voidstrap/main/Resources/bar.png" style="width: 100%;">
+
 ## Find Me
 1. **Roblox:** [@conshun](https://www.roblox.com/users/8657911604/profile)
 2. **YouTube:** [@thisbreadtic](https://www.youtube.com/@thisbreadtic)
@@ -105,6 +107,8 @@ Built on top of [Bloxstrap](https://github.com/bloxstraplabs/bloxstrap) by pizza
     <td style="width: 33%; text-align: right;"><a href="https://github.com/voidstrap/Voidstrap/blob/main/LICENSE.VOIDSTRAP" target="_blank">MIT</a></td>
   </tr>
 </table>
+
+<img src="https://raw.githubusercontent.com/voidstrap/Voidstrap/main/Resources/bar.png" style="width: 100%;">
 
 ## Star History
 
